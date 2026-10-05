@@ -1,5 +1,5 @@
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
-import { act, fireEvent } from '@testing-library/react'
+import { act, fireEvent, waitFor } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 import { createCapricornRuntime } from 'virtual:markflowy-capricorn-runtime'
 import {
@@ -41,7 +41,7 @@ test.skipIf(!isCapricornRuntimeAvailable)(
     expect(open).toHaveBeenCalledExactlyOnceWith('./my notes/中文.md')
     await act(async () => adapter!.updateSettings({ linkEditMode: 'markdown' }))
     await act(async () => fireEvent.click(link))
-    expect(container.querySelector('[data-cap-inline-source] .cm-content')).not.toBeNull()
+    await waitFor(() => expect(container.querySelector('[data-cap-inline-source] .cm-content')).not.toBeNull())
     expect(adapter!.getMarkdown()).toBe(markdown)
     await act(async () => adapter!.updateSettings({ linkEditMode: 'popover' }))
     expect(container.querySelector('[data-cap-inline-source]')).toBeNull()

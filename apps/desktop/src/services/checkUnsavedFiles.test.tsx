@@ -27,8 +27,27 @@ vi.mock('@/i18n', () => ({
 }))
 
 import { guardUnsavedFilesAsync } from './checkUnsavedFiles'
+import { registerDraftRecovery } from './draftRecoveryState'
 
 describe('guardUnsavedFilesAsync', () => {
+  it('waits for pending disk validation before deciding whether closing requires confirmation', async () => {
+    mocks.idStateMap.set('recovering', { hasUnsavedChanges: true })
+    const promote = vi.fn()
+    const ready = registerDraftRecovery('recovering', promote)
+    const onContinue = vi.fn()
+    try {
+      const guarded = guardUnsavedFilesAsync({ fileIds: ['recovering'], onContinue })
+      expect(promote).toHaveBeenCalledWith('foreground')
+      expect(mocks.confirm).not.toHaveBeenCalled()
+      expect(onContinue).not.toHaveBeenCalled()
+      mocks.idStateMap.set('recovering', { hasUnsavedChanges: false })
+      ready()
+      await expect(guarded).resolves.toBe(true)
+      expect(onContinue).toHaveBeenCalledOnce()
+      expect(mocks.confirm).not.toHaveBeenCalled()
+    } finally { ready() }
+  })
+
   beforeEach(() => {
     mocks.confirm.mockReset()
     mocks.getFileObject.mockReset()

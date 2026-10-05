@@ -22,7 +22,7 @@ import { LineBlockquoteExtension } from './BlockQuote'
 import { ClipboardExtension } from './Clipboard'
 import { LineCodeMirrorExtension } from './CodeMirror/codemirror-extension'
 import type { CustomCopyFunction } from './CodeMirror/codemirror-types'
-import { type CodemirrorOptions, getSetupByCodemirrorOptions } from './CodeMirror/setup'
+import { type CodemirrorOptions, minimalSetup } from './CodeMirror/setup'
 import { CommonKeymapExtension } from './CommonKeymap'
 import { CopilotExtension } from './Copilot/copilot-extension'
 import { DateExtension } from './Date'
@@ -135,13 +135,8 @@ function extensions(options: ExtensionsOptions): any[] {
   const codemirrorNodeCommonOptions = {
     customCopyFunction,
     behavior: options.livePreviewBlock?.behavior,
-    codemirrorExtensions: [
-      ...getSetupByCodemirrorOptions({
-        ...codemirrorOptions,
-        lineNumbers: true,
-      }),
-      ...typewriterCmExtension,
-    ],
+    codemirrorOptions,
+    codemirrorExtensions: [minimalSetup, ...typewriterCmExtension],
   }
 
   const res: any[] = [
@@ -187,10 +182,8 @@ function extensions(options: ExtensionsOptions): any[] {
     new HeadingNumberingExtension(),
     new LineStandardListExtension(),
     new LineCodeMirrorExtension({
-      extensions: [
-        ...getSetupByCodemirrorOptions({ ...codemirrorOptions, lineNumbers: true }),
-        ...typewriterCmExtension,
-      ],
+      codemirrorOptions,
+      extensions: [minimalSetup, ...typewriterCmExtension],
       useProsemirrorHistoryKey: true,
       commandKeymapOptions: {
         disableAllBuildInShortcuts: options.disableAllBuildInShortcuts,

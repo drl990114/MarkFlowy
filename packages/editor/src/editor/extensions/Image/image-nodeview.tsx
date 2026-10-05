@@ -1,13 +1,11 @@
 import type { NodeViewComponentProps } from '@rme-sdk/sdk/react'
 import { omit } from 'lodash'
 import { normalizeReference } from 'markdown-it/lib/common/utils.mjs'
-import { useCallback, useEffect, useEffectEvent, useMemo, useRef } from 'react'
-import type { PopoverStore } from 'zens'
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { Popover, Image as ZensImage } from 'zens'
 import type { ExtensionsOptions } from '..'
 import { Resizable } from '../../components/Resizable'
 import { editorZIndex } from '../../theme/z-index'
-import { isBrowser } from '../../utils/common'
 import {
   IMAGE_REFERRER_POLICY,
   normalizeImageSourceForBrowser,
@@ -38,8 +36,7 @@ export function ImageNodeView(props: ImageNodeViewProps) {
     view,
   } = props
   const initRef = useRef<() => void>(null)
-  const popoverStore = useRef<PopoverStore>(null)
-  const popoverRef = useRef<HTMLDivElement>(null)
+  const [popoverOpen, setPopoverOpen] = useState(false)
   const fromPaste = node.attrs['data-rme-from-paste'] === 'true'
   const referLabel = node.attrs['data-refer-label'] as string | undefined
   const curRefer = useMemo(() => {
@@ -91,37 +88,12 @@ export function ImageNodeView(props: ImageNodeViewProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromPaste])
 
-  const handleStoreChange = useCallback((store: PopoverStore) => {
-    popoverStore.current = store
-  }, [])
-
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (
-        popoverRef.current &&
-        popoverStore.current &&
-        (!event.target ||
-          !(event.target instanceof Node) ||
-          !popoverRef.current.contains(event.target))
-      ) {
-        popoverStore.current.setOpen(false)
-      }
-    }
-
-    if (selected && isBrowser()) {
-      document.addEventListener('mousedown', handleOutsideClick)
-      return () => {
-        document.removeEventListener('mousedown', handleOutsideClick)
-      }
-    }
-  }, [selected])
-
   const handleResizeAttributes = useCallback(() => ({ 'data-rme-type': 'html' }), [])
   const handleControlInit = useCallback((init: () => void) => {
     initRef.current = init
   }, [])
   const closePopover = useCallback(() => {
-    popoverStore.current?.setOpen(false)
+    setPopoverOpen(false)
   }, [])
   const loadImageSource = useCallback(
     async (source: string) => {
@@ -198,7 +170,6 @@ export function ImageNodeView(props: ImageNodeViewProps) {
 
   return (
     <div
-      ref={popoverRef}
       style={{
         position: 'relative',
         zIndex: selected ? editorZIndex.imageSelected : 'auto',
@@ -222,10 +193,15 @@ export function ImageNodeView(props: ImageNodeViewProps) {
         }}
         placement='top-start'
         arrow={false}
-        hideOnEscape={false}
-        onStoreChange={handleStoreChange}
+        open={popoverOpen}
+        onOpenChange={setPopoverOpen}
+        aria-label='Image actions'
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault()
+          view.focus()
+        }}
         toggleOnClick
-        unmountOnHide
         style={{ zIndex: editorZIndex.imageToolbar, padding: 0 }}
       >
         {Main}

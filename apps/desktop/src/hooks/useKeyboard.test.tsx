@@ -1,3 +1,4 @@
+import { createKeyboardEvent } from '../../tests/helpers/keyboard'
 import { getDefaultKeybindings } from '@/commands/keybindingCatalog'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
@@ -72,7 +73,7 @@ describe('application shortcut scope and persistence', () => {
     document.body.replaceChildren()
   })
   function press(key: string, extra: KeyboardEventInit = {}) {
-    const event = new KeyboardEvent('keydown', {
+    const event = createKeyboardEvent('keydown', {
       key,
       ctrlKey: true,
       bubbles: true,

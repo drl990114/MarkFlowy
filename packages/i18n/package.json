@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./desktop": {
+      "types": "./dist/desktop.d.ts",
+      "import": "./dist/desktop.js"
     }
   },
   "files": [
@@ -28,7 +32,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.19.0",
-    "esbuild": "^0.24.2",
+    "esbuild": "^0.28.2",
     "react": "^19.2.0",
     "rimraf": "^6.1.0",
     "typescript": "^5.7.3"

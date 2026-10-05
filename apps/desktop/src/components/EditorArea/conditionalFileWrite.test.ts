@@ -5,6 +5,17 @@ import {
 } from './conditionalFileWrite'
 
 describe('conditionalWriteWithRevision', () => {
+  it.each(['/workspace', ''])('includes the first-save history scope %j in the guarded write', async (workspace) => {
+    const invoke = vi.fn().mockResolvedValue({ status: 'success', revision: 'saved' })
+    await conditionalWriteExpectedIfAllowed(
+      '/workspace/new.md', 'new', 'missing', () => true, invoke, 'save', undefined, workspace,
+    )
+    expect(invoke).toHaveBeenCalledWith('conditional_write_file', {
+      filePath: '/workspace/new.md', content: 'new', expectedRevision: 'missing',
+      historyKind: 'save', historyWorkspace: workspace,
+    })
+  })
+
   it('passes the captured revision into the conditional write command', async () => {
     const invoke = vi
       .fn()

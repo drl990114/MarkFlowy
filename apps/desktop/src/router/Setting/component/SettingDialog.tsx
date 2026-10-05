@@ -4,9 +4,11 @@ import { useRef, useState, type PropsWithChildren } from 'react'
 import { useNavigate } from 'react-router'
 import './SettingDialog.css'
 
-export type SettingDialogProps = PropsWithChildren<Pick<DialogContentProps, 'onEscapeKeyDown'>>
+export type SettingDialogProps = PropsWithChildren<
+  Pick<DialogContentProps, 'onEscapeKeyDown'> & { beforeClose?: () => Promise<boolean> }
+>
 
-export function SettingDialog({ children, onEscapeKeyDown }: SettingDialogProps) {
+export function SettingDialog({ children, onEscapeKeyDown, beforeClose }: SettingDialogProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [open, setOpen] = useState(true)
@@ -15,7 +17,8 @@ export function SettingDialog({ children, onEscapeKeyDown }: SettingDialogProps)
   return (
     <Dialog.Root
       open={open}
-      onOpenChange={(nextOpen) => {
+      onOpenChange={async (nextOpen) => {
+        if (!nextOpen && beforeClose && !(await beforeClose())) return
         closeRequested.current = !nextOpen
         setOpen(nextOpen)
       }}
@@ -23,11 +26,11 @@ export function SettingDialog({ children, onEscapeKeyDown }: SettingDialogProps)
       <Dialog.Content
         aria-describedby={undefined}
         aria-modal='true'
-        className='h-[92dvh] max-h-[100dvh] w-[96vw] max-w-none gap-0 rounded-xl p-0 max-[719px]:h-dvh max-[719px]:w-screen max-[719px]:rounded-none max-[719px]:border-0'
+        className='h-[92dvh] max-h-[100dvh] w-[96vw] max-w-none gap-0 rounded-lg p-0'
         closeLabel={t('common.close')}
         data-mf-settings-surface=''
         onCloseAutoFocus={(event) => {
-          // Radix waits for the exit animation before releasing the focus scope.
+          // Radix releases the focus scope before the workspace becomes active.
           // Then the route controller makes the workspace active and restores editor focus.
           event.preventDefault()
           if (closeRequested.current) navigate('/', { replace: true })

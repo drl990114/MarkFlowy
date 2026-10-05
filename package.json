@@ -14,6 +14,8 @@
     "dev": "turbo dev",
     "dev:desktop": "node scripts/dev-desktop.mjs",
     "test:dev-desktop": "node --test scripts/dev-desktop.test.mjs",
+    "test:security-dependencies": "node --test scripts/security-dependencies.test.mjs",
+    "test:release-workflows": "node --test scripts/release-workflows.test.mjs",
     "install:capricorn-runtime": "node --env-file-if-exists=.env scripts/install-capricorn-runtime.mjs",
     "build": "turbo build --concurrency=2",
     "build:web": "yarn turbo build --filter=!@markflowy/desktop",
@@ -45,22 +47,24 @@
     "@codemirror/legacy-modes": "^6.5.2",
     "@halodong/eslint-config-react": "^0.38.24",
     "@rollup/plugin-node-resolve": "15.3.0",
-    "@rollup/plugin-terser": "0.4.4",
     "@rollup/plugin-typescript": "11.1.6",
     "@rollup/plugin-url": "^8.0.2",
+    "@umijs/fabric": "^4",
     "babel": "^6.23.0",
     "child_process": "^1.0.2",
-    "eslint": "9.13.0",
+    "eslint": "9.39.5",
     "fast-glob": "^3.3.2",
-    "patch-package": "^8.0.0",
-    "postcss": "^8.4.47",
+    "gray-matter": "4.0.3",
+    "patch-package": "^8.0.1",
+    "postcss": "^8.5.28",
     "postcss-import": "^16.1.1",
     "postcss-nested": "^7.0.2",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
-    "rollup": "4.24.3",
+    "rollup": "4.63.4",
     "rollup-plugin-postcss": "^4.0.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "yaml": "2.9.0"
   },
   "packageManager": "yarn@4.8.0",
   "engines": {
@@ -68,5 +72,18 @@
   },
   "dependencies": {
     "turbo": "^2.9.14"
+  },
+  "resolutions": {
+    "@opentelemetry/sdk-trace-node/@opentelemetry/propagator-jaeger": "2.11.0",
+    "@tauri-release/cli/@actions/github": "6.0.1",
+    "@xmldom/xmldom@npm:0.9.10": "0.9.12",
+    "mdx-bundler/uuid": "11.1.1",
+    "nanoid@npm:3.3.12": "3.3.19",
+    "postcss@npm:8.4.49": "8.5.28",
+    "remark-mdx-frontmatter/toml": "4.3.0",
+    "undici@npm:^5.25.4": "6.28.1",
+    "undici@npm:^5.28.5": "6.28.1",
+    "undici@npm:^5.29.0": "6.28.1",
+    "yaml@npm:~2.5.0": "2.9.0"
   }
 }

@@ -6,16 +6,20 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/docs/**",
-        "$TURBO_ROOT$/scripts/web-geo*.test.mjs"
+        "$TURBO_ROOT$/scripts/web-*.test.mjs",
+        "$TURBO_ROOT$/scripts/web-document-sources.mjs"
       ]
     },
     "build": {
-      "env": ["MARKFLOWY_CLOUD_API_URL"],
+      "outputs": ["$TURBO_EXTENDS$", ".contentlayer/generated/**"],
+      "env": ["MARKFLOWY_CLOUD_API_URL", "NEXT_PUBLIC_API_URL"],
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/docs/**",
         "!$TURBO_ROOT$/docs/**/.DS_Store",
-        "!.contentlayer/**"
+        "!.contentlayer/**",
+        "$TURBO_ROOT$/yarn.lock",
+        "$TURBO_ROOT$/.yarnrc.yml"
       ]
     }
   }

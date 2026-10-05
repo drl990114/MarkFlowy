@@ -1,7 +1,8 @@
 // Transform the source/package graph before UI wait deadlines. The component
 // still uses its real async loader; loader caching has separate unit coverage.
 import 'virtual:markflowy-capricorn-runtime'
-import { createInstance } from '@markflowy/i18n'
+import { createInstance } from '@/i18n'
+import type * as I18nModule from '@/i18n'
 import { desktopLightTheme } from '@markflowy/theme'
 import { act, cleanup, fireEvent, render, waitFor, within } from '@testing-library/react'
 import { createRef, StrictMode } from 'react'
@@ -18,13 +19,15 @@ import { EditorWrapper } from './EditorWrapper'
 import {
   CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
   loadCapricornRuntimeFactory,
+  type CapricornEditorChangeEvent,
   type CapricornLocalizationAdapter,
   type CapricornRuntimeAdapter,
 } from './capricornRuntimeAdapter'
 import { createCapricornKeybindingConfiguration } from './capricornKeybindings'
 import { getCapricornRuntimeInput } from './capricornRuntimeDom'
 
-vi.mock('@/i18n', () => ({
+vi.mock('@/i18n', async (importOriginal) => ({
+  ...(await importOriginal<typeof I18nModule>()),
   useTranslation: () => ({
     t: (key: string) =>
       (
@@ -43,6 +46,67 @@ vi.mock('@/i18n', () => ({
 afterEach(cleanup)
 
 describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the published runtime', () => {
+  it('does not apply native undo or redo to a retained background document', async () => {
+    const first = createRef<CapricornEditorHandle>()
+    const second = createRef<CapricornEditorHandle>()
+    const onError = vi.fn()
+    const editorOptions = { virtualize: { enable: false } }
+    const surface = (firstActive: boolean) => (
+      <ThemeProvider theme={desktopLightTheme}>
+        <CapricornEditor
+          ref={first}
+          editorId='history-first'
+          active={firstActive}
+          visible={firstActive}
+          initialMarkdown='first'
+          onChange={vi.fn()}
+          onError={onError}
+          onUnavailable={onError}
+          options={editorOptions}
+        />
+        <CapricornEditor
+          ref={second}
+          editorId='history-second'
+          active={!firstActive}
+          initialMarkdown='second'
+          onChange={vi.fn()}
+          onError={onError}
+          onUnavailable={onError}
+          options={editorOptions}
+        />
+      </ThemeProvider>
+    )
+    const view = render(surface(true))
+    const firstInput = await waitFor(() => {
+      const input = getCapricornRuntimeInput(view.container.querySelector('#history-first')!)
+      expect(input).not.toBeNull()
+      return input!
+    })
+    await act(async () => {
+      first.current!.focus()
+      fireEvent.input(firstInput, { target: { value: 'X' }, inputType: 'insertText', data: 'X' })
+    })
+    const edited = first.current!.getMarkdown()
+    expect(edited).not.toBe('first')
+    view.rerender(surface(false))
+    await waitFor(() => expect(view.container.querySelector('#history-second [data-cap-editable]')).not.toBeNull())
+    await act(async () => second.current!.focus())
+    for (const inputType of ['historyUndo', 'historyRedo']) {
+      await act(async () => {
+        firstInput.dispatchEvent(new InputEvent('beforeinput', { inputType, bubbles: true, cancelable: true }))
+      })
+      expect(first.current!.getMarkdown()).toBe(edited)
+      expect(second.current!.getMarkdown()).toBe('second')
+    }
+    view.rerender(surface(true))
+    await act(async () => first.current!.focus())
+    await act(async () => {
+      firstInput.dispatchEvent(new InputEvent('beforeinput', { inputType: 'historyUndo', bubbles: true, cancelable: true }))
+    })
+    expect(first.current!.getMarkdown()).toBe('first')
+    expect(onError).not.toHaveBeenCalled()
+  })
+
   it('keeps the padded host handle pinned until its block menu closes', async () => {
     const onChange = vi.fn()
     const onError = vi.fn()
@@ -215,6 +279,86 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     expect(onError).not.toHaveBeenCalled()
   })
 
+  it('publishes a row duplication from the localized table menu through the host change callback', async () => {
+    const translations = createInstance()
+    await translations.init({
+      lng: 'cn',
+      resources: { cn: { translation: zhCNLocale } },
+    })
+    const localization: CapricornLocalizationAdapter = {
+      getDirection: () => (translations.dir() === 'rtl' ? 'rtl' : 'ltr'),
+      getLocale: () => translations.resolvedLanguage || translations.language || 'en',
+      subscribe(listener) {
+        translations.on('languageChanged', listener)
+        return () => translations.off('languageChanged', listener)
+      },
+      translate: ({ defaultValue, key, values }) =>
+        translations.t(`capricorn.${key}`, { defaultValue, ...values }),
+    }
+    const ref = createRef<CapricornEditorHandle>()
+    const onEditorChange = vi.fn()
+    const snapshots: string[] = []
+    const onChange = vi.fn((event?: CapricornEditorChangeEvent) => {
+      if (event?.documentChanged) snapshots.push(ref.current!.getMarkdown())
+    })
+    const onError = vi.fn()
+    const original = 'Before\n\n| A | B |\n| --- | --- |\n| One | Two |\n\nAfter'
+    const expected = original.replace('| One | Two |', '| One | Two |\n| One | Two |')
+    const { container } = render(
+      <CapricornEditor
+        ref={ref}
+        active
+        initialMarkdown={original}
+        onEditorChange={onEditorChange}
+        onChange={onChange}
+        onError={onError}
+        onUnavailable={onError}
+        options={{
+          localization,
+          virtualize: { enable: false },
+          getScrollableContainer: () => window,
+        }}
+      />,
+    )
+    await waitFor(() =>
+      expect(container.querySelectorAll('[role="row"][data-markdown-table]')).toHaveLength(2),
+    )
+    const surface = container.querySelector<HTMLElement>('[data-cap-content]')!
+    const root = container.querySelector<HTMLElement>('[data-cap-editable]')!
+    const rows = [...root.querySelectorAll<HTMLElement>('[role="row"][data-markdown-table]')]
+    // Supply the layout missing from the DOM runner; the menu and command use
+    // the installed runtime through CapricornEditor's production loader.
+    surface.getBoundingClientRect = () => new DOMRect(60, 40, 700, 550)
+    root.getBoundingClientRect = () => new DOMRect(80, 60, 640, 500)
+    rows.forEach((row, index) => {
+      row.getBoundingClientRect = () => new DOMRect(100, 140 + index * 36, 400, 36)
+      const cells = [...row.querySelectorAll<HTMLElement>('[role="cell"], [role="columnheader"]')]
+      cells.forEach((cell, column) => {
+        cell.getBoundingClientRect = () =>
+          new DOMRect(100 + column * 200, 140 + index * 36, 200, 36)
+      })
+    })
+    snapshots.splice(0)
+    onChange.mockClear()
+    await act(async () => {
+      fireEvent.contextMenu(rows[1].querySelector('[role="cell"]')!, {
+        clientX: 180,
+        clientY: 180,
+      })
+    })
+    const menu = await within(container).findByRole('menu', { name: '表格操作' })
+    const duplicate = within(menu).getByRole('menuitem', { name: '复制当前行' })
+    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    await act(async () => fireEvent.click(duplicate))
+    await waitFor(() => expect(snapshots).toContain(expected))
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    expect(ref.current!.getMarkdown()).toBe(expected)
+    expect(container.querySelectorAll('[role="row"][data-markdown-table]')).toHaveLength(3)
+    expect(container.querySelector('[data-cap-content]')).toBe(surface)
+    expect(onEditorChange.mock.calls.filter(([value]) => value !== null)).toHaveLength(1)
+    expect(onError).not.toHaveBeenCalled()
+  })
+
   it('opens the localized block conversion menu through the host keymap and preserves undo', async () => {
     const translations = createInstance()
     await translations.init({
@@ -365,6 +509,103 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     expect(onError).not.toHaveBeenCalled()
     await act(async () => unmount())
     externalInput.remove()
+  })
+
+  it.each([
+    {
+      name: 'inline badge',
+      markdown:
+        '[![GitHub Repo stars](https://img.shields.io/github/stars/drl990114/MarkFlowy)](https://github.com/drl990114/MarkFlowy)',
+      direct: false,
+    },
+    {
+      name: 'reference badge',
+      markdown:
+        '[![App Version][VERSION-BADGE]][RELEASE]\n\n[VERSION-BADGE]: https://img.shields.io/github/v/release/drl990114/MarkFlowy\n[RELEASE]: https://github.com/drl990114/MarkFlowy',
+      direct: false,
+    },
+    {
+      name: 'badge in HTML wrapper',
+      markdown:
+        '<div align="center">\n\n<u>[![GitHub Repo stars](https://img.shields.io/github/stars/drl990114/MarkFlowy)](https://github.com/drl990114/MarkFlowy)</u>\n<br/>\n</div>',
+      direct: false,
+    },
+    {
+      name: 'badge in HTML live preview',
+      markdown:
+        '<details open>\n<summary>Badges</summary>\n\n[![GitHub Repo stars](https://img.shields.io/github/stars/drl990114/MarkFlowy)](https://github.com/drl990114/MarkFlowy)\n\n</details>',
+      direct: true,
+    },
+  ])('prevents WebView navigation for $name in edit mode', async ({ markdown, direct }) => {
+    const handleLinkClick = vi.fn()
+    const onError = vi.fn()
+    const onChange = vi.fn()
+    const ref = createRef<CapricornEditorHandle>()
+    const { container } = render(
+      <CapricornEditor
+        ref={ref}
+        active
+        initialMarkdown={markdown}
+        onChange={onChange}
+        onError={onError}
+        onUnavailable={onError}
+        options={{ mode: 'edit', handleLinkClick, virtualize: { enable: false } }}
+      />,
+    )
+    const badge = await waitFor(() => {
+      const image = container.querySelector('a[href="https://github.com/drl990114/MarkFlowy"] img')
+      expect(image).not.toBeNull()
+      return image!
+    })
+    const plainClick = new MouseEvent('click', { bubbles: true, cancelable: true })
+    await act(async () => fireEvent(badge, plainClick))
+    expect(plainClick.defaultPrevented).toBe(true)
+    expect(handleLinkClick).toHaveBeenCalledTimes(direct ? 1 : 0)
+    for (const event of [
+      new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true }),
+      new MouseEvent('click', { bubbles: true, cancelable: true, metaKey: true }),
+      new MouseEvent('auxclick', { bubbles: true, cancelable: true, button: 1 }),
+    ]) {
+      handleLinkClick.mockClear()
+      await act(async () => fireEvent(badge, event))
+      expect(event.defaultPrevented).toBe(true)
+      expect(handleLinkClick).toHaveBeenCalledExactlyOnceWith(
+        'https://github.com/drl990114/MarkFlowy',
+      )
+    }
+    expect(ref.current!.getMarkdown()).toBe(markdown)
+    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    expect(onError).not.toHaveBeenCalled()
+  })
+
+  it('keeps ordinary links editable through the navigation guard', async () => {
+    const markdown = '[Documentation](./my notes/中文.md)'
+    const handleLinkClick = vi.fn()
+    const onError = vi.fn()
+    const ref = createRef<CapricornEditorHandle>()
+    const { container } = render(
+      <CapricornEditor
+        ref={ref}
+        active
+        initialMarkdown={markdown}
+        onChange={vi.fn()}
+        onError={onError}
+        onUnavailable={onError}
+        options={{ handleLinkClick, linkEditMode: 'markdown', virtualize: { enable: false } }}
+      />,
+    )
+    const link = await waitFor(() => {
+      const anchor = container.querySelector('a')
+      expect(anchor).not.toBeNull()
+      return anchor!
+    })
+    await act(async () => fireEvent.click(link))
+    await waitFor(() =>
+      expect(container.querySelector('[data-cap-inline-source] .cm-content')).not.toBeNull(),
+    )
+    expect(handleLinkClick).not.toHaveBeenCalled()
+    expect(ref.current!.getMarkdown()).toBe(markdown)
+    expect(onError).not.toHaveBeenCalled()
   })
 
   it.each([false, true])(

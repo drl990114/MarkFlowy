@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/cn'
 import { useTranslation } from '@/i18n'
-import styled from 'styled-components'
 import { getSettingGroupAnchorId } from '../../settingSearch'
 import SettingItem from '../SettingItems'
 import { SettingGroupContainer } from './styles'
@@ -8,6 +9,7 @@ import { SettingGroupContainer } from './styles'
 const SettingGroup: React.FC<SettingGroupProps> = (props) => {
   const { activeChildId, group } = props
   const { t } = useTranslation()
+  const tabId = useId()
 
   const children = useMemo(
     () => (Array.isArray(group.children) ? group.children : []),
@@ -41,11 +43,13 @@ const SettingGroup: React.FC<SettingGroupProps> = (props) => {
     return (
       <>
         {config.titleVisible ? (
-          <div className='setting-group__title'>{t(groupItem.i18nKey)}</div>
+          <h2 className='setting-group__title'>{t(groupItem.i18nKey)}</h2>
         ) : null}
-        {itemKeys.map((key) => (
-          <SettingItem key={key} item={groupItem[key]} />
-        ))}
+        <div className='setting-group__items'>
+          {itemKeys.map((key) => (
+            <SettingItem key={key} item={groupItem[key]} />
+          ))}
+        </div>
       </>
     )
   }
@@ -55,26 +59,48 @@ const SettingGroup: React.FC<SettingGroupProps> = (props) => {
       <SettingGroupContainer
         $anchorId={getSettingGroupAnchorId(props.categoryKey, props.groupKey, selectedChildId)}
       >
-        <div className='setting-group__title'>{t(group.i18nKey)}</div>
+        <h2 className='setting-group__title'>{t(group.i18nKey)}</h2>
         <div
           aria-label={t(group.i18nKey)}
           role='tablist'
-          style={{ display: 'flex', justifyItems: 'flex-start', alignItems: 'center' }}
+          className='flex flex-wrap items-center gap-1 px-1 pb-2'
         >
           {children.map((item, index) => (
-            <TabItem
-              $active={tabIndex === index}
+            <Button
+              size='sm'
+              variant='ghost'
+              className={cn(
+                'font-normal text-muted-foreground',
+                tabIndex === index &&
+                  'bg-control-selected text-foreground hover:bg-control-selected',
+              )}
               aria-selected={tabIndex === index}
+              aria-controls={`${tabId}-panel`}
+              id={`${tabId}-${index}`}
               key={childId(item, index)}
               role='tab'
-              type='button'
+              tabIndex={tabIndex === index ? 0 : -1}
               onClick={() => setSelectedChildId(childId(item, index))}
+              onKeyDown={(event) => {
+                let nextIndex: number
+                if (event.key === 'ArrowRight') nextIndex = (index + 1) % children.length
+                else if (event.key === 'ArrowLeft')
+                  nextIndex = (index + children.length - 1) % children.length
+                else if (event.key === 'Home') nextIndex = 0
+                else if (event.key === 'End') nextIndex = children.length - 1
+                else return
+                event.preventDefault()
+                setSelectedChildId(childId(children[nextIndex], nextIndex))
+                document.getElementById(`${tabId}-${nextIndex}`)?.focus()
+              }}
             >
               {t(item.i18nKey)}
-            </TabItem>
+            </Button>
           ))}
         </div>
-        <div role='tabpanel'>{renderParams(children[tabIndex], { titleVisible: false })}</div>
+        <div role='tabpanel' id={`${tabId}-panel`} aria-labelledby={`${tabId}-${tabIndex}`}>
+          {renderParams(children[tabIndex], { titleVisible: false })}
+        </div>
       </SettingGroupContainer>
     )
   } else {
@@ -85,31 +111,6 @@ const SettingGroup: React.FC<SettingGroupProps> = (props) => {
     )
   }
 }
-
-const TabItem = styled.button<{ $active: boolean }>`
-  appearance: none;
-  background: transparent;
-  border: 0;
-  border-top: 3px solid ${(props) =>
-    props.$active ? props.theme.accentColor : 'transparent'};
-  font-family: inherit;
-  margin-right: 6px;
-  margin-bottom: 20px;
-  padding-top: 6px;
-  font-size: var(--mf-ui-font-body);
-  line-height: var(--mf-ui-line-height-body);
-  letter-spacing: var(--mf-ui-tracking-body);
-  font-weight: 600;
-  cursor: pointer;
-  color: ${(props) => (props.$active ? props.theme.primaryFontColor : props.theme.labelFontColor)};
-
-  &:focus-visible {
-    outline: none;
-    text-decoration-line: underline;
-    text-underline-offset: 2px;
-    opacity: 0.8;
-  }
-`
 
 interface SettingGroupProps {
   group: Setting.SettingGroup

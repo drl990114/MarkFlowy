@@ -13,6 +13,7 @@ import {
   foldGutter,
   foldKeymap,
   indentOnInput,
+  indentUnit,
   syntaxHighlighting,
 } from '@codemirror/language'
 import { lintKeymap } from '@codemirror/lint'
@@ -26,6 +27,8 @@ import {
   highlightActiveLine,
   highlightActiveLineGutter,
   highlightSpecialChars,
+  highlightWhitespace,
+  highlightTrailingWhitespace,
   keymap,
   lineNumbers,
 } from '@codemirror/view'
@@ -68,15 +71,7 @@ import {
 /// you take this package's source (which is just a bunch of imports
 /// and an array literal), copy it into your own code, and adjust it
 /// as desired.
-export const basicSetup: Extension = (() => [
-  EditorView.lineWrapping,
-
-  lineNumbers({
-    formatNumber: (line: number) => {
-      return line % 10 === 0 || line === 1 ? `${line}` : ''
-    },
-  }),
-  highlightActiveLineGutter(),
+export const sourceSetup: Extension = (() => [
   highlightSpecialChars(),
   history(),
   foldGutter(),
@@ -85,13 +80,10 @@ export const basicSetup: Extension = (() => [
   indentOnInput(),
   syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
   bracketMatching(),
-  closeBrackets(),
   autocompletion(),
   crosshairCursor(),
-  highlightActiveLine(),
   highlightSelectionMatches(),
   keymap.of([
-    ...closeBracketsKeymap,
     ...defaultKeymap,
     ...searchKeymap,
     ...historyKeymap,
@@ -113,7 +105,6 @@ export const minimalSetup: Extension = (() => [
   highlightSpecialChars(),
   syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
   bracketMatching(),
-  closeBrackets(),
   autocompletion(),
   crosshairCursor(),
   highlightSelectionMatches(),
@@ -122,20 +113,84 @@ export const minimalSetup: Extension = (() => [
 
 export type CodemirrorOptions = {
   lineWrapping?: boolean
-  lineNumbers?: boolean
+  /** Boolean values remain supported for existing integrations. */
+  lineNumbers?: boolean | 'off' | 'all' | 'sparse'
+  indentStyle?: 'spaces' | 'tabs'
+  indentSize?: 2 | 4 | 8
+  autoCloseBrackets?: boolean
+  highlightActiveLine?: boolean
+  whitespace?: 'off' | 'trailing' | 'all'
 }
 
-export const getSetupByCodemirrorOptions = (options: CodemirrorOptions): Extension[] => {
-  const res: Extension[] = [minimalSetup]
+export type CodemirrorSettingsProfile = 'source' | 'embedded' | 'frontmatter'
 
-  if (options?.lineWrapping) {
-    res.push(EditorView.lineWrapping)
-  }
+const whitespaceTheme = EditorView.theme({
+  '.cm-highlightSpace': {
+    backgroundImage:
+      'radial-gradient(circle at 50% 55%, color-mix(in srgb, currentColor 40%, transparent) 20%, transparent 5%)',
+  },
+  '.cm-highlightTab': { backgroundImage: 'none', position: 'relative' },
+  '.cm-highlightTab::before': {
+    content: "'→'",
+    position: 'absolute',
+    left: '0',
+    opacity: '0.4',
+    pointerEvents: 'none',
+  },
+  '.cm-trailingSpace': { backgroundColor: 'color-mix(in srgb, currentColor 15%, transparent)' },
+})
 
-  if (options?.lineNumbers) {
-    res.push(lineNumbers())
+/** Mutable presentation/input extensions, separate from history and language state. */
+export const getCodemirrorSettingsExtensions = (
+  options: CodemirrorOptions = {},
+  profile: CodemirrorSettingsProfile = 'embedded',
+): Extension[] => {
+  const source = profile === 'source'
+  const wrapping = options.lineWrapping ?? source
+  const numbers =
+    options.lineNumbers ?? (source ? 'sparse' : profile === 'frontmatter' ? 'off' : 'all')
+  const activeLine = options.highlightActiveLine ?? source
+  const res: Extension[] = [whitespaceTheme]
+
+  if (wrapping) res.push(EditorView.lineWrapping)
+  if (numbers !== false && numbers !== 'off') {
+    res.push(
+      lineNumbers({
+        formatNumber:
+          numbers === 'sparse'
+            ? (line) => (line === 1 || line % 10 === 0 ? String(line) : '')
+            : undefined,
+      }),
+    )
   }
+  if (activeLine) res.push(highlightActiveLine(), highlightActiveLineGutter())
+  if (options.autoCloseBrackets !== false) {
+    res.push(closeBrackets())
+    // Embedded editors historically delete only the opening character.
+    // Preserve that behavior; the source profile owns pair deletion.
+    if (source) res.push(keymap.of(closeBracketsKeymap))
+  }
+  // CodeMirror's default display width is four columns, while its default
+  // indentation unit is two spaces. Preserve both until a width is selected.
+  res.push(EditorState.tabSize.of(options.indentSize ?? 4))
+  res.push(
+    indentUnit.of(
+      options.indentStyle === 'tabs' && profile !== 'frontmatter'
+        ? '\t'
+        : ' '.repeat(options.indentSize ?? 2),
+    ),
+  )
+  if (options.whitespace === 'all') res.push(highlightWhitespace())
+  else if (options.whitespace === 'trailing') res.push(highlightTrailingWhitespace())
   return res
 }
+
+// Keep the standalone convenience setup compatible with existing consumers.
+export const basicSetup: Extension = [...getCodemirrorSettingsExtensions({}, 'source'), sourceSetup]
+
+export const getSetupByCodemirrorOptions = (options: CodemirrorOptions): Extension[] => [
+  minimalSetup,
+  ...getCodemirrorSettingsExtensions(options),
+]
 
 export { EditorView } from '@codemirror/view'

@@ -1,6 +1,7 @@
 import { commandRegistry } from '@/commands'
 import { EditorLoadingProgress, EditorOpeningClockContext } from './EditorLoadingProgress'
 import { AsyncSurface } from '@/components/AsyncSurface'
+import { markStartupInteractive } from '@/startup/interactive'
 import { RenderErrorBoundary } from '@/components/RenderErrorBoundary'
 import { EditorViewType } from '@/constants/editorViewType'
 import { EVENT } from '@/constants'
@@ -10,9 +11,10 @@ import { guardUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
+import { loadEditorAreaContent } from './editorAreaLoader'
 import { lazy, memo, Suspense, useEffect, useState } from 'react'
 
-const EditorAreaContent = lazy(() => import('./EditorAreaContent'))
+const EditorAreaContent = lazy(loadEditorAreaContent)
 
 function EditorArea() {
   const [openingClock] = useState(() => ({ startedAt: performance.now() as number | null }))
@@ -28,14 +30,17 @@ function EditorArea() {
 
         const supportsToggle =
           fileTypeConfig.supportedModes.includes(EditorViewType.SOURCECODE) &&
-          fileTypeConfig.supportedModes.includes(EditorViewType.WYSIWYG)
+          (fileTypeConfig.supportedModes.includes(EditorViewType.WYSIWYG) ||
+            fileTypeConfig.type === 'html')
 
         if (!supportsToggle) return
 
         const currentViewType = useEditorViewTypeStore.getState().getEditorViewType(activeId)
         const targetViewType =
           currentViewType === EditorViewType.SOURCECODE
-            ? EditorViewType.WYSIWYG
+            ? fileTypeConfig.type === 'html'
+              ? EditorViewType.PREVIEW
+              : EditorViewType.WYSIWYG
             : EditorViewType.SOURCECODE
 
         bus.emit('editor_toggle_type', undefined, targetViewType)
@@ -102,6 +107,7 @@ function EditorArea() {
 
   return (
     <RenderErrorBoundary
+      onError={() => markStartupInteractive('error')}
       fallback={({ error, reset }) => (
         <AsyncSurface
           retryLabel={t('common.retry')}

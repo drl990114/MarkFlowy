@@ -1,10 +1,22 @@
 {
   "extends": "../../tsconfig.rollup.json",
   "compilerOptions": {
-    "jsx": "react",
+    "jsx": "react-jsx",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "skipLibCheck": true,
-    "types": ["react", "react-dom"]
+    "types": [
+      "react",
+      "react-dom"
+    ]
   },
-  "include": ["./src"],
-  "exclude": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "node_modules", "./src/**/*.js"]
+  "include": [
+    "./src"
+  ],
+  "exclude": [
+    "./src/**/*.spec.ts",
+    "./src/**/*.test.ts",
+    "node_modules",
+    "./src/**/*.js"
+  ]
 }

@@ -35,6 +35,7 @@ tauri-plugin-cli = "2.4.1"
 tauri-plugin-clipboard-manager = "2.3.2"
 tauri-plugin-opener = "2.5.4"
 tauri-plugin-persisted-scope = "2.3.7"
+tauri-plugin-wdio-webdriver = { version = "=1.4.0", optional = true }
 regex = "1.10.4"
 same-file = "1.0.6"
 sha2 = "0.10"
@@ -120,6 +121,12 @@ path = "../../../crates/utils"
 [dependencies.mf_file_search]
 path = "../../../crates/file_search"
 
+[dependencies.mf_local_history]
+path = "../../../crates/local_history"
+
+[dependencies.mf_text_encoding]
+path = "../../../crates/text_encoding"
+
 [dependencies.download_npm]
 path = "../../../crates/download_npm"
 
@@ -145,6 +152,7 @@ tauri-plugin-single-instance = "2.4.3"
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
+e2e = ["dep:tauri-plugin-wdio-webdriver"]
 
 [dev-dependencies.lending-stream]
 version = "1.0"

@@ -5,6 +5,9 @@ import type { IFile } from '@/helper/filesys'
 import { dialog } from '@/services/dialog'
 import { getUnsavedFileIds } from '@/services/checkUnsavedFiles'
 import { useEditorStore } from '@/stores'
+import { AsyncSurface } from '@/components/AsyncSurface'
+import { logger } from '@/helper/logger'
+import { refreshWorkspaceDirectory, useWorkspaceDirectoryState } from '@/services/workspace-refresh'
 import {
   ChevronsUpIcon,
   EllipsisIcon,
@@ -121,6 +124,8 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
   const { folderData, addOpenedFile, setActiveId } = useEditorStore()
   const workspacePath = folderData?.[0]?.path ?? ''
+  const directory = useWorkspaceDirectoryState()
+  const directoryState = directory.root === folderData?.[0] ? directory.status : 'idle'
   const useExplorerState = getExplorerStateStore(workspacePath)
   const expandedPaths = useExplorerState((state) => state.expandedPaths)
   const onExpandedPathsChange = useExplorerState((state) => state.setExpandedPaths)
@@ -240,7 +245,25 @@ const Explorer: FC<ExplorerProps> = (props) => {
   return (
     <Container className={containerCLs} onContextMenu={handleContextMenu}>
       <div className='min-h-0 w-full flex-1 overflow-hidden' ref={(ref) => setDndRootElement(ref)}>
-        {hasWorkspace ? (
+        {directoryState === 'error' ? (
+          <AsyncSurface
+            retryLabel={t('common.retry')}
+            state={{
+              status: 'error',
+              title: t('file.read_failed'),
+              description: directory.error instanceof Error ? directory.error.message : undefined,
+              retry: () => {
+                void refreshWorkspaceDirectory().catch((error) => logger.error('Directory retry failed', error))
+              },
+            }}
+          >
+            {() => null}
+          </AsyncSurface>
+        ) : directoryState === 'loading' && !folderData?.[0]?.children?.length ? (
+          <AsyncSurface state={{ status: 'loading', label: t('common.fetching') }}>
+            {() => null}
+          </AsyncSurface>
+        ) : hasWorkspace ? (
           <FileTree
             key={workspacePath}
             {...explorerFileTreePresentation}

@@ -1,11 +1,6 @@
----
-title: 'zens'
-hero:
-  title: 'zens'
-  desc: markflowy components
-  actions:
-    - text: 快速上手
-      link: /getting-started
-    - text: GitHub
-      link: https://github.com/drl990114/zens
----
+# Zens documentation
+
+- [Getting started](getting-started.md): imports, independent stylesheet, themes, and accessible composition.
+- [Migration guide](migration.md): Radix APIs, shared component ownership, and removed documentation tooling.
+
+Component implementations and their public TypeScript props live in `src/components`. Convenience adapter notes remain beside their source. The repository keeps documentation as Markdown; there is no dumi site or demo-generation command.

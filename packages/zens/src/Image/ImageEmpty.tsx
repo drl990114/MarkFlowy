@@ -1,30 +1,34 @@
-import type { CSSProperties } from 'react';
-import styled from 'styled-components';
+import type { CSSProperties } from 'react'
+import { useComponentThemeStyle } from '../Theme/components-theme'
+import { cn } from '../lib/cn'
 
-interface ImageEmptyProps {
-  emptyTip?: string;
-  style?: CSSProperties;
-  className?: string;
-  width?: number | string;
-  height?: number | string;
+export interface ImageEmptyProps {
+  emptyTip?: string
+  style?: CSSProperties
+  className?: string
+  width?: number | string
+  height?: number | string
 }
-export const ImageEmpty = (props: ImageEmptyProps) => {
-  const { emptyTip, style, className, width = 100, height = 100 } = props;
-  const resolvedStyle = { width, height, ...style };
-  return (
-    <Container style={resolvedStyle} className={className}>
-      {emptyTip || 'Empty source'}
-    </Container>
-  );
-};
 
-const Container = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${(props) => props.theme.secondaryFontColor};
-  border: 1px solid ${(props) => props.theme.borderColor};
-  background: ${(props) => props.theme.tipsBgColor};
-  border-radius: ${(props) => props.theme.smallBorderRadius};
-  font-size: ${(props) => props.theme.fontSm};
-`;
+export function ImageEmpty({
+  emptyTip,
+  style,
+  className,
+  width = 100,
+  height = 100,
+}: ImageEmptyProps) {
+  const themeStyle = useComponentThemeStyle({ width, height, ...style })
+  return (
+    <div
+      data-mf-component=''
+      data-slot='image-empty'
+      style={themeStyle}
+      className={cn(
+        'mfc:flex mfc:items-center mfc:justify-center mfc:text-muted-foreground mfc:border mfc:border-border mfc:bg-muted mfc:rounded-sm mfc:text-sm',
+        className,
+      )}
+    >
+      {emptyTip || 'Empty source'}
+    </div>
+  )
+}

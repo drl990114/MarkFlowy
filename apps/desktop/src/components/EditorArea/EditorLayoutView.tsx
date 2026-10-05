@@ -13,6 +13,8 @@ import { hasEditorTabDragData, readEditorTabDragData } from './editorDragData'
 import { containsEditorGroup } from './editorLayoutActionGroups'
 import { EditorPanel } from './styles'
 import { FindReplace } from './editorToolBar/FindReplace'
+import { isSingleDocumentLayout } from './documentLayout'
+import useFileCacheStore from '@/helper/files'
 
 interface EditorLayoutViewProps {
   activeGroupId?: string
@@ -104,9 +106,8 @@ function PanelWithSeparator(props: PanelWithSeparatorProps) {
 
   return (
     <>
-      <SplitPanel
-        $hiddenInZen={hiddenInZen}
-        $zenPath={zenPath}
+      <Panel
+        data-mf-hidden-in-zen={hiddenInZen ? '' : undefined}
         data-mf-zen-path={zenPath ? '' : undefined}
         id={getPanelId(child)}
         defaultSize={`${defaultSize}%`}
@@ -118,7 +119,7 @@ function PanelWithSeparator(props: PanelWithSeparatorProps) {
           node={child}
           zenModeActive={zenModeActive}
         />
-      </SplitPanel>
+      </Panel>
       {showSeparator ? (
         <SplitSeparator $orientation={node.direction} $zenMode={zenModeActive} />
       ) : null}
@@ -139,8 +140,10 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
   const { groupId, zenModeActive } = props
   const [isDropTarget, setIsDropTarget] = useState(false)
   const group = useEditorStore((state) => state.getGroup(groupId))
+  const activeFileName = useFileCacheStore((state) => state.entries[group?.activeId ?? '']?.name)
   const activeGroupId = useEditorStore((state) => state.activeGroupId)
   const isSplitMode = useEditorStore((state) => state.editorLayout.type === 'branch')
+  const singleDocument = useEditorStore((state) => isSingleDocumentLayout(state.folderData?.[0]?.path, state.editorLayout))
   const setActiveGroupId = useEditorStore((state) => state.setActiveGroupId)
   const moveFileToGroup = useEditorStore((state) => state.moveFileToGroup)
 
@@ -209,16 +212,16 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
       onFocusCapture={handleActivateGroup}
       onMouseDownCapture={handleActivateGroup}
     >
-      <EditorAreaTabs
-        compact={isSplitMode}
-        groupId={groupId}
-      />
+      {singleDocument || group.opened.length === 0 ? null : (
+        <EditorAreaTabs compact={isSplitMode} groupId={groupId} />
+      )}
       {isActiveGroup ? <FindReplace /> : null}
-      <EditorGroupToolbar editorId={activeFileId} />
+      <EditorGroupToolbar editorId={activeFileId} compactGroupId={singleDocument ? groupId : undefined} />
       <EditorPanel
-        aria-labelledby={activeFileId ? getEditorTabId(groupId, activeFileId) : undefined}
+        aria-labelledby={activeFileId && !singleDocument ? getEditorTabId(groupId, activeFileId) : undefined}
+        aria-label={singleDocument ? activeFileName : undefined}
         id={`editor-panel-${groupId}`}
-        role={activeFileId ? 'tabpanel' : undefined}
+        role={activeFileId ? singleDocument ? 'region' : 'tabpanel' : undefined}
       >
         {group.opened.length === 0 ? (
           <GroupEmptyState>
@@ -250,21 +253,16 @@ const SplitGroup = styled(Group)`
   height: 100%;
   min-width: 0;
   min-height: 0;
-`
 
-const SplitPanel = styled(Panel)<{ $hiddenInZen: boolean; $zenPath: boolean }>`
-  ${(props) =>
-    props.$hiddenInZen &&
-    css`
-      display: none !important;
-    `}
+  /* Panel's className targets its inner content; Zen must resize the outer flex item. */
+  > [data-panel][data-mf-hidden-in-zen] {
+    display: none !important;
+  }
 
-  ${(props) =>
-    props.$zenPath &&
-    css`
-      flex: 1 1 100% !important;
-      width: 100%;
-    `}
+  > [data-panel][data-mf-zen-path] {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+  }
 `
 
 const SplitSeparator = styled(Separator)<{

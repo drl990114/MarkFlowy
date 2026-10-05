@@ -1,9 +1,9 @@
 import { Input } from '@/components/ui/input'
+import { DEFAULT_CURRENT_DATE_FORMAT, formatCurrentDate } from '@/helper/date'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { debounce } from 'lodash'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
-import { DEFAULT_CURRENT_DATE_FORMAT, formatCurrentDate } from 'rme'
 import styled from 'styled-components'
 import { useTranslation } from '@/i18n'
 import type { SettingItemProps } from '.'
@@ -67,6 +67,7 @@ const DateFormatSettingItem: React.FC<SettingItemProps<Setting.DateFormatSetting
       <SettingLabel htmlFor={inputId} item={item} />
       <div className='setting-item__control'>
         <Input
+          inputSize='sm'
           id={inputId}
           value={inputValue}
           onBlur={() => writeSettingData.flush()}

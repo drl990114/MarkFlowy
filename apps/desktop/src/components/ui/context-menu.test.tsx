@@ -25,7 +25,7 @@ describe('ContextMenu facade', () => {
     const menu = await screen.findByRole('menu')
     expect(menu.hasAttribute('data-mf-portal')).toBe(true)
     expect(menu.getAttribute('data-slot')).toBe('context-menu-content')
-    expect(menu.className).toContain('z-[var(--mf-layer-menu)]')
+    expect(menu.className).toContain('mfc:z-[var(--mf-layer-menu,1000)]')
     expect(screen.getByRole('menuitem', { name: 'Rename' })).not.toBeNull()
 
     fireEvent.keyDown(menu, { key: 'Escape' })

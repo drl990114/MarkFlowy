@@ -1,0 +1,168 @@
+import { useComponentThemeStyle } from '../Theme/components-theme';
+import { HexAlphaColorPicker, HexColorInput, HexColorPicker } from 'react-colorful';
+import { useEffect, useRef, useState, type ComponentProps } from 'react';
+import { cn } from '../lib/cn';
+import { Button } from './button';
+import { Popover } from './popover';
+import { focusFeedback } from './focus-styles';
+
+const HEX_COLOR_PATTERN = /^#?([\da-f]{3}|[\da-f]{6})$/i;
+
+export function normalizeHexColor(value: string, fallback = '#000000') {
+  const match = HEX_COLOR_PATTERN.exec(value.trim());
+  if (!match) return fallback;
+
+  const hex = match[1]?.toLowerCase();
+  if (!hex) return fallback;
+  if (hex.length === 3) {
+    return `#${hex
+      .split('')
+      .map((character) => `${character}${character}`)
+      .join('')}`;
+  }
+
+  return `#${hex}`;
+}
+
+export type ColorPickerProps = {
+  value: string;
+  onValueChange: (value: string) => void;
+  onValueCommit?: (value: string) => void;
+  onOpenChange?: (open: boolean) => void;
+  disabled?: boolean;
+  className?: string;
+  contentClassName?: string;
+  id?: string;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
+};
+
+export function ColorPicker({
+  'aria-label': ariaLabel = 'Choose color',
+  'aria-labelledby': ariaLabelledBy,
+  className,
+  contentClassName,
+  disabled = false,
+  id,
+  onOpenChange,
+  onValueChange,
+  onValueCommit,
+  value,
+}: ColorPickerProps) {
+  const externalColor = normalizeHexColor(value);
+  const [color, setColor] = useState(externalColor);
+  const latestColor = useRef(externalColor);
+  const dirty = useRef(false);
+
+  useEffect(() => {
+    if (dirty.current || externalColor === latestColor.current) return;
+
+    latestColor.current = externalColor;
+    setColor(externalColor);
+  }, [externalColor]);
+
+  const handleValueChange = (nextValue: string) => {
+    const normalized = normalizeHexColor(nextValue, latestColor.current);
+    dirty.current = true;
+    latestColor.current = normalized;
+    setColor(normalized);
+    onValueChange(normalized);
+  };
+
+  const commit = () => {
+    dirty.current = false;
+    onValueCommit?.(latestColor.current);
+  };
+
+  const handleValueCommit = (nextValue: string) => {
+    const normalized = normalizeHexColor(nextValue, latestColor.current);
+    latestColor.current = normalized;
+    setColor(normalized);
+    commit();
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) commit();
+    onOpenChange?.(open);
+  };
+
+  return (
+    <Popover.Root onOpenChange={handleOpenChange}>
+      <Popover.Trigger asChild>
+        <Button
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          className={cn('mfc:justify-start mfc:gap-2 mfc:font-mono mfc:font-normal', className)}
+          data-mf-component=""
+          data-slot="color-picker-trigger"
+          disabled={disabled}
+          id={id}
+          size="sm"
+          variant="outline"
+        >
+          <span
+            className="mfc:size-4 mfc:shrink-0 mfc:rounded-sm mfc:border mfc:border-border"
+            data-mf-component=""
+            data-slot="color-picker-swatch"
+            style={{ backgroundColor: color }}
+          />
+          <span>{color}</span>
+        </Button>
+      </Popover.Trigger>
+      <Popover.Content
+        align="start"
+        className={cn('mfc:w-auto mfc:space-y-2 mfc:p-3', contentClassName)}
+      >
+        <HexColorPicker
+          color={color}
+          onChange={handleValueChange}
+          onChangeEnd={handleValueCommit}
+        />
+        <HexColorInput
+          aria-label={`${ariaLabel} hex value`}
+          className={cn(
+            focusFeedback,
+            'mfc:h-7 mfc:w-full mfc:rounded-sm mfc:border mfc:border-input mfc:bg-background mfc:px-2 mfc:font-mono mfc:text-ui-control mfc:text-foreground',
+          )}
+          color={color}
+          data-mf-component=""
+          data-slot="color-picker-input"
+          onBlur={commit}
+          onChange={handleValueChange}
+          prefixed
+        />
+      </Popover.Content>
+    </Popover.Root>
+  );
+}
+
+/** Inline picker for composed editors; the popover control above remains the compact field. */
+export type ColorPickerPanelProps = Omit<ComponentProps<'div'>, 'onChange'> & {
+  value: string;
+  alpha?: boolean;
+  onValueChange: (value: string) => void;
+  onValueCommit?: (value: string) => void;
+};
+export function ColorPickerPanel({
+  value,
+  alpha = false,
+  onValueChange,
+  onValueCommit,
+  className,
+  ...props
+}: ColorPickerPanelProps) {
+  const componentStyle = useComponentThemeStyle(props.style);
+
+  const Picker = alpha ? HexAlphaColorPicker : HexColorPicker;
+  return (
+    <div
+      data-mf-component=""
+      data-slot="color-picker-panel"
+      className={cn('mfc:w-fit', className)}
+      {...props}
+      style={componentStyle}
+    >
+      <Picker color={value} onChange={onValueChange} onChangeEnd={onValueCommit} />
+    </div>
+  );
+}

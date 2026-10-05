@@ -74,6 +74,7 @@ export class MathBlockExtension extends NodeExtension<MathBlockExtensionOptions>
         renderer: createMathRenderer({
           codemirrorExtensions: this.options.codemirrorExtensions,
         }),
+        codemirrorOptions: this.options.codemirrorOptions,
         customCopyFunction: this.options.customCopyFunction,
         behavior: this.options.behavior,
         openOnMount: Boolean((node.attrs as any).fromInput),

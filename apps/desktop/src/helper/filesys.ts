@@ -4,6 +4,7 @@ import type { IFile } from '@markflowy/interface'
 import { FileResultCode } from '@markflowy/interface'
 import { invoke } from '@tauri-apps/api/core'
 import { nanoid } from 'nanoid'
+import { touchDocument } from '@/services/pristine-document'
 import { resolveFileExcludePatterns } from './file-exclude'
 import {
   deletePathEntry,
@@ -55,11 +56,12 @@ export const hydrateDirectoryEntries = (entries: DirectoryReadEntry[]): IFile[] 
       }
       // A directory scan only refreshes metadata, including when opening a
       // parent/child workspace. The live editor still owns its cached content.
-      if (entry.kind === 'file' && cachedFile?.kind === 'file') {
-        file.content = cachedFile.content
-      }
-
-      idEntries.push({ id: file.id, file })
+      idEntries.push({
+        id: file.id,
+        file: entry.kind === 'file' && cachedFile?.kind === 'file'
+          ? { ...file, content: cachedFile.content }
+          : file,
+      })
       pathEntries.push({ path: entry.path, file })
 
       if (entry.children) {
@@ -107,6 +109,7 @@ export const createFile = (opt?: Partial<IFile>): IFile => {
 }
 
 export const updateFile = (changes: Partial<IFile> & Pick<IFile, 'id'>): IFile => {
+  if (changes.path || changes.content) touchDocument(changes.id)
   const currentFile = getFileObject(changes.id)
   const nextFile = { ...currentFile, ...changes } as IFile
 
@@ -142,13 +145,19 @@ const readDirectoryEntries = async (
   return unwrapDirectoryReadResult(result)
 }
 
-export const readDirectory = async (folderPath: string): Promise<IFile[]> => {
+export const readDirectory = async (
+  folderPath: string,
+  options: { isCurrent?: () => boolean } = {},
+): Promise<IFile[]> => {
   try {
-    const entries = hydrateDirectoryEntries(await readDirectoryEntries(folderPath))
-
-    const folderName = await invoke<string>('get_path_name', {
-      path: folderPath,
-    })
+    const [snapshot, folderName] = await Promise.all([
+      readDirectoryEntries(folderPath),
+      invoke<string>('get_path_name', { path: folderPath }),
+    ])
+    // Directory hydration updates shared file metadata. Reject obsolete reads
+    // before that publication, not just before updating the visible tree.
+    if (options.isCurrent && !options.isCurrent()) return []
+    const entries = hydrateDirectoryEntries(snapshot)
 
     const root: IFile = {
       id: getFileObjectByPath(folderPath)?.id || nanoid(),

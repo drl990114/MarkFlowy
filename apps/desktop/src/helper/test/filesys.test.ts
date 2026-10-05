@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { invoke } from '@tauri-apps/api/core'
 
 vi.mock('@/stores', () => ({
   useEditorStore: {
@@ -43,6 +44,7 @@ import {
   getFileNameFromPath,
   getFolderPathFromPath,
   hydrateDirectoryEntries,
+  readDirectory,
   isMdFile,
   unwrapDirectoryReadResult,
   updateFile,
@@ -62,6 +64,18 @@ describe('test helper/filesys ', () => {
 
     expect(getFileNameFromPath(macPath)).toBe('myfile.txt')
     expect(getFileNameFromPath(winPath)).toBe('myfile.txt')
+  })
+
+  it('does not hydrate obsolete directory metadata after a workspace change', async () => {
+    vi.mocked(invoke).mockImplementation(async (command) => command === 'get_path_name'
+      ? 'workspace'
+      : { code: FileResultCode.Success, entries: [
+          { name: 'old.md', path: '/workspace/old.md', kind: 'file', ext: 'md', children: null },
+        ] })
+    await expect(readDirectory('/workspace', { isCurrent: () => false })).resolves.toEqual([])
+    expect(setFileObjects).not.toHaveBeenCalled()
+    expect(setFileObjectsByPath).not.toHaveBeenCalled()
+    expect(setFileObjectByPath).not.toHaveBeenCalled()
   })
 
   it('isMdFile', () => {
@@ -193,8 +207,10 @@ describe('test helper/filesys ', () => {
     ])
 
     expect(file.id).toBe(indexedFile.id)
-    expect(file.content).toBe('unsaved editor content')
-    expect(setFileObjects).toHaveBeenCalledWith([{ id: indexedFile.id, file }])
+    expect(file.content).toBeUndefined()
+    expect(setFileObjects).toHaveBeenCalledWith([{
+      id: indexedFile.id, file: { ...file, content: 'unsaved editor content' },
+    }])
     expect(setFileObjectsByPath).toHaveBeenCalledWith([{ path: indexedFile.path, file }])
   })
 })

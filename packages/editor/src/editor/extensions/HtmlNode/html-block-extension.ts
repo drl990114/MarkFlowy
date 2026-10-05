@@ -21,6 +21,7 @@ import { createHtmlRenderer, LivePreviewNodeView } from '../LivePreviewBlock'
   defaultOptions: {
     customCopyFunction: undefined,
     codemirrorExtensions: undefined,
+    codemirrorOptions: undefined,
     behavior: undefined,
     handleViewImgSrcUrl: undefined,
   },
@@ -70,6 +71,7 @@ export class LineHtmlBlockExtension extends NodeExtension<LineHtmlBlockExtension
           codemirrorExtensions: this.options.codemirrorExtensions,
           handleViewImgSrcUrl: this.options.handleViewImgSrcUrl,
         }),
+        codemirrorOptions: this.options.codemirrorOptions,
         customCopyFunction: this.options.customCopyFunction,
         behavior: this.options.behavior,
       })

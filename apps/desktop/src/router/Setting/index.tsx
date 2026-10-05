@@ -1,28 +1,31 @@
+import { SnippetSetting } from './SnippetSetting'
+import type { SettingLeaveGuard } from './types'
+import { HistorySetting } from './HistorySetting'
 import Logo from '@/assets/logo.svg?react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { OpenSettingTarget } from '@/extensions/ai/aiProvidersService'
-import { installUpdate } from '@/helper/updater'
+import { fetchUpdate, installUpdate } from '@/helper/updater'
 import { useTranslation } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
 import { dialog } from '@/services/dialog'
 import useAppInfoStore from '@/stores/useAppInfoStore'
 import useLayoutStore from '@/stores/useLayoutStore'
+import useUpdaterStore from '@/stores/useUpdaterStore'
 import { invoke } from '@tauri-apps/api/core'
 import { openUrl } from '@tauri-apps/plugin-opener'
-import type { Update } from '@tauri-apps/plugin-updater'
-import { check } from '@tauri-apps/plugin-updater'
 import classNames from 'classnames'
-import { ArrowLeft, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'zens'
 import { SettingDialog } from './component/SettingDialog'
 import SettingGroup from './component/SettingGroup'
+import { SettingNavigation } from './component/SettingNavigation'
 import { CopilotSetting } from './CopilotSetting'
 import { ExportSetting } from './ExportSetting'
 import { ImageSetting } from './ImageSetting'
 import { KeyboardTable } from './KeyboardTable'
-import { getSettingMap } from './settingMap'
+import { useSettingMap } from './useSettingMap'
 import {
   createSettingSearchIndex,
   filterSettingSearchEntries,
@@ -35,16 +38,11 @@ import { Support } from './Support'
 import { ThemeSetting } from './ThemeSetting'
 import { ThemeStore } from './ThemeStore'
 
-const NARROW_SETTINGS_QUERY = '(max-width: 719px)'
-
 function isSettingGroup(
   group: Setting.SettingGroup | Setting.SettingItem,
 ): group is Setting.SettingGroup {
   return typeof group === 'object'
 }
-
-const isNarrowSettingsViewport = () =>
-  typeof window !== 'undefined' && window.matchMedia?.(NARROW_SETTINGS_QUERY).matches
 
 const getNavigationItemId = (prefix: string, value: string) =>
   `${prefix}-${value.replace(/[^a-zA-Z0-9_-]+/g, '-')}`
@@ -68,21 +66,29 @@ interface SettingProps {
 function Setting({ navigationRequest }: SettingProps) {
   const { appInfo } = useAppInfoStore()
   const { t } = useTranslation()
-  const settingMap = useMemo(() => getSettingMap(), [])
+  const settingMap = useSettingMap()
   const settingDataGroupsKeys = Object.keys(settingMap) as SettingCategoryKey[]
   const initialCategory =
     navigationRequest?.target?.category ?? (settingDataGroupsKeys[0] as SettingCategoryKey)
 
-  const [update, setUpdate] = useState<Update | null>(null)
+  const update = useUpdaterStore((state) => state.update)
+  const isInstalling = useUpdaterStore((state) => state.isInstalling)
   const [searchQuery, setSearchQuery] = useState('')
   const [curGroupKey, setCurGroupKey] = useState<SettingCategoryKey>(initialCategory)
   const [activeChildId, setActiveChildId] = useState<string | undefined>(
     navigationRequest?.target?.providerId,
   )
-  const [mobileDetailOpen, setMobileDetailOpen] = useState(Boolean(navigationRequest?.target))
-  const [mobileReturnFocusId, setMobileReturnFocusId] = useState<string>()
   const [pendingFocusTarget, setPendingFocusTarget] = useState<SettingFocusTarget>()
   const [selectedSearchEntryId, setSelectedSearchEntryId] = useState<string>()
+  const leaveGuardRef = useRef<SettingLeaveGuard | null>(null)
+  const registerLeaveGuard = useCallback((guard: SettingLeaveGuard) => {
+    leaveGuardRef.current = guard
+    return () => {
+      if (leaveGuardRef.current === guard) leaveGuardRef.current = null
+    }
+  }, [])
+  const requestLeave = useCallback(() => leaveGuardRef.current?.() ?? Promise.resolve(true), [])
+  const [acceptedNavigation, setAcceptedNavigation] = useState(navigationRequest)
   const categoryHeadingRef = useRef<HTMLHeadingElement>(null)
   const deferredSearchQuery = useDeferredValue(searchQuery)
   const normalizedSearchQuery = deferredSearchQuery.trim()
@@ -94,7 +100,6 @@ function Setting({ navigationRequest }: SettingProps) {
     ? filterSettingSearchEntries(searchEntries, normalizedSearchQuery, t)
     : []
 
-  const value = settingDataGroupsKeys.indexOf(curGroupKey)
   const curGroup = settingMap[curGroupKey] as Setting.SettingGroup
   const curGroupKeys = Object.keys(curGroup).filter(
     (key) => key !== 'i18nKey' && key !== 'iconName' && key !== 'desc',
@@ -124,26 +129,31 @@ function Setting({ navigationRequest }: SettingProps) {
   }
 
   useEffect(() => {
-    check().then((nextUpdate) => {
-      setUpdate(nextUpdate)
-    })
+    void fetchUpdate()
   }, [])
 
   useEffect(() => {
     const target = navigationRequest?.target
     if (!target) return
 
-    setSearchQuery('')
-    setSelectedSearchEntryId(undefined)
-    setCurGroupKey(target.category)
-    setActiveChildId(target.providerId)
-    setMobileDetailOpen(true)
-    setPendingFocusTarget({
-      categoryKey: target.category,
-      groupKey: target.providerId ? 'model' : undefined,
-      childId: target.providerId,
+    let canceled = false
+    void requestLeave().then((allowed) => {
+      if (!allowed || canceled) return
+      setAcceptedNavigation(navigationRequest)
+      setSearchQuery('')
+      setSelectedSearchEntryId(undefined)
+      setCurGroupKey(target.category)
+      setActiveChildId(target.providerId)
+      setPendingFocusTarget({
+        categoryKey: target.category,
+        groupKey: target.providerId ? 'model' : undefined,
+        childId: target.providerId,
+      })
     })
-  }, [navigationRequest])
+    return () => {
+      canceled = true
+    }
+  }, [navigationRequest, requestLeave])
 
   useEffect(() => {
     if (!pendingFocusTarget || pendingFocusTarget.categoryKey !== curGroupKey) return
@@ -177,13 +187,6 @@ function Setting({ navigationRequest }: SettingProps) {
     return () => cancelAnimationFrame(frame)
   }, [activeChildId, curGroupKey, pendingFocusTarget])
 
-  const closeMobileDetail = useCallback(() => {
-    setMobileDetailOpen(false)
-    requestAnimationFrame(() => {
-      if (mobileReturnFocusId) document.getElementById(mobileReturnFocusId)?.focus()
-    })
-  }, [mobileReturnFocusId])
-
   const handleEscapeKeyDown = (event: KeyboardEvent) => {
     // Radix handles Escape during capture, before an inline input can cancel its edit.
     if (
@@ -191,33 +194,22 @@ function Setting({ navigationRequest }: SettingProps) {
       event.target.closest('[data-mf-settings-escape-cancel]')
     ) {
       event.preventDefault()
-      return
-    }
-
-    if (mobileDetailOpen && isNarrowSettingsViewport()) {
-      event.preventDefault()
-      closeMobileDetail()
     }
   }
 
-  const handleCategorySelect = (groupKey: SettingCategoryKey, navigationItemId: string) => {
+  const handleCategorySelect = async (groupKey: SettingCategoryKey) => {
+    if (groupKey !== curGroupKey && leaveGuardRef.current && !(await requestLeave())) return
     setCurGroupKey(groupKey)
     setActiveChildId(undefined)
     setSelectedSearchEntryId(undefined)
-    setMobileReturnFocusId(navigationItemId)
-
-    if (isNarrowSettingsViewport()) {
-      setMobileDetailOpen(true)
-      setPendingFocusTarget({ categoryKey: groupKey })
-    }
   }
 
-  const handleSearchResultSelect = (entry: SettingSearchEntry, navigationItemId: string) => {
+  const handleSearchResultSelect = async (entry: SettingSearchEntry) => {
+    if (entry.categoryKey !== curGroupKey && leaveGuardRef.current && !(await requestLeave()))
+      return
     setCurGroupKey(entry.categoryKey)
     setActiveChildId(entry.childId)
     setSelectedSearchEntryId(entry.id)
-    setMobileReturnFocusId(navigationItemId)
-    setMobileDetailOpen(true)
     setPendingFocusTarget({
       categoryKey: entry.categoryKey,
       groupKey: entry.groupKey,
@@ -227,6 +219,15 @@ function Setting({ navigationRequest }: SettingProps) {
   }
 
   const renderCurrentSettingData = () => {
+    if (curGroupKey === 'snippets')
+      return (
+        <SnippetSetting
+          initialKind={acceptedNavigation?.target?.snippetKind}
+          navigationId={acceptedNavigation?.id}
+          registerLeaveGuard={registerLeaveGuard}
+        />
+      )
+    if (curGroupKey === 'history') return <HistorySetting />
     if (curGroupKey === 'keyboard') return <KeyboardTable />
     if (curGroupKey === 'themeStore') return <ThemeStore />
     if (curGroupKey === 'image') return <ImageSetting />
@@ -278,15 +279,10 @@ function Setting({ navigationRequest }: SettingProps) {
   }
 
   return (
-    <SettingDialog onEscapeKeyDown={handleEscapeKeyDown}>
+    <SettingDialog beforeClose={requestLeave} onEscapeKeyDown={handleEscapeKeyDown}>
       <div className='box-border flex h-full w-full min-w-0 overflow-hidden bg-background text-foreground'>
-        <aside
-          className={classNames(
-            'box-border flex w-full shrink-0 flex-col border-border bg-muted/50 min-[720px]:w-[15.5rem] min-[720px]:border-r max-lg:min-[720px]:w-56',
-            mobileDetailOpen && 'max-[719px]:hidden',
-          )}
-        >
-          <div className='shrink-0 px-3 pt-5 pb-2'>
+        <aside className='box-border flex w-[13.5rem] shrink-0 flex-col border-r border-border bg-muted/50'>
+          <div className='shrink-0 px-3 pt-4 pb-2'>
             <h2 className='m-0 px-2 pr-8 text-ui-body font-semibold'>{t('settings.label')}</h2>
             <label className='sr-only' htmlFor='setting-search'>
               {t('settings.search_placeholder')}
@@ -298,7 +294,7 @@ function Setting({ navigationRequest }: SettingProps) {
               />
               <Input
                 autoComplete='off'
-                className='h-7 rounded-md bg-background/80 pl-8 text-ui-control leading-[var(--mf-ui-line-height-control)] shadow-none'
+                className='h-7 rounded-sm bg-background pl-8 text-ui-control leading-[var(--mf-ui-line-height-control)] shadow-none'
                 id='setting-search'
                 name='settings-search'
                 placeholder={t('settings.search_placeholder')}
@@ -321,73 +317,59 @@ function Setting({ navigationRequest }: SettingProps) {
                 {t('settings.search_results', { count: searchResults.length })}
               </div>
             ) : null}
-            <ul className='m-0 list-none p-0'>
-              {normalizedSearchQuery
-                ? searchResults.map((entry) => {
-                    const navigationItemId = getNavigationItemId('setting-search-result', entry.id)
-                    const path = [t('settings.label'), ...getSettingSearchPath(entry, t)]
+            {normalizedSearchQuery ? (
+              <ul className='m-0 list-none p-0'>
+                {searchResults.map((entry) => {
+                  const navigationItemId = getNavigationItemId('setting-search-result', entry.id)
+                  const path = [t('settings.label'), ...getSettingSearchPath(entry, t)]
 
-                    return (
-                      <li key={entry.id}>
-                        <Button
-                          aria-current={selectedSearchEntryId === entry.id ? 'location' : undefined}
-                          className={classNames(
-                            'my-px h-auto min-h-10 w-full flex-col items-start gap-0 rounded-md px-2 py-1.5 text-left font-normal text-foreground shadow-none',
-                            selectedSearchEntryId === entry.id
-                              ? 'bg-control-selected text-content-primary hover:bg-control-selected'
-                              : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
-                          )}
-                          id={navigationItemId}
-                          variant='ghost'
-                          onClick={() => handleSearchResultSelect(entry, navigationItemId)}
-                        >
-                          <span className='block w-full truncate text-ui-control font-medium'>
-                            {t(entry.titleI18nKey)}
-                          </span>
-                          {entry.descI18nKey ? (
-                            <span className='mt-0.5 block w-full truncate text-ui-caption text-muted-foreground'>
-                              {t(entry.descI18nKey)}
-                            </span>
-                          ) : null}
+                  return (
+                    <li key={entry.id}>
+                      <Button
+                        aria-current={selectedSearchEntryId === entry.id ? 'location' : undefined}
+                        className={classNames(
+                          'my-px h-auto min-h-10 w-full flex-col items-start gap-0 rounded-sm px-2 py-1.5 text-left font-normal text-foreground shadow-none',
+                          selectedSearchEntryId === entry.id
+                            ? 'bg-control-selected text-content-primary hover:bg-control-selected'
+                            : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
+                        )}
+                        id={navigationItemId}
+                        variant='ghost'
+                        onClick={() => handleSearchResultSelect(entry)}
+                      >
+                        <span className='block w-full truncate text-ui-control font-medium'>
+                          {t(entry.titleI18nKey)}
+                        </span>
+                        {entry.descI18nKey ? (
                           <span className='mt-0.5 block w-full truncate text-ui-caption text-muted-foreground'>
-                            {path.join(' › ')}
+                            {t(entry.descI18nKey)}
                           </span>
-                        </Button>
-                      </li>
-                    )
-                  })
-                : settingDataGroupsKeys.map((groupKey) => {
-                    const group = settingMap[groupKey] as Setting.SettingGroup
-                    const index = settingDataGroupsKeys.indexOf(groupKey)
-                    const navigationItemId = getNavigationItemId('setting-category', groupKey)
-                    return (
-                      <li key={groupKey}>
-                        <Button
-                          aria-current={index === value ? 'page' : undefined}
-                          className={classNames(
-                            'my-px h-7 w-full justify-start gap-2 rounded-md px-2 text-left text-ui-control font-normal text-foreground shadow-none',
-                            index === value
-                              ? 'bg-control-selected font-medium text-content-primary hover:bg-control-selected'
-                              : 'bg-transparent hover:bg-control-ghost-hover hover:text-content-primary',
-                          )}
-                          id={navigationItemId}
-                          variant='ghost'
-                          onClick={() => handleCategorySelect(groupKey, navigationItemId)}
-                        >
-                          <i aria-hidden className={classNames(group.iconName, 'text-sm')} />
-                          <span className='min-w-0 truncate capitalize'>{t(group.i18nKey)}</span>
-                        </Button>
-                      </li>
-                    )
-                  })}
-              {normalizedSearchQuery && searchResults.length === 0 ? (
-                <li className='px-2 py-6 text-center text-sm text-muted-foreground' role='status'>
-                  {t('settings.search_empty')}
-                </li>
-              ) : null}
-            </ul>
+                        ) : null}
+                        <span className='mt-0.5 block w-full truncate text-ui-caption text-muted-foreground'>
+                          {path.join(' › ')}
+                        </span>
+                      </Button>
+                    </li>
+                  )
+                })}
+                {searchResults.length === 0 ? (
+                  <li
+                    className='px-2 py-6 text-center text-ui-control text-muted-foreground'
+                    role='status'
+                  >
+                    {t('settings.search_empty')}
+                  </li>
+                ) : null}
+              </ul>
+            ) : (
+              <SettingNavigation
+                activeCategory={curGroupKey}
+                settingMap={settingMap}
+                onSelect={handleCategorySelect}
+              />
+            )}
           </nav>
-          <footer className='shrink-0 border-t border-border/80 px-3 py-3'>
+          <footer className='shrink-0 border-t border-border/80 px-3 py-2'>
             <div className='flex min-w-0 items-center gap-2'>
               <Logo aria-hidden='true' className='size-6 shrink-0' focusable='false' />
               <div aria-live='polite' className='min-w-0 flex-1'>
@@ -410,11 +392,12 @@ function Setting({ navigationRequest }: SettingProps) {
               {update ? (
                 <Button
                   className='shrink-0 px-2 text-primary shadow-none hover:text-primary'
+                  aria-busy={isInstalling}
+                  disabled={isInstalling}
                   size='sm'
                   variant='ghost'
                   onClick={() => {
-                    installUpdate(update)
-                    setUpdate(null)
+                    void installUpdate(update)
                   }}
                 >
                   {t('about.install')}
@@ -423,32 +406,18 @@ function Setting({ navigationRequest }: SettingProps) {
             </div>
           </footer>
         </aside>
-        <main
-          className={classNames(
-            'box-border flex min-h-0 min-w-0 flex-1 flex-col bg-background',
-            !mobileDetailOpen && 'max-[719px]:hidden',
-          )}
-        >
-          <div className='box-border mx-auto w-full max-w-[58rem] shrink-0 px-8 pt-7 max-lg:px-6 max-[719px]:px-4 max-[719px]:pt-3'>
-            <Button
-              className='mb-3 px-2 text-muted-foreground min-[720px]:hidden'
-              size='sm'
-              variant='ghost'
-              onClick={closeMobileDetail}
-            >
-              <ArrowLeft aria-hidden className='size-4' />
-              {t('settings.back_to_settings')}
-            </Button>
-            <header className='mb-5 flex items-start justify-between gap-4 pr-8 max-[719px]:pr-0'>
+        <main className='box-border flex min-h-0 min-w-0 flex-1 flex-col bg-background'>
+          <div className='box-border mx-auto w-full max-w-[58rem] shrink-0 px-6 pt-5'>
+            <header className='mb-4 flex items-start justify-between gap-4 pr-8'>
               <div className='min-w-0'>
                 <h1
-                  className='m-0 text-xl font-semibold text-foreground focus-visible:outline-none focus-visible:underline focus-visible:underline-offset-2'
+                  className='m-0 text-lg font-semibold text-foreground focus-visible:outline-none focus-visible:underline focus-visible:underline-offset-2'
                   ref={categoryHeadingRef}
                   tabIndex={-1}
                 >
                   {t(curGroup.i18nKey)}
                 </h1>
-                <p className='mt-1 mb-0 text-ui-body leading-relaxed text-muted-foreground'>
+                <p className='mt-1 mb-0 text-ui-control text-muted-foreground'>
                   {t(curGroup.desc?.i18nKey)}
                 </p>
               </div>
@@ -456,7 +425,7 @@ function Setting({ navigationRequest }: SettingProps) {
             </header>
           </div>
           <div className='min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain'>
-            <div className='box-border mx-auto w-full max-w-[58rem] px-8 pb-12 max-lg:px-6 max-[719px]:px-4'>
+            <div className='box-border mx-auto w-full max-w-[58rem] px-6 pb-8'>
               {renderCurrentSettingData()}
             </div>
           </div>

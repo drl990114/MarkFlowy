@@ -1,113 +1,92 @@
+const { execFile } = require('node:child_process');
+const { promisify } = require('node:util');
+const { mkdir, rename, rm, writeFile } = require('node:fs/promises');
+const path = require('node:path');
 const gulp = require('gulp');
 const babel = require('gulp-babel');
-const less = require('gulp-less');
-const cssnano = require('gulp-cssnano');
-const through2 = require('through2');
+const postcss = require('gulp-postcss');
+const tailwind = require('@tailwindcss/postcss');
 
-const paths = {
-  dest: {
-    lib: 'lib',
-    esm: 'esm',
-    dist: 'dist',
-  },
-  styles: 'src/**/*.less',
-  scripts: ['src/**/*.{ts,tsx}', '!src/**/demo/*.{ts,tsx}', '!src/**/__tests__/*.{ts,tsx}'],
-};
+const execFileAsync = promisify(execFile);
+const scripts = [
+  'src/**/*.{ts,tsx}',
+  '!src/**/*.d.ts',
+  '!src/**/demo/**',
+  '!src/**/__tests__/**',
+  '!src/**/*.{test,spec}.{ts,tsx}',
+];
+const readyArtifact = path.join(__dirname, 'esm/.dev-ready');
 
-/**
- * 当前组件样式 import './index.less' => import './index.css'
- * 依赖的其他组件样式 import '../test-comp/style' => import '../test-comp/style/css.js'
- * 依赖的其他组件样式 import '../test-comp/style/index.js' => import '../test-comp/style/css.js'
- * @param {string} content
- */
-function cssInjection(content) {
-  return content
-    .replace(/\/style\/?'/g, "/style/css'")
-    .replace(/\/style\/?"/g, '/style/css"')
-    .replace(/\.less/g, '.css');
-}
-
-/**
- * 编译脚本文件
- * @param {string} babelEnv babel环境变量
- * @param {string} destDir 目标目录
- */
-function compileScripts(babelEnv, destDir) {
-  const { scripts } = paths;
-  process.env.BABEL_ENV = babelEnv;
+function compileScripts(envName, destination) {
   return gulp
     .src(scripts)
-    .pipe(
-      babel({
-        plugins: [
-          [
-            require.resolve('babel-plugin-module-resolver'),
-            {
-              alias: {
-                '@': './src',
-              },
-            },
-          ],
-        ],
-      }),
-    ) // 使用gulp-babel处理
-    .pipe(
-      through2.obj(function z(file, encoding, next) {
-        this.push(file.clone());
-        // 找到目标
-        if (file.path.match(/(\/|\\)style(\/|\\)index\.js/)) {
-          const content = file.contents.toString(encoding);
-          file.contents = Buffer.from(cssInjection(content)); // 处理文件内容
-          file.path = file.path.replace(/index\.js/, 'css.js'); // 文件重命名
-          this.push(file); // 新增该文件
-          next();
-        } else {
-          next();
-        }
-      }),
-    )
-    .pipe(gulp.dest(destDir));
+    .pipe(babel({ envName }))
+    .pipe(gulp.dest(destination));
 }
 
-/**
- * 编译cjs
- */
 function compileCJS() {
-  const { dest } = paths;
-  return compileScripts('cjs', dest.lib);
+  return compileScripts('cjs', 'lib');
 }
 
-/**
- * 编译esm
- */
 function compileESM() {
-  const { dest } = paths;
-  return compileScripts('esm', dest.esm);
+  return compileScripts('esm', 'esm');
 }
 
-const buildScripts = gulp.series(compileCJS, compileESM);
-
-/**
- * 拷贝less文件
- */
-function copyLess() {
-  return gulp.src(paths.styles).pipe(gulp.dest(paths.dest.lib)).pipe(gulp.dest(paths.dest.esm));
-}
-
-/**
- * 生成css文件
- */
-function less2css() {
+function compileStyles() {
   return gulp
-    .src(paths.styles)
-    .pipe(less()) // 处理less文件
-    .pipe(cssnano({ zindex: false, reduceIdents: false })) // 压缩
-    .pipe(gulp.dest(paths.dest.lib))
-    .pipe(gulp.dest(paths.dest.esm));
+    .src('src/styles.css')
+    .pipe(postcss([tailwind({ base: __dirname, optimize: true })]))
+    .pipe(gulp.dest('lib'))
+    .pipe(gulp.dest('esm'));
 }
 
-const build = gulp.parallel(buildScripts, copyLess, less2css);
+async function compileTypes() {
+  const tsc = require.resolve('typescript/bin/tsc');
+  for (const destination of ['lib', 'esm']) {
+    try {
+      await execFileAsync(process.execPath, [
+        tsc,
+        '-p',
+        'tsconfig.build.json',
+        '--declarationDir',
+        destination,
+      ], { cwd: __dirname });
+    } catch (error) {
+      if (error.stdout) process.stderr.write(error.stdout);
+      if (error.stderr) process.stderr.write(error.stderr);
+      throw error;
+    }
+  }
+}
 
-exports.build = build;
+const buildScripts = gulp.parallel(compileCJS, compileESM);
 
-exports.default = build;
+async function invalidateReady() {
+  await rm(readyArtifact, { force: true });
+}
+
+async function markReady() {
+  await mkdir(path.dirname(readyArtifact), { recursive: true });
+  const temporaryArtifact = `${readyArtifact}.tmp`;
+  await writeFile(temporaryArtifact, process.env.MF_ZENS_DEV_SESSION || 'standalone');
+  await rename(temporaryArtifact, readyArtifact);
+}
+
+function watch() {
+  // One queue prevents readiness from observing mixed generations of JS, CSS, and types.
+  // Register before the initial run so edits during that run schedule another pass.
+  return gulp.watch(
+    ['src/**/*.{ts,tsx,css}', 'typings.d.ts', '.babelrc.js', 'tsconfig*.json'],
+    { ignoreInitial: false },
+    gulp.series(
+      invalidateReady,
+      gulp.parallel(buildScripts, compileStyles, compileTypes),
+      markReady,
+    ),
+  );
+}
+
+exports.styles = compileStyles;
+exports.dev = watch;
+exports.build = gulp.parallel(buildScripts, compileStyles);
+exports.default = exports.build;

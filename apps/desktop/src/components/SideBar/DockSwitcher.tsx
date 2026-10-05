@@ -4,6 +4,7 @@ import { useTranslation } from '@/i18n'
 import useLayoutStore, { type DockPanelId, type DockSide } from '@/stores/useLayoutStore'
 import { StatusBarButton } from '@/components/StatusBar/StatusBarButton'
 import { getDockPanels } from './dockPanels'
+import useEditorStore from '@/stores/useEditorStore'
 
 export function scheduleDockFocus(side: DockSide): void {
   window.requestAnimationFrame(() => {
@@ -23,7 +24,8 @@ export function DockSwitcher({ side }: { side: DockSide }) {
   const { t } = useTranslation()
   const dock = useLayoutStore((state) => (side === 'left' ? state.leftBar : state.rightBar))
   const toggleDockPanel = useLayoutStore((state) => state.toggleDockPanel)
-  const panels = getDockPanels(side)
+  const hasWorkspace = useEditorStore((state) => Boolean(state.folderData?.[0]?.path))
+  const panels = getDockPanels(side).filter((panel) => hasWorkspace || !['explorer', 'search'].includes(panel.id))
 
   const handleSelect = (panelId: DockPanelId) => {
     const isClosing = dock.visible && dock.activePanelId === panelId

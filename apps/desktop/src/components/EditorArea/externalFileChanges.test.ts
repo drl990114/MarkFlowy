@@ -1,5 +1,6 @@
+import { DEFAULT_TEXT_METADATA } from './textFileFormat'
 import bus from '@/helper/eventBus'
-import { deleteFileObject, getFileObject, setFileObject } from '@/helper/files'
+import useFileCacheStore, { deleteFileObject, getFileObject, setFileObject } from '@/helper/files'
 import { FileResultCode, type IFile } from '@/helper/filesys'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useExternalFileChangeStore, {
@@ -18,6 +19,7 @@ import {
 } from './externalFileChanges'
 import { fileSaveCoordinator } from './fileSaveCoordinator'
 import { editorSnapshotRegistry } from './editorSnapshotRegistry'
+import { onFileSnapshotInvalidated } from './fileSnapshot'
 
 enableMapSet()
 
@@ -33,6 +35,31 @@ vi.mock('zens', () => ({
 
 const fileId = 'file'
 const filePath = '/workspace/note.md'
+const gbkMetadata = {
+  ...DEFAULT_TEXT_METADATA,
+  format: { encoding: 'gbk', bom: 'none' } as const,
+  decoding: { source: 'user', needsConfirmation: false, byteRoundTrip: true } as const,
+}
+
+function loadSelectedGbk() {
+  setFileObject(fileId, createFile('漏'))
+  fileSaveCoordinator.loadSnapshot(fileId, {
+    content: '漏', revision: 'disk:old', status: 'success', text: gbkMetadata,
+  })
+}
+
+function mockAmbiguousBytes() {
+  invoke.mockImplementation(async (command: string, args: { encoding?: string }) => {
+    if (command !== 'get_file_snapshot') throw new Error(command)
+    const encoding = args.encoding ?? 'utf-8'
+    return {
+      content: new TextDecoder(encoding).decode(new Uint8Array([0xc2, 0xa9, 0x21])),
+      revision: 'disk:new',
+      status: 'success',
+      text: encoding === 'gbk' ? gbkMetadata : DEFAULT_TEXT_METADATA,
+    }
+  })
+}
 
 const createFile = (content: string): IFile => ({
   content,
@@ -61,6 +88,19 @@ async function emitChange() {
 }
 
 describe('external file changes', () => {
+  it('invalidates a startup handoff as soon as the watcher event arrives, before disk inspection', async () => {
+    mockStableDisk('local', 'disk:new')
+    const invalidated = vi.fn()
+    const dispose = onFileSnapshotInvalidated(invalidated)
+    try {
+      const inspected = emitChange()
+      expect(invalidated).toHaveBeenCalledExactlyOnceWith(filePath)
+      expect(invoke).not.toHaveBeenCalledWith('get_file_snapshot', expect.anything())
+      await inspected
+    } finally {
+      dispose()
+    }
+  })
   beforeEach(async () => {
     vi.useFakeTimers()
     invoke.mockReset()
@@ -81,6 +121,155 @@ describe('external file changes', () => {
   afterEach(() => {
     resetExternalFileChanges()
     vi.useRealTimers()
+  })
+
+  it('ignores unrelated cached paths and coalesces duplicate events for an open document', async () => {
+    const previous = useFileCacheStore.getState()
+    const readClosedPath = vi.fn(() => '/workspace/closed.md')
+    const closed = { ...createFile('closed'), id: 'closed' }
+    Object.defineProperty(closed, 'path', { get: readClosedPath })
+    useFileCacheStore.setState({ entries: { ...previous.entries, closed } })
+    mockStableDisk('local', 'disk:old')
+    try {
+      await handleExternalWatchEvent({
+        attrs: {},
+        paths: ['/workspace/closed.md', '/workspace/unrelated.md', filePath, filePath],
+        type: 'any',
+      })
+      expect(readClosedPath).not.toHaveBeenCalled()
+      expect(invoke).toHaveBeenCalledExactlyOnceWith('get_file_snapshot', { filePath })
+    } finally {
+      useFileCacheStore.setState(previous)
+    }
+  })
+
+  it('keeps a format-only local edit dirty when external text is identical', async () => {
+    fileSaveCoordinator.loadSnapshot(fileId, {
+      content: 'local',
+      revision: 'disk:old',
+      status: 'success',
+      text: DEFAULT_TEXT_METADATA,
+    })
+    fileSaveCoordinator.recordFormat(fileId, { encoding: 'utf-16le', bom: 'utf16le' })
+    useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: true })
+    invoke.mockResolvedValue({
+      content: 'local',
+      revision: 'disk:new',
+      status: 'success',
+      text: DEFAULT_TEXT_METADATA,
+    })
+    await emitChange()
+    expect(useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges).toBe(true)
+    expect(fileSaveCoordinator.getTextMetadata(fileId).format.encoding).toBe('utf-16le')
+    expect(isExternalFileSaveBlocked(fileId)).toBe(true)
+  })
+
+  it('adopts an external BOM-only change when the document is clean', async () => {
+    fileSaveCoordinator.loadSnapshot(fileId, {
+      content: 'local',
+      revision: 'disk:old',
+      status: 'success',
+      text: DEFAULT_TEXT_METADATA,
+    })
+    useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: false })
+    invoke.mockResolvedValue({
+      content: 'local',
+      revision: 'disk:new',
+      status: 'success',
+      text: { ...DEFAULT_TEXT_METADATA, format: { encoding: 'utf-8', bom: 'utf8' } },
+    })
+    await emitChange()
+    expect(fileSaveCoordinator.getTextMetadata(fileId).format.bom).toBe('utf8')
+    expect(fileSaveCoordinator.getDiskRevision(fileId)).toBe('disk:new')
+    expect(isExternalFileSaveBlocked(fileId)).toBe(false)
+  })
+
+  it('coalesces a thousand notifications while a read is in flight', async () => {
+    let finishRead!: (value: unknown) => void
+    let reads = 0
+    invoke.mockImplementation(async (command: string) => {
+      if (command !== 'get_file_snapshot') throw new Error(command)
+      reads++
+      if (reads === 1)
+        return new Promise((resolve) => {
+          finishRead = resolve
+        })
+      return { status: 'success', content: 'final', revision: 'disk:final' }
+    })
+    const first = emitChange()
+    await vi.advanceTimersByTimeAsync(0)
+    const pending = Array.from({ length: 1000 }, () => emitChange())
+    finishRead({ status: 'success', content: 'intermediate', revision: 'disk:middle' })
+    await vi.advanceTimersByTimeAsync(1000)
+    await Promise.all([first, ...pending])
+    expect(reads).toBe(2)
+    expect(getFileObject(fileId).content).toBe('final')
+  })
+
+  it.each(['watch', 'reload'] as const)('preserves explicitly selected GBK during %s', async (action) => {
+    loadSelectedGbk()
+    mockAmbiguousBytes()
+    if (action === 'reload') {
+      markExternalFileConflict(fileId, 'disk:new')
+      await resolveExternalFileChange(fileId, 'reload')
+    } else await emitChange()
+    expect(invoke).toHaveBeenCalledWith('get_file_snapshot', { filePath, encoding: 'gbk' })
+    expect(getFileObject(fileId).content).toBe('漏!')
+    expect(fileSaveCoordinator.getTextMetadata(fileId).format.encoding).toBe('gbk')
+  })
+
+  it('reads the saved encoding while an unsaved conversion is pending', async () => {
+    loadSelectedGbk()
+    fileSaveCoordinator.recordFormat(fileId, { encoding: 'utf-16le', bom: 'utf16le' })
+    useEditorStateStore.getState().setIdStateMap(fileId, { hasUnsavedChanges: true })
+    mockAmbiguousBytes()
+    await emitChange()
+    expect(invoke).toHaveBeenCalledWith('get_file_snapshot', { filePath, encoding: 'gbk' })
+    expect(getFileObject(fileId).content).toBe('漏')
+    expect(fileSaveCoordinator.getTextMetadata(fileId).format.encoding).toBe('utf-16le')
+    expect(isExternalFileSaveBlocked(fileId)).toBe(true)
+    await resolveExternalFileChange(fileId, 'reload')
+    expect(getFileObject(fileId).content).toBe('漏!')
+    expect(fileSaveCoordinator.getTextMetadata(fileId).format.encoding).toBe('gbk')
+  })
+
+  it('keeps separate decoding choices for aliases of the same path', async () => {
+    loadSelectedGbk()
+    const alias = 'utf8-alias'
+    setFileObject(alias, { ...createFile('©'), id: alias })
+    fileSaveCoordinator.loadSnapshot(alias, {
+      content: '©', revision: 'disk:old', status: 'success', text: DEFAULT_TEXT_METADATA,
+    })
+    useEditorStore.setState({ opened: [fileId, alias] })
+    mockAmbiguousBytes()
+    try {
+      await emitChange()
+      expect(invoke).toHaveBeenCalledTimes(2)
+      expect(getFileObject(fileId).content).toBe('漏!')
+      expect(getFileObject(alias).content).toBe('©!')
+    } finally {
+      deleteFileObject(alias)
+      useEditorStateStore.getState().delIdStateMap(alias)
+      await fileSaveCoordinator.releaseWhenIdle(alias, () => true, () => undefined)
+    }
+  })
+
+  it('retries when the selected decoder changes during a pending read', async () => {
+    loadSelectedGbk()
+    let finishRead!: (value: unknown) => void
+    mockAmbiguousBytes()
+    invoke.mockImplementationOnce(() => new Promise((resolve) => { finishRead = resolve }))
+    const inspection = emitChange()
+    await vi.advanceTimersByTimeAsync(0)
+    fileSaveCoordinator.loadSnapshot(fileId, {
+      content: '©', revision: 'disk:old', status: 'success', text: DEFAULT_TEXT_METADATA,
+    })
+    finishRead({ content: '漏!', revision: 'disk:new', status: 'success', text: gbkMetadata })
+    await vi.advanceTimersByTimeAsync(1000)
+    await inspection
+    expect(invoke).toHaveBeenCalledTimes(2)
+    expect(getFileObject(fileId).content).toBe('©!')
+    expect(fileSaveCoordinator.getReadEncoding(fileId)).toBeUndefined()
   })
 
   it('auto-loads a stable external update for a clean editor and clears its notice after 3s', async () => {
@@ -163,7 +352,9 @@ describe('external file changes', () => {
         result: { code, content: '' },
       })
 
-      await emitChange()
+      const inspection = emitChange()
+      await vi.advanceTimersByTimeAsync(3000)
+      await inspection
 
       expect(getFileObject(fileId).content).toBe('local')
       expect(fileSaveCoordinator.getDiskRevision(fileId)).toBe('disk:old')
@@ -196,6 +387,7 @@ describe('external file changes', () => {
         expect(args).toMatchObject({
           content: 'local',
           expectedRevision: 'disk:newest',
+          historyKind: 'overwrite',
           filePath,
         })
         return { revision: 'disk:written', status: 'success' }

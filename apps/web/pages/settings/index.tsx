@@ -4,6 +4,13 @@ import Link from 'next/link'
 import { useState } from 'react'
 import styled from 'styled-components'
 import rem from 'utils/rem'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
+import type { GetStaticProps } from 'next'
+import ThemeSwitcher from '../../components/ThemeSwitcher'
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => ({
+  props: { ...(await serverSideTranslations(locale || 'en', ['common'])) },
+})
 
 function formatDate(value?: string) {
   if (!value) return 'Not available'
@@ -62,6 +69,7 @@ export default function PersonalSettingsPage() {
             <Title>Personal Settings</Title>
             <Subtitle>Manage basic information and connected services.</Subtitle>
           </HeaderCopy>
+          <ThemeSwitcher />
         </HeaderMain>
       </Header>
 

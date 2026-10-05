@@ -25,7 +25,7 @@ export const BookMarkViewItem = (props: BookMarkViewItemProps) => {
         <span className='bookmark-list__tags'>
           {bookmark.tags.map((tag) => (
             <Badge
-              className='h-4 rounded-sm px-1 py-0 text-[10px] font-normal'
+              className='rounded-sm px-1 py-0 text-ui-caption font-normal'
               key={tag}
               size='sm'
               variant='outline'

@@ -34,6 +34,7 @@ declare namespace Setting {
     storage?: 'layout'
     type: 'select'
     options: readonly T[]
+    defaultValue?: string
   } & BaseSettingItem
 
   type FontListSelectSettingItem = {
@@ -80,6 +81,9 @@ declare namespace Setting {
      * Save the value to string
      */
     saveToString?: boolean
+    /** Null follows the editor default; this value starts a custom override. */
+    optionalValue?: { initial: number; defaultLabel?: string; note?: string }
+    valueLabelI18nKey?: string
   } & BaseSettingItem
 
   type PathSelectSettingItem = {

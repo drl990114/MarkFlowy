@@ -83,6 +83,7 @@ export const InputConfirmModal = memo((props: InputConfirmModalProps) => {
 
         <Dialog.Body>
           <Input
+            inputSize='sm'
             {...inputProps}
             aria-label={inputLabel}
             className={cn('w-full', inputProps?.className)}

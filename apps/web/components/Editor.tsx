@@ -21,7 +21,9 @@ const EditorContainer = styled.div`
   font-weight: 400;
 
   .rme-editor-root {
-    padding: 16px 24px;
+    padding: 32px clamp(20px, 4vw, 56px);
+    max-width: 880px;
+    margin-inline: auto;
   }
 `
 

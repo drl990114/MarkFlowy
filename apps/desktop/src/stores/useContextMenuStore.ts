@@ -1,9 +1,13 @@
+import type { LucideIcon } from 'lucide-react'
+import type { ReactElement } from 'react'
 import type { MenuDividerType, MenuGroupType } from 'zens'
 import { create } from 'zustand'
 
 export type DesktopMenuGroupType = Omit<MenuGroupType, 'children'> & {
   children?: DesktopMenuItemData[]
   disabled?: boolean
+  icon?: LucideIcon
+  checkedIcon?: ReactElement
 }
 
 export type DesktopMenuItemData = DesktopMenuGroupType | MenuDividerType

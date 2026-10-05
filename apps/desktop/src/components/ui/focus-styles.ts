@@ -1,3 +1,2 @@
-// Indicate keyboard focus through content, without drawing a frame or changing layout.
-export const focusFeedback =
-  'focus-visible:outline-none focus-visible:underline focus-visible:underline-offset-2 focus-visible:opacity-80'
+// Shared Radix + Tailwind implementation. Keep Desktop imports behind this facade.
+export * from 'zens/esm/components/focus-styles'

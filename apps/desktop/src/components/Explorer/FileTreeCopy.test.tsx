@@ -5,7 +5,7 @@ import { ThemeProvider } from 'styled-components'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { toast } from 'zens'
 import type * as Zens from 'zens'
-import FileTree from '../../../../../packages/interface/src/components/FileTree/FileTree'
+import FileTree, { fileTreeHandler } from '../../../../../packages/interface/src/components/FileTree/FileTree'
 import { SimpleTree } from '../../../../../packages/interface/src/components/FileTree/types'
 import { AppContext } from '../../../../../packages/interface/src/contexts/AppContext'
 import {
@@ -196,6 +196,11 @@ describe('FileTree copy menu integration', () => {
   })
 
   it('creates a visible sibling after the real menu closes without opening it or saving the source', async () => {
+    vi.mocked(fileSystem.readSubdirectory).mockResolvedValue([
+      { id: 'disk-archive', name: 'Archive', path: '/workspace/archive', kind: 'dir', children: [] },
+      { id: 'disk-copy', name: 'note copy.md', path: '/workspace/note copy.md', kind: 'file' },
+      { ...source, id: 'disk-source', content: 'Saved content' },
+    ])
     render(
       <StrictMode>
         <Harness />
@@ -209,6 +214,11 @@ describe('FileTree copy menu integration', () => {
     expect(fileSystem.writeFile).not.toHaveBeenCalled()
     expect(screen.queryByRole('textbox')).toBeNull()
     expect(toast.success).toHaveBeenCalledWith('contextmenu.explorer.duplicate_success')
+    expect(fileTreeHandler.rootTree?.get('root')?.data.children?.map((file) => file.id)).toEqual([
+      'archive', 'copy-created', 'source',
+    ])
+    expect(fileTreeHandler.rootTree?.get('source')?.data.content).toBe('# Unsaved edits')
+    expect(fileSystem.readSubdirectory).toHaveBeenCalledExactlyOnceWith('/workspace')
   })
 
   it('leaves an unloaded destination intact and discovers the copy alongside existing files on expansion', async () => {
@@ -235,7 +245,7 @@ describe('FileTree copy menu integration', () => {
     await waitFor(() => expect(toast.success).toHaveBeenCalled())
     fireEvent.click(screen.getByText('Archive'))
     await waitFor(() => expect(screen.getAllByText('note.md')).toHaveLength(2))
-    expect(fileSystem.readSubdirectory).toHaveBeenCalledOnce()
+    expect(fileSystem.readSubdirectory).toHaveBeenCalledTimes(2)
   })
 
   it('merges an older in-flight directory read without losing or duplicating the completed copy', async () => {

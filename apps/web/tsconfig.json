@@ -23,6 +23,15 @@
     "paths": {
       "contentlayer/generated": [
         "./.contentlayer/generated"
+      ],
+      "zens": [
+        "../../packages/zens/src/index.ts"
+      ],
+      "zens/esm/components/*": [
+        "../../packages/zens/src/components/*"
+      ],
+      "zens/esm/Theme/*": [
+        "../../packages/zens/src/Theme/*"
       ]
     }
   },

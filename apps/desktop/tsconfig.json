@@ -10,11 +10,32 @@
     "emitDeclarationOnly": false,
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@markflowy/i18n/desktop": [
+        "../../packages/i18n/src/desktop.ts"
+      ],
+      "@markflowy/theme/semantic": [
+        "../../packages/theme/src/semantic/index.ts"
+      ],
+      "zens": [
+        "../../packages/zens/src/index.ts"
+      ],
+      "zens/esm/components/*": [
+        "../../packages/zens/src/components/*"
+      ],
+      "zens/esm/Theme/*": [
+        "../../packages/zens/src/Theme/*"
+      ]
     },
     "skipLibCheck": true
   },
-  "include": ["src", "src/**/*.json", "src/types/*.d.ts"],
+  "include": [
+    "src",
+    "src/**/*.json",
+    "src/types/*.d.ts"
+  ],
   "exclude": [
     "node_modules",
     "dist",
@@ -33,6 +54,8 @@
     "**/.cache"
   ],
   "references": [
-    { "path": "./tsconfig.node.json" }
+    {
+      "path": "./tsconfig.node.json"
+    }
   ]
 }

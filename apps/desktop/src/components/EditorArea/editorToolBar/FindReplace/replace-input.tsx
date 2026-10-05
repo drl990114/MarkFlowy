@@ -12,7 +12,7 @@ export const ReplaceInput: FC<{
     <Input
       data-mf-replace-input=''
       aria-label={t('find_replace.replace_with')}
-      className='h-6'
+      inputSize='sm'
       placeholder={t('find_replace.replace')}
       value={replacement}
       onChange={(event) => setReplacement(event.target.value)}

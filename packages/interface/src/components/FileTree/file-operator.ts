@@ -7,6 +7,31 @@ export interface MoveFileNodeOptions {
   replacementIds?: string[]
 }
 
+/** Use the adapter's directory order without replacing live nodes or loaded subtrees. */
+export function mergeDirectoryChildren(current: IFile[], entries: IFile[]): IFile[] {
+  const byId = new Map(current.map((child) => [child.id, child]))
+  const byPath = new Map(current.filter((child) => child.path).map((child) => [child.path, child]))
+  const matchedIds = new Set<string>()
+  const ordered = entries.map((entry) => {
+    const child = (entry.path && byPath.get(entry.path)) || byId.get(entry.id) || entry
+    matchedIds.add(child.id)
+    return child
+  })
+
+  // Keep drafts and concurrent creations in their existing slots while the
+  // on-disk entries follow the read order. Both passes are linear in sibling count.
+  const merged: IFile[] = []
+  let next = 0
+  for (const child of current) {
+    if (!matchedIds.has(child.id)) merged.push(child)
+    else if (next < ordered.length) merged.push(ordered[next++])
+  }
+  while (next < ordered.length) merged.push(ordered[next++])
+  return merged.length === current.length && merged.every((child, index) => child === current[index])
+    ? current
+    : merged
+}
+
 export const updateFileNodePath = (
   tree: SimpleTree<IFile>,
   params: Partial<IFile> & { id: string },

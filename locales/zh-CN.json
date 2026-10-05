@@ -11,6 +11,32 @@
     "markdown": "Markdown 语法",
     "open_failed": "无法打开链接或找到目标标题。"
   },
+  "command_palette": {
+    "title": "命令面板",
+    "placeholder": "搜索并执行命令…",
+    "empty": "没有匹配的命令",
+    "recent": "最近使用",
+    "hints": "↑↓ 选择 · Enter 执行 · Esc 关闭",
+    "failed": "无法执行“{{command}}”。",
+    "categories": {
+      "file": "文件",
+      "editor": "编辑",
+      "view": "视图",
+      "app": "应用"
+    },
+    "reasons": {
+      "no_document": "请先打开文档",
+      "unavailable": "当前上下文不支持此操作",
+      "preview": "预览模式不可编辑",
+      "read_only": "当前文档为只读",
+      "stale_target": "原编辑器已发生变化",
+      "selection_unavailable": "原选区已失效",
+      "no_undo": "没有可撤销的操作",
+      "no_redo": "没有可重做的操作",
+      "markdown_only": "仅适用于 Markdown 文档",
+      "zen_mode": "请先退出 Zen 模式"
+    }
+  },
   "quick_open": {
     "title": "快速打开",
     "placeholder": "按文件名或路径搜索…",
@@ -240,6 +266,14 @@
     "untitled": "未命名",
     "not_found": "文件不存在",
     "openDir": "打开文件夹",
+    "openFolderInNewWindow": "在新窗口打开文件夹",
+    "closeFolder": "关闭文件夹",
+    "closeDocument": "关闭文档",
+    "renameErrors": {
+      "empty": "请输入文件名。",
+      "invalid": "文件名不能包含路径分隔符或保留字符。",
+      "exists": "已存在同名文件。"
+    },
     "openFile": "打开文件",
     "recentDir": "最近打开的文件夹",
     "emptyOpened": "没有打开的文件",
@@ -344,7 +378,10 @@
     "label": "书",
     "info": "工作区信息",
     "none": "未打开工作区",
-    "searchPlaceholder": "搜索工作区…",
+    "searchPlaceholder": "搜索最近工作区和文件…",
+    "open": "打开",
+    "openFileOrFolder": "打开文件或文件夹",
+    "recentFiles": "最近打开的文件",
     "sync_mode": {
       "git_local": {
         "name": "Git 本地",
@@ -375,6 +412,42 @@
     "emptyDesc": "换个关键词或关闭大小写敏感后再试试",
     "search_failed": "搜索失败"
   },
+  "text_encoding": {
+    "label": "文本编码与换行",
+    "encoding": "文本编码",
+    "description": "重新打开会按所选编码读取当前文件；以编码保存会转换当前文本。原有换行保持不变。",
+    "mixed_endings": "混合换行",
+    "no_endings": "无换行",
+    "unconfirmed": "待确认",
+    "confirm_hint": "当前编码由内容推测或来自旧草稿。请检查文字是否正确，再选择编码保存。",
+    "roundtrip_hint": "文件含非标准字节映射，修改后需要显式转换到另一种编码。",
+    "preview_hint": "预览（前 4,000 个字符）。应用前会保留当前内容的恢复草稿。",
+    "preview_reopen": "预览重新打开",
+    "apply_reopen": "应用重新打开",
+    "save_with_encoding": "以此编码保存",
+    "save_failed": "尚未保存。内容和编码选择已保留，请检查保存提示后重试。",
+    "errors": {
+      "invalid_encoding": "无法用所选编码读取此文件。请选择其他编码预览，确认文字正确后再重新打开。",
+      "unsupported_encoding": "无法识别或暂不支持此文件的编码。请打开“文本编码与换行”，选择编码并预览，确认文字正确后再重新打开。",
+      "binary": "该文件包含二进制数据，无法作为文本打开。",
+      "invalid_bom": "文件的编码标记（BOM）与所选编码不一致。请选择匹配的编码后重试。",
+      "unmappable": "当前编码无法保存部分字符。内容仍保留在编辑器中，请选择 UTF-8 保存，或移除不支持的字符后重试。",
+      "unmappable_character": "{{encoding}} 无法保存字符“{{character}}”。内容仍保留在编辑器中，请选择 UTF-8 保存，或移除该字符后重试。",
+      "confirm_encoding": "检测到的编码尚未确认。内容仍保留在编辑器中，请打开“文本编码与换行”，预览确认文字正确后，再点击“以此编码保存”。",
+      "noncanonical": "修改后无法保留文件原来的字节映射。请选择 UTF-8 等其他编码保存，或另存为副本。",
+      "not_reversible": "所选编码会改变部分字符。请选择 UTF-8 或其他能完整保留文本的编码后再保存。",
+      "ambiguous_bom": "正文开头含有不可见的编码标记。请为当前 Unicode 编码选择带 BOM 的格式后再保存。",
+      "finish_input": "请完成当前文字输入后重试。",
+      "save_first": "请先保存文件，再预览其他编码。",
+      "retry_read": "文件正在变化，请等待变化完成后重新预览。",
+      "preview_again": "文档或磁盘文件已变化，请重新预览后再应用编码。",
+      "draft_pending": "当前内容尚未完成恢复草稿保护，请重试后再重新打开文件。",
+      "invalid_unicode": "文本含有无效的字符序列，原文件未写入。请修正相关文本后重试。",
+      "save_failed": "尚未保存。内容仍保留在编辑器中，请检查文件是否可写后重试，或另存为副本。",
+      "read_failed": "无法读取文件内容。请确认文件仍存在且有读取权限后重试。",
+      "preview_failed": "无法完成编码操作。当前编辑内容已保留，请重试。"
+    }
+  },
   "settings": {
     "select_placeholder": "请选择",
     "font_placeholder": "选择字体",
@@ -388,6 +461,12 @@
     "search_placeholder": "搜索设置...",
     "search_empty": "没有匹配的设置",
     "search_results": "{{count}} 个结果",
+    "navigation": {
+      "preferences": "偏好设置",
+      "writing": "写作与文件",
+      "ai": "AI",
+      "help": "帮助"
+    },
     "resetAppConf": {
       "label": "重置应用配置",
       "desc": "重置应用配置，恢复默认设置。此操作将重置所有设置，包括主题、语言、自动保存等，且不可恢复。",
@@ -408,6 +487,10 @@
         "automatic_updates": {
           "label": "自动更新",
           "desc": "自动检查更新并在应用程序启动时安装。"
+        },
+        "error_reporting": {
+          "label": "发送错误报告",
+          "desc": "默认关闭。向 Sentry 发送错误类型和应用代码位置，不包含文档内容、文件路径、凭据和浏览活动。你可以随时关闭。"
         }
       },
       "autosave": {
@@ -438,6 +521,9 @@
       "label": "外观",
       "desc": "应用程序的外观和显示设置，包括界面缩放、主题等视觉相关配置。",
       "theme": {
+        "unavailable": "{{name}}（不可用）",
+        "unavailable_help": "找不到已选主题：{{names}}。暂时使用内置主题，原选择已保留。可重新导入 JSON 主题或选择其他主题；旧版 JS 主题和自动加载的 CSS 需手动迁移。",
+        "migration_guide": "查看主题迁移指南",
         "label": "主题",
         "mode": {
           "label": "主题模式",
@@ -479,12 +565,20 @@
           "desc": "编辑器是否占满整个窗口。"
         },
         "font_size": {
-          "label": "字体大小",
-          "desc": "设置编辑器的根字体大小。"
+          "label": "正文字号",
+          "desc": "写作与阅读模式的字体大小。"
         },
         "line_height": {
-          "label": "行高",
-          "desc": "设置编辑器的根行高。"
+          "label": "正文行高",
+          "desc": "写作与阅读模式的文字行高。"
+        },
+        "source_font_size": {
+          "label": "源码字号",
+          "desc": "源码模式的字体大小，与正文分别设置。"
+        },
+        "source_line_height": {
+          "label": "源码行高",
+          "desc": "源码模式的文字行高。"
         },
         "font_family": {
           "label": "字体",
@@ -500,6 +594,14 @@
         "md_default_mode": {
           "label": "Markdown 默认模式",
           "desc": "设置新建 Markdown 文件时的默认编辑模式。"
+        },
+        "text_direction": {
+          "follow_global": "跟随全局设置",
+          "label": "正文方向",
+          "desc": "设置所见即所得和预览模式下的正文方向。自动模式按段落识别。",
+          "auto": "自动识别",
+          "ltr": "从左到右（LTR）",
+          "rtl": "从右到左（RTL）"
         },
         "typewriter_scroll": {
           "label": "打字机滚动",
@@ -540,6 +642,66 @@
           "label": "拼写检查",
           "desc": "是否在源代码模式下启用拼写检查。"
         }
+      },
+      "code_editing": {
+        "label": "代码编辑",
+        "embedded_label": "内嵌代码",
+        "default": "默认",
+        "custom": "自定义",
+        "on": "开启",
+        "off": "关闭",
+        "indent_style": {
+          "label": "缩进方式",
+          "desc": "全文源码和内嵌代码共用。前置信息的源码编辑框始终使用空格缩进。",
+          "spaces": "空格",
+          "tabs": "Tab"
+        },
+        "indent_size": {
+          "label": "缩进宽度",
+          "desc": "空格缩进默认 2 格；Tab 在全文源码中显示为 4 格，在内嵌代码中显示为 2 格。选择具体宽度后统一应用。",
+          "default": "2 格（Tab 随模式）"
+        },
+        "auto_close": {
+          "label": "自动闭合括号与引号",
+          "desc": "在全文源码和内嵌代码中输入时，自动补全匹配的括号与引号。"
+        },
+        "whitespace": {
+          "label": "显示空白字符",
+          "desc": "显示空格和 Tab，不修改文档内容。",
+          "trailing": "仅尾随空白",
+          "all": "所有空格和 Tab"
+        },
+        "line_wrap": {
+          "label": "自动换行",
+          "desc": "长行在编辑区边缘折行，不插入换行符。超长行可能保持横向滚动。",
+          "mixed_default": "按区域（默认）",
+          "mixed_desc": "默认普通代码块不换行，预览块源码和前置信息换行。选择开启或关闭可统一设置；超长行可能保持横向滚动。"
+        },
+        "line_numbers": {
+          "label": "行号",
+          "desc": "稀疏模式显示第 1 行和每 10 行的行号。",
+          "all": "每行",
+          "sparse": "稀疏"
+        },
+        "active_line": {
+          "label": "高亮当前行",
+          "desc": "突出显示光标所在的行，方便定位编辑位置。"
+        },
+        "font_size": {
+          "label": "代码字号",
+          "desc": "默认为正文字号的 87.5%，随正文调整。选择自定义可固定字号。",
+          "default": "随正文（{{value}} px）",
+          "relative_default": "随正文（87.5%）",
+          "unit": "{{value}} px"
+        },
+        "line_height": {
+          "label": "代码行高",
+          "desc": "行高是字号的倍数。默认 1.6 倍，选择自定义可调整行间距。",
+          "default": "1.6 倍（默认）",
+          "unit": "{{value}} 倍"
+        },
+        "default_value": "{{value}}（默认）",
+        "typography_disabled": "“使用个人字体、字号与行高”已关闭，自定义字号和行高暂不生效。"
       }
     },
     "image": {
@@ -571,14 +733,14 @@
           "desc": "支持变量：${documentPath}（当前文件所在文件夹路径）、${fileName}（当前文件名，不含扩展名）。例如：${documentPath}/photo/${fileName}"
         }
       },
-    "upload_img": {
-      "label": "插入本地图片",
-      "when_upload_image": {
-        "label": "插入本地图片行为",
-        "desc": "选择从电脑选取、拖放或通过截图软件粘贴本地图片时的默认行为。",
-        "options": {
-          "insert_path": "直接插入原文件路径",
-          "save_to_local_absolute": "保存到全局绝对路径",
+      "upload_img": {
+        "label": "插入本地图片",
+        "when_upload_image": {
+          "label": "插入本地图片行为",
+          "desc": "选择从电脑选取、拖放或通过截图软件粘贴本地图片时的默认行为。",
+          "options": {
+            "insert_path": "直接插入原文件路径",
+            "save_to_local_absolute": "保存到全局绝对路径",
             "save_to_local_relative": "保存到工作区相对路径",
             "paste_as_base64": "粘贴为 Base64 编码",
             "save_to_file_relative": "保存到相对当前文件的路径"
@@ -678,6 +840,86 @@
       }
     },
     "themeStore": {
+      "controls": {
+        "installedOnly": "仅看已安装",
+        "title": "主题",
+        "create": "创建主题",
+        "import": "导入 JSON",
+        "export": "导出 JSON",
+        "edit": "编辑",
+        "copy": "复制并编辑",
+        "remove": "移除",
+        "apply": "应用",
+        "save": "保存并应用",
+        "close": "关闭",
+        "undo": "撤销",
+        "redo": "重做",
+        "search": "查找 token…",
+        "modified": "仅看修改项",
+        "reset": "恢复默认",
+        "link": "关联 token",
+        "value": "值",
+        "inspect": "检查预览元素",
+        "snippets": "个人 CSS 片段",
+        "addCss": "导入 CSS",
+        "createCss": "新建片段",
+        "untitledCss": "未命名片段",
+        "disableAll": "全部停用",
+        "includeCss": "包含个人 CSS",
+        "up": "上移",
+        "down": "下移",
+        "name": "名称",
+        "author": "作者",
+        "variant": "变体",
+        "addLight": "添加浅色变体",
+        "addDark": "添加深色变体",
+        "advanced": "高级 JSON / CSS",
+        "options": "主题选项",
+        "previewOptions": "预览选项",
+        "closeAdvanced": "收起高级编辑",
+        "noTokens": "没有匹配的样式项",
+        "css": "主题 CSS",
+        "json": "主题 JSON",
+        "applyJson": "从 JSON 更新",
+        "revertJson": "丢弃 JSON 修改",
+        "pendingJson": "先应用或丢弃 JSON 修改，再继续可视化编辑和导出。",
+        "catalog": "社区主题",
+        "install": "安装",
+        "emptyCatalog": "转换为 JSON 格式的社区主题将在这里显示。",
+        "replace": "已有相同 ID 的主题，是否替换？",
+        "replaceAction": "替换",
+        "cancel": "取消",
+        "saveCopy": "另存副本",
+        "draft": "有可恢复的本地草稿。",
+        "resume": "恢复草稿",
+        "discard": "丢弃草稿",
+        "preview": "主题预览",
+        "loadError": "无法加载编辑器预览。",
+        "retry": "重试",
+        "linked": "已关联",
+        "inherited": "默认",
+        "customCss": "自定义 CSS 可能覆盖所检查的 token。",
+        "preferences": "此处仅预览主题，应用结果还会结合所选的个人偏好。",
+        "personalTypography": "使用个人字体、字号与行高",
+        "saved": "已保存",
+        "error": "错误",
+        "enabled": "启用",
+        "editCss": "编辑 CSS",
+        "saveCss": "保存片段",
+        "noSnippets": "暂无个人 CSS 片段。",
+        "deleteConfirm": "移除此主题？",
+        "removeVariant": "移除变体",
+        "schema": "导出 JSON Schema",
+        "light": "浅色",
+        "dark": "深色",
+        "catalogMismatch": "主题 ID 与社区目录中的记录不一致。",
+        "previewNotes": "笔记",
+        "previewIdeas": "灵感",
+        "previewWelcome": "欢迎",
+        "previewSearch": "搜索预览",
+        "previewSearchPlaceholder": "搜索…",
+        "previewNewNote": "新建笔记"
+      },
       "label": "主题商店",
       "desc": "浏览和下载社区创建的主题，丰富你的编辑器外观。",
       "submit_theme": "提交主题",
@@ -783,6 +1025,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_commandPalette": "命令面板",
       "app_quickOpen": "快速打开",
       "app_openFolder": "打开文件夹",
       "app_openSetting": "打开设置窗口",
@@ -960,7 +1203,22 @@
     },
     "livePreview": {
       "largeDeferred": "大型预览已暂停，仍可浏览、编辑和复制完整源码。",
-      "renderLarge": "渲染大型预览（可能需要较长时间）"
+      "renderLarge": "渲染大型预览（可能需要较长时间）",
+      "actions": "{{kind}} 块操作",
+      "copied": "已复制源码",
+      "copy": "复制源码",
+      "copying": "正在复制源码…",
+      "editSource": "编辑源码",
+      "editSourceForKind": "编辑 {{kind}} 源码",
+      "hideSource": "隐藏源码",
+      "kind": {
+        "html": "HTML",
+        "math": "公式",
+        "mermaid": "Mermaid"
+      },
+      "preview": "{{kind}} 预览",
+      "retryCopy": "重试复制源码",
+      "sourceEditor": "{{kind}} 源码编辑器"
     },
     "sourceFallback": {
       "longLine": "超长行采用横向滚动，以保持源码编辑流畅。",
@@ -983,13 +1241,52 @@
       "cancel": "取消",
       "invalidAddress": "请输入有效的链接地址。"
     },
-    "image": { "unavailable": "图片无法加载", "loading": "正在加载图片…", "edit": "修改地址" },
-    "preview": { "retry": "重试" },
+    "image": {
+      "unavailable": "图片无法加载",
+      "loading": "正在加载图片…",
+      "edit": "修改地址"
+    },
+    "preview": {
+      "retry": "重试"
+    },
     "editor": {
       "loading": "正在加载 Capricorn 编辑器",
       "opening": "正在打开文档",
       "load_failed": "无法加载 Capricorn 编辑器",
       "preparation_failed": "后台文档准备失败，请重试。"
+    },
+    "snippets": {
+      "title": "插入片段",
+      "search": "搜索片段…",
+      "manage": "管理片段…",
+      "blank": "新建空白块",
+      "stale": "插入位置已变化，请重新选择。"
+    },
+    "table": {
+      "actions": "表格操作",
+      "alignment": "列对齐方式",
+      "copy": "复制",
+      "cut": "剪切",
+      "paste": "粘贴",
+      "selectAll": "全选",
+      "action": {
+        "column": "列操作",
+        "columnAt": "第 {{index}} 列操作",
+        "row": "行操作",
+        "rowAt": "第 {{index}} 行操作"
+      },
+      "addColumnAfter": "在右侧插入列",
+      "addColumnBefore": "在左侧插入列",
+      "addRowAfter": "在下方插入行",
+      "addRowBefore": "在上方插入行",
+      "alignCenter": "列居中对齐",
+      "alignLeft": "列左对齐",
+      "alignNone": "清除列对齐方式",
+      "alignRight": "列右对齐",
+      "deleteColumn": "删除当前列",
+      "deleteRow": "删除当前行",
+      "deleteTable": "删除表格",
+      "duplicateRow": "复制当前行"
     }
   },
   "inline_insert": {
@@ -1019,5 +1316,160 @@
     "open_error": "无法打开此链接。",
     "copy_error": "无法复制地址。",
     "single_block": "请在同一段落或表格单元格内选择文字。"
+  },
+  "history": {
+    "title": "本地历史",
+    "description": "查看文档变化，将历史版本恢复为未保存草稿。",
+    "enabled": "开启本地历史",
+    "enabled_description": "记录在 MarkFlowy 打开过的文档版本。关闭后，未保存草稿仍会在后台受到保护。",
+    "retention": "普通历史保留 30 天，每文档最多 100 份，目标空间 1GB。未保存草稿和进行中的修改会话优先保留。",
+    "count": "{{count}} 个版本",
+    "clear_title": "管理历史数据",
+    "clear_description": "删除历史不会删除原文件或未保存草稿。功能开启时，后续修改仍会生成新历史。",
+    "clear_workspace": "删除当前工作区历史",
+    "clear_loose": "删除独立文档历史",
+    "clear_all": "删除所有工作区历史",
+    "clear_confirm": "永久删除 {{count}} 个历史版本？最多可回收 {{size}} MB 未共享的正文。原文件和未保存草稿会保留。",
+    "all_workspaces": "所有工作区和独立文档",
+    "loose": "独立文档",
+    "delete": "删除历史",
+    "empty": "暂无历史版本。",
+    "previous": "上一页",
+    "next": "下一页",
+    "before": "修改前",
+    "after": "最新结果",
+    "refresh": "有新变化 · 刷新对比",
+    "loading": "正在加载对比…",
+    "compare_failed": "暂时无法加载差异对比，已显示完整原文，仍可恢复此版本。",
+    "select": "选择一个历史版本，查看文档变化。",
+    "restore_before": "恢复修改前版本",
+    "restore": "恢复此版本",
+    "merging": "持续合并中",
+    "kind_save": "已保存",
+    "kind_external": "外部修改",
+    "kind_ai": "AI 修改",
+    "kind_checkpoint": "草稿检查点",
+    "kind_restore": "恢复前备份",
+    "kind_discard": "放弃前备份",
+    "kind_overwrite": "覆盖前备份",
+    "kind_autosave": "自动保存",
+    "kind_opened": "初始版本",
+    "protected": "草稿已保护",
+    "pending": "正在保护草稿…",
+    "failed": "草稿保护失败",
+    "paused": "已恢复草稿，请手动保存",
+    "large": "大文档：当前显示完整原文。",
+    "compare_current": "与当前草稿对比",
+    "compare_version": "与其他历史对比",
+    "compare_batch": "对比修改前后",
+    "snapshot": "所选版本",
+    "current": "当前草稿",
+    "versions": "历史版本",
+    "split": "双栏对比",
+    "unified": "单栏对比",
+    "full_context": "显示完整上下文",
+    "previous_change": "上一处变更",
+    "next_change": "下一处变更",
+    "no_changes": "内容相同",
+    "change_position": "第 {{current}} / {{total}} 处变更",
+    "added_lines": "新增 {{count}} 行",
+    "removed_lines": "删除 {{count}} 行",
+    "unchanged_lines": "$ 行未修改 · 点击展开",
+    "retry": "重试草稿保护",
+    "coarse": "差异按计算预算简化显示，原文保持完整。",
+    "compute_large": "计算大文档差异",
+    "deleted": "已删除 {{count}} 个历史版本。",
+    "kind_write-pending": "中断的文件写入",
+    "budget_limited": "历史存储已达到容量目标，已暂停普通检查点和新的 AI 编辑会话。草稿保护与操作前备份继续保留，可清理不需要的历史以恢复。",
+    "kind_recovered-save": "已找回的保存"
+  },
+  "document_preview": {
+    "html_title": "HTML 预览",
+    "pdf_title": "PDF 阅读器",
+    "refresh": "刷新",
+    "run_scripts": "运行脚本",
+    "loading": "正在加载…",
+    "load_failed": "无法加载此文件。",
+    "retry": "重试",
+    "resources_blocked": "资源未加载",
+    "resource_folder_hint": "请将包含此文档及其资源的文件夹作为工作区打开，然后刷新预览。",
+    "resource_errors": {
+      "not_found": "文件不存在。",
+      "permission_denied": "没有读取此文件的权限。",
+      "outside_root": "超出此文档所在目录或工作区。",
+      "too_large": "资源或展开后的预览内容超出大小限制。",
+      "unsupported": "不支持的资源类型或链接。",
+      "invalid_css": "无法解析此样式表。",
+      "resource_limit": "存在循环引用，或资源数量、嵌套层数超出限制。",
+      "read_failed": "无法读取此资源。"
+    },
+    "previous_page": "上一页",
+    "next_page": "下一页",
+    "page": "页码",
+    "zoom_out": "缩小",
+    "zoom_in": "放大",
+    "fit_width": "适合宽度",
+    "search": "搜索 PDF",
+    "previous_match": "上一个结果",
+    "next_match": "下一个结果",
+    "password_required": "输入 PDF 密码",
+    "password_incorrect": "密码不正确，请重试。",
+    "unlock": "解锁",
+    "cancel": "取消"
+  },
+  "snippets": {
+    "library": "片段库",
+    "description": "在本机所有工作区复用公式、图表和代码。",
+    "kind": "类型",
+    "kinds": {
+      "math": "Math（公式）",
+      "mermaid": "Mermaid（图表）",
+      "code": "Code（代码）"
+    },
+    "search": "搜索片段…",
+    "new": "新建片段",
+    "copy": "复制",
+    "copyCustom": "复制为自定义",
+    "copySuffix": "（副本）",
+    "show": "显示",
+    "hide": "隐藏",
+    "hidden": "已隐藏",
+    "delete": "删除",
+    "deleteTitle": "删除“{{title}}”？",
+    "builtin": "内置",
+    "custom": "自定义",
+    "unsaved": "有未保存修改",
+    "name": "名称",
+    "language": "代码语言",
+    "languagePlaceholder": "例如 typescript；留空为纯文本",
+    "source": "源码",
+    "sourceHelp": "只填写源码，不加外层的 ``` 或 $$。文字、缩进与换行按原样插入，不展开变量。",
+    "save": "保存",
+    "discard": "放弃修改",
+    "unsavedTitle": "保存片段修改？",
+    "unsavedDescription": "离开此片段前，请保存或放弃修改。",
+    "loadError": "无法加载片段库",
+    "saveError": "保存失败",
+    "retry": "重试",
+    "noResults": "没有匹配的片段",
+    "conflict": "片段库已在其他窗口更新。草稿已保留；可复制为新片段，或放弃草稿后重新选择原片段。",
+    "preview": "预览",
+    "previewAgain": "重新预览",
+    "previewStale": "源码已修改，请重新预览。",
+    "previewError": "预览不可用，仍可保存源码。",
+    "builtins": {
+      "math-fraction": "分式",
+      "math-root": "根式",
+      "math-sum": "求和",
+      "math-matrix": "矩阵",
+      "mermaid-flow": "流程图",
+      "mermaid-sequence": "时序图",
+      "mermaid-class": "类图",
+      "mermaid-state": "状态图",
+      "code-json": "JSON 对象",
+      "code-typescript": "TypeScript 函数",
+      "code-python": "Python 函数",
+      "code-bash": "Bash 脚本"
+    }
   }
 }

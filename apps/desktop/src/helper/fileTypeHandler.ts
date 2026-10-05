@@ -6,7 +6,7 @@ import {
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import type { IFile } from './filesys'
 
-export type FileType = 'markdown' | 'image' | 'json' | 'text' | 'unsupported'
+export type FileType = 'markdown' | 'html' | 'pdf' | 'image' | 'json' | 'text' | 'unsupported'
 
 export interface FileTypeConfig {
   type: FileType
@@ -16,7 +16,7 @@ export interface FileTypeConfig {
 }
 
 export const isTextfileType = (fileTypeConfig: FileTypeConfig): boolean => {
-  return ['markdown', 'json', 'text'].includes(fileTypeConfig.type)
+  return ['markdown', 'html', 'json', 'text'].includes(fileTypeConfig.type)
 }
 
 const TEXT_EXTENSIONS = new Set([
@@ -68,8 +68,6 @@ const TEXT_EXTENSIONS = new Set([
   'ps1',
   'bat',
   'cmd',
-  'html',
-  'htm',
   'css',
   'scss',
   'sass',
@@ -177,7 +175,6 @@ const BINARY_EXTENSIONS = new Set([
   'flv',
   'wmv',
   'webm',
-  'pdf',
   'doc',
   'docx',
   'xls',
@@ -282,6 +279,22 @@ export async function getFileTypeConfig(file: IFile): Promise<FileTypeConfig> {
       supportedModes,
       defaultMode: getMarkdownDefaultMode(settingData.md_editor_default_mode),
       exporters: ['Html', 'Image'],
+    }
+  }
+
+  if (extLower === 'html' || extLower === 'htm') {
+    return {
+      type: 'html',
+      supportedModes: [EditorViewType.PREVIEW, EditorViewType.SOURCECODE],
+      defaultMode: EditorViewType.PREVIEW,
+    }
+  }
+
+  if (extLower === 'pdf') {
+    return {
+      type: 'pdf',
+      supportedModes: [EditorViewType.PREVIEW],
+      defaultMode: EditorViewType.PREVIEW,
     }
   }
 

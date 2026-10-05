@@ -1,22 +1,26 @@
+import { useHistoryDialog } from '@/components/LocalHistory/historyDialogStore'
 import { commandRegistry } from '@/commands'
 import { EVENT } from '@/constants'
-import { Root, Setting } from '@/router'
+import Root from '@/router/Root'
+import Setting from '@/router/Setting'
 import { SettingRouteController } from '@/router/Setting/component/SettingRouteController'
 import type { SettingRouteState } from '@/router/Setting/component/SettingRouteController'
 import { WorkspaceRouteSurface } from '@/router/Setting/component/WorkspaceRouteSurface'
 import { appInfoStoreSetup } from '@/services/app-info'
 import { markBootShellReady } from '@/startup/boot'
+import { markStartupInteractive } from '@/startup/interactive'
 import { StartupProgress } from '@/startup/StartupProgress'
 import type { StartupPhaseState } from '@/startup/startupCoordinator'
 import {
   getStartupErrorDescription,
   WorkspaceStartupSurface,
 } from '@/startup/WorkspaceStartupSurface'
-import { useEffect, useLayoutEffect } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect } from 'react'
 import { Route, Routes, useLocation, useMatch } from 'react-router'
 import { Notifications } from 'zens'
 import { FileTreeProvider, TauriFileSystemProvider } from './adapters'
-import { AppInfoDialog, Modal } from './components'
+import AppInfoDialog from './components/AppInfoDialog'
+import Modal from './components/Modal'
 import { AsyncSurface } from './components/AsyncSurface'
 import { RenderErrorBoundary } from './components/RenderErrorBoundary'
 import {
@@ -28,8 +32,19 @@ import {
 import TitleBar from './components/TitleBar'
 import { TooltipProvider } from './components/ui/tooltip'
 import { ContextMenu } from './components/ui-v2/ContextMenu/ContextMenu'
-import { useAppRuntimeSetup, useAppSetup } from './hooks'
+import useAppSetup, { useAppRuntimeSetup } from './hooks/useAppSetup'
 import { useCommandInit } from './hooks/useCommandInit'
+
+const HistoryDialog = lazy(() => import('@/components/LocalHistory/HistoryDialog'))
+
+function HistorySurface() {
+  const open = useHistoryDialog((s) => s.open)
+  return open ? (
+    <Suspense fallback={null}>
+      <HistoryDialog />
+    </Suspense>
+  ) : null
+}
 
 interface AppRoutesProps {
   chooseWorkspace: () => void
@@ -74,7 +89,10 @@ function AppRoutes({ chooseWorkspace, retryWorkspace, workspace }: AppRoutesProp
         </WorkspaceRouteSurface>
         <Routes>
           <Route path='/' element={null} />
-          <Route path='/settings' element={<Setting navigationRequest={navigationRequest} />} />
+          <Route
+            path='/settings'
+            element={<Setting navigationRequest={navigationRequest} />}
+          />
         </Routes>
       </div>
     </div>
@@ -106,6 +124,7 @@ function ReadyApp({ retryWorkspace, workspace }: ReadyAppProps) {
           <ContextMenu />
           <Notifications />
           <AppInfoDialog />
+          <HistorySurface />
           <Modal.InputConfirm id={MODAL_INPUT_ID} />
           <Modal.Info id={MODAL_INFO_ID} />
           <Modal.Confirm id={MODAL_CONFIRM_ID} />
@@ -124,6 +143,7 @@ function ReadyApp({ retryWorkspace, workspace }: ReadyAppProps) {
 function StartupFailureSurface({ error, retry }: { error: unknown; retry: () => void }) {
   useLayoutEffect(() => {
     markBootShellReady()
+    markStartupInteractive('error')
   }, [])
 
   return (

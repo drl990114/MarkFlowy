@@ -1,0 +1,17 @@
+/* This stylesheet is loaded only by the standalone theme preview document. */
+html,
+body,
+#root {
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+}
+body {
+  overflow: hidden;
+  background: var(--mf-background);
+  color: var(--mf-foreground);
+  font: var(--mf-ui-font-control) / var(--mf-ui-line-height-control) var(--mf-ui-font-family);
+}
+* {
+  box-sizing: border-box;
+}

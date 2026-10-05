@@ -183,6 +183,7 @@ const NewFileInput = (
     <Tooltip title={invalidText} open={invalidState}>
       <Input
         size='small'
+        type='text'
         inputRef={inputRef}
         value={inputName}
         aria-invalid={invalidState || undefined}

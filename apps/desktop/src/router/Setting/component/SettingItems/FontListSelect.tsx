@@ -60,7 +60,7 @@ const FontListSelectSettingItem: React.FC<SettingItemProps<Setting.FontListSelec
         onValueChange={handleChange}
         options={options}
         onSearch={handleSearch}
-        className='setting-item__control'
+        className='setting-item__control h-7'
         placeholder={t('settings.font_placeholder')}
       />
     </SettingItemContainer>

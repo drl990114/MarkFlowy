@@ -1,6 +1,6 @@
 import type { Extension, RemirrorEventListener } from '@rme-sdk/sdk/core'
 import { Remirror } from '@rme-sdk/sdk/react'
-import { memo, useCallback, useEffect, useMemo, type FC } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, type FC } from 'react'
 import { TransformerExtension } from '../../extensions/Transformer/transformer-extension'
 import { WysiwygThemeWrapper } from '../../theme'
 import { BlockHandler } from '../../toolbar/BlockHandler'
@@ -30,7 +30,11 @@ const WysiwygEditor: FC<EditorProps> = (props) => {
     onChange,
   } = props
 
-  const editorDelegate = useMemo(() => delegate ?? createWysiwygDelegate(), [delegate])
+  const initialDelegateOptions = useRef(props.delegateOptions)
+  const editorDelegate = useMemo(
+    () => delegate ?? createWysiwygDelegate(initialDelegateOptions.current),
+    [delegate],
+  )
 
   const handleChange: RemirrorEventListener<Extension> = useCallback(
     (params) => {

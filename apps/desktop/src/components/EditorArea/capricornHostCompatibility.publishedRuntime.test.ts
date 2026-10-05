@@ -1,3 +1,4 @@
+import { createKeyboardEvent } from '../../../tests/helpers/keyboard'
 import { act } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createCapricornRuntime } from 'virtual:markflowy-capricorn-runtime'
@@ -72,7 +73,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('published runtime host compatibil
           bubbles: true,
           cancelable: true,
         }
-        const recorded = recordKey(new KeyboardEvent('keydown', init))!
+        const recorded = recordKey(createKeyboardEvent('keydown', init))!
         const configuration = createCapricornKeybindingConfiguration(
           { toggleH2: shortcutString(recorded) },
           true,
@@ -85,7 +86,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('published runtime host compatibil
           await frame()
         })
         await act(async () => {
-          getCapricornRuntimeInput(source)!.dispatchEvent(new KeyboardEvent('keydown', init))
+          getCapricornRuntimeInput(source)!.dispatchEvent(createKeyboardEvent('keydown', init))
           await frame()
         })
         expect(runtime.getMarkdown(), JSON.stringify(recorded)).toBe('## Body')
@@ -138,7 +139,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('published runtime host compatibil
         await frame()
       })
       const press = async (key: string, altKey = false) => {
-        const event = new KeyboardEvent('keydown', {
+        const event = createKeyboardEvent('keydown', {
           key,
           code: key === 'z' ? 'KeyZ' : `Digit${key}`,
           altKey,

@@ -5,9 +5,7 @@ import * as esbuild from 'esbuild'
 import { nodeExternalsPlugin } from 'esbuild-node-externals'
 import alias from 'esbuild-plugin-alias'
 import { esbuildDecorators } from 'esbuild-plugin-ts-decorators'
-import pkg from 'esbuild-plugin-markdown'
 import fs from 'fs'
-const { markdownPlugin } = pkg
 
 const devCtx = await esbuild.context({
   entryPoints: ['./src/index-dev.tsx'],
@@ -16,6 +14,7 @@ const devCtx = await esbuild.context({
   treeShaking: true,
   logLevel: 'info',
   loader: {
+    '.md': 'text',
     '.woff': 'dataurl',
     '.woff2': 'dataurl',
     '.ttf': 'dataurl',
@@ -25,9 +24,6 @@ const devCtx = await esbuild.context({
   plugins: [
     alias({
       '@/': './',
-    }),
-    markdownPlugin({
-      filter: /\.md$/,
     }),
   ],
 })

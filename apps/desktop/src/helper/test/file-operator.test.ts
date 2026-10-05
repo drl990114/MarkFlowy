@@ -1,7 +1,23 @@
 import { describe, expect, it, vi } from 'vitest'
-import { moveFileNode } from '../../../../../packages/interface/src/components/FileTree/file-operator'
+import { mergeDirectoryChildren, moveFileNode } from '../../../../../packages/interface/src/components/FileTree/file-operator'
 import { SimpleTree } from '../../../../../packages/interface/src/components/FileTree/types'
 import type { IFile } from '../../../../../packages/interface/src/types/file'
+
+describe('directory ordering merge', () => {
+  it('retains live object identities in a large directory and leaves the inputs unchanged', () => {
+    const ordered: IFile[] = Array.from({ length: 2000 }, (_, index) => ({
+      id: `file-${index}`, name: `note${index}.md`, path: `/notes/note${index}.md`, kind: 'file',
+      content: 'unsaved text',
+    }))
+    const current = [...ordered].reverse()
+    const entries = ordered.map((entry) => ({ ...entry, id: `read-${entry.id}`, content: '' }))
+    const merged = mergeDirectoryChildren(current, entries)
+    expect(merged.every((entry, index) => entry === ordered[index])).toBe(true)
+    expect(current[0]).toBe(ordered.at(-1))
+    expect(entries[0].content).toBe('')
+    expect(mergeDirectoryChildren(merged, entries)).toBe(merged)
+  })
+})
 
 const createCachedTree = (root: IFile) => {
   const entries = new Map<string, IFile>()

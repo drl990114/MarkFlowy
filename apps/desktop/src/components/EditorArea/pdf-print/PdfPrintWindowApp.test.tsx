@@ -5,7 +5,9 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 const windowMocks = vi.hoisted(() => ({
   dataHandler: undefined as ((event: { payload: unknown }) => void) | undefined,
   destroy: vi.fn(async () => undefined),
-  emitTo: vi.fn(async () => undefined),
+  emitTo: vi.fn<(target: string, event: string, payload: unknown) => Promise<void>>(
+    async () => undefined,
+  ),
   label: 'mf-pdf-print-main-42',
   listen: vi.fn(async (_event: string, handler: (event: { payload: unknown }) => void) => {
     windowMocks.dataHandler = handler
@@ -22,7 +24,7 @@ const printMocks = vi.hoisted(() => ({
     dispose: vi.fn(),
     settled: Promise.resolve(),
   })),
-  invokeSystemPrint: vi.fn(async () => undefined),
+  invokeSystemPrint: vi.fn<() => Promise<void>>(async () => undefined),
   preparePrintDocument: vi.fn(async () => ({ failedImageCount: 2 })),
 }))
 
@@ -71,6 +73,7 @@ vi.mock('./printDocument', () => ({
 
 import { PdfPrintWindowApp } from './PdfPrintWindowApp'
 import {
+  PDF_PRINT_WINDOW_PREPARED_EVENT,
   PDF_PRINT_WINDOW_READY_EVENT,
   PDF_PRINT_WINDOW_RESULT_EVENT,
   type PdfPrintWindowPayload,
@@ -93,12 +96,12 @@ describe('PdfPrintWindowApp', () => {
   beforeEach(() => {
     windowMocks.dataHandler = undefined
     windowMocks.destroy.mockClear()
-    windowMocks.emitTo.mockClear()
+    windowMocks.emitTo.mockReset().mockResolvedValue(undefined)
     windowMocks.listen.mockClear()
     windowMocks.setFocus.mockClear()
     windowMocks.show.mockClear()
     printMocks.createPrintDialogCompletionObserver.mockClear()
-    printMocks.invokeSystemPrint.mockClear()
+    printMocks.invokeSystemPrint.mockReset().mockResolvedValue(undefined)
     printMocks.preparePrintDocument.mockClear()
     container = document.createElement('div')
     document.body.append(container)
@@ -108,6 +111,65 @@ describe('PdfPrintWindowApp', () => {
   afterEach(() => {
     act(() => root.unmount())
     container.remove()
+  })
+
+  const transferDocument = async () => {
+    await act(async () => {
+      root.render(<PdfPrintWindowApp request={{ jobId: '42', sourceLabel: 'main' }} />)
+    })
+    const payload: PdfPrintWindowPayload = {
+      failedImageCount: 0,
+      fileName: 'draft.md',
+      html: '<p>Current unsaved content</p>',
+      interactiveMediaLabel: 'Interactive content',
+      jobId: '42',
+      sourceLabel: 'main',
+    }
+    await act(async () => {
+      windowMocks.dataHandler?.({ payload })
+    })
+  }
+
+  it('does not start printing if unmounted while the prepared notification is pending', async () => {
+    let preparedDelivered!: () => void
+    windowMocks.emitTo.mockImplementation(async (_target, event) => {
+      if (event === PDF_PRINT_WINDOW_PREPARED_EVENT)
+        await new Promise<void>((resolve) => { preparedDelivered = resolve })
+    })
+    await transferDocument()
+    await vi.waitFor(() => expect(preparedDelivered).toBeTypeOf('function'))
+    expect(printMocks.invokeSystemPrint).not.toHaveBeenCalled()
+
+    await act(async () => root.unmount())
+    await act(async () => preparedDelivered())
+
+    expect(printMocks.invokeSystemPrint).not.toHaveBeenCalled()
+    expect(windowMocks.emitTo.mock.calls.some(([, event]) => event === PDF_PRINT_WINDOW_RESULT_EVENT)).toBe(false)
+    expect(windowMocks.destroy).not.toHaveBeenCalled()
+    const observer = await printMocks.createPrintDialogCompletionObserver.mock.results[0]!.value
+    expect(observer.dispose).toHaveBeenCalledOnce()
+  })
+
+  it('keeps the prepared window alive until native printing finishes', async () => {
+    let finishPrinting!: () => void
+    printMocks.invokeSystemPrint.mockImplementationOnce(
+      () => new Promise<void>((resolve) => { finishPrinting = resolve }),
+    )
+    await transferDocument()
+    await vi.waitFor(() => expect(printMocks.invokeSystemPrint).toHaveBeenCalledOnce())
+
+    expect(windowMocks.emitTo).toHaveBeenCalledWith('main', PDF_PRINT_WINDOW_PREPARED_EVENT, {
+      jobId: '42', sourceLabel: 'main', windowLabel: windowMocks.label,
+    })
+    expect(windowMocks.emitTo.mock.calls.some(([, event]) => event === PDF_PRINT_WINDOW_RESULT_EVENT)).toBe(false)
+    expect(windowMocks.destroy).not.toHaveBeenCalled()
+
+    await act(async () => finishPrinting())
+
+    expect(windowMocks.emitTo).toHaveBeenCalledWith('main', PDF_PRINT_WINDOW_RESULT_EVENT, {
+      failedImageCount: 2, jobId: '42', status: 'complete',
+    })
+    expect(windowMocks.destroy).toHaveBeenCalledOnce()
   })
 
   it('renders the transferred document and prints only from the dedicated window', async () => {
@@ -149,6 +211,17 @@ describe('PdfPrintWindowApp', () => {
     expect(windowMocks.setFocus).toHaveBeenCalledOnce()
     expect(printMocks.preparePrintDocument).toHaveBeenCalledWith(
       expect.objectContaining({ interactiveMediaLabel: 'Interactive content' }),
+    )
+    expect(windowMocks.emitTo).toHaveBeenCalledWith('main', PDF_PRINT_WINDOW_PREPARED_EVENT, {
+      jobId: '42',
+      sourceLabel: 'main',
+      windowLabel: windowMocks.label,
+    })
+    const preparedCall = windowMocks.emitTo.mock.calls.findIndex(
+      (args) => args[1] === PDF_PRINT_WINDOW_PREPARED_EVENT,
+    )
+    expect(windowMocks.emitTo.mock.invocationCallOrder[preparedCall]).toBeLessThan(
+      printMocks.invokeSystemPrint.mock.invocationCallOrder[0]!,
     )
     await vi.waitFor(() =>
       expect(windowMocks.emitTo).toHaveBeenCalledWith('main', PDF_PRINT_WINDOW_RESULT_EVENT, {

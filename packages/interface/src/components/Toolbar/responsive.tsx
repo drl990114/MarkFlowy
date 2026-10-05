@@ -1,4 +1,4 @@
-import React, { FC, HTMLAttributes, ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { FC, HTMLAttributes, ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 // Priority: Higher number means more important (hides later)

@@ -27,7 +27,7 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
       : undefined,
   )
   const { t } = useTranslation()
-  const currentValue = String(layoutValue ?? settingValue ?? '')
+  const currentValue = String(layoutValue ?? settingValue ?? item.defaultValue ?? '')
 
   return (
     <SettingItemContainer $settingKey={item.key}>
@@ -47,7 +47,7 @@ const SelectSettingItem: React.FC<SettingItemProps<Setting.SelectSettingItem>> =
           }
         }}
       >
-        <SelectTrigger aria-label={t(item.title.i18nKey)} className='setting-item__control'>
+        <SelectTrigger size='sm' aria-label={t(item.title.i18nKey)} className='setting-item__control'>
           <SelectValue placeholder={t('settings.select_placeholder')} />
         </SelectTrigger>
         <SelectContent>

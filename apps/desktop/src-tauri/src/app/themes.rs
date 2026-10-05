@@ -1,390 +1,355 @@
+//! Declarative themes only. Theme files are data and are never executed.
 use super::conf;
-use super::startup_io;
-use crate::fc::exists;
 use serde::{Deserialize, Serialize};
-use std::{
-    fs::create_dir_all,
-    path::PathBuf,
-    sync::{
-        atomic::{AtomicU64, Ordering},
-        RwLock,
-    },
-    time::Instant,
-    vec,
-};
+use serde_json::Value;
+use std::{io::Write, path::Path, sync::Mutex};
+static THEME_LOCK: Mutex<()> = Mutex::new(());
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Theme {
-    pub id: String,
-    pub path: String,
-    pub pkg: String,
-    pub script_text: Option<String>,
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThemeLibrary {
+    pub revision: u64,
+    pub documents: Vec<Value>,
+    pub snippets: Vec<CssSnippet>,
 }
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct LocalTheme {
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct CssSnippet {
     pub id: String,
     pub name: String,
-    pub path: String,
-    pub css_content: String,
+    pub css: String,
+    pub enabled: bool,
 }
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct AppThemes {
-    themes: Vec<Theme>,
-    local_themes: Vec<LocalTheme>,
+#[derive(Deserialize)]
+#[serde(tag = "type", rename_all = "camelCase")]
+pub enum ThemeMutation {
+    Save { document: Value, replace: bool },
+    Remove { id: String },
+    SaveSnippet { snippet: CssSnippet },
+    RemoveSnippet { id: String },
+    MoveSnippet { id: String, offset: i32 },
+    DisableSnippets,
 }
-pub const APP_THEMES_PATH: &str = "themes";
-pub const APP_LOCAL_THEMES_PATH: &str = "local_themes";
-static THEME_CATALOG_CACHE: RwLock<Option<(u64, AppThemes)>> = RwLock::new(None);
-static THEME_CATALOG_GENERATION: AtomicU64 = AtomicU64::new(0);
-lazy_static::lazy_static! {
-    static ref THEME_CATALOG_LOAD_LOCK: tokio::sync::Mutex<()> = tokio::sync::Mutex::new(());
-}
-
-fn build_theme(path: PathBuf) -> Option<Theme> {
-    let pkg_path = path.join("package.json");
-    let script_file_path = path.join("index.js");
-
-    if exists(&pkg_path) {
-        let pkg = std::fs::read_to_string(pkg_path).ok()?;
-        let pkg: serde_json::Value = serde_json::from_str(&pkg).ok()?;
-        let pkg = pkg.to_string();
-
-        let script_text = if exists(&script_file_path) {
-            std::fs::read_to_string(script_file_path).ok()
-        } else {
-            None
-        };
-
-        return Some(Theme {
-            id: path.file_name()?.to_str()?.to_string(),
-            path: path.to_str()?.to_string(),
-            pkg,
-            script_text,
-        });
-    }
-
-    None
-}
-
-impl AppThemes {
-    pub fn new() -> Self {
-        Self {
-            themes: vec![],
-            local_themes: vec![],
-        }
-    }
-
-    pub fn dir_path() -> PathBuf {
-        conf::app_root().join(APP_THEMES_PATH)
-    }
-
-    pub fn local_themes_dir_path() -> PathBuf {
-        conf::app_root().join(APP_LOCAL_THEMES_PATH)
-    }
-
-    fn build_local_theme(path: &PathBuf) -> Option<LocalTheme> {
-        if path.extension().and_then(|extension| extension.to_str()) == Some("css") {
-            let file_name = path.file_stem()?.to_str()?.to_string();
-            let css_content = std::fs::read_to_string(path).ok()?;
-            return Some(LocalTheme {
-                id: file_name.clone(),
-                name: file_name,
-                path: path.to_str()?.to_string(),
-                css_content,
-            });
-        }
-        None
-    }
-
-    pub fn init(mut self) -> Result<Self, String> {
-        create_dir_all(Self::dir_path())
-            .map_err(|error| format!("Failed to create theme directory: {error}"))?;
-        create_dir_all(Self::local_themes_dir_path())
-            .map_err(|error| format!("Failed to create local theme directory: {error}"))?;
-
-        let mut themes = vec![];
-        let dir = Self::dir_path();
-
-        for entry in std::fs::read_dir(dir)
-            .map_err(|error| format!("Failed to read theme directory: {error}"))?
-        {
-            let entry = match entry {
-                Ok(entry) => entry,
-                Err(error) => {
-                    tracing::warn!("Failed to read theme directory entry: {error}");
-                    continue;
-                }
-            };
-            let path = entry.path();
-            if !path.is_dir() {
-                continue;
-            }
-
-            let theme = build_theme(path);
-
-            if theme.is_none() {
-                continue;
-            }
-            themes.push(theme.unwrap());
-        }
-
-        let mut local_themes = vec![];
-        let local_dir = Self::local_themes_dir_path();
-
-        if exists(&local_dir) {
-            for entry in std::fs::read_dir(local_dir)
-                .map_err(|error| format!("Failed to read local theme directory: {error}"))?
-            {
-                let entry = match entry {
-                    Ok(entry) => entry,
-                    Err(error) => {
-                        tracing::warn!("Failed to read local theme directory entry: {error}");
-                        continue;
-                    }
-                };
-                let path = entry.path();
-                if !path.is_file() {
-                    continue;
-                }
-
-                if let Some(local_theme) = Self::build_local_theme(&path) {
-                    local_themes.push(local_theme);
-                }
-            }
-        }
-
-        self.themes = themes;
-        self.local_themes = local_themes;
-
-        Ok(self)
-    }
-}
-
-fn cached_theme_catalog() -> Option<AppThemes> {
-    let generation = THEME_CATALOG_GENERATION.load(Ordering::Acquire);
-    THEME_CATALOG_CACHE
-        .read()
-        .unwrap_or_else(|error| error.into_inner())
-        .as_ref()
-        .filter(|(cached_generation, _)| *cached_generation == generation)
-        .map(|(_, catalog)| catalog.clone())
-}
-
-fn cache_theme_catalog(catalog: AppThemes, generation: u64) -> Option<AppThemes> {
-    let mut cache = THEME_CATALOG_CACHE
-        .write()
-        .unwrap_or_else(|error| error.into_inner());
-    if generation != THEME_CATALOG_GENERATION.load(Ordering::Acquire) {
-        return None;
-    }
-    if let Some((cached_generation, existing)) = cache.as_ref() {
-        if *cached_generation == generation {
-            return Some(existing.clone());
-        }
-    }
-    *cache = Some((generation, catalog.clone()));
-    Some(catalog)
-}
-
-fn invalidate_theme_catalog() {
-    THEME_CATALOG_GENERATION.fetch_add(1, Ordering::AcqRel);
-    *THEME_CATALOG_CACHE
-        .write()
-        .unwrap_or_else(|error| error.into_inner()) = None;
-}
-
-async fn load_theme_catalog_cached() -> Result<AppThemes, String> {
-    let started_at = Instant::now();
-    if let Some(catalog) = cached_theme_catalog() {
-        tracing::debug!(
-            marker = "theme-catalog-loaded",
-            cached = true,
-            elapsed_ms = started_at.elapsed().as_millis() as u64,
-            theme_count = catalog.themes.len(),
-            local_theme_count = catalog.local_themes.len(),
-            "Theme catalog loaded"
-        );
-        return Ok(catalog);
-    }
-
-    let _load_guard = THEME_CATALOG_LOAD_LOCK.lock().await;
-    loop {
-        if let Some(catalog) = cached_theme_catalog() {
-            return Ok(catalog);
-        }
-
-        let generation = THEME_CATALOG_GENERATION.load(Ordering::Acquire);
-        let catalog = startup_io::run(|| AppThemes::default().init())
-            .await
-            .map_err(|error| format!("Failed to join theme catalog reader: {error}"))??;
-
-        // A completed import/download/remove invalidates the generation. Scan
-        // again instead of publishing a catalog captured before that mutation.
-        if generation != THEME_CATALOG_GENERATION.load(Ordering::Acquire) {
-            continue;
-        }
-
-        if let Some(catalog) = cache_theme_catalog(catalog, generation) {
-            tracing::debug!(
-                marker = "theme-catalog-loaded",
-                cached = false,
-                elapsed_ms = started_at.elapsed().as_millis() as u64,
-                theme_count = catalog.themes.len(),
-                local_theme_count = catalog.local_themes.len(),
-                "Theme catalog loaded"
-            );
-            return Ok(catalog);
-        }
-    }
-}
-
-impl Default for AppThemes {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-pub mod cmd {
-    use super::{
-        invalidate_theme_catalog, load_theme_catalog_cached, AppThemes, LocalTheme, Theme,
+fn validate_document(document: &Value) -> Result<(), String> {
+    let valid_id = |id: &str| {
+        id.bytes()
+            .next()
+            .is_some_and(|first| first.is_ascii_lowercase() || first.is_ascii_digit())
+            && id.len() <= 80
+            && id
+                .bytes()
+                .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || b"._-".contains(&c))
     };
-    use crate::fc::exists;
-    use download_npm;
-    use std::fs::create_dir_all;
-    use std::path::PathBuf;
-    use tauri::command;
-
-    #[command]
-    pub async fn load_theme_catalog() -> Result<AppThemes, String> {
-        load_theme_catalog_cached().await
+    if document["version"].as_u64() != Some(1)
+        || !document["id"].as_str().map(valid_id).unwrap_or(false)
+        || document["name"].as_str().unwrap_or("").trim().is_empty()
+    {
+        return Err("Invalid theme document".into());
     }
-
-    #[command]
-    pub async fn load_themes() -> Result<Vec<Theme>, String> {
-        Ok(load_theme_catalog_cached().await?.themes)
+    let variants = document["variants"].as_array().ok_or("Missing variants")?;
+    if variants.is_empty() || variants.len() > 32 {
+        return Err("Invalid variants".into());
     }
-
-    #[command]
-    pub async fn load_local_themes() -> Result<Vec<LocalTheme>, String> {
-        Ok(load_theme_catalog_cached().await?.local_themes)
-    }
-
-    #[command]
-    pub async fn import_local_theme(file_path: String) -> Result<LocalTheme, String> {
-        let source_path = PathBuf::from(&file_path);
-
-        if !source_path.exists() {
-            return Err("File does not exist".to_string());
-        }
-
-        if source_path
-            .extension()
-            .and_then(|extension| extension.to_str())
-            != Some("css")
+    let mut ids = std::collections::HashSet::new();
+    for variant in variants {
+        let id = variant["id"].as_str().ok_or("Missing variant id")?;
+        if !valid_id(id)
+            || !ids.insert(id)
+            || !matches!(variant["mode"].as_str(), Some("light" | "dark"))
+            || variant["name"].as_str().unwrap_or("").trim().is_empty()
         {
-            return Err("Only CSS files are supported".to_string());
+            return Err("Invalid variant".into());
         }
-
-        let file_name = source_path
-            .file_stem()
-            .ok_or("Invalid file name")?
-            .to_str()
-            .ok_or("Invalid file name encoding")?
-            .to_string();
-
-        let dest_dir = AppThemes::local_themes_dir_path();
-
-        if !exists(&dest_dir) {
-            create_dir_all(&dest_dir)
-                .map_err(|error| format!("Failed to create local theme directory: {error}"))?;
-        }
-
-        let dest_path = dest_dir.join(format!("{}.css", file_name));
-
-        std::fs::copy(&source_path, &dest_path)
-            .map_err(|e| format!("Failed to copy file: {}", e))?;
-
-        let css_content = std::fs::read_to_string(&dest_path)
-            .map_err(|e| format!("Failed to read file: {}", e))?;
-
-        let theme = LocalTheme {
-            id: file_name.clone(),
-            name: file_name,
-            path: dest_path.to_string_lossy().to_string(),
-            css_content,
-        };
-        invalidate_theme_catalog();
-        Ok(theme)
-    }
-
-    #[command]
-    pub async fn remove_local_theme(id: String) -> Result<(), String> {
-        let local_themes = load_theme_catalog_cached().await?.local_themes;
-
-        let theme = local_themes.iter().find(|t| t.id == id);
-
-        if let Some(theme) = theme {
-            let path = PathBuf::from(&theme.path);
-            if path.exists() {
-                std::fs::remove_file(&path).map_err(|e| format!("Failed to remove file: {}", e))?;
-                invalidate_theme_catalog();
+        if let Some(css) = variant.get("css") {
+            if !css.is_string() {
+                return Err("Invalid CSS".into());
             }
         }
-
-        Ok(())
-    }
-
-    #[command]
-    pub async fn download_theme(name: String) -> Result<(), String> {
-        let dir_path = AppThemes::dir_path();
-        // Handle invalid path encoding to prevent runtime panics and provide debug context
-        let dest_path = dir_path
-            .to_str()
-            .ok_or_else(|| {
-                let err_msg = format!("Invalid theme directory path: {:?}", dir_path);
-                tracing::error!("{}", err_msg);
-                err_msg
-            })?
-            .to_string();
-
-        download_npm::download(
-            &name,
-            download_npm::DownloadOptions {
-                untar: true,
-                dest_path,
-            },
-        )
-        .await
-        .map_err(|e| {
-            // Log the detailed error for debugging purposes while returning a user-friendly message
-            let err_msg = format!("Failed to download theme '{}': {}", name, e);
-            tracing::error!("{}", err_msg);
-            err_msg
-        })?;
-
-        invalidate_theme_catalog();
-        Ok(())
-    }
-
-    #[command]
-    pub async fn remove_theme(name: String) -> Result<(), String> {
-        let dir_path = AppThemes::dir_path();
-        let theme_path = dir_path.join(&name);
-
-        if !theme_path.exists() {
-            return Err(format!("Theme '{}' not found", name));
+        if let Some(tokens) = variant.get("tokens") {
+            let tokens = tokens.as_object().ok_or("Invalid tokens")?;
+            // Persist only the wire format. Token names, kinds and reference
+            // graphs are validated by the shared semantic registry in TS.
+            for value in tokens.values() {
+                let valid = match value {
+                    Value::String(text) => !text.trim().is_empty(),
+                    Value::Object(reference) => {
+                        reference.len() == 1
+                            && reference
+                                .get("ref")
+                                .and_then(Value::as_str)
+                                .is_some_and(|name| !name.trim().is_empty())
+                    }
+                    _ => false,
+                };
+                if !valid {
+                    return Err("Invalid token value".into());
+                }
+            }
         }
-
-        std::fs::remove_dir_all(&theme_path).map_err(|e| {
-            let err_msg = format!("Failed to remove theme '{}': {}", name, e);
-            tracing::error!("{}", err_msg);
-            err_msg
-        })?;
-
-        invalidate_theme_catalog();
+    }
+    Ok(())
+}
+impl ThemeLibrary {
+    fn read(path: &Path) -> Result<Self, String> {
+        match std::fs::read_to_string(path) {
+            Ok(text) => serde_json::from_str(&text).map_err(|error| error.to_string()),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(Self::default()),
+            Err(error) => Err(error.to_string()),
+        }
+    }
+    fn write(&self, path: &Path) -> Result<(), String> {
+        let directory = path.parent().ok_or("Missing theme directory")?;
+        std::fs::create_dir_all(directory).map_err(|error| error.to_string())?;
+        let mut temporary = tempfile::Builder::new()
+            .prefix(".themes-")
+            .tempfile_in(directory)
+            .map_err(|error| error.to_string())?;
+        temporary
+            .write_all(&serde_json::to_vec_pretty(self).map_err(|error| error.to_string())?)
+            .map_err(|error| error.to_string())?;
+        temporary
+            .as_file()
+            .sync_all()
+            .map_err(|error| error.to_string())?;
+        temporary
+            .persist(path)
+            .map_err(|error| error.error.to_string())?;
         Ok(())
+    }
+    fn apply(&mut self, mutation: ThemeMutation) -> Result<(), String> {
+        match mutation {
+            ThemeMutation::Save { document, replace } => {
+                validate_document(&document)?;
+                if let Some(index) = self
+                    .documents
+                    .iter()
+                    .position(|old| old["id"] == document["id"])
+                {
+                    if !replace {
+                        return Err("Theme id already exists".into());
+                    }
+                    self.documents[index] = document;
+                } else {
+                    self.documents.push(document);
+                }
+            }
+            ThemeMutation::Remove { id } => self.documents.retain(|document| document["id"] != id),
+            ThemeMutation::SaveSnippet { snippet } => {
+                if snippet.id.trim().is_empty() || snippet.name.trim().is_empty() {
+                    return Err("Missing snippet id or name".into());
+                }
+                if let Some(index) = self.snippets.iter().position(|old| old.id == snippet.id) {
+                    self.snippets[index] = snippet;
+                } else {
+                    self.snippets.push(snippet);
+                }
+            }
+            ThemeMutation::RemoveSnippet { id } => self.snippets.retain(|snippet| snippet.id != id),
+            ThemeMutation::MoveSnippet { id, offset } => {
+                if let Some(index) = self.snippets.iter().position(|snippet| snippet.id == id) {
+                    let target = (index as i64 + i64::from(offset))
+                        .clamp(0, self.snippets.len().saturating_sub(1) as i64)
+                        as usize;
+                    let snippet = self.snippets.remove(index);
+                    self.snippets.insert(target, snippet);
+                }
+            }
+            ThemeMutation::DisableSnippets => {
+                for snippet in &mut self.snippets {
+                    snippet.enabled = false;
+                }
+            }
+        }
+        self.revision += 1;
+        Ok(())
+    }
+}
+pub mod cmd {
+    use super::*;
+    use tauri::Emitter;
+    #[tauri::command]
+    pub async fn get_theme_library() -> Result<ThemeLibrary, String> {
+        super::super::startup_io::run(|| {
+            let _guard = THEME_LOCK.lock().map_err(|error| error.to_string())?;
+            ThemeLibrary::read(&conf::app_root().join("themes-v1.json"))
+        })
+        .await
+        .map_err(|error| error.to_string())?
+    }
+    #[tauri::command]
+    pub async fn mutate_theme_library(
+        app: tauri::AppHandle,
+        mutation: ThemeMutation,
+    ) -> Result<ThemeLibrary, String> {
+        let library = super::super::startup_io::run(move || {
+            let _guard = THEME_LOCK.lock().map_err(|error| error.to_string())?;
+            let path = conf::app_root().join("themes-v1.json");
+            let mut library = ThemeLibrary::read(&path)?;
+            library.apply(mutation)?;
+            library.write(&path)?;
+            Ok::<_, String>(library)
+        })
+        .await
+        .map_err(|error| error.to_string())??;
+        let _ = app.emit("themes-changed", library.revision);
+        Ok(library)
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn document() -> Value {
+        serde_json::json!({
+            "version": 1,
+            "id": "test",
+            "name": "Test",
+            "variants": [{
+                "id": "light",
+                "name": "Light",
+                "mode": "light",
+                "tokens": {
+                    "surface.canvas": "#ffffff",
+                    "editor.background": { "ref": "surface.canvas" }
+                }
+            }]
+        })
+    }
+
+    fn assert_failed_save_preserves_library(invalid: Value) {
+        let mut library = ThemeLibrary::default();
+        library
+            .apply(ThemeMutation::Save {
+                document: document(),
+                replace: false,
+            })
+            .unwrap();
+        let before = serde_json::to_value(&library).unwrap();
+        assert!(
+            library
+                .apply(ThemeMutation::Save {
+                    document: invalid.clone(),
+                    replace: true,
+                })
+                .is_err(),
+            "accepted invalid document: {invalid}"
+        );
+        assert_eq!(serde_json::to_value(&library).unwrap(), before);
+        assert_eq!(library.revision, 1);
+    }
+
+    #[test]
+    fn atomic_roundtrip_and_failed_duplicate() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("themes.json");
+        let mut library = ThemeLibrary::default();
+        let document = serde_json::json!({"version":1,"id":"test","name":"Test","variants":[{"id":"light","name":"Light","mode":"light"}]});
+        library
+            .apply(ThemeMutation::Save {
+                document: document.clone(),
+                replace: false,
+            })
+            .unwrap();
+        library.write(&path).unwrap();
+        assert!(library
+            .apply(ThemeMutation::Save {
+                document,
+                replace: false
+            })
+            .is_err());
+        assert_eq!(library.revision, 1);
+        assert_eq!(library.documents.len(), 1);
+        assert_eq!(ThemeLibrary::read(&path).unwrap().revision, 1);
+    }
+
+    #[test]
+    fn ids_match_the_semantic_parser_format() {
+        for id in [".theme", "_theme", "-theme", "", "Theme", "主题"] {
+            let mut invalid = document();
+            invalid["id"] = id.into();
+            assert_failed_save_preserves_library(invalid);
+            let mut invalid = document();
+            invalid["variants"][0]["id"] = id.into();
+            assert_failed_save_preserves_library(invalid);
+        }
+        for id in ["a", "0-theme", "theme.v1_light-dark"] {
+            let mut valid = document();
+            valid["id"] = id.into();
+            valid["variants"][0]["id"] = id.into();
+            assert!(validate_document(&valid).is_ok());
+        }
+        let mut invalid = document();
+        invalid["id"] = "a".repeat(81).into();
+        assert_failed_save_preserves_library(invalid);
+    }
+
+    #[test]
+    fn invalid_variant_shapes_leave_saved_themes_unchanged() {
+        for variants in [
+            serde_json::json!(null),
+            serde_json::json!({}),
+            serde_json::json!([]),
+            serde_json::json!([null]),
+            serde_json::json!([{"id":"light","name":"Light","mode":"system"}]),
+            serde_json::json!([{"id":"light","name":" ","mode":"light"}]),
+            serde_json::json!([{"id":"light","name":"Light","mode":"light","css":true}]),
+        ] {
+            let mut invalid = document();
+            invalid["variants"] = variants;
+            assert_failed_save_preserves_library(invalid);
+        }
+        let mut invalid = document();
+        let variant = invalid["variants"][0].clone();
+        invalid["variants"] = serde_json::json!([variant.clone(), variant]);
+        assert_failed_save_preserves_library(invalid);
+    }
+
+    #[test]
+    fn invalid_token_shapes_do_not_advance_revision() {
+        for tokens in [serde_json::json!(null), serde_json::json!([])] {
+            let mut invalid = document();
+            invalid["variants"][0]["tokens"] = tokens;
+            assert_failed_save_preserves_library(invalid);
+        }
+        for value in [
+            serde_json::json!(null),
+            serde_json::json!(42),
+            serde_json::json!(true),
+            serde_json::json!([]),
+            serde_json::json!(" "),
+            serde_json::json!({}),
+            serde_json::json!({"ref":42}),
+            serde_json::json!({"ref":""}),
+            serde_json::json!({"ref":"surface.canvas","extra":true}),
+        ] {
+            let mut invalid = document();
+            invalid["variants"][0]["tokens"]["editor.background"] = value;
+            assert_failed_save_preserves_library(invalid);
+        }
+    }
+
+    #[test]
+    fn snippets_keep_order_and_can_be_disabled() {
+        let mut library = ThemeLibrary::default();
+        for id in ["a", "b"] {
+            library
+                .apply(ThemeMutation::SaveSnippet {
+                    snippet: CssSnippet {
+                        id: id.into(),
+                        name: id.into(),
+                        css: String::new(),
+                        enabled: true,
+                    },
+                })
+                .unwrap();
+        }
+        library
+            .apply(ThemeMutation::MoveSnippet {
+                id: "b".into(),
+                offset: -1,
+            })
+            .unwrap();
+        assert_eq!(library.snippets[0].id, "b");
+        library.apply(ThemeMutation::DisableSnippets).unwrap();
+        assert!(library.snippets.iter().all(|snippet| !snippet.enabled));
     }
 }

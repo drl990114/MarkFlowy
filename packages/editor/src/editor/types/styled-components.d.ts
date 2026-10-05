@@ -6,6 +6,7 @@ type ThemeType = Omit<typeof lightTheme.styledConstants, 'tableHeaderBgColor'>
 declare module 'styled-components' {
   export interface DefaultTheme extends ThemeType {
     tableHeaderBgColor?: string
+    editorToolbarBgColor?: string
   }
 }
 

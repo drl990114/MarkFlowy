@@ -45,13 +45,19 @@ export const WysiwygThemeWrapper = styled.div
   box-sizing: border-box;
   outline: none;
 
+  &::selection,
+  & ::selection {
+    background-color: var(--rme-editor-selection-bg, ${(props) => props.theme.nodeSelectedColor});
+    color: var(--rme-editor-selection-foreground, ${(props) => props.theme.primaryFontColor});
+  }
+
   & summary {
     display: list-item;
   }
 
   & a {
     background-color: transparent;
-    color: ${(props) => props.theme.accentColor};
+    color: var(--rme-editor-link-color, ${(props) => props.theme.accentColor});
     text-decoration: none;
   }
 
@@ -866,7 +872,7 @@ export const WysiwygThemeWrapper = styled.div
     letter-spacing: -0.01em;
     text-indent: 0;
     vertical-align: baseline;
-    caret-color: ${(props) => props.theme.accentColor};
+    caret-color: var(--rme-editor-caret-color, ${(props) => props.theme.accentColor});
     background-color: ${(props) => props.theme.tipsBgColor};
     border-radius: ${(props) => props.theme.smallBorderRadius};
     box-shadow: inset 0 0 0 1px ${(props) => props.theme.borderColor};
@@ -882,7 +888,7 @@ export const WysiwygThemeWrapper = styled.div
   .md-emoji:has(.show) .show {
     /* Safari hides contenteditable carets inside positioned inline ancestors. */
     font-size: inherit;
-    caret-color: ${(props) => props.theme.accentColor};
+    caret-color: var(--rme-editor-caret-color, ${(props) => props.theme.accentColor});
     background: transparent;
   }
 
@@ -1061,7 +1067,7 @@ export const WysiwygThemeWrapper = styled.div
     display: inline;
     padding: 0;
     margin: 0;
-    caret-color: ${(props) => props.theme.accentColor};
+    caret-color: var(--rme-editor-caret-color, ${(props) => props.theme.accentColor});
     background: transparent;
 
     br {
@@ -1223,8 +1229,11 @@ export const WysiwygThemeWrapper = styled.div
     max-width: 100%;
     padding: 12px 0;
     margin-bottom: 1em;
-    line-height: var(--rme-editor-line-height, ${(props) => props.rootLineHeight});
-    font-size: ${(props) => props.rootFontSize};
+    line-height: var(
+      --rme-code-line-height,
+      var(--rme-editor-line-height, ${(props) => props.rootLineHeight})
+    );
+    font-size: var(--rme-code-font-size, ${(props) => props.rootFontSize});
     font-family: ${(props) => props.theme.codemirrorFontFamily} !important;
     border: var(--rme-editor-code-block-border-width, 0) solid
       var(--rme-editor-code-block-border-color, transparent);
@@ -1236,18 +1245,16 @@ export const WysiwygThemeWrapper = styled.div
     overflow: auto;
     box-sizing: border-box;
 
-    &[data-front-matter='true'] {
-      .cm-lineNumbers {
-        display: none !important;
-      }
-    }
     .cm-line {
       padding: 2px 2px 2px 6px;
       font-size: 1em;
       font-family: ${(props) => props.theme.codemirrorFontFamily};
 
       span {
-        line-height: var(--rme-editor-line-height, ${(props) => props.rootLineHeight});
+        line-height: var(
+          --rme-code-line-height,
+          var(--rme-editor-line-height, ${(props) => props.rootLineHeight})
+        );
       }
     }
 

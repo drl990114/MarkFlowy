@@ -38,9 +38,9 @@ export const DesktopSpecificStyles = createGlobalStyle<{
     --mf-control-selected: ${(props) => props.theme.fileTreeSelectedBgColor};
     --mf-control-border: ${(props) => props.theme.borderColor};
     --mf-control-focus: ${(props) => props.theme.accentColor};
-    --mf-motion-duration-fast: 120ms;
+    --mf-motion-duration-fast: 100ms;
     --mf-motion-duration-base: 180ms;
-    --mf-motion-duration-overlay: 240ms;
+    --mf-motion-duration-overlay: 120ms;
     --mf-motion-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --mf-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
     --mf-layer-dialog: 900;
@@ -62,6 +62,8 @@ export const DesktopSpecificStyles = createGlobalStyle<{
     --mf-primary: ${(props) => props.theme.accentColor};
     --mf-primary-foreground: ${(props) => props.$primaryForeground};
     --mf-primary-soft: ${(props) => props.theme.accentColorFocused};
+    --mf-update-action: ${(props) => props.theme.blue};
+    --mf-update-action-foreground: ${(props) => props.theme.white};
     --mf-secondary: var(--mf-control-surface);
     --mf-secondary-foreground: var(--mf-text-primary);
     --mf-muted: var(--mf-surface-muted);

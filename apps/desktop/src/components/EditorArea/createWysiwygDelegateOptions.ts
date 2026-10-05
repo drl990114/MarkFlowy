@@ -17,6 +17,7 @@ import { getFileObject } from '@/helper/files'
 import { getFolderPathFromPath } from '@/helper/filesys'
 import { getImageUrlInTauri } from '@/helper/image'
 import { logger } from '@/helper/logger'
+import type { RemoteImageResources } from '@/helper/remoteImageResources'
 import { useEditorKeybindingStore } from '@/hooks/useKeyboard'
 import { locales } from '@/i18n'
 import useAppSettingStore from '@/stores/useAppSettingStore'
@@ -25,6 +26,7 @@ import type { CreateWysiwygDelegateOptions } from 'rme'
 import { handleImagePaste, handleUploadImage } from './imageHandlers'
 import { openEditorLink } from './openEditorLink'
 import { requestImageInsert } from './requestImageInsert'
+import { resolveCodeEditorPreferences } from './codeEditorSettings'
 
 type AIOptions = NonNullable<CreateWysiwygDelegateOptions['ai']>
 type LivePreviewBlockBehavior = 'auto' | 'always-split'
@@ -45,7 +47,10 @@ export const getCurrentEditorInsertDateFormat = () => {
   return useAppSettingStore.getState().settingData.editor_insert_date_format as string | undefined
 }
 
-export const createWysiwygDelegateOptions = (fileId?: string): WysiwygDelegateOptions => {
+export const createWysiwygDelegateOptions = (
+  fileId?: string,
+  remoteImages?: RemoteImageResources,
+): WysiwygDelegateOptions => {
   const settingData = useAppSettingStore.getState().settingData
   const supportProviderInfosMap: AIOptions['supportProviderInfosMap'] = {}
 
@@ -69,9 +74,10 @@ export const createWysiwygDelegateOptions = (fileId?: string): WysiwygDelegateOp
   return {
     disableAllBuildInShortcuts: true,
     overrideShortcutMap: useEditorKeybindingStore.getState().editorKeybingMap,
-    codemirrorOptions: {
-      lineWrapping: settingData.wysiwyg_editor_codemirror_line_wrap,
-    },
+    // The package declarations are generated separately; source integration tests
+    // verify the expanded options without rebuilding rme/dist in this task.
+    codemirrorOptions: resolveCodeEditorPreferences(settingData).rmeEmbedded as
+      CreateWysiwygDelegateOptions['codemirrorOptions'],
     livePreviewBlock: {
       behavior: normalizeLivePreviewBlockBehavior(
         settingData.wysiwyg_editor_live_preview_block_behavior,
@@ -95,7 +101,7 @@ export const createWysiwygDelegateOptions = (fileId?: string): WysiwygDelegateOp
         const file = fileId ? getFileObject(fileId) : null
         const fileFolderPath = getFolderPathFromPath(file?.path)
 
-        const src = await getImageUrlInTauri(url, fileFolderPath)
+        const src = await getImageUrlInTauri(url, fileFolderPath, remoteImages)
         return src
       } catch (error) {
         logger.error('Failed to get image URL:', error)

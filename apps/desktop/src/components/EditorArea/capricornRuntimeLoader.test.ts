@@ -15,9 +15,18 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.doUnmock('virtual:markflowy-capricorn-runtime')
+  vi.doUnmock('@codemirror/view')
 })
 
 describe('Capricorn runtime preloading', () => {
+  it('keeps the runtime available if the optional CodeMirror focus accessor fails to load', async () => {
+    const createCapricornRuntime = vi.fn()
+    vi.doMock('virtual:markflowy-capricorn-runtime', () => ({ createCapricornRuntime }))
+    vi.doMock('@codemirror/view', () => { throw new Error('CodeMirror chunk unavailable') })
+    const { loadCapricornRuntimeFactory } = await import('./capricornRuntimeAdapter')
+    await expect(loadCapricornRuntimeFactory()).resolves.toBe(createCapricornRuntime)
+  })
+
   it('prewarms an optional runtime Worker after the shared module import without creating a session', async () => {
     const createCapricornRuntime = vi.fn()
     const prewarmCapricornRuntime = vi.fn()

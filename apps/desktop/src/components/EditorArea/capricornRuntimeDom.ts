@@ -24,9 +24,11 @@ export function getCapricornRuntimeInput(container: HTMLElement): HTMLTextAreaEl
 export function subscribeCapricornBeforeInput(
   container: HTMLElement,
   listener: (event: InputEvent) => void,
+  inputTypes?: readonly string[],
 ): () => void {
   const ownerDocument = container.ownerDocument
   const onBeforeInput = (event: InputEvent) => {
+    if (inputTypes && !inputTypes.includes(event.inputType)) return
     const element = event.target as Element | null
     const codeMirrorInput = element?.closest?.('.cm-content[contenteditable="true"]')
     if (codeMirrorInput && container.contains(codeMirrorInput)) {
@@ -58,4 +60,61 @@ export function subscribeCapricornBeforeInput(
   // Read the document key per event: no observer, cache, or stale session key.
   ownerDocument.addEventListener('beforeinput', onBeforeInput, true)
   return () => ownerDocument.removeEventListener('beforeinput', onBeforeInput, true)
+}
+
+/** WebKit can send native undo to an old textarea retained by its undo manager. */
+export function guardCapricornHistoryInput(
+  container: HTMLElement,
+  canEdit: () => boolean,
+): () => void {
+  return subscribeCapricornBeforeInput(
+    container,
+    (event) => {
+      const target = event.target as Element
+      const focused = container.ownerDocument.activeElement
+      if (canEdit() && (target === focused || target.contains(focused))) return
+      event.preventDefault()
+      event.stopImmediatePropagation()
+    },
+    ['historyUndo', 'historyRedo'],
+  )
+}
+
+export function hasVisiblePendingSourceEditor(container: HTMLElement): boolean {
+  return hasVisibleSourceState(container, '[data-cap-source-editor-pending="true"]')
+}
+
+export function hasVisibleFailedSourceEditor(container: HTMLElement): boolean {
+  return hasVisibleSourceState(container, '[data-cap-source-editor-error="true"]')
+}
+
+function hasVisibleSourceState(container: HTMLElement, selector: string): boolean {
+  let left = 0
+  let top = 0
+  let right = window.innerWidth
+  let bottom = window.innerHeight
+  // Intersect the actual host/panel viewport, not the full document's height.
+  for (const element of [container, container.closest<HTMLElement>('[data-editor-id]')]) {
+    const rect = element?.getBoundingClientRect()
+    if (!rect || rect.width <= 0 || rect.height <= 0) continue
+    left = Math.max(left, rect.left)
+    top = Math.max(top, rect.top)
+    right = Math.min(right, rect.right)
+    bottom = Math.min(bottom, rect.bottom)
+  }
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(selector),
+  ).some((element) => {
+    const style = getComputedStyle(element)
+    if (style.display === 'none' || style.visibility === 'hidden') return false
+    const rect = element.getBoundingClientRect()
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      rect.right > left &&
+      rect.left < right &&
+      rect.bottom > top &&
+      rect.top < bottom
+    )
+  })
 }

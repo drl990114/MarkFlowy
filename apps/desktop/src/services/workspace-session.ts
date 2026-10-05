@@ -4,8 +4,8 @@ import {
   FILE_MUTATION_QUEUE_KEY,
   savePathCoordinator,
 } from '@/components/EditorArea/savePathCoordinator'
-import { getFileObject } from '@/helper/files'
-import { readDirectory } from '@/helper/filesys'
+import { getFileObject, getFileObjectByPath, pruneFileMetadata } from '@/helper/files'
+import { readDirectory, releaseSecurityScope } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { t } from '@/i18n'
 import useEditorStore from '@/stores/useEditorStore'
@@ -14,8 +14,66 @@ import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
 import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import { getUnsavedFileIds, guardUnsavedFilesAsync } from './checkUnsavedFiles'
 import { restoreRecentFileHistory } from './recent-files'
-import { restoreWorkspaceCache, type WorkspaceCachePersistence } from './workspace-cache'
+import { ensureCachedFileByPath, workspaceCachedPaths, restoreWorkspaceCache, type WorkspaceCachePersistence } from './workspace-cache'
 import { currentWindow } from './windows'
+import { waitForAllDraftRecovery } from './draftRecoveryState'
+import { flushDraftProtection } from './local-history'
+import { removePristineDocuments } from './editor-file'
+
+const detachedScopes = new Set<string>()
+
+export async function releaseDetachedWorkspaceScopes() {
+  for (const path of detachedScopes) {
+    const owner = await invoke<string | null>('check_window_by_path', { path })
+    if (!owner || owner === currentWindow.label) await releaseSecurityScope(path)
+  }
+  detachedScopes.clear()
+}
+
+/** Attach/detach the directory without closing or remounting any live editor. */
+export async function attachWorkspaceSession(path: string | undefined, persistence: WorkspaceCachePersistence) {
+  await waitForAllDraftRecovery()
+  return savePathCoordinator.runExclusive(FILE_MUTATION_QUEUE_KEY, 'workspace-context', async () => {
+    const previousRoot = useEditorStore.getState().getRootPath()
+    if (previousRoot === path) return true
+    await persistence.flush()
+    await flushDraftProtection()
+    const cache = path ? await persistence.getWorkspaceCache(path) : undefined
+    if (path) {
+      if (!await invoke<boolean>('save_security_bookmark', { path }) ||
+        !await invoke<boolean>('activate_workspace_root', { rootPath: path })) {
+        throw new Error(t('startup.workspace_open_failed'))
+      }
+    }
+    const folderData = path ? await readDirectory(path) : null
+    if (useEditorStore.getState().getRootPath() !== previousRoot) return false
+    // Update the native binding before committing the UI; a failed request leaves it intact.
+    await invoke('update_window_path', { windowLabel: currentWindow.label, newPath: path ?? null })
+    const recent = useRecentFilesStore.getState().entries
+    flushSync(() => restoreRecentFileHistory(() => {
+      useEditorStore.getState().setFolderDataPure(folderData)
+      const restoredPaths = workspaceCachedPaths(cache)
+      if (restoredPaths.length) removePristineDocuments()
+      const editor = useEditorStore.getState()
+      const active = editor.activeId
+      for (const filePath of restoredPaths) {
+        const file = ensureCachedFileByPath(filePath)
+        if (!useEditorStore.getState().opened.includes(file.id)) editor.addOpenedFile(file.id)
+      }
+      const restored = useEditorStore.getState()
+      // Adding tabs alone does not make a document visible. Keep a live document
+      // selected, or restore the cached selection after removing placeholders.
+      const activeId = active && restored.opened.includes(active)
+        ? active
+        : getFileObjectByPath(cache?.activeFilePath)?.id ?? restored.opened[0]
+      if (activeId && restored.activeId !== activeId) editor.setActiveId(activeId)
+    }, [...recent, ...(cache?.recentFilePaths ?? []).map((filePath) => ({ path: filePath }))]))
+    if (!path && previousRoot) detachedScopes.add(previousRoot)
+    if (path) await useOpenedCacheStore.getState().addRecentWorkspaces({ path })
+      .catch((error) => logger.error('Failed to update recent workspaces', error))
+    return true
+  })
+}
 
 function captureUnsavedDocuments() {
   const editor = useEditorStore.getState()
@@ -31,6 +89,8 @@ function captureUnsavedDocuments() {
 }
 
 export async function switchWorkspaceSession(path: string, persistence: WorkspaceCachePersistence) {
+  if (!useEditorStore.getState().getRootPath()) return attachWorkspaceSession(path, persistence)
+  await waitForAllDraftRecovery()
   for (;;) {
     const currentRootPath = useEditorStore.getState().getRootPath()
     if (currentRootPath === path) return true
@@ -140,7 +200,11 @@ export async function switchWorkspaceSession(path: string, persistence: Workspac
     })
 
     if (!allowed) return false
-    if (didSwitch) return true
+    if (didSwitch) {
+      const editor = useEditorStore.getState()
+      pruneFileMetadata(editor.getRootPath(), editor.opened)
+      return true
+    }
     // Release the mutation queue before prompting/saving again: Save As uses it too.
   }
 }

@@ -1,5 +1,6 @@
 use anyhow::Result as AnyResult;
 use chrono::{DateTime, Local};
+use mf_text_encoding::{TextEncoding, TextMetadata, TextWriteOptions};
 use mf_utils::is_supported_file_name;
 use natural_sort_rs::natural_cmp;
 use serde::{Deserialize, Serialize};
@@ -31,7 +32,7 @@ lazy_static::lazy_static! {
 }
 
 lazy_static::lazy_static! {
-    static ref FILE_WRITE_MUTEX: Mutex<()> = Mutex::new(());
+    pub(crate) static ref FILE_WRITE_MUTEX: Mutex<()> = Mutex::new(());
     static ref FILE_WRITE_GENERATIONS: Mutex<HashMap<String, u64>> = Mutex::new(HashMap::new());
 }
 
@@ -398,8 +399,14 @@ pub struct FileResult {
 #[derive(Debug, Serialize)]
 #[serde(tag = "status", rename_all = "camelCase")]
 pub enum FileSnapshotResult {
-    Success { content: String, revision: String },
-    Unavailable { result: FileResult },
+    Success {
+        content: String,
+        revision: String,
+        text: TextMetadata,
+    },
+    Unavailable {
+        result: FileResult,
+    },
     Unstable,
 }
 
@@ -546,100 +553,21 @@ fn filter_files_with_exclude_matcher(
         .collect()
 }
 
-fn decode_utf16_bytes(bytes: &[u8], little_endian: bool) -> Result<String, String> {
-    if bytes.len() % 2 != 0 {
-        return Err(String::from("UTF-16 content has an odd byte length"));
-    }
-
-    let code_units = bytes.chunks_exact(2).map(|chunk| {
-        if little_endian {
-            u16::from_le_bytes([chunk[0], chunk[1]])
+fn text_read_error(error: mf_text_encoding::TextError) -> FileResult {
+    FileResult {
+        code: if matches!(error, mf_text_encoding::TextError::Binary) {
+            FileResultCode::Binary
         } else {
-            u16::from_be_bytes([chunk[0], chunk[1]])
-        }
-    });
-
-    std::char::decode_utf16(code_units)
-        .map(|result| result.map_err(|e| format!("Invalid UTF-16 content: {}", e)))
-        .collect()
+            FileResultCode::UnknownError
+        },
+        content: error.to_string(),
+    }
 }
 
-fn decode_text_bytes(bytes: Vec<u8>) -> Result<String, FileResult> {
-    if bytes.is_empty() {
-        return Ok(String::new());
-    }
-
-    if bytes.starts_with(&[0xEF, 0xBB, 0xBF]) {
-        return String::from_utf8(bytes[3..].to_vec()).map_err(|e| FileResult {
-            code: FileResultCode::UnknownError,
-            content: format!("Unsupported UTF-8 content: {}", e),
-        });
-    }
-
-    if bytes.starts_with(&[0xFF, 0xFE]) {
-        return decode_utf16_bytes(&bytes[2..], true).map_err(|e| FileResult {
-            code: FileResultCode::UnknownError,
-            content: e,
-        });
-    }
-
-    if bytes.starts_with(&[0xFE, 0xFF]) {
-        return decode_utf16_bytes(&bytes[2..], false).map_err(|e| FileResult {
-            code: FileResultCode::UnknownError,
-            content: e,
-        });
-    }
-
-    let mut could_be_utf16_le = true;
-    let mut could_be_utf16_be = true;
-    let mut contains_zero_byte = false;
-
-    for (i, byte) in bytes.iter().take(512).enumerate() {
-        let is_endian = i % 2 == 1;
-        let is_zero_byte = *byte == 0;
-
-        if is_zero_byte {
-            contains_zero_byte = true;
-        }
-
-        if could_be_utf16_le && ((is_endian && !is_zero_byte) || (!is_endian && is_zero_byte)) {
-            could_be_utf16_le = false;
-        }
-
-        if could_be_utf16_be && ((is_endian && is_zero_byte) || (!is_endian && !is_zero_byte)) {
-            could_be_utf16_be = false;
-        }
-
-        if is_zero_byte && !could_be_utf16_le && !could_be_utf16_be {
-            break;
-        }
-    }
-
-    if contains_zero_byte {
-        if could_be_utf16_le {
-            return decode_utf16_bytes(&bytes, true).map_err(|e| FileResult {
-                code: FileResultCode::UnknownError,
-                content: e,
-            });
-        }
-
-        if could_be_utf16_be {
-            return decode_utf16_bytes(&bytes, false).map_err(|e| FileResult {
-                code: FileResultCode::UnknownError,
-                content: e,
-            });
-        }
-
-        return Err(FileResult {
-            code: FileResultCode::Binary,
-            content: String::from("File seems to be binary and cannot be opened as text"),
-        });
-    }
-
-    String::from_utf8(bytes).map_err(|e| FileResult {
-        code: FileResultCode::UnknownError,
-        content: format!("Unsupported text encoding: {}", e),
-    })
+pub(crate) fn decode_text_bytes(bytes: Vec<u8>) -> Result<String, FileResult> {
+    mf_text_encoding::decode(&bytes, None)
+        .map(|decoded| decoded.content)
+        .map_err(text_read_error)
 }
 
 pub fn read_file(path: &str) -> FileResult {
@@ -731,41 +659,27 @@ pub fn is_text_file(path: &str) -> bool {
     std::str::from_utf8(chunk).is_ok()
 }
 
-fn write_file_unlocked(path: &str, content: &str) -> FileResult {
-    let file_path = Path::new(path);
-    match fs::write(file_path, content) {
-        Ok(()) => FileResult {
-            code: FileResultCode::Success,
-            content: String::from("File written successfully"),
-        },
-        Err(e) => {
-            let code = match e.kind() {
-                std::io::ErrorKind::NotFound => FileResultCode::NotFound,
-                std::io::ErrorKind::PermissionDenied => FileResultCode::PermissionDenied,
-                _ => FileResultCode::UnknownError,
-            };
-            FileResult {
-                code,
-                content: format!("Failed to write file: {}", e),
-            }
-        }
-    }
-}
-
-// update file and create new file
+// Legacy callers still use this entry point for new files. Existing text must obey
+// the same encoding preflight, revision check and history protection as editor saves.
 pub fn write_file(path: &str, content: &str) -> FileResult {
-    let Ok(_guard) = FILE_WRITE_MUTEX.lock() else {
-        return FileResult {
+    let path = Path::new(path);
+    let result = get_file_write_revision(path).and_then(|revision| {
+        conditional_write_text_file(path, content, &revision, "save", None, None)
+    });
+    match result {
+        Ok(result) if result.status == ConditionalWriteStatus::Success => FileResult {
+            code: FileResultCode::Success,
+            content: "File written successfully".into(),
+        },
+        Ok(_) => FileResult {
             code: FileResultCode::UnknownError,
-            content: String::from("File write lock is unavailable"),
-        };
-    };
-
-    let result = write_file_unlocked(path, content);
-    if result.code == FileResultCode::Success {
-        let _ = bump_file_write_generation(Path::new(path));
+            content: "File changed before saving".into(),
+        },
+        Err(error) => FileResult {
+            code: FileResultCode::UnknownError,
+            content: error.to_string(),
+        },
     }
-    result
 }
 
 fn revision_for_content(content: &[u8]) -> String {
@@ -937,6 +851,10 @@ fn read_file_sample_once(path: &Path) -> std::io::Result<Option<FileSample>> {
     let _guard = FILE_WRITE_MUTEX
         .lock()
         .map_err(|_| std::io::Error::other("File write lock is unavailable"))?;
+    read_file_sample_unlocked(path)
+}
+
+fn read_file_sample_unlocked(path: &Path) -> std::io::Result<Option<FileSample>> {
     let mut identity = same_file::Handle::from_file(fs::File::open(path)?)?;
     let before = identity.as_file().metadata()?;
     let mut bytes = Vec::new();
@@ -972,12 +890,19 @@ fn read_file_sample_once(path: &Path) -> std::io::Result<Option<FileSample>> {
 }
 
 fn read_file_sample(path: &Path) -> Result<Option<FileSample>, FileResult> {
-    match read_file_sample_once(path) {
+    read_file_sample_with_retry(path, read_file_sample_once)
+}
+
+fn read_file_sample_with_retry(
+    path: &Path,
+    reader: impl Fn(&Path) -> std::io::Result<Option<FileSample>>,
+) -> Result<Option<FileSample>, FileResult> {
+    match reader(path) {
         Err(error) if error.kind() == std::io::ErrorKind::PermissionDenied => {
             acquire_security_scope(path);
             // Preserve the existing read command's one retry and original
             // permission error if restoring access does not fix the read.
-            read_file_sample_once(path).map_err(|_| file_read_error(error))
+            reader(path).map_err(|_| file_read_error(error))
         }
         result => result.map_err(file_read_error),
     }
@@ -987,16 +912,51 @@ fn read_file_snapshot_with_reader<F>(path: &Path, mut reader: F) -> FileSnapshot
 where
     F: FnMut(&Path) -> Result<Option<FileSample>, FileResult>,
 {
+    read_file_snapshot_with_encoding_and_reader(path, None, &mut reader)
+}
+
+fn read_file_snapshot_with_encoding_and_reader<F>(
+    path: &Path,
+    encoding: Option<TextEncoding>,
+    reader: F,
+) -> FileSnapshotResult
+where
+    F: FnMut(&Path) -> Result<Option<FileSample>, FileResult>,
+{
+    let sample = match read_stable_file_sample_with_reader(path, reader) {
+        Ok(sample) => sample,
+        Err(result) => return result,
+    };
+    let revision = format_file_write_revision(&sample.metadata, &sample.bytes, &sample.generations);
+    match mf_text_encoding::decode(&sample.bytes, encoding) {
+        Ok(decoded) => FileSnapshotResult::Success {
+            content: decoded.content,
+            revision,
+            text: decoded.metadata,
+        },
+        Err(error) => FileSnapshotResult::Unavailable {
+            result: text_read_error(error),
+        },
+    }
+}
+
+fn read_stable_file_sample_with_reader<F>(
+    path: &Path,
+    mut reader: F,
+) -> Result<FileSample, FileSnapshotResult>
+where
+    F: FnMut(&Path) -> Result<Option<FileSample>, FileResult>,
+{
     for _ in 0..3 {
         let first = match reader(path) {
             Ok(Some(sample)) => sample,
             Ok(None) => continue,
-            Err(result) => return FileSnapshotResult::Unavailable { result },
+            Err(result) => return Err(FileSnapshotResult::Unavailable { result }),
         };
         let second = match reader(path) {
             Ok(Some(sample)) => sample,
             Ok(None) => continue,
-            Err(result) => return FileSnapshotResult::Unavailable { result },
+            Err(result) => return Err(FileSnapshotResult::Unavailable { result }),
         };
         if first.identity != second.identity
             || first.generations != second.generations
@@ -1008,19 +968,32 @@ where
         // Two content observations are still required. Exact comparison lets
         // us avoid hashing both copies, and only one buffer survives decoding.
         drop(second);
-        let revision =
-            format_file_write_revision(&first.metadata, &first.bytes, &first.generations);
-        return match decode_text_bytes(first.bytes) {
-            Ok(content) => FileSnapshotResult::Success { content, revision },
-            Err(result) => FileSnapshotResult::Unavailable { result },
-        };
+        return Ok(first);
     }
-    FileSnapshotResult::Unstable
+    Err(FileSnapshotResult::Unstable)
+}
+
+/// Freeze CLI input before the target window supplies its saved-disk decoder.
+pub(crate) fn read_file_bytes_snapshot(path: &Path) -> Result<Vec<u8>, FileSnapshotResult> {
+    ensure_workspace_scope_active(path);
+    read_stable_file_sample_with_reader(path, read_file_sample).map(|sample| sample.bytes)
 }
 
 pub fn read_file_snapshot(path: &Path) -> FileSnapshotResult {
     ensure_workspace_scope_active(path);
     read_file_snapshot_with_reader(path, read_file_sample)
+}
+
+/// The caller must hold FILE_WRITE_MUTEX until this read and its history job finish.
+/// The history worker must never wait for a lock held by a caller awaiting that worker.
+pub(crate) fn read_file_snapshot_while_write_locked(
+    path: &Path,
+    encoding: Option<TextEncoding>,
+) -> FileSnapshotResult {
+    ensure_workspace_scope_active(path);
+    read_file_snapshot_with_encoding_and_reader(path, encoding, |path| {
+        read_file_sample_with_retry(path, read_file_sample_unlocked)
+    })
 }
 
 fn bump_file_write_generation(path: &Path) -> AnyResult<()> {
@@ -1082,6 +1055,44 @@ pub fn conditional_write_file(
     content: &[u8],
     expected_revision: &str,
 ) -> AnyResult<ConditionalWriteResult> {
+    conditional_write_file_with_kind(path, content, expected_revision, "save")
+}
+
+pub fn conditional_write_file_with_kind(
+    path: &Path,
+    content: &[u8],
+    expected_revision: &str,
+    kind: &str,
+) -> AnyResult<ConditionalWriteResult> {
+    conditional_write_file_inner(path, content, expected_revision, kind, None, None)
+}
+
+pub fn conditional_write_text_file(
+    path: &Path,
+    content: &str,
+    expected_revision: &str,
+    kind: &str,
+    options: Option<&TextWriteOptions>,
+    history_workspace: Option<&str>,
+) -> AnyResult<ConditionalWriteResult> {
+    conditional_write_file_inner(
+        path,
+        content.as_bytes(),
+        expected_revision,
+        kind,
+        Some(options),
+        history_workspace,
+    )
+}
+
+fn conditional_write_file_inner(
+    path: &Path,
+    content: &[u8],
+    expected_revision: &str,
+    kind: &str,
+    text_options: Option<Option<&TextWriteOptions>>,
+    history_workspace: Option<&str>,
+) -> AnyResult<ConditionalWriteResult> {
     let _guard = FILE_WRITE_MUTEX
         .lock()
         .map_err(|_| anyhow::anyhow!("File write lock is unavailable"))?;
@@ -1094,6 +1105,58 @@ pub fn conditional_write_file(
         });
     }
 
+    // Finish strict encoding before history preparation or opening a writable handle.
+    let encoded;
+    let mut formats = None;
+    let content = if let Some(options) = text_options {
+        let before = match fs::read(path) {
+            Ok(bytes) => Some(bytes),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
+            Err(error) => return Err(error.into()),
+        };
+        let text = std::str::from_utf8(content)?;
+        encoded = match mf_text_encoding::prepare_write(text, before.as_deref(), options)? {
+            Some(bytes) => bytes,
+            None => {
+                let revision = file_write_revision_unlocked(path)?;
+                return Ok(ConditionalWriteResult {
+                    status: if revision == expected_revision {
+                        ConditionalWriteStatus::Success
+                    } else {
+                        ConditionalWriteStatus::Conflict
+                    },
+                    revision,
+                });
+            }
+        };
+        let old_format = before
+            .as_deref()
+            .map(|bytes| {
+                mf_text_encoding::decode(
+                    bytes,
+                    options.and_then(|o| o.original_format.map(|f| f.encoding)),
+                )
+            })
+            .transpose()?
+            .map(|d| d.metadata.format);
+        let target = options.map(|o| o.format).or(old_format).unwrap_or_default();
+        formats = Some((old_format, target));
+        encoded.as_slice()
+    } else {
+        content
+    };
+    let history_write =
+        crate::local_history::prepare_write_with_formats(path, content, formats, history_workspace)
+            .map_err(anyhow::Error::msg)?;
+    // A backup commit can take time. External writers do not share our mutex.
+    let checked_revision = file_write_revision_unlocked(path)?;
+    if checked_revision != expected_revision {
+        crate::local_history::cancel_write(history_write).map_err(anyhow::Error::msg)?;
+        return Ok(ConditionalWriteResult {
+            status: ConditionalWriteStatus::Conflict,
+            revision: checked_revision,
+        });
+    }
     match fs::metadata(path) {
         Ok(_) => {
             // Preserve the inode, hardlinks, xattrs, and the existing `fs::write`
@@ -1113,6 +1176,7 @@ pub fn conditional_write_file(
         Err(error) => return Err(error.into()),
     }
     bump_file_write_generation(path)?;
+    crate::local_history::complete_write(history_write, kind).map_err(anyhow::Error::msg)?;
     Ok(ConditionalWriteResult {
         status: ConditionalWriteStatus::Success,
         revision: file_write_revision_unlocked(path)?,
@@ -1610,10 +1674,17 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub async fn get_file_snapshot(file_path: String) -> Result<fc::FileSnapshotResult, String> {
-        tokio::task::spawn_blocking(move || fc::read_file_snapshot(Path::new(&file_path)))
-            .await
-            .map_err(|error| error.to_string())
+    pub async fn get_file_snapshot(
+        file_path: String,
+        encoding: Option<mf_text_encoding::TextEncoding>,
+    ) -> Result<fc::FileSnapshotResult, String> {
+        tokio::task::spawn_blocking(move || {
+            let path = Path::new(&file_path);
+            fc::ensure_workspace_scope_active(path);
+            fc::read_file_snapshot_with_encoding_and_reader(path, encoding, fc::read_file_sample)
+        })
+        .await
+        .map_err(|error| error.to_string())
     }
 
     #[tauri::command]
@@ -1636,12 +1707,22 @@ pub mod cmd {
         file_path: String,
         content: String,
         expected_revision: String,
+        history_kind: Option<String>,
+        text_options: Option<mf_text_encoding::TextWriteOptions>,
+        history_workspace: Option<String>,
     ) -> Result<ConditionalWriteResult, String> {
         tokio::task::spawn_blocking(move || {
-            fc::conditional_write_file(
+            fc::conditional_write_text_file(
                 Path::new(&file_path),
-                content.as_bytes(),
+                &content,
                 &expected_revision,
+                match history_kind.as_deref() {
+                    Some("autosave") => "autosave",
+                    Some("overwrite") => "overwrite",
+                    _ => "save",
+                },
+                text_options.as_ref(),
+                history_workspace.as_deref(),
             )
         })
         .await
@@ -1651,6 +1732,7 @@ pub mod cmd {
 
     #[tauri::command]
     pub fn read_u8_array_from_file(file_path: &str) -> FileResult {
+        fc::acquire_security_scope(Path::new(file_path));
         match fs::read(file_path) {
             Ok(content) => FileResult {
                 code: FileResultCode::Success,
@@ -1889,17 +1971,8 @@ pub mod cmd {
     }
 
     #[tauri::command]
-    pub fn export_html_to_path(str: &str, path: &str) -> String {
-        let re = Regex::new(r#"\\\""#).unwrap();
-
-        let result = re.replace_all(str, "\"");
-
-        let file_path = Path::new(path);
-
-        match fs::write(file_path, result.to_string()) {
-            Ok(_) => String::from("OK"),
-            Err(e) => format!("ERROR: {}", e),
-        }
+    pub fn export_html_to_path(str: &str, path: &str) -> Result<(), String> {
+        fs::write(Path::new(path), str).map_err(|error| error.to_string())
     }
 
     #[tauri::command]

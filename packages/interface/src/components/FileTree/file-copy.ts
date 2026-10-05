@@ -22,6 +22,7 @@ export interface CopyFileTreeNodeOptions {
   getFileIdsByPathPrefix?: (path: string) => string[]
   createFile?: (options: Partial<IFile>) => IFile
   canInsertIntoDirectory: (directory: IFile) => boolean
+  refreshDirectory?: (directory: IFile) => Promise<void>
 }
 
 function directoryPathKey(path: string): string {
@@ -108,7 +109,10 @@ export async function copyFileTreeNode(options: CopyFileTreeNodeOptions): Promis
       // remaining children look loaded. Let the normal directory read find it.
       return copiedPath
     }
-    if (nextDirectory.data.children?.some((child) => child.path === copiedPath)) return copiedPath
+    if (nextDirectory.data.children?.some((child) => child.path === copiedPath)) {
+      await options.refreshDirectory?.(nextDirectory.data)
+      return copiedPath
+    }
 
     const name = getFileNameFromPath(copiedPath)
     const fileOptions: Partial<IFile> = {
@@ -128,6 +132,7 @@ export async function copyFileTreeNode(options: CopyFileTreeNodeOptions): Promis
       index: sourceIndex >= 0 ? sourceIndex + 1 : (nextDirectory.children?.length ?? 0),
     })
     options.setFolderData(nextTree.data)
+    await options.refreshDirectory?.(nextDirectory.data)
     return copiedPath
   })
 }

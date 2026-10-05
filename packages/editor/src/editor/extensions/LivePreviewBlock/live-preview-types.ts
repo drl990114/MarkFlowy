@@ -1,5 +1,6 @@
 import type { Extension as CodeMirrorExtension } from '@codemirror/state'
 import type { EditorView, ProsemirrorNode } from '@rme-sdk/sdk/pm'
+import type { CodemirrorOptions } from '../CodeMirror/setup'
 import type { CustomCopyFunction } from '../CodeMirror/codemirror-types'
 
 export type LivePreviewMode = 'split' | 'preview'
@@ -29,6 +30,7 @@ export interface LivePreviewNodeViewApi {
 }
 
 export interface LivePreviewNodeViewOptions {
+  codemirrorOptions?: CodemirrorOptions
   node: ProsemirrorNode
   view: EditorView
   getPos: () => number
@@ -40,6 +42,7 @@ export interface LivePreviewNodeViewOptions {
 }
 
 export interface LivePreviewBlockCommonOptions {
+  codemirrorOptions?: CodemirrorOptions
   customCopyFunction?: CustomCopyFunction
   codemirrorExtensions?: CodeMirrorExtension[]
   /**

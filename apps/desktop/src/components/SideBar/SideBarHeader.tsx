@@ -15,6 +15,7 @@ export interface RightNavItem {
 export interface SideBarHeaderProps {
   actions?: ReactNode
   name: string
+  title?: ReactNode
   onRightNavItemClick?: (item: RightNavItem) => void
   rightNavItems?: RightNavItem[]
 }
@@ -41,10 +42,15 @@ const Container = styled.div`
 `
 
 export default function SideBarHeader(props: SideBarHeaderProps) {
-  const { actions, name, onRightNavItemClick, rightNavItems } = props
+  const { actions, name, title, onRightNavItemClick, rightNavItems } = props
 
   return (
     <Container aria-label={name} data-slot='dock-toolbar' role='toolbar'>
+      {title ? (
+        <span className='min-w-0 flex-1 truncate px-1 text-ui-control font-medium text-content-secondary'>
+          {title}
+        </span>
+      ) : null}
       <div className='mf-sidebar-header__actions'>
         {actions}
         {rightNavItems?.map((item) => {

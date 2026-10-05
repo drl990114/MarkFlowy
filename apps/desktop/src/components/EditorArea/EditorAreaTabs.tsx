@@ -127,9 +127,9 @@ export function getEditorTabScrollAdjustment(
 }
 
 function getTabButton(container: HTMLElement | null, id: string) {
-  return Array.from(
-    container?.querySelectorAll<HTMLElement>('[data-mf-editor-tab-id]') ?? [],
-  ).find((tab) => tab.dataset.mfEditorTabId === id)
+  return Array.from(container?.querySelectorAll<HTMLElement>('[data-mf-editor-tab-id]') ?? []).find(
+    (tab) => tab.dataset.mfEditorTabId === id,
+  )
 }
 
 function getTabRoot(tabButton: HTMLElement) {
@@ -241,9 +241,7 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
           value: 'close_others',
           handler: () => {
             const { closeOtherFilesInGroup, getGroup } = useEditorStore.getState()
-            const otherIds = (getGroup(groupId)?.opened || []).filter(
-              (openedId) => openedId !== id,
-            )
+            const otherIds = (getGroup(groupId)?.opened || []).filter((openedId) => openedId !== id)
             if (
               checkUnsavedFiles({
                 fileIds: otherIds,
@@ -445,13 +443,11 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
 
       if (pointerX < rect.left + edgeSize) {
         velocity = -Math.ceil(
-          TAB_DRAG_SCROLL_MAX_SPEED *
-            Math.min(1, (rect.left + edgeSize - pointerX) / edgeSize),
+          TAB_DRAG_SCROLL_MAX_SPEED * Math.min(1, (rect.left + edgeSize - pointerX) / edgeSize),
         )
       } else if (pointerX > rect.right - edgeSize) {
         velocity = Math.ceil(
-          TAB_DRAG_SCROLL_MAX_SPEED *
-            Math.min(1, (pointerX - (rect.right - edgeSize)) / edgeSize),
+          TAB_DRAG_SCROLL_MAX_SPEED * Math.min(1, (pointerX - (rect.right - edgeSize)) / edgeSize),
         )
       }
 
@@ -472,8 +468,7 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
     const handleWheel = (event: WheelEvent) => {
       if (tabItems.scrollWidth <= tabItems.clientWidth) return
 
-      const rawDelta =
-        Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+      const rawDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
       if (rawDelta === 0) return
 
       const scale = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? tabItems.clientWidth : 1
@@ -557,10 +552,7 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
       const lastTab = e.currentTarget.previousElementSibling
       const hasLastTab =
         lastTab instanceof HTMLElement && lastTab.dataset.mfEditorTabIndex !== undefined
-      updateDropIndicator(
-        hasLastTab ? lastTab : e.currentTarget,
-        hasLastTab ? 'after' : 'before',
-      )
+      updateDropIndicator(hasLastTab ? lastTab : e.currentTarget, hasLastTab ? 'after' : 'before')
       updateDragAutoScroll(e.clientX)
     },
     [updateDragAutoScroll, updateDropIndicator],
@@ -652,9 +644,7 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
     const currentGroup = useEditorStore.getState().getGroup(groupId)
     if (!currentGroup) return
 
-    const curIndex = currentGroup.opened.findIndex(
-      (openedId) => openedId === currentGroup.activeId,
-    )
+    const curIndex = currentGroup.opened.findIndex((openedId) => openedId === currentGroup.activeId)
 
     if (curIndex < 0) return
 

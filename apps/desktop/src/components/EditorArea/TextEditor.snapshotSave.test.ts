@@ -9,7 +9,11 @@ import type { CapricornEditorChangeEvent } from './capricornRuntimeAdapter'
 import { FileSaveCoordinator } from './fileSaveCoordinator'
 import { EditorSnapshotRegistry } from './editorSnapshotRegistry'
 import { runSaveOperation } from './runSaveOperation'
+import { runReservedSaveAs } from './runReservedSaveAs'
+import { SavePathCoordinator } from './savePathCoordinator'
 import textEditorSource from './TextEditor.tsx?raw'
+import { formatTextFileError, getTextFileErrorCode } from './text-encoding/textFileError'
+import i18n, { i18nInit } from '../../../../../packages/i18n/src/desktop'
 
 // Run the actual host callbacks with its shared save/publisher helpers while
 // keeping native file dialogs and disk writes outside this regression test.
@@ -73,6 +77,9 @@ function createHarness(initialContent = 'A', visibleSibling = false) {
   const capricornStatisticsScheduler = { cancel: vi.fn(), schedule: vi.fn() }
   const capricornRuntimeAdapter = {}
   const bindings: Record<string, unknown> = {
+    protectLocalEdit: vi.fn(),
+    historyFileSaved: vi.fn(),
+    endHistoryBatch: vi.fn().mockResolvedValue(undefined),
     groupId: 'group',
     id: 'file',
     EditorViewType,
@@ -91,6 +98,10 @@ function createHarness(initialContent = 'A', visibleSibling = false) {
       }),
     },
     fileSaveCoordinator: coordinator,
+    formatTextFileError,
+    getTextFileErrorCode,
+    t: (key: string) => key,
+    logger: { error: vi.fn() },
     savePathCoordinator: {},
     isExternalFileSaveBlocked: () => false,
     editorContextRef: { current: null },
@@ -162,6 +173,7 @@ function createHarness(initialContent = 'A', visibleSibling = false) {
     onSyncDemandChanged: () => {},
   })
   return {
+    bindings,
     state,
     written,
     autosave,
@@ -249,6 +261,70 @@ function createHarness(initialContent = 'A', visibleSibling = false) {
 afterEach(() => vi.useRealTimers())
 
 describe('TextEditor deferred snapshots during saving', () => {
+  it.each([
+    ['text_confirm_encoding: Confirm the detected encoding before overwriting this file.', '检测到的编码尚未确认'],
+    ["text_unmappable: Character '🙂' (U+1F642) at UTF-16 offset 52 cannot be saved in GBK.", 'GBK 无法保存字符“🙂”'],
+    ['Permission denied at /private/user/note.md:52', '请检查文件是否可写后重试'],
+  ])('localizes the failed save notification and preserves the draft for %s', async (error, expected) => {
+    await i18nInit({ lng: 'cn' })
+    const harness = createHarness('unsaved text 🙂')
+    const toastError = vi.fn()
+    const logError = vi.fn()
+    Object.assign(harness.bindings, {
+      conditionalWriteExpectedIfAllowed: vi.fn().mockRejectedValue(error),
+      t: i18n.t,
+      toast: { error: toastError },
+      logger: { error: logError },
+    })
+    expect(await harness.save()).toBe(false)
+    expect(toastError).toHaveBeenCalledExactlyOnceWith(expect.stringContaining(expected))
+    expect(toastError.mock.calls[0][0]).not.toContain('UTF-16 offset')
+    expect(toastError.mock.calls[0][0]).not.toContain('/private')
+    expect(logError).toHaveBeenCalledWith('Failed to save text file', error)
+    expect(harness.state.dirty).toBe(true)
+    expect(harness.state.editorContent).toBe('unsaved text 🙂')
+    expect(harness.coordinator.getTextMetadata('file').saveError).toBe(
+      getTextFileErrorCode(error) ? error : undefined,
+    )
+  })
+
+  it('sends the destination workspace on the first native write, before rebinding an untitled file', async () => {
+    const harness = createHarness('new document')
+    harness.state.file.path = ''
+    const targetPath = '/workspace/new.md'
+    const historyWorkspaceForPath = vi.fn(() => '/workspace')
+    const write = vi.fn(async () => {
+      expect(harness.state.file.path).toBe('')
+      return { status: 'success', revision: 'disk:saved' }
+    })
+    Object.assign(harness.bindings, {
+      noFileSaveingRef: { current: false },
+      save: vi.fn(async () => targetPath),
+      t: (key: string) => key,
+      flushSync: (update: () => void) => update(),
+      memoizePathRelationResolver: () => vi.fn(),
+      comparePathRelation: vi.fn(),
+      collectSaveAsCollisions: () => ({ protectedIds: [], replaceIds: [] }),
+      collectSaveAsReplaceIds: () => [],
+      runReservedSaveAs,
+      savePathCoordinator: new SavePathCoordinator(),
+      getFileWriteRevision: async () => 'missing',
+      getFileNameFromPath: () => 'new.md',
+      insertNodeToFolderData: vi.fn(),
+      closeCleanPhysicalAliases: vi.fn(),
+      useEditorStore: { getState: () => ({ opened: ['file'], delOpenedFile: vi.fn() }) },
+      conditionalWriteExpectedIfAllowed: write,
+      historyWorkspaceForPath,
+    })
+    expect(await harness.save()).toBe(true)
+    expect(historyWorkspaceForPath).toHaveBeenCalledExactlyOnceWith(targetPath)
+    expect(write).toHaveBeenCalledWith(
+      targetPath, 'new document', 'missing', expect.any(Function), undefined, 'save',
+      expect.objectContaining({ originalFormat: undefined }), '/workspace',
+    )
+    expect(harness.state.file.path).toBe(targetPath)
+  })
+
   it('does not let obsolete runtime progress replace the pane current open request', () => {
     const beginEditorOpenMeasurement = vi.fn(() => 'obsolete-request')
     const recordEditorOpenStage = vi.fn()

@@ -1,4 +1,4 @@
-import { getCapricornRuntimeInput, subscribeCapricornBeforeInput } from './capricornRuntimeDom'
+import { getCapricornRuntimeInput, hasVisiblePendingSourceEditor, subscribeCapricornBeforeInput } from './capricornRuntimeDom'
 
 const DIAGNOSTICS_STORAGE_KEY = 'mf:editor-performance'
 const SNAPSHOT_MODE_STORAGE_KEY = 'mf:editor-snapshot-mode'
@@ -48,6 +48,8 @@ export interface EditorOpenSample {
   /** Host-owned content generation used to reject stale prepared documents. */
   contentRevision?: number
   byteLength?: number
+  /** Opt-in fingerprint of initial decoded UTF-8 content, computed after readiness. */
+  contentSha256?: string
   blockCount?: number
   runtimeVersion?: string
   runtimeEntrySha256?: string
@@ -55,6 +57,7 @@ export interface EditorOpenSample {
   startedAt: number
   duration?: number
   firstInputDuration?: number
+  firstInputTrusted?: boolean
   firstInputCommitDuration?: number
   status: 'opening' | 'ready' | 'canceled' | 'error' | 'unverified'
   stages: {
@@ -365,47 +368,28 @@ export function finishEditorOpenMeasurement(
     window.setTimeout(() => {
       if (!diagnosticsEnabled()) return
       const startedAt = window.performance.now()
-      sample.byteLength = new TextEncoder().encode(pendingContent.content).byteLength
+      const bytes = new TextEncoder().encode(pendingContent.content)
+      sample.byteLength = bytes.byteLength
       const finishedAt = window.performance.now()
       sample.stages.push({
         stage: 'content-measured',
         elapsedMs: finishedAt - sample.startedAt,
         durationMs: finishedAt - startedAt,
       })
+      try {
+        // Reuse the diagnostic encoding. Keep hashing off the ready path and
+        // leave evidence missing when Web Crypto is unavailable or rejects.
+        void globalThis.crypto?.subtle?.digest('SHA-256', bytes).then((hash) => {
+          if (diagnosticsEnabled()) sample.contentSha256 = Array.from(
+            new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, '0'),
+          ).join('')
+        }).catch(() => {})
+      } catch {
+        // Fingerprint availability must not affect opening or editing.
+      }
     }, 0)
   }
   if (!hasOpeningWork()) stopOpeningObservers()
-}
-
-function hasVisiblePendingSourceEditor(container: HTMLElement): boolean {
-  let left = 0
-  let top = 0
-  let right = window.innerWidth
-  let bottom = window.innerHeight
-  // Intersect the actual host/panel viewport, not the full document's height.
-  for (const element of [container, container.closest<HTMLElement>('[data-editor-id]')]) {
-    const rect = element?.getBoundingClientRect()
-    if (!rect || rect.width <= 0 || rect.height <= 0) continue
-    left = Math.max(left, rect.left)
-    top = Math.max(top, rect.top)
-    right = Math.min(right, rect.right)
-    bottom = Math.min(bottom, rect.bottom)
-  }
-  return Array.from(
-    container.querySelectorAll<HTMLElement>('[data-cap-source-editor-pending="true"]'),
-  ).some((element) => {
-    const style = getComputedStyle(element)
-    if (style.display === 'none' || style.visibility === 'hidden') return false
-    const rect = element.getBoundingClientRect()
-    return (
-      rect.width > 0 &&
-      rect.height > 0 &&
-      rect.right > left &&
-      rect.left < right &&
-      rect.bottom > top &&
-      rect.top < bottom
-    )
-  })
 }
 
 /** Confirm an actual, current, visible editable surface across a paint opportunity. */
@@ -429,8 +413,9 @@ export function observeEditorFirstPaint({
   // Capricorn owns a separate React root and body-portal textarea. The host
   // wrapper's capture handler never sees its native beforeinput events.
   let visualInputStartedAt: number | undefined
-  // Multiple native inputs before one paint intentionally collapse to the
-  // latest event. This is a paint-level feedback sample, not a keystroke log.
+  let visualInputTrusted: boolean | undefined
+  // A burst shares its first unpainted input's start. Restarting at the latest
+  // event would hide time already spent waiting for visible feedback.
   let visualInputSequence = 0
   let visualFrame: number | undefined
   const mutationObserver = new MutationObserver((records) => {
@@ -455,13 +440,17 @@ export function observeEditorFirstPaint({
     visualFrame = window.requestAnimationFrame(() => {
       visualFrame = undefined
       if (sequence !== visualInputSequence || visualInputStartedAt === undefined) return
-      appendInteractionSample(fileId, visualInputStartedAt, observedViewId, requestId)
+      appendInteractionSample(fileId, visualInputStartedAt, observedViewId, requestId, visualInputTrusted)
       visualInputStartedAt = undefined
+      visualInputTrusted = undefined
     })
   })
   mutationObserver.observe(container, { characterData: true, childList: true, subtree: true })
-  const removeInputListener = subscribeCapricornBeforeInput(container, () => {
-    visualInputStartedAt = startEditorInteractionMeasurement()
+  const removeInputListener = subscribeCapricornBeforeInput(container, (event) => {
+    if (visualInputStartedAt === undefined) {
+      visualInputStartedAt = startEditorInteractionMeasurement()
+      visualInputTrusted = event.isTrusted === true
+    }
     visualInputSequence += 1
     onBeforeInput?.()
   })
@@ -581,6 +570,7 @@ function appendInteractionSample(
   startedAt: number,
   viewId?: string,
   openRequestId?: string,
+  trusted?: boolean,
 ): void {
   if (!diagnosticsEnabled()) return
   const now = window.performance.now()
@@ -603,7 +593,10 @@ function appendInteractionSample(
       (sample.status === 'opening' &&
         sample.stages.some((stage) => stage.stage === 'surface-committed'))) &&
     sample.firstInputDuration === undefined
-  if (canAttach) sample.firstInputDuration = now - startedAt
+  if (canAttach) {
+    sample.firstInputDuration = now - startedAt
+    sample.firstInputTrusted = trusted
+  }
 }
 
 export function measureEditorSnapshot<T>(

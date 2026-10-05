@@ -148,7 +148,7 @@ function EditorContextMention({
       adapter={mention.adapter}
       aria-label={t('ai.add_context')}
       char='@'
-      className='aui-popover-content absolute bottom-full start-0 z-[var(--mf-layer-popover)] mb-1.5 w-64 max-w-[calc(100vw-1rem)] overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md'
+      className='aui-popover-content absolute bottom-full start-0 z-[var(--mf-layer-popover)] mb-1.5 w-64 max-w-[calc(100vw-1rem)] overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-md'
     >
       <ComposerPrimitive.Unstable_TriggerPopover.Action onExecute={handleMention} removeOnExecute />
       <ComposerPrimitive.Unstable_TriggerPopoverItems>
@@ -161,7 +161,7 @@ function EditorContextMention({
               return (
                 <ComposerPrimitive.Unstable_TriggerPopoverItem
                   key={item.id}
-                  className='flex min-h-8 w-full cursor-default items-center gap-1.5 rounded-sm px-1.5 py-1 text-start text-xs leading-4 outline-none transition-colors hover:bg-control-hover hover:text-content-primary data-[highlighted]:bg-control-hover data-[highlighted]:text-content-primary'
+                  className='flex min-h-7 w-full cursor-default items-center gap-1.5 rounded-sm px-1.5 py-1 text-start text-ui-control outline-none hover:bg-control-hover hover:text-content-primary data-[highlighted]:bg-control-hover data-[highlighted]:text-content-primary'
                   index={index}
                   item={item}
                 >

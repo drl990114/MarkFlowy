@@ -5,6 +5,16 @@ use tauri::menu::{
 };
 use tauri::{App, AppHandle, Emitter};
 
+const QUIT_MENU_ID: &str = "app_quit";
+
+fn handle_app_menu_action(menu_id: &str, request_exit: impl FnOnce(i32)) -> bool {
+    if menu_id != QUIT_MENU_ID {
+        return false;
+    }
+    request_exit(0);
+    true
+}
+
 pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     // let is_dark = app_conf.clone().theme_check("dark");
 
@@ -26,6 +36,13 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
 
     let menu_handler = move |app: &AppHandle, event: MenuEvent| {
         let menu_id = event.id().as_ref();
+
+        // Quit is application-wide, including when no editor window has focus.
+        // AppHandle::exit emits ExitRequested, whose handler waits for each
+        // window's draft protection before destroying it.
+        if handle_app_menu_action(menu_id, |code| app.exit(code)) {
+            return;
+        }
 
         // 获取当前焦点窗口
         if let Some(window) = get_focused_window(app) {
@@ -67,7 +84,12 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
                         .id("About")
                         .build(app)?,
                     &MenuItemBuilder::new("Settings").id("Settings").build(app)?,
-                    &PredefinedMenuItem::quit(app, Some("Quit"))?,
+                    // Muda's predefined macOS Quit invokes Cocoa terminate:
+                    // directly, bypassing Tauri's preventable ExitRequested.
+                    &MenuItemBuilder::new("Quit")
+                        .id(QUIT_MENU_ID)
+                        .accelerator("CmdOrCtrl+Q")
+                        .build(app)?,
                 ],
             )?,
             &Submenu::with_items(
@@ -110,4 +132,27 @@ pub fn generate_menu(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     app.on_menu_event(menu_handler);
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::handle_app_menu_action;
+
+    #[test]
+    fn quit_requests_normal_exit_without_needing_a_focused_window() {
+        let mut requests = Vec::new();
+        let handled = handle_app_menu_action("app_quit", |code| requests.push(code));
+
+        assert!(handled);
+        assert_eq!(requests, [0]);
+    }
+
+    #[test]
+    fn window_menu_actions_do_not_request_an_application_exit() {
+        for menu_id in ["About", "Settings", "app_save", "unknown"] {
+            assert!(!handle_app_menu_action(menu_id, |_| {
+                panic!("A window menu action requested application exit")
+            }));
+        }
+    }
 }

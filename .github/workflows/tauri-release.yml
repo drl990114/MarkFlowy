@@ -6,7 +6,16 @@ on:
       - 'v*'
 
 jobs:
+  quality:
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/test-ci.yml
+    secrets:
+      CAPRICORN_READ_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
   build:
+    needs: quality
     permissions:
       contents: write
       packages: read
@@ -151,6 +160,7 @@ jobs:
             ./target/${{ matrix.target }}/release/bundle/portable/**.zip
 
   build-offline-installer:
+    needs: quality
     permissions:
       contents: write
       packages: read

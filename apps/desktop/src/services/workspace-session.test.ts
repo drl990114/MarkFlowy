@@ -20,8 +20,9 @@ import {
   type WorkspaceCache,
   type WorkspaceCachePersistence,
 } from './workspace-cache'
-import { switchWorkspaceSession } from './workspace-session'
+import { attachWorkspaceSession, switchWorkspaceSession } from './workspace-session'
 import { refreshWorkspaceDirectory } from './workspace-refresh'
+import { markPristineDocument } from './pristine-document'
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn().mockResolvedValue(true) }))
 vi.mock('zens', () => ({ toast: { error: vi.fn() } }))
@@ -93,6 +94,93 @@ describe('workspace editor sessions', () => {
       .reverse()
       .forEach((cleanup) => cleanup())
     await persistence.dispose()
+  })
+
+  it('attaches a folder and merges its history without prompting or replacing edited documents', async () => {
+    useEditorStore.getState().setFolderData(null)
+    const draft = openDocument()
+    editDocument(draft)
+    const saved = openDocument('/two/existing.md')
+    useEditorStore.getState().setActiveId(draft.id)
+    const revision = useEditorStore.getState().editorSessionRevision
+    data.set('/two', { openedFilePaths: ['/two/existing.md', '/two/other.md'], activeFilePath: '/two/other.md' })
+    expect(await switchWorkspaceSession('/two', persistence)).toBe(true)
+    expect(dialog.confirm).not.toHaveBeenCalled()
+    expect(useEditorStore.getState().activeId).toBe(draft.id)
+    expect(useEditorStore.getState().editorSessionRevision).toBe(revision)
+    expect(useEditorStore.getState().opened).toContain(saved.id)
+    expect(openedPaths()).toEqual([undefined, '/two/existing.md', '/two/other.md'])
+    expect(getFileObject(draft.id).content).toBe('unsaved content')
+    expect(useEditorStateStore.getState().idStateMap.get(draft.id)?.hasUnsavedChanges).toBe(true)
+  })
+
+  it.each(['empty', 'pristine', 'new-tab', 'stale-active'] as const)(
+    'activates the cached document when attaching a workspace to a %s window',
+    async (initialState) => {
+      useEditorStore.getState().setFolderData(null)
+      if (initialState === 'pristine') markPristineDocument(openDocument().id)
+      if (initialState === 'new-tab') {
+        const placeholder = createFile({ name: 'New tab', kind: 'new_tab', content: '' })
+        useEditorStore.getState().addOpenedFile(placeholder.id)
+        useEditorStore.getState().setActiveId(placeholder.id)
+      }
+      if (initialState === 'stale-active') useEditorStore.setState({ activeId: 'closed-file' })
+      const revision = useEditorStore.getState().editorSessionRevision
+      data.set('/two', {
+        openedFilePaths: ['/two/first.md', '/two/selected.md'],
+        activeFilePath: '/two/selected.md',
+      })
+
+      expect(await switchWorkspaceSession('/two', persistence)).toBe(true)
+
+      const editor = useEditorStore.getState()
+      expect(openedPaths()).toEqual(['/two/first.md', '/two/selected.md'])
+      expect(getFileObject(editor.activeId!)?.path).toBe('/two/selected.md')
+      expect(editor.getActiveGroup()?.activeId).toBe(editor.activeId)
+      expect(editor.editorSessionRevision).toBe(revision)
+      expect(dialog.confirm).not.toHaveBeenCalled()
+    },
+  )
+
+  it('activates the first restored tab when an attached workspace has no cached active document', async () => {
+    useEditorStore.getState().setFolderData(null)
+    data.set('/two', { openedFilePaths: ['/two/first.md', '/two/second.md'] })
+
+    expect(await switchWorkspaceSession('/two', persistence)).toBe(true)
+
+    const editor = useEditorStore.getState()
+    expect(getFileObject(editor.activeId!)?.path).toBe('/two/first.md')
+    expect(editor.getActiveGroup()?.activeId).toBe(editor.activeId)
+  })
+
+  it('closes only the folder and keeps the split layout and dirty document identities', async () => {
+    const first = openDocument('/one/first.md')
+    const second = openDocument()
+    editDocument(second)
+    useEditorStore.getState().setEditorLayout({ type: 'branch', id: 'split', direction: 'horizontal', sizes: [40, 60], children: [
+      { type: 'leaf', id: 'a', opened: [first.id], activeId: first.id },
+      { type: 'leaf', id: 'b', opened: [second.id], activeId: second.id },
+    ] }, 'b')
+    const previous = useEditorStore.getState()
+    await attachWorkspaceSession(undefined, persistence)
+    expect(useEditorStore.getState().getRootPath()).toBeUndefined()
+    expect(useEditorStore.getState().editorLayout).toBe(previous.editorLayout)
+    expect(useEditorStore.getState().activeId).toBe(second.id)
+    expect(useEditorStore.getState().editorSessionRevision).toBe(previous.editorSessionRevision)
+    expect(dialog.confirm).not.toHaveBeenCalled()
+    expect(getFileObject(second.id).content).toBe('unsaved content')
+  })
+
+  it('leaves a standalone document usable when opening the folder fails', async () => {
+    useEditorStore.getState().setFolderData(null)
+    const draft = openDocument()
+    editDocument(draft)
+    const layout = useEditorStore.getState().editorLayout
+    vi.mocked(readDirectory).mockRejectedValueOnce(new Error('permission denied'))
+    await expect(switchWorkspaceSession('/missing', persistence)).rejects.toThrow('permission denied')
+    expect(useEditorStore.getState().editorLayout).toBe(layout)
+    expect(useEditorStore.getState().getRootPath()).toBeUndefined()
+    expect(getFileObject(draft.id).content).toBe('unsaved content')
   })
 
   it('restores each workspace tab order, selected tab, split layout and active group independently', async () => {

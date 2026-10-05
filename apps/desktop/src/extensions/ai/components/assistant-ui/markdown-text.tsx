@@ -22,6 +22,7 @@ import {
 } from 'react'
 import remarkGfm from 'remark-gfm'
 import { cn } from '@/lib/cn'
+import { compactControlFocus } from '@/components/ui/focus-styles'
 import { TooltipIconButton } from './tooltip-icon-button'
 import { useAssistantLink } from './link-context'
 
@@ -63,7 +64,7 @@ function MarkdownAnchor({ className, href, onClick, onKeyDown, ...props }: Compo
 
   return (
     <a
-      className={cn('text-primary underline underline-offset-2 hover:opacity-80', className)}
+      className={cn(compactControlFocus, 'rounded-sm text-primary underline decoration-primary/50 underline-offset-2 hover:decoration-primary', className)}
       data-href={href}
       onClick={(event) => {
         onClick?.(event)
@@ -117,10 +118,10 @@ const CodeHeader: FC<CodeHeaderProps> = ({ language, code }) => {
   const labels = useContext(MarkdownTextLabelsContext)
 
   return (
-    <div className='mt-2 flex items-center justify-between rounded-t-lg border border-b-0 border-border bg-muted px-2.5 py-1 text-xs'>
+    <div className='mt-2 flex min-h-7 items-center justify-between rounded-t-sm border border-b-0 border-border bg-muted px-2.5 py-0.5 text-ui-caption'>
       <span className='font-medium lowercase text-muted-foreground'>{language}</span>
       <TooltipIconButton
-        className='size-5'
+        className='size-[22px]'
         onClick={() => void copy(code ?? '')}
         tooltip={copied ? labels.copiedCode : labels.copyCode}
       >
@@ -141,6 +142,15 @@ const markdownComponents = memoizeMarkdownComponents({
   h3: ({ className, ...props }) => (
     <h3 className={cn('mb-1 mt-3 text-base font-semibold first:mt-0', className)} {...props} />
   ),
+  h4: ({ className, ...props }) => (
+    <h4 className={cn('mb-1 mt-3 text-ui-body font-semibold first:mt-0', className)} {...props} />
+  ),
+  h5: ({ className, ...props }) => (
+    <h5 className={cn('mb-1 mt-3 text-ui-body font-medium first:mt-0', className)} {...props} />
+  ),
+  h6: ({ className, ...props }) => (
+    <h6 className={cn('mb-1 mt-3 text-ui-body font-medium text-muted-foreground first:mt-0', className)} {...props} />
+  ),
   p: ({ className, ...props }) => (
     <p className={cn('my-2 leading-relaxed first:mt-0 last:mb-0', className)} {...props} />
   ),
@@ -152,7 +162,7 @@ const markdownComponents = memoizeMarkdownComponents({
   ),
   ul: ({ className, ...props }) => (
     <ul
-      className={cn('my-2 ms-4 list-disc marker:text-muted-foreground [&>li]:mt-0.5', className)}
+      className={cn('my-2 ms-4 list-disc marker:text-muted-foreground [&>li]:mt-0.5 [&>li.task-list-item]:relative [&>li.task-list-item]:list-none [&>li.task-list-item>input]:absolute [&>li.task-list-item>input]:-start-4 [&>li.task-list-item>input]:top-[0.3em]', className)}
       {...props}
     />
   ),
@@ -179,10 +189,19 @@ const markdownComponents = memoizeMarkdownComponents({
       {...props}
     />
   ),
+  hr: ({ className, ...props }) => (
+    <hr className={cn('my-4 border-0 border-t border-border', className)} {...props} />
+  ),
+  img: ({ className, ...props }) => (
+    <img className={cn('my-2 h-auto max-w-full rounded-sm', className)} {...props} />
+  ),
+  input: ({ className, ...props }) => (
+    <input className={cn('size-3.5 align-middle accent-primary', className)} {...props} />
+  ),
   pre: ({ className, ...props }) => (
     <pre
       className={cn(
-        'overflow-x-auto rounded-b-lg rounded-t-none border border-t-0 border-border bg-muted p-2.5 text-xs leading-relaxed',
+        'overflow-x-auto rounded-b-sm rounded-t-none border border-t-0 border-border bg-muted p-2.5 text-ui-control leading-[1.6]',
         className,
       )}
       {...props}
@@ -193,7 +212,7 @@ const markdownComponents = memoizeMarkdownComponents({
     return (
       <code
         className={cn(
-          !isBlock && 'rounded-sm bg-muted px-1 py-0.5 font-mono text-[0.85em]',
+          !isBlock && 'rounded-sm bg-muted px-1 py-0.5 font-mono text-[0.9em]',
           className,
         )}
         {...props}

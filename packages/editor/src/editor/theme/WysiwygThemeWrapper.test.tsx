@@ -23,6 +23,21 @@ function renderWrapperStyles() {
 }
 
 describe('WysiwygThemeWrapper visual overrides', () => {
+  it('applies the host selection foreground as well as its background', () => {
+    const css = renderWrapperStyles()
+
+    expect(css).toMatch(/::selection[^}]*background-color:var\(--rme-editor-selection-bg,/)
+    expect(css).toContain('color:var(--rme-editor-selection-foreground,')
+  })
+
+  it('limits embedded code typography overrides to CodeMirror and permits Frontmatter line numbers', () => {
+    const css = renderWrapperStyles()
+    expect(css).toMatch(/\.cm-editor\{[^}]*font-size:var\(--rme-code-font-size,/)
+    expect(css).toMatch(/\.cm-editor\{[^}]*line-height:var\(--rme-code-line-height,/)
+    expect(css).not.toMatch(/code,[^{]*tt\{[^}]*--rme-code-font-size/)
+    expect(css).not.toMatch(/data-front-matter[^}]*display:none/)
+  })
+
   it('keeps the existing editor values as fallbacks when host variables are absent', () => {
     const css = renderWrapperStyles()
 

@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import type { FC, JSX, MouseEvent, ReactNode } from 'react'
 
 import styled from 'styled-components'
-import { Ariakit, Tooltip } from 'zens'
+import { ToolbarButton, Tooltip } from 'zens'
 import { useCommandOptionValues } from '../use-command-option-values'
 import type { UseCommandOptionValuesParams } from '../use-command-option-values'
 import { CommandButtonIcon } from './command-button-icon'
@@ -73,7 +73,7 @@ export const CommandButton: FC<CommandButtonProps> = ({
   )
 }
 
-const Container = styled(Ariakit.ToolbarItem)`
+const Container = styled(ToolbarButton)`
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -28,10 +28,10 @@ describe.skipIf(!isCapricornRuntimeAvailable)('published Capricorn runtime', () 
     document.body.append(container)
 
     expect(CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS).toEqual({
-      bufferRange: 900,
+      bufferRange: 3600,
       enable: true,
       enableScrollAnchoring: true,
-      firstPaintBlockSize: 40,
+      firstPaintBlockSize: 96,
     })
 
     session = (createCapricornRuntime as CapricornRuntimeFactory)(container, {

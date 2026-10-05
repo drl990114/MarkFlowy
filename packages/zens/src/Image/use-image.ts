@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import imagePromiseFactory from './imagePromiseFactory';
 
@@ -11,7 +11,11 @@ export type useImageProps = {
 
 const removeBlankArrayElements = (a) => a.filter((x) => x);
 const stringToArray = (x) => (Array.isArray(x) ? x : [x]);
-const cache = {};
+const defaultImgPromise = imagePromiseFactory({ decode: true });
+// A custom loader can return an owner-scoped Blob URL. Reusing that URL across
+// loaders bypasses the new owner's acquisition and can reuse a revoked URL.
+// Weak keys also let an unmounted loader's resolved-source cache be collected.
+const cachesByLoader = new WeakMap();
 
 // sequential map.find for promises
 const promiseFind = (arr, promiseFactory) => {
@@ -37,7 +41,7 @@ const promiseFind = (arr, promiseFactory) => {
 
 export default function useImage({
   srcList,
-  imgPromise = imagePromiseFactory({ decode: true }),
+  imgPromise = defaultImgPromise,
   useSuspense = true,
 }: useImageProps): { src: string | undefined; isLoading: boolean; error: any } {
   const [, setIsSettled] = useState(false);
@@ -45,6 +49,12 @@ export default function useImage({
   const sourceKey = sourceList.join('');
   if (sourceList.length === 0) {
     return { src: undefined, isLoading: false, error: null };
+  }
+
+  let cache = cachesByLoader.get(imgPromise);
+  if (!cache) {
+    cache = {};
+    cachesByLoader.set(imgPromise, cache);
   }
 
   if (!cache[sourceKey]) {

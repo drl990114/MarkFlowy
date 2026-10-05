@@ -1,27 +1,19 @@
-import { useContext } from 'react';
-import { Toaster } from 'sonner';
-import { ThemeContext } from 'styled-components';
+import { Toaster } from 'sonner'
+import { useComponentThemeMode, useComponentThemeStyle } from '../Theme/components-theme'
 
-export { toast } from 'sonner';
+export { toast } from 'sonner'
+export type Variant = 'default' | 'error' | 'warning' | 'info' | 'success'
 
-export type Variant = 'default' | 'error' | 'warning' | 'info' | 'success';
-
-export const Notifications = () => {
-  const context = useContext(ThemeContext);
-
+export function Notifications() {
+  const style = useComponentThemeStyle({
+    borderColor: 'var(--mf-border)',
+    borderRadius: 'var(--mf-radius-sm)',
+    color: 'var(--mf-foreground)',
+    background: 'var(--mf-background)',
+    fontFamily: 'var(--mf-ui-font-family)',
+  })
+  const mode = useComponentThemeMode()
   return (
-    <Toaster
-      expand={false}
-      closeButton
-      toastOptions={{
-        style: {
-          borderColor: context?.borderColor,
-          borderRadius: context?.smallBorderRadius,
-          color: context?.primaryFontColor,
-          background: context?.bgColor,
-        },
-        duration: 5000,
-      }}
-    />
-  );
-};
+    <Toaster theme={mode} expand={false} closeButton toastOptions={{ style, duration: 5000 }} />
+  )
+}

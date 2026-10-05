@@ -52,6 +52,10 @@ export class EditorSnapshotRegistry {
     return this.sources.getAll(fileId).some((source) => source.hasPending())
   }
 
+  hasSources(fileId: string): boolean {
+    return this.sources.getAll(fileId).length > 0
+  }
+
   publish(fileId: string, instanceId: string, publish: () => boolean): boolean {
     if (!this.sources.get(fileId, instanceId)) return false
     const publishing = this.publishing.get(fileId) ?? new Set<string>()

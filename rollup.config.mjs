@@ -13,13 +13,19 @@ import url from '@rollup/plugin-url'
  * @returns {import('rollup').RollupOptions}
  */
 export function createConfig({ input = 'index.ts', pkg, external = [] }) {
+  const dependencies = Object.keys(pkg.dependencies || {}).concat(
+    Object.keys(pkg.peerDependencies || {}),
+  )
+  const externalModules = new Set([...builtinModules, ...external])
+  // Package externals also cover subpaths injected by compilers, such as react/jsx-runtime.
+  const isExternal = (id) =>
+    externalModules.has(id) ||
+    dependencies.some((dependency) => id === dependency || id.startsWith(`${dependency}/`))
+
   return [
     {
       input,
-      external: Object.keys(pkg.dependencies || {})
-        .concat(Object.keys(pkg.peerDependencies || {}))
-        .concat(builtinModules)
-        .concat(external),
+      external: isExternal,
       onwarn: (warning) => {
         throw Object.assign(new Error(), warning)
       },
@@ -65,11 +71,7 @@ export function createConfig({ input = 'index.ts', pkg, external = [] }) {
         sourcemap: true,
         entryFileNames: '[name].js',
       },
-      external: Object.keys(pkg.dependencies || {})
-        .concat(Object.keys(pkg.peerDependencies || {}))
-        .concat(builtinModules)
-        .concat(external)
-        .concat(['styled-components', 'color']),
+      external: (id) => isExternal(id) || id === 'styled-components' || id === 'color',
       plugins: [
         resolve(),
         url({

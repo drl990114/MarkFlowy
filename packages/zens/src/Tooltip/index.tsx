@@ -1,78 +1,66 @@
-import React from 'react';
-import styled from 'styled-components';
-import * as Ariakit from '@ariakit/react';
-import * as S from './styles';
-import { Box } from '../Box';
+import { isValidElement, type ComponentProps, type ReactNode } from 'react'
+import {
+  Tooltip as ComponentTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  type TooltipContentProps,
+} from '../components/tooltip'
 
+type TooltipSide = NonNullable<TooltipContentProps['side']>
 export type TooltipOptions = {
-  children: React.ReactNode;
-  title: BaseComponentProps['children'];
-  fixed?: boolean;
-} & Pick<Ariakit.TooltipStoreProps, 'placement'>;
-
-export interface TooltipProps
-  extends BaseComponentProps,
-    TooltipOptions,
-    Ariakit.TooltipProviderProps {
-  title: string;
-  children: BaseComponentProps['children'];
+  children: ReactNode
+  title: ReactNode
+  fixed?: boolean
+  placement?: TooltipSide | `${TooltipSide}-start` | `${TooltipSide}-end`
 }
 
-const TooltipWrapper = styled.div`
-  border-radius: 0.375rem;
-  border-width: 1px;
-  border-color: ${(props) => props.theme.borderColor};
-  background-color: ${(props) => props.theme.tooltipBgColor};
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  font-size: ${(props) => props.theme.fontXs};
-  line-height: 1.25rem;
-  color: ${(props) => props.theme.primaryFontColor};
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-`;
+export type TooltipProps = TooltipOptions &
+  Omit<TooltipContentProps, 'children' | 'title'> &
+  Pick<ComponentProps<typeof ComponentTooltip>, 'open' | 'defaultOpen' | 'onOpenChange'> & {
+    showTimeout?: number
+    skipTimeout?: number
+  }
 
-const Tooltip = ({
+/** Compatibility names only; the shared Radix primitive owns all tooltip behavior. */
+export default function Tooltip({
   children,
   title,
   fixed = false,
   placement = fixed ? 'top' : 'bottom',
   open,
-  popover: _popover,
-  hideTimeout = 0,
-  showTimeout = 0,
+  defaultOpen,
+  onOpenChange,
+  showTimeout = 100,
   skipTimeout = 0,
-  timeout = 0,
-  ...rest
-}: TooltipProps) => {
-  const child = (children as JSX.Element)?.props?.disabled
-    ? React.Children.only(<S.ChildItem>{children}</S.ChildItem>)
-    : children;
+  ...contentProps
+}: TooltipProps) {
+  if (!title) return children
 
-  // If no content, simply return the children
-  if (!title) {
-    return children as React.ReactElement;
-  }
+  const [side, alignment] = placement.split('-') as [TooltipSide, 'start' | 'end' | undefined]
+  const child =
+    isValidElement<{ disabled?: boolean }>(children) && children.props.disabled ? (
+      <span
+        className='mfc:inline-flex mfc:focus-visible:outline-2 mfc:focus-visible:outline-ring mfc:focus-visible:outline-offset-2'
+        tabIndex={0}
+        aria-label={typeof title === 'string' ? title : undefined}
+      >
+        {children}
+      </span>
+    ) : (
+      children
+    )
 
   return (
-    <Ariakit.TooltipProvider
-      hideTimeout={hideTimeout}
-      open={open}
-      placement={placement}
-      showTimeout={showTimeout}
-      skipTimeout={skipTimeout}
-      timeout={timeout}
-    >
-      <Ariakit.TooltipAnchor render={child} />
-      <Ariakit.Tooltip render={p => {
-        const { popover: __, ...boxProps } = p;
-        return <Box style={{ zIndex: 99 }} {...boxProps as React.HTMLAttributes<HTMLDivElement>} {...rest} />;
-      }}>
-        <TooltipWrapper>{title}</TooltipWrapper>
-      </Ariakit.Tooltip>
-    </Ariakit.TooltipProvider>
-  );
-};
-
-export default Tooltip;
+    <TooltipProvider delayDuration={showTimeout} skipDelayDuration={skipTimeout}>
+      <ComponentTooltip open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange}>
+        <TooltipTrigger asChild tabIndex={0} type={undefined}>
+          {child}
+        </TooltipTrigger>
+        <TooltipContent side={side} align={alignment ?? 'center'} {...contentProps}>
+          {title}
+        </TooltipContent>
+      </ComponentTooltip>
+    </TooltipProvider>
+  )
+}

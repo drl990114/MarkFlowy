@@ -1,4 +1,5 @@
 import { getFileObject } from '@/helper/files'
+import { toFileMetadata } from '@/helper/fileMetadata'
 import { beginEditorOpenMeasurement } from '@/components/EditorArea/editorPerformanceDiagnostics'
 import { editorSnapshotRegistry } from '@/components/EditorArea/editorSnapshotRegistry'
 import { createFile, FileResultCode, getFolderPathFromPath, isMdFile, releaseSecurityScope, type IFile } from '@/helper/filesys'
@@ -205,6 +206,11 @@ const removeFileFromAllGroups = (node: EditorLayoutNode, id: string) => {
   getAllGroups(node).forEach((group) => closeFileInGroup(group, id))
 }
 
+const copyActiveEditorGroup = (node: EditorLayoutLeaf) => {
+  const activeId = node.activeId || node.opened[0]
+  return createEditorLeaf(activeId ? [activeId] : [], activeId)
+}
+
 const splitGroupInLayout = (
   node: EditorLayoutNode,
   groupId: string,
@@ -214,8 +220,7 @@ const splitGroupInLayout = (
   if (isEditorLeaf(node)) {
     if (node.id !== groupId) return { node }
 
-    const copiedActiveId = node.activeId || node.opened[0]
-    const newGroup = createEditorLeaf(copiedActiveId ? [copiedActiveId] : [], copiedActiveId)
+    const newGroup = copyActiveEditorGroup(node)
     const children = insertion === 'before' ? [newGroup, node] : [node, newGroup]
 
     return {
@@ -235,8 +240,7 @@ const splitGroupInLayout = (
 
   for (const child of node.children) {
     if (isEditorLeaf(child) && child.id === groupId) {
-      const copiedActiveId = child.activeId || child.opened[0]
-      newGroup = createEditorLeaf(copiedActiveId ? [copiedActiveId] : [], copiedActiveId)
+      newGroup = copyActiveEditorGroup(child)
 
       if (node.direction === direction) {
         if (insertion === 'before') {
@@ -447,6 +451,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     activeGroupId: initialEditorLayout.id,
     editorLayout: initialEditorLayout,
     folderData: null,
+    editorSessionRevision: 0,
     editorDelegateMap: new Map(),
     editorCtxMap: new Map(),
 
@@ -469,7 +474,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
           ...target,
         })
 
-        parent.children!.push(targetFile)
+        parent.children!.push(toFileMetadata(targetFile))
         addOpenedFile(targetFile.id)
         await invoke('write_file', {
           filePath: targetFile.path,
@@ -489,6 +494,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     },
 
     insertNodeToFolderData: (fileNode, replacedIds = []) => {
+      if (fileNode) fileNode = toFileMetadata(fileNode)
       set((state) => {
         const root = state.folderData?.[0]
         if (!fileNode || !root) return state
@@ -515,10 +521,11 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
         if (replacement) {
           const { index, parent, previousFile } = replacement
           parent.children ??= []
-          parent.children.splice(Math.min(index, parent.children.length), 0, {
-            ...previousFile,
-            ...fileNode,
-          })
+          parent.children.splice(
+            Math.min(index, parent.children.length),
+            0,
+            toFileMetadata({ ...previousFile, ...fileNode }),
+          )
           replacementIds.forEach((id) => removeFileFromAllGroups(state.editorLayout, id))
           const synced = commitEditorLayoutState(state.editorLayout, state.activeGroupId)
 
@@ -548,10 +555,10 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
         }
 
         const previousFile = parent.children[sameFileIndex]
-        parent.children[sameFileIndex] = {
+        parent.children[sameFileIndex] = toFileMetadata({
           ...previousFile,
           ...fileNode,
-        }
+        })
 
         const synced =
           previousFile.id === fileNode.id
@@ -903,7 +910,8 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
 
       set((state) => ({
         ...state,
-        folderData,
+        folderData: folderData?.map(toFileMetadata) ?? null,
+        editorSessionRevision: state.editorSessionRevision + 1,
         editorLayout,
         activeGroupId: editorLayout.id,
         opened: [],
@@ -914,7 +922,7 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     setFolderDataPure: (folderData) =>
       set((state) => ({
         ...state,
-        folderData,
+        folderData: folderData?.map(toFileMetadata) ?? null,
       })),
 
     setEditorCtx: (id, ctx) =>
@@ -1005,13 +1013,14 @@ type EditorStore = {
   closeGroup: (groupId: string) => void
   setBranchSizes: (branchId: string, sizes: number[]) => void
   setEditorLayout: (editorLayout: EditorLayoutNode, activeGroupId?: string) => void
+  editorSessionRevision: number
   setFolderData: (folderData: IFile[] | null) => void
   /**
    * dont change opened and activeId
    * @param folderData
    * @returns
    */
-  setFolderDataPure: (folderData: IFile[]) => void
+  setFolderDataPure: (folderData: IFile[] | null) => void
   setEditorDelegate: (id: string, delegate: EditorDelegate<any>) => void
   clearEditorDelegate: (id: string) => void
   getEditorContent: (id: string) => string

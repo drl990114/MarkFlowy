@@ -62,7 +62,9 @@ function createHostChangeHandler(bindings: Record<string, unknown>) {
   const compiled = ts.transpileModule(`(${callback!.getText(source)})`, {
     compilerOptions: { target: ts.ScriptTarget.ES2022 },
   }).outputText
-  return runInNewContext(compiled, bindings) as (event?: CapricornEditorChangeEvent) => void
+  return runInNewContext(compiled, { protectLocalEdit: vi.fn(), ...bindings }) as (
+    event?: CapricornEditorChangeEvent,
+  ) => void
 }
 
 vi.mock('./capricornRuntimeAdapter', async (importOriginal) => ({
@@ -87,7 +89,140 @@ function createMountAdapter(markdown = '# Markdown') {
   } as unknown as CapricornRuntimeAdapter
 }
 
+describe('CapricornEditor native link navigation', () => {
+  async function mountLink(
+    options: CapricornRuntimeModule.CapricornRuntimeOptions,
+    href = 'https://github.com/drl990114/MarkFlowy',
+  ) {
+    const link = document.createElement('a')
+    link.setAttribute('href', href)
+    const image = document.createElement('img')
+    image.alt = 'GitHub Repo stars'
+    link.append(image)
+    vi.mocked(loadCapricornRuntimeFactory).mockResolvedValue(vi.fn())
+    vi.mocked(createCapricornRuntimeAdapter).mockImplementation(({ container }) => {
+      // Model a rendered fragment with no per-anchor React event handler.
+      container.append(link)
+      return createMountAdapter()
+    })
+    const onError = vi.fn()
+    render(
+      <CapricornEditor
+        active
+        initialMarkdown='# Markdown'
+        onChange={vi.fn()}
+        onError={onError}
+        onUnavailable={onError}
+        options={options}
+      />,
+    )
+    await waitFor(() => expect(createCapricornRuntimeAdapter).toHaveBeenCalledOnce())
+    return { image, link, onError }
+  }
+
+  it.each(['edit', 'preview'] as const)(
+    'routes unhandled badge clicks, Enter and middle clicks through the host in %s mode',
+    async (mode) => {
+      const handleLinkClick = vi.fn()
+      const { image, link } = await mountLink({ mode, handleLinkClick })
+      for (const href of [
+        'https://github.com/drl990114/MarkFlowy?tab=readme-ov-file#download',
+        './my%20notes/中文.md#下载',
+        '#heading',
+      ]) {
+        link.setAttribute('href', href)
+        for (const event of [
+          new MouseEvent('click', { bubbles: true, cancelable: true }),
+          new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+          new MouseEvent('auxclick', { button: 1, bubbles: true, cancelable: true }),
+        ]) {
+          handleLinkClick.mockClear()
+          await act(async () => {
+            fireEvent(image, event)
+            expect(event.defaultPrevented).toBe(true)
+          })
+          expect(handleLinkClick).toHaveBeenCalledExactlyOnceWith(href)
+        }
+      }
+    },
+  )
+
+  it.each(['edit', 'preview'] as const)(
+    'blocks native navigation without an opener, including empty hrefs, in %s mode',
+    async (mode) => {
+      const { image, link } = await mountLink({ mode })
+      for (const href of ['https://github.com/drl990114/MarkFlowy', '']) {
+        link.setAttribute('href', href)
+        const event = new MouseEvent('click', { bubbles: true, cancelable: true })
+        fireEvent(image, event)
+        expect(event.defaultPrevented).toBe(true)
+      }
+    },
+  )
+
+  it('keeps navigation cancelled when the host opener rejects', async () => {
+    const error = new Error('Unable to open link')
+    const handleLinkClick = vi.fn().mockRejectedValue(error)
+    const { image, onError } = await mountLink({ handleLinkClick })
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true })
+    await act(async () => fireEvent(image, event))
+    expect(event.defaultPrevented).toBe(true)
+    expect(onError).toHaveBeenCalledExactlyOnceWith(error)
+  })
+
+  it('leaves context-menu and non-activation keys alone', async () => {
+    const handleLinkClick = vi.fn()
+    const { image } = await mountLink({ handleLinkClick })
+    for (const event of [
+      new MouseEvent('auxclick', { button: 2, bubbles: true, cancelable: true }),
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+      new KeyboardEvent('keydown', {
+        key: 'Enter',
+        isComposing: true,
+        bubbles: true,
+        cancelable: true,
+      }),
+    ]) {
+      fireEvent(image, event)
+      expect(event.defaultPrevented).toBe(false)
+    }
+    expect(handleLinkClick).not.toHaveBeenCalled()
+  })
+})
+
 describe('CapricornEditor typography', () => {
+  it('associates synchronous stage timings with the current open request and ignores late callbacks', async () => {
+    const adapter = createMountAdapter('short document')
+    const onOpenProgress = vi.fn()
+    let report: CapricornRuntimeModule.CapricornRuntimeOptions['onProgress']
+    vi.mocked(loadCapricornRuntimeFactory).mockResolvedValue(vi.fn())
+    vi.mocked(createCapricornRuntimeAdapter).mockImplementationOnce(({ options }) => {
+      report = options?.onProgress
+      report?.({ stage: 'parse', elapsedMs: 2, durationMs: 2 })
+      report?.({ stage: 'controller', elapsedMs: 5, durationMs: 3 })
+      return adapter
+    })
+    const view = render(
+      <CapricornEditor
+        active
+        initialMarkdown='short document'
+        options={{}}
+        onChange={vi.fn()}
+        onError={vi.fn()}
+        onUnavailable={vi.fn()}
+        onOpenProgress={onOpenProgress}
+      />,
+    )
+    await waitFor(() => expect(createCapricornRuntimeAdapter).toHaveBeenCalledOnce())
+    expect(onOpenProgress).toHaveBeenCalledWith(
+      { stage: 'controller', elapsedMs: 5, durationMs: 3 },
+      { contentRevision: 0, runtimeRequestSequence: 1 },
+    )
+    view.unmount()
+    const calls = onOpenProgress.mock.calls.length
+    report?.({ stage: 'ready', elapsedMs: 9 })
+    expect(onOpenProgress).toHaveBeenCalledTimes(calls)
+  })
   it('updates placeholder settings on the mounted editor without publishing content', async () => {
     const adapter = createMountAdapter('Unsaved text')
     vi.mocked(loadCapricornRuntimeFactory).mockResolvedValue(vi.fn())
@@ -246,6 +381,125 @@ describe('CapricornEditor background preparation', () => {
     expect(adapter.destroy).not.toHaveBeenCalled()
     expect(props.onChange).not.toHaveBeenCalled()
   })
+
+  it('applies the latest body direction before exposing a prepared editor and updates it in place', async () => {
+    const adapter = createMountAdapter(largeMarkdown)
+    let complete!: (adapter: CapricornRuntimeAdapter) => void
+    vi.mocked(loadCapricornRuntimeAsyncFactory).mockResolvedValue(vi.fn())
+    vi.mocked(createCapricornRuntimeAdapterAsync).mockReturnValue(
+      new Promise((resolve) => {
+        complete = resolve
+      }),
+    )
+    const props = baseProps()
+    const onEditorChange = vi.fn((editor: CapricornRuntimeAdapter | null) => {
+      if (editor)
+        expect(adapter.updateSettings).toHaveBeenLastCalledWith(
+          expect.objectContaining({ textDirection: 'rtl' }),
+        )
+    })
+    const { rerender } = render(
+      <CapricornEditor
+        {...props}
+        onEditorChange={onEditorChange}
+        options={{ textDirection: 'auto' }}
+      />,
+    )
+    await waitFor(() => expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce())
+    expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledWith(
+      expect.objectContaining({ options: expect.objectContaining({ textDirection: 'auto' }) }),
+    )
+    rerender(
+      <CapricornEditor
+        {...props}
+        onEditorChange={onEditorChange}
+        options={{ textDirection: 'rtl' }}
+      />,
+    )
+    await act(async () => complete(adapter))
+    expect(onEditorChange).toHaveBeenCalledWith(adapter)
+    for (const textDirection of ['ltr', 'auto'] as const) {
+      rerender(
+        <CapricornEditor {...props} onEditorChange={onEditorChange} options={{ textDirection }} />,
+      )
+      expect(adapter.updateSettings).toHaveBeenLastCalledWith(
+        expect.objectContaining({ textDirection }),
+      )
+    }
+    expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce()
+    expect(adapter.destroy).not.toHaveBeenCalled()
+    expect(props.onChange).not.toHaveBeenCalled()
+  })
+
+  it('applies code settings changed during preparation before attachment and resets them in place', async () => {
+    const adapter = createMountAdapter(largeMarkdown)
+    let complete!: (adapter: CapricornRuntimeAdapter) => void
+    vi.mocked(loadCapricornRuntimeAsyncFactory).mockResolvedValue(vi.fn())
+    vi.mocked(createCapricornRuntimeAdapterAsync).mockReturnValue(new Promise((resolve) => { complete = resolve }))
+    const props = baseProps()
+    const { rerender } = render(<CapricornEditor {...props} options={{ codeEditor: {} }} />)
+    await waitFor(() => expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce())
+    rerender(<CapricornEditor {...props} options={{ codeEditor: { lineNumbers: 'off', indentSize: 8 } }} />)
+    await act(async () => complete(adapter))
+    expect(adapter.updateSettings).toHaveBeenLastCalledWith(expect.objectContaining({
+      codeEditor: { lineNumbers: 'off', indentSize: 8 },
+    }))
+    rerender(<CapricornEditor {...props} options={{ codeEditor: {} }} />)
+    expect(adapter.updateSettings).toHaveBeenLastCalledWith(expect.objectContaining({ codeEditor: {} }))
+    expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce()
+    expect(adapter.destroy).not.toHaveBeenCalled()
+    expect(props.onChange).not.toHaveBeenCalled()
+  })
+
+  it.each([false, true])(
+    'reconciles caret animation changed from %s during preparation and resets omitted settings in place',
+    async (initialCaretAnimation) => {
+      const adapter = createMountAdapter(largeMarkdown)
+      let complete!: (adapter: CapricornRuntimeAdapter) => void
+      vi.mocked(loadCapricornRuntimeAsyncFactory).mockResolvedValue(vi.fn())
+      vi.mocked(createCapricornRuntimeAdapterAsync).mockReturnValue(
+        new Promise((resolve) => {
+          complete = resolve
+        }),
+      )
+      const props = baseProps()
+      const nextCaretAnimation = initialCaretAnimation ? undefined : true
+      const onEditorChange = vi.fn((editor: CapricornRuntimeAdapter | null) => {
+        if (editor)
+          expect(adapter.updateSettings).toHaveBeenLastCalledWith(
+            expect.objectContaining({ caretAnimation: nextCaretAnimation ?? false }),
+          )
+      })
+      const { rerender } = render(
+        <CapricornEditor
+          {...props}
+          onEditorChange={onEditorChange}
+          options={{ caretAnimation: initialCaretAnimation }}
+        />,
+      )
+      await waitFor(() => expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce())
+      rerender(
+        <CapricornEditor
+          {...props}
+          onEditorChange={onEditorChange}
+          options={{ caretAnimation: nextCaretAnimation }}
+        />,
+      )
+      await act(async () => complete(adapter))
+      expect(onEditorChange).toHaveBeenCalledWith(adapter)
+      for (const caretAnimation of [false, true, undefined]) {
+        rerender(
+          <CapricornEditor {...props} onEditorChange={onEditorChange} options={{ caretAnimation }} />,
+        )
+        expect(adapter.updateSettings).toHaveBeenLastCalledWith(
+          expect.objectContaining({ caretAnimation: caretAnimation ?? false }),
+        )
+      }
+      expect(createCapricornRuntimeAdapterAsync).toHaveBeenCalledOnce()
+      expect(adapter.destroy).not.toHaveBeenCalled()
+      expect(props.onChange).not.toHaveBeenCalled()
+    },
+  )
 
   it('applies shortcut settings changed during preparation and after attachment without remounting', async () => {
     const adapter = createMountAdapter(largeMarkdown)

@@ -12,10 +12,10 @@ This file applies to the entire repository. If a subdirectory contains a more sp
 ## Repository and Package Boundaries
 
 - `apps/desktop`: the React/Vite/Tauri desktop application. Keep Desktop-specific interactions and styles here.
-- `apps/desktop/src/components/ui`: the facade for shared Desktop UI primitives. It should contain only generic presentation and interaction behavior and must not depend on business stores, i18n, Tauri services, or a specific feature.
+- `apps/desktop/src/components/ui`: the Desktop import facade for shared primitives implemented in `packages/zens/src/components`. Re-export or thinly adapt the shared implementation; do not duplicate it. The facade must not depend on business stores, i18n, Tauri services, or a specific feature.
 - `apps/desktop/src/components`: reusable Desktop composite components shared across features. Keep feature-private components close to their corresponding `router`, `extensions`, or other feature directory.
 - `packages/interface`: components and interfaces that genuinely need to be reused across applications. It must not import `@/...`, the Desktop UI facade, or Tauri APIs, and it must not depend on Desktop's Tailwind content scanning.
-- `packages/zens`: the existing shared UI library. Ariakit and styled-components are internal implementation details of this package. Desktop may maintain existing usages, but new Desktop UI must not use zens Button or Dialog as its foundation.
+- `packages/zens`: the shared Radix + Tailwind component library. Generic primitives belong in `src/components`; retained convenience adapters live beside them. It must not depend on Desktop aliases, stores, i18n, Tauri, or host Tailwind scanning. Keep styled-components only for the legacy theme bridge.
 - `packages/theme`: the source of shared themes and legacy styled tokens. Do not move application styles here for a single Desktop component.
 - Do not directly edit build outputs such as `dist`, `lib`, `esm`, or generated declarations.
 
@@ -23,11 +23,11 @@ This file applies to the entire repository. If a subdirectory contains a more sp
 
 Choose in the following order:
 
-1. When adding a shared Desktop primitive, use or extend the shadcn/Radix facade in `apps/desktop/src/components/ui`. Business code must import from `@/components/ui/*` instead of assembling Radix primitives directly.
-2. Prefer Tailwind for new Desktop components and local styles. Use CVA for variants, `@/lib/cn` for class-name merging, and follow neighboring components' `data-slot` naming conventions.
+1. Implement shared primitives in `packages/zens/src/components` using the existing Radix conventions, then expose them through `apps/desktop/src/components/ui`. Desktop business code must import from `@/components/ui/*` instead of assembling Radix primitives directly; other workspaces may import the shared zens components.
+2. Prefer Tailwind for new components and local styles. Use CVA for variants and follow neighboring components' `data-slot` naming conventions. Shared zens classes use the `mfc:` prefix and its local class-merging helper; Desktop classes remain unprefixed and use `@/lib/cn`.
 3. Use styled-components only to maintain existing styled layouts, legacy complex styles that depend heavily on `props.theme`, or third-party components without a suitable `className` API. Do not use it to create new foundational primitives such as Button, Dialog, or Input, and do not opportunistically rewrite untouched legacy pages.
 4. Use plain CSS for global contracts, fonts, keyframes, scrollbars, browser or Tauri behavior, third-party class selectors, or state styles that span multiple React trees. Keep local CSS with its feature. Namespace new first-party global classes with `mf-`; third-party integrations and existing features should retain their established namespace, such as `aui-`, while avoiding global pollution. Do not recreate existing UI primitives with plain CSS.
-5. Use Ariakit only when maintaining or extending `packages/zens`. New Desktop primitives must use Radix. Do not mix Ariakit and Radix focus, Portal, or dismiss mechanisms within the same primitive.
+5. Use Radix for primitive interaction, focus, Portals, and dismissal. Do not reintroduce Ariakit or a parallel focus/dismiss implementation.
 
 Keep migrations scoped to the code being touched. A component currently being reworked may be fully migrated to the new facade, but unrelated pages must not be migrated as a side effect.
 
@@ -44,10 +44,10 @@ Keep migrations scoped to the code being touched. A component currently being re
 ## Theme and Tailwind
 
 - Use semantic classes and tokens such as `bg-background`, `text-foreground`, `border-border`, `bg-primary`, `text-muted-foreground`, and `bg-destructive`. Do not copy shadcn's default neutral or slate colors, and do not hard-code light, dark, or brand colors.
-- Tailwind tokens are defined in `apps/desktop/src/ui.css`. The active theme is mapped to `--mf-*` variables by `DesktopSpecificStyles` in `apps/desktop/src/globalStyles.ts`.
-- When adding a semantic token, provide both a `:root` fallback in `ui.css` and a runtime mapping in `DesktopSpecificStyles`. If a semantic utility must be generated, also add an `@theme inline` mapping.
+- Shared Tailwind tokens and fallback variables are defined in `packages/zens/src/styles.css`; the package emits its own `esm/styles.css` and `lib/styles.css`. Load shared CSS once at each host entry. Shared rules use the `mf-components` layer so host `utilities` can override them. Desktop tokens remain in `apps/desktop/src/ui.css`, with the active theme mapped to `--mf-*` variables by `DesktopSpecificStyles` in `apps/desktop/src/globalStyles.ts`.
+- When adding a shared semantic token, update the zens CSS fallback, `@theme inline` mapping, and component theme adapter. For a Desktop-specific token, provide both a `:root` fallback in `ui.css` and a runtime mapping in `DesktopSpecificStyles`. Keep Portal theme variables scoped to their owning provider, including nested editor instances.
 - Dark mode is driven by `data-mf-theme`. Prefer semantic tokens that adapt automatically; do not add a parallel `.dark` or `prefers-color-scheme` theme system.
-- `ui.css` deliberately does not enable Tailwind preflight, protecting legacy and editor styles. Do not add a global Tailwind reset, `@tailwind base`, or `@import "tailwindcss"`.
+- Both shared CSS and Desktop `ui.css` deliberately disable Tailwind preflight, protecting legacy and editor styles. Do not add a global Tailwind reset, `@tailwind base`, or `@import "tailwindcss"`. Shared CSS must explicitly scan zens sources instead of depending on host source scanning.
 
 ## Portals, Layering, and Accessibility
 
@@ -59,19 +59,18 @@ Keep migrations scoped to the code being touched. A component currently being re
 
 ## Validation
 
-- Decide whether a build is necessary from the nature and scope of the change. In the final handoff, state which validation commands were run and why a build was required or skipped.
-- When a change can affect compiled output, runtime behavior, public APIs, dependencies, or build configuration, run the narrowest build that fully covers the affected workspaces and their dependents. Use `yarn build` from the repository root for cross-workspace or broadly scoped changes; an isolated workspace may use its own `build` script when that fully covers the impact.
+- Follow the user's validation limit: run TypeScript checks, relevant unit tests, and lint only; do not run builds unless the user explicitly changes that instruction. Report the commands and keep generated-output or native-runtime behavior unverified when those checks do not cover it.
 - For Desktop changes, also run `yarn workspace @markflowy/desktop build:types`, which executes `tsc --noEmit`.
 - Lint only the `.ts` and `.tsx` files changed in the current task, without `--fix`. Until the root ESLint 9 setup and legacy `.eslintrc`/parser configuration are migrated to flat config, use the installed and verified ESLint 8 runner:
-  `node node_modules/@umijs/fabric/node_modules/eslint/bin/eslint.js <changed-files...>`
+  `node node_modules/@umijs/fabric/node_modules/eslint/bin/eslint.js --resolve-plugins-relative-to node_modules/@umijs/fabric <changed-files...>`
 - Do not use the root `yarn lint` command for validation because it runs with `--fix` and scans too broadly.
-- Documentation-only changes and translation-only i18n content changes do not require a build. Inspect the diff and Markdown for documentation changes; run `yarn translate:check` for i18n content changes. If an i18n change also touches runtime loading, locale schemas, code generation, or build configuration, follow the build rule above.
+- Documentation-only changes and translation-only i18n content changes do not require a build. Inspect the diff and Markdown for documentation changes; run `yarn translate:check` for i18n content changes. If an i18n change also touches runtime loading, locale schemas, code generation, or build configuration, run the affected TypeScript checks and unit tests as well.
 
 ## Prohibited Actions
 
 - Do not add another UI, Dialog, Popover, or focus-trap library for an existing capability.
 - Do not import `@ariakit/react` directly in Desktop business components or bypass the facade to assemble Radix primitives directly.
-- Do not use a new zens Button or Dialog as the foundation of a new Desktop interface.
+- Do not duplicate shared zens primitive implementations in Desktop or feature packages.
 - Do not place Desktop Tailwind or shadcn implementations in `packages/interface`.
 - Do not add Tailwind preflight, unscoped global CSS, hard-coded theme colors, or arbitrary z-index values.
-- Do not edit generated outputs, skip a necessary build for changes that can affect build or runtime output, or use lint `--fix` in a way that produces unrelated changes.
+- Do not edit generated outputs or use lint `--fix` in a way that produces unrelated changes.

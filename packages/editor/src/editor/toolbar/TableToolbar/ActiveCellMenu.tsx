@@ -1,6 +1,6 @@
 import { useTranslation } from '@markflowy/i18n'
 import { useCommands, useRemirrorContext, type UseMultiPositionerReturn } from '@rme-sdk/sdk/react'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Dropdown, type DropdownMenuItem, type MenuItemType } from 'zens'
 import type { LineTableExtension } from '../../extensions/Table'
 import {
@@ -15,7 +15,6 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
   const { getState } = useRemirrorContext({ autoUpdate: true })
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const triggerRef = useRef<HTMLDivElement>(null)
   const selectedAlignment = getSelectedTableColumnAlignment(getState())
   const activeAlignment = selectedAlignment === null ? 'left' : selectedAlignment
 
@@ -122,23 +121,29 @@ const ActiveCellMenu = (props: ActiveCellMenuProps) => {
           },
         }}
         trigger={['click']}
-        raw
         open={open}
         onOpenChange={setOpen}
-        triggerRef={triggerRef}
         getPopupContainer={() => document.body}
-      >
-        <div
-          ref={triggerRef}
-          onMouseDown={(e) => {
-            e.preventDefault()
-          }}
-          onClick={() => setOpen((currentOpen) => !currentOpen)}
-          style={{ cursor: 'pointer' }}
-        >
-          <i className="ri-equalizer-line"></i>
-        </div>
-      </Dropdown>
+        onCloseAutoFocus={(event) => event.preventDefault()}
+        customTrigger={
+          <button
+            type='button'
+            aria-label={t('table.alignLeft')}
+            onMouseDown={(e) => {
+              e.preventDefault()
+            }}
+            style={{
+              cursor: 'pointer',
+              padding: 0,
+              border: 0,
+              background: 'transparent',
+              color: 'inherit',
+            }}
+          >
+            <i className='ri-equalizer-line'></i>
+          </button>
+        }
+      />
     </div>
   )
 }

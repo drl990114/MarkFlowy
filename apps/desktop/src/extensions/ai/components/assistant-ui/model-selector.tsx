@@ -146,7 +146,7 @@ function ModelSelectorRoot({
 export const modelSelectorTriggerVariants = cva(
   [
     focusFeedback,
-    'flex w-fit items-center justify-between gap-1.5 overflow-hidden rounded-md text-xs outline-none transition-colors disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-60 [&_svg]:shrink-0',
+    'flex w-fit items-center justify-between gap-1.5 overflow-hidden rounded-sm text-ui-control outline-none transition-colors duration-[var(--mf-motion-duration-fast)] motion-reduce:transition-none disabled:pointer-events-none disabled:text-disabled-foreground disabled:opacity-60 [&_svg]:shrink-0',
   ],
   {
     variants: {
@@ -158,7 +158,7 @@ export const modelSelectorTriggerVariants = cva(
       },
       size: {
         default: 'h-8 px-2.5',
-        sm: 'h-7 px-2 text-xs',
+        sm: 'h-7 px-2',
       },
     },
     defaultVariants: {

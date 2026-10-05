@@ -4,6 +4,7 @@ import { styledLightTheme } from './light'
 export * from './darken-colors'
 
 export * from './ThemeProvider'
+export * from './components-theme'
 
 export type ThemeColors = typeof lightTheme
 export type ScThemeProps = { theme: ThemeColors }

@@ -1,10 +1,11 @@
-import { EditorViewType as RmeEditorViewType } from 'rme'
+import type { EditorViewType as RmeEditorViewType } from 'rme'
 import { isCapricornRuntimeAvailable } from './capricornRuntime'
 
+// Persisted mode identifiers must remain available without evaluating the RME bundle.
 export const EditorViewType = {
-  WYSIWYG: RmeEditorViewType.WYSIWYG,
-  SOURCECODE: RmeEditorViewType.SOURCECODE,
-  PREVIEW: RmeEditorViewType.PREVIEW,
+  WYSIWYG: 'wysiwyg' as RmeEditorViewType.WYSIWYG,
+  SOURCECODE: 'sourceCode' as RmeEditorViewType.SOURCECODE,
+  PREVIEW: 'preview' as RmeEditorViewType.PREVIEW,
 } as const
 
 export type EditorViewTypeValue = RmeEditorViewType

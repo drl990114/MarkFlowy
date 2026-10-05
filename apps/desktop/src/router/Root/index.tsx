@@ -1,13 +1,15 @@
 import { commandRegistry } from '@/commands'
-import { SideBar } from '@/components'
+import SideBar from '@/components/SideBar'
 import { scheduleActiveEditorFocus } from '@/components/EditorArea/focusActiveEditor'
 import EditorArea from '@/components/EditorArea'
+import { isSingleDocumentLayout } from '@/components/EditorArea/documentLayout'
 import { scheduleDockFocus } from '@/components/SideBar/DockSwitcher'
 import RightBar from '@/components/SideBar/RightBar'
 import StatusBar from '@/components/StatusBar'
 import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
 import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
 import { QuickOpenDialog } from '@/extensions/quick-open/QuickOpenDialog'
+import { CommandPaletteDialog } from '@/extensions/command-palette/CommandPaletteDialog'
 import { useTranslation } from '@/i18n'
 import { useEditorStore } from '@/stores'
 import useLayoutStore, {
@@ -21,7 +23,9 @@ import type { PanelImperativeHandle } from 'react-resizable-panels'
 import { Group, Panel } from 'react-resizable-panels'
 import { toast } from 'zens'
 import { RootPageLayout, StyleSeparator } from './styles'
+import { useStatusBarReveal } from './useStatusBarReveal'
 import { ZenModeHint } from './ZenModeHint'
+import { WorkspaceOpenError } from '@/components/WorkspaceOpenError'
 import {
   queueDoubleEscapeResolution,
   registerZenModeCommand,
@@ -39,6 +43,13 @@ const RIGHT_DOCK_LABEL_KEYS = {
 } as const
 
 function Root() {
+  const rootPath = useEditorStore((state) => state.folderData?.[0]?.path)
+  const singleDocument = useEditorStore((state) =>
+    isSingleDocumentLayout(state.folderData?.[0]?.path, state.editorLayout),
+  )
+  useLayoutEffect(() => {
+    useLayoutStore.getState().setWorkspaceContext(Boolean(rootPath))
+  }, [rootPath])
   const { t } = useTranslation()
   const syncDockPanelFromResize = useLayoutStore((state) => state.syncDockPanelFromResize)
   const leftActivePanelId = useLayoutStore((state) => state.leftBar.activePanelId)
@@ -46,8 +57,11 @@ function Root() {
   const leftDockVisible = useLayoutStore((state) => state.leftBar.visible)
   const rightDockVisible = useLayoutStore((state) => state.rightBar.visible)
   const zenModeActive = useLayoutStore((state) => state.zenModeActive)
+  const statusBarRef = useStatusBarReveal(singleDocument && !zenModeActive)
   const leftPanelRef = useRef<PanelImperativeHandle>(null)
   const rightPanelRef = useRef<PanelImperativeHandle>(null)
+  const applyingDockLayoutRef = useRef(false)
+  const lastDockRootRef = useRef(rootPath)
   const initialDockSizesRef = useRef({
     left: useLayoutStore.getState().leftBar.visible ? useLayoutStore.getState().leftBar.size : 0,
     right: useLayoutStore.getState().rightBar.visible ? useLayoutStore.getState().rightBar.size : 0,
@@ -99,13 +113,22 @@ function Root() {
     if (!leftPanel || !rightPanel || zenModeActive) return
 
     const layoutState = useLayoutStore.getState()
-    if (leftDockVisible) {
-      if (leftPanel.isCollapsed()) leftPanel.resize(`${layoutState.leftBar.size}px`)
-    } else leftPanel.collapse()
-    if (rightDockVisible) {
-      if (rightPanel.isCollapsed()) rightPanel.resize(`${layoutState.rightBar.size}px`)
-    } else rightPanel.collapse()
-  }, [leftDockVisible, rightDockVisible, zenModeActive])
+    const contextChanged = lastDockRootRef.current !== rootPath
+    lastDockRootRef.current = rootPath
+    // Applying one pane can report an intermediate size for the other pane.
+    // Preserve the selected profile until both programmatic changes are applied.
+    applyingDockLayoutRef.current = true
+    try {
+      if (leftDockVisible) {
+        if (contextChanged || leftPanel.isCollapsed()) leftPanel.resize(`${layoutState.leftBar.size}px`)
+      } else leftPanel.collapse()
+      if (rightDockVisible) {
+        if (contextChanged || rightPanel.isCollapsed()) rightPanel.resize(`${layoutState.rightBar.size}px`)
+      } else rightPanel.collapse()
+    } finally {
+      applyingDockLayoutRef.current = false
+    }
+  }, [leftDockVisible, rightDockVisible, rootPath, zenModeActive])
 
   useEffect(() => {
     const d1 = commandRegistry.registerCommand({
@@ -190,10 +213,15 @@ function Root() {
   }, [])
 
   return (
-    <RootPageLayout data-mf-zen-mode={zenModeActive ? '' : undefined}>
+    <RootPageLayout
+      data-mf-single-document={singleDocument ? '' : undefined}
+      data-mf-zen-mode={zenModeActive ? '' : undefined}
+    >
+      <WorkspaceOpenError />
       <Group
         disabled={zenModeActive}
         onLayoutChanged={(layout) => {
+          if (applyingDockLayoutRef.current) return
           // Finish a drag before disabling its handle so the library can release it cleanly.
           if (layout['root-left'] === 0) syncDockPanelFromResize('left', 0)
           if (layout['root-right'] === 0) syncDockPanelFromResize('right', 0)
@@ -215,6 +243,7 @@ function Root() {
           maxSize={`${MAX_LEFT_DOCK_SIZE}px`}
           minSize={`${MIN_LEFT_DOCK_SIZE}px`}
           onResize={(size) => {
+            if (applyingDockLayoutRef.current) return
             if (size.inPixels > 0) syncDockPanelFromResize('left', size.inPixels)
           }}
           panelRef={leftPanelRef}
@@ -260,6 +289,7 @@ function Root() {
           maxSize={`${MAX_RIGHT_DOCK_SIZE}px`}
           minSize={`${MIN_RIGHT_DOCK_SIZE}px`}
           onResize={(size) => {
+            if (applyingDockLayoutRef.current) return
             if (size.inPixels > 0) syncDockPanelFromResize('right', size.inPixels)
           }}
           panelRef={rightPanelRef}
@@ -269,12 +299,13 @@ function Root() {
           <RightBar />
         </Panel>
       </Group>
-      <div className='app-status-bar'>
+      <div className='app-status-bar' ref={statusBarRef}>
         <StatusBar />
       </div>
       <ZenModeHint active={zenModeActive} />
       <BookMarkDialog />
       <QuickOpenDialog />
+      <CommandPaletteDialog />
     </RootPageLayout>
   )
 }

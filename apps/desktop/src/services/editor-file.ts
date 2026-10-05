@@ -1,7 +1,33 @@
-import { getFileObject } from '@/helper/files'
+import { getFileObject, getFileObjectByPath } from '@/helper/files'
 import { createFile } from '@/helper/filesys'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import { i18n } from '@/i18n'
+import { EditorViewType } from '@/constants/editorViewType'
+import { getMarkdownDefaultMode } from '@/helper/fileTypeHandler'
+import useAppSettingStore from '@/stores/useAppSettingStore'
+import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import { isPristineDocument, markPristineDocument } from './pristine-document'
+
+export function ensureDocument() {
+  const editor = useEditorStore.getState()
+  if (editor.getRootPath() || editor.opened.length) return
+  const file = createFile({ name: `${i18n.t('file.untitled')}.md`, content: '' })
+  const preferred = useAppSettingStore.getState().settingData.md_editor_default_mode
+  useEditorViewTypeStore.getState().setEditorViewType(file.id,
+    getMarkdownDefaultMode(preferred === EditorViewType.PREVIEW ? undefined : preferred))
+  markPristineDocument(file.id)
+  useEditorStateStore.getState().setIdStateMap(file.id, { hasUnsavedChanges: false })
+  editor.addOpenedFile(file.id)
+  editor.setActiveId(file.id)
+}
+
+export function removePristineDocuments() {
+  for (const id of useEditorStore.getState().opened) {
+    if (isPristineDocument(id) && !getFileObject(id)?.path) {
+      useEditorStore.getState().delOpenedFile(id)
+    }
+  }
+}
 
 interface AddNewMarkdownFileEditParams {
   fileName: string
@@ -31,6 +57,13 @@ interface AddMarkdownFileEditParams {
 }
 
 export const addMarkdownFileEdit = async (params: AddMarkdownFileEditParams) => {
+  removePristineDocuments()
+  const existing = params.path ? getFileObjectByPath(params.path) : undefined
+  if (existing) {
+    useEditorStore.getState().addOpenedFile(existing.id)
+    useEditorStore.getState().setActiveId(existing.id)
+    return
+  }
   const { fileName } = params
   const newFile = createFile({
     name: fileName,
@@ -46,8 +79,6 @@ export const addMarkdownFileEdit = async (params: AddMarkdownFileEditParams) => 
       hasUnsavedChanges: false,
       undoDepth: 0,
     }
-    const { setIdStateMap } = useEditorStateStore.getState()
-
     setIdStateMap(newFile.id, state)
   } else {
     setIdStateMap(newFile.id, {

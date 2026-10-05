@@ -24,17 +24,20 @@ export async function exportEditorOpeningFixtures({
   outputDir,
   selected = 'ordinary',
   force = false,
+  byteLength = EDITOR_OPENING_FIXTURE_BYTES,
 }) {
   if (typeof outputDir !== 'string' || !outputDir.trim())
     throw new TypeError('Expected an explicit output directory')
+  if (!Number.isSafeInteger(byteLength) || byteLength < 0 || byteLength > 64 * 1024 * 1024)
+    throw new RangeError('Use a byte count from 0 through 64 MiB')
   const absoluteOutputDir = resolve(outputDir)
   await mkdir(absoluteOutputDir, { recursive: true })
   const results = []
   for (const name of selectEditorOpeningFixtures(selected)) {
-    const markdown = createEditorOpeningFixture(name)
+    const markdown = createEditorOpeningFixture(name, byteLength)
     const content = Buffer.from(markdown, 'utf8')
-    if (content.byteLength !== EDITOR_OPENING_FIXTURE_BYTES)
-      throw new Error(`${name} is not exactly 2 MiB`)
+    if (content.byteLength !== byteLength)
+      throw new Error(`${name} has an unexpected UTF-8 byte count`)
     const path = resolve(absoluteOutputDir, `${name}.md`)
     await writeFile(path, content, { flag: force ? 'w' : 'wx' })
     results.push({
@@ -54,12 +57,14 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
       'output-dir': { type: 'string' },
       fixture: { type: 'string', default: 'ordinary' },
       force: { type: 'boolean', default: false },
+      bytes: { type: 'string', default: String(EDITOR_OPENING_FIXTURE_BYTES) },
     },
   })
   const results = await exportEditorOpeningFixtures({
     outputDir: values['output-dir'],
     selected: values.fixture,
     force: values.force,
+    byteLength: Number(values.bytes),
   })
   for (const result of results) console.log(JSON.stringify(result))
 }

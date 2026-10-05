@@ -11,6 +11,32 @@
     "markdown": "Syntaxe Markdown",
     "open_failed": "Impossible d’ouvrir le lien ou de trouver son titre."
   },
+  "command_palette": {
+    "title": "Palette de commandes",
+    "placeholder": "Rechercher une commande…",
+    "empty": "Aucune commande correspondante",
+    "recent": "Commandes récentes",
+    "hints": "↑↓ Sélectionner · Entrée Exécuter · Échap Fermer",
+    "failed": "Impossible d’exécuter « {{command}} ».",
+    "categories": {
+      "file": "Fichier",
+      "editor": "Éditeur",
+      "view": "Affichage",
+      "app": "Application"
+    },
+    "reasons": {
+      "no_document": "Ouvrez d’abord un document",
+      "unavailable": "Indisponible dans le contexte actuel",
+      "preview": "Modification impossible en mode aperçu",
+      "read_only": "Ce document est en lecture seule",
+      "stale_target": "L’éditeur d’origine a changé",
+      "selection_unavailable": "La sélection d’origine n’est plus disponible",
+      "no_undo": "Rien à annuler",
+      "no_redo": "Rien à refaire",
+      "markdown_only": "Disponible pour les documents Markdown",
+      "zen_mode": "Quittez d’abord le mode Zen"
+    }
+  },
   "quick_open": {
     "title": "Ouverture rapide",
     "placeholder": "Rechercher par nom de fichier ou chemin…",
@@ -207,6 +233,14 @@
     "untitled": "sans titre",
     "not_found": "Fichier introuvable",
     "openDir": "ouvrir le dossier",
+    "openFolderInNewWindow": "Ouvrir le dossier dans une nouvelle fenêtre",
+    "closeFolder": "Fermer le dossier",
+    "closeDocument": "Fermer le document",
+    "renameErrors": {
+      "empty": "Saisissez un nom de fichier.",
+      "invalid": "Utilisez un nom de fichier valide sans séparateurs de chemin ni caractères réservés.",
+      "exists": "Un fichier portant ce nom existe déjà."
+    },
     "recentDir": "Dossiers récemment ouverts",
     "emptyOpened": "Aucun fichier ouvert",
     "emptyFolder": "Dossier vide",
@@ -322,6 +356,42 @@
     "emptyDesc": "Essayez un autre mot-clé ou désactivez la casse",
     "search_failed": "La recherche a échoué"
   },
+  "text_encoding": {
+    "label": "Encodage et fins de ligne",
+    "encoding": "Encodage du texte",
+    "description": "La réouverture lit ce fichier sur le disque avec l’encodage choisi. L’enregistrement convertit le texte actuel. Les fins de ligne sont conservées.",
+    "mixed_endings": "Fins de ligne mixtes",
+    "no_endings": "Aucune fin de ligne",
+    "unconfirmed": "À confirmer",
+    "confirm_hint": "L’encodage a été déduit du contenu ou restauré depuis un ancien brouillon. Vérifiez que le texte est correct avant de l’enregistrer avec l’encodage choisi.",
+    "roundtrip_hint": "Ce fichier contient des correspondances d’octets non standard. Après modification, convertissez-le explicitement vers un autre encodage.",
+    "preview_hint": "Aperçu des 4 000 premiers caractères. Un brouillon de récupération du contenu actuel sera conservé avant l’application.",
+    "preview_reopen": "Aperçu de la réouverture",
+    "apply_reopen": "Appliquer la réouverture",
+    "save_with_encoding": "Enregistrer avec cet encodage",
+    "save_failed": "Le fichier n’est pas encore enregistré. Le contenu et l’encodage choisi sont conservés. Vérifiez le message d’enregistrement et réessayez.",
+    "errors": {
+      "invalid_encoding": "This file cannot be read with the selected encoding. Preview another encoding and check the text before reopening it.",
+      "unsupported_encoding": "The file encoding could not be identified or is not supported. Open Text encoding and line endings, select an encoding, and preview it before reopening.",
+      "binary": "This file contains binary data and cannot be opened as text.",
+      "invalid_bom": "The file’s encoding marker (BOM) does not match the selected encoding. Choose the matching encoding and try again.",
+      "unmappable": "The current encoding cannot save some characters. Your content is still in the editor. Save as UTF-8, or remove the unsupported characters and try again.",
+      "unmappable_character": "{{encoding}} cannot save the character “{{character}}”. Your content is still in the editor. Save as UTF-8, or remove this character and try again.",
+      "confirm_encoding": "The detected encoding has not been confirmed. Your content is still in the editor. Open Text encoding and line endings, preview the text, then choose Save with this encoding.",
+      "noncanonical": "The original byte mapping cannot be preserved after editing. Choose a different encoding such as UTF-8, or save a copy.",
+      "not_reversible": "The selected encoding would change some characters. Choose UTF-8 or another encoding that preserves the complete text before saving.",
+      "ambiguous_bom": "The text begins with an invisible encoding marker. Choose the BOM variant of the current Unicode encoding before saving.",
+      "finish_input": "Finish the current text input before trying again.",
+      "save_first": "Save the file before previewing another encoding.",
+      "retry_read": "The file is changing. Wait for the changes to finish, then preview it again.",
+      "preview_again": "The document or its file has changed. Preview it again before applying the new encoding.",
+      "draft_pending": "The current content has not yet been protected by a recovery draft. Try again before reopening the file.",
+      "invalid_unicode": "The text contains an invalid character sequence. The original file was not written. Correct the affected text and try again.",
+      "save_failed": "Not saved yet. Your content is still in the editor. Check that the file is writable and try again, or save a copy.",
+      "read_failed": "Unable to read the file. Check that it still exists and you have permission to read it, then try again.",
+      "preview_failed": "The encoding operation could not be completed. Your current content has been kept. Please try again."
+    }
+  },
   "settings": {
     "select_placeholder": "Sélectionnez une option",
     "font_placeholder": "Sélectionnez une police",
@@ -335,6 +405,12 @@
     "search_placeholder": "Rechercher dans les réglages...",
     "search_empty": "Aucun réglage correspondant",
     "search_results": "{{count}} résultats",
+    "navigation": {
+      "preferences": "Préférences",
+      "writing": "Rédaction et fichiers",
+      "ai": "IA",
+      "help": "Aide"
+    },
     "general": {
       "startup": {
         "label": "Démarrage",
@@ -349,6 +425,10 @@
         "automatic_updates": {
           "label": "Mise à jour automatique",
           "desc": "Vérifier automatiquement les mises à jour et les installer au lancement de l'application."
+        },
+        "error_reporting": {
+          "label": "Partager les rapports d’erreur",
+          "desc": "Désactivé par défaut. Envoie à Sentry les types d’erreur et les emplacements du code de l’application, sans contenu des documents, chemins de fichiers, identifiants ni activité de navigation. Vous pouvez le désactiver à tout moment."
         }
       },
       "autosave": {
@@ -385,12 +465,20 @@
           "desc": "Mettre l'éditeur en plein largeur."
         },
         "font_size": {
-          "label": "Taille de la police",
-          "desc": "Définit la taille de la police racine de l'éditeur."
+          "label": "Taille du texte du document",
+          "desc": "Taille du texte pour la rédaction et la lecture."
         },
         "line_height": {
-          "label": "Ligne haute",
-          "desc": "Définit la hauteur de la ligne racine de l'éditeur."
+          "label": "Hauteur de ligne du document",
+          "desc": "Hauteur de ligne pour la rédaction et la lecture."
+        },
+        "source_font_size": {
+          "label": "Taille du texte source",
+          "desc": "Taille du texte en mode source, indépendante du document."
+        },
+        "source_line_height": {
+          "label": "Hauteur de ligne du source",
+          "desc": "Hauteur de ligne en mode source."
         },
         "font_family": {
           "label": "Famille de polices",
@@ -406,6 +494,14 @@
         "md_default_mode": {
           "label": "Mode par défaut de Markdown",
           "desc": "Définit le mode d'édition par défaut lorsque vous créez un nouveau fichier Markdown."
+        },
+        "text_direction": {
+          "follow_global": "Suivre le réglage global",
+          "label": "Sens du texte",
+          "desc": "Sens du texte en mode WYSIWYG et Aperçu. Le mode automatique détecte le sens de chaque paragraphe.",
+          "auto": "Automatique",
+          "ltr": "De gauche à droite (LTR)",
+          "rtl": "De droite à gauche (RTL)"
         },
         "typewriter_scroll": {
           "label": "Défilement de la machine à écrire",
@@ -447,6 +543,66 @@
           "label": "Spellcheck",
           "desc": "Indique si l'orthographe doit être activé en mode Code source."
         }
+      },
+      "code_editing": {
+        "label": "Édition du code",
+        "embedded_label": "Code intégré",
+        "default": "Par défaut",
+        "custom": "Personnalisé",
+        "on": "Activé",
+        "off": "Désactivé",
+        "indent_style": {
+          "label": "Indentation",
+          "desc": "Commune au mode source et au code intégré. L’éditeur des métadonnées initiales utilise toujours des espaces.",
+          "spaces": "Espaces",
+          "tabs": "Tabulations"
+        },
+        "indent_size": {
+          "label": "Largeur d’indentation",
+          "desc": "L’indentation par espaces utilise 2 colonnes par défaut. Les tabulations occupent 4 colonnes en mode source et 2 dans le code intégré. Une largeur précise s’applique aux deux.",
+          "default": "2 colonnes (tabulations selon le mode)"
+        },
+        "auto_close": {
+          "label": "Fermer automatiquement parenthèses et guillemets",
+          "desc": "Complète les parenthèses et les guillemets pendant la saisie en mode source et dans le code intégré."
+        },
+        "whitespace": {
+          "label": "Afficher les espaces",
+          "desc": "Affiche les espaces et les tabulations sans modifier le document.",
+          "trailing": "En fin de ligne uniquement",
+          "all": "Tous les espaces et tabulations"
+        },
+        "line_wrap": {
+          "label": "Retour à la ligne automatique",
+          "desc": "Replie les lignes longues au bord de l’éditeur sans insérer de saut de ligne. Les lignes extrêmement longues peuvent conserver le défilement horizontal.",
+          "mixed_default": "Selon la zone (par défaut)",
+          "mixed_desc": "Par défaut, les blocs de code ordinaires ne sont pas repliés ; le code des aperçus et les métadonnées initiales le sont. Choisissez Activé ou Désactivé pour uniformiser ce réglage. Les lignes extrêmement longues peuvent conserver le défilement horizontal."
+        },
+        "line_numbers": {
+          "label": "Numéros de ligne",
+          "desc": "L’affichage espacé indique la première ligne puis une ligne sur dix.",
+          "all": "Toutes les lignes",
+          "sparse": "Espacés"
+        },
+        "active_line": {
+          "label": "Surligner la ligne actuelle",
+          "desc": "Surligne la ligne du curseur pour repérer plus facilement la position de saisie."
+        },
+        "font_size": {
+          "label": "Taille du texte du code",
+          "desc": "Par défaut, utilise 87,5 % de la taille du texte du document et évolue avec elle. Choisissez Personnalisé pour fixer une taille.",
+          "default": "Suivre le document ({{value}} px)",
+          "relative_default": "Suivre le document (87,5 %)",
+          "unit": "{{value}} px"
+        },
+        "line_height": {
+          "label": "Hauteur de ligne du code",
+          "desc": "La hauteur de ligne est un multiple de la taille du texte. La valeur par défaut est 1,6× ; choisissez Personnalisé pour régler l’interligne.",
+          "default": "1,6× (par défaut)",
+          "unit": "{{value}}×"
+        },
+        "default_value": "{{value}} (par défaut)",
+        "typography_disabled": "« Utiliser mes polices, tailles et interlignes » est désactivé. La taille du texte et la hauteur de ligne personnalisées ne sont donc pas appliquées."
       }
     },
     "keyboard": {
@@ -578,14 +734,14 @@
           "desc": "Variables supportées: ${documentPath} (chemin du dossier parent du fichier actuel), ${fileName} (nom du fichier actuel sans extension). Exemple: ${documentPath}/photo/${fileName}"
         }
       },
-    "upload_img": {
-      "label": "Insérer une image locale",
-      "when_upload_image": {
-        "label": "Comportement d’insertion des images locales",
-        "desc": "Choisissez le comportement par défaut des images locales sélectionnées, déposées dans l’éditeur ou collées depuis un logiciel de capture.",
-        "options": {
-          "insert_path": "Insérer le chemin du fichier d’origine",
-          "save_to_local_absolute": "Enregistrer le chemin absolu global",
+      "upload_img": {
+        "label": "Insérer une image locale",
+        "when_upload_image": {
+          "label": "Comportement d’insertion des images locales",
+          "desc": "Choisissez le comportement par défaut des images locales sélectionnées, déposées dans l’éditeur ou collées depuis un logiciel de capture.",
+          "options": {
+            "insert_path": "Insérer le chemin du fichier d’origine",
+            "save_to_local_absolute": "Enregistrer le chemin absolu global",
             "save_to_local_relative": "Enregistrer le chemin relatif de la zone de travail",
             "paste_as_base64": "Collez pour l'encodage Base64",
             "save_to_file_relative": "Enregistrer le chemin d'accès au fichier actuel relatif"
@@ -631,6 +787,9 @@
     "display": {
       "label": "Apparence",
       "theme": {
+        "unavailable": "{{name}} (indisponible)",
+        "unavailable_help": "Les thèmes sélectionnés sont indisponibles : {{names}}. Des thèmes intégrés sont utilisés temporairement et vos choix sont conservés. Réimportez les thèmes au format JSON ou choisissez-en un autre. Les anciens thèmes JS et le CSS chargé automatiquement nécessitent une migration manuelle.",
+        "migration_guide": "Guide de migration des thèmes",
         "label": "Thème",
         "mode": {
           "label": "Mode de thème",
@@ -688,6 +847,86 @@
       }
     },
     "themeStore": {
+      "controls": {
+        "installedOnly": "Installés uniquement",
+        "title": "Thèmes",
+        "create": "Créer un thème",
+        "import": "Importer du JSON",
+        "export": "Exporter en JSON",
+        "edit": "Modifier",
+        "copy": "Copier et modifier",
+        "remove": "Supprimer",
+        "apply": "Appliquer",
+        "save": "Enregistrer et appliquer",
+        "close": "Fermer",
+        "undo": "Annuler",
+        "redo": "Rétablir",
+        "search": "Rechercher un token…",
+        "modified": "Modifiés uniquement",
+        "reset": "Réinitialiser",
+        "link": "Lier à un token",
+        "value": "Valeur",
+        "inspect": "Inspecter l’aperçu",
+        "snippets": "Extraits CSS personnels",
+        "addCss": "Importer du CSS",
+        "createCss": "Nouvel extrait",
+        "untitledCss": "Extrait sans titre",
+        "disableAll": "Tout désactiver",
+        "includeCss": "Inclure le CSS personnel",
+        "up": "Monter",
+        "down": "Descendre",
+        "name": "Nom",
+        "author": "Auteur",
+        "variant": "Variante",
+        "addLight": "Ajouter une variante claire",
+        "addDark": "Ajouter une variante sombre",
+        "advanced": "JSON / CSS avancé",
+        "options": "Options du thème",
+        "previewOptions": "Options d’aperçu",
+        "closeAdvanced": "Fermer l’éditeur avancé",
+        "noTokens": "Aucun token correspondant",
+        "css": "CSS du thème",
+        "json": "JSON du thème",
+        "applyJson": "Mettre à jour depuis le JSON",
+        "revertJson": "Abandonner les modifications JSON",
+        "pendingJson": "Appliquez ou abandonnez les modifications JSON pour poursuivre l’édition visuelle et l’exportation.",
+        "catalog": "Thèmes de la communauté",
+        "install": "Installer",
+        "emptyCatalog": "Les nouveaux thèmes de la communauté apparaîtront ici dès qu’ils seront disponibles au format JSON.",
+        "replace": "Un thème avec cet identifiant existe déjà. Le remplacer ?",
+        "replaceAction": "Remplacer",
+        "cancel": "Annuler",
+        "saveCopy": "Enregistrer une copie",
+        "draft": "Un brouillon local est disponible.",
+        "resume": "Reprendre le brouillon",
+        "discard": "Abandonner le brouillon",
+        "preview": "Aperçu du thème",
+        "loadError": "Impossible de charger l’aperçu de l’éditeur.",
+        "retry": "Réessayer",
+        "linked": "Lié",
+        "inherited": "Par défaut",
+        "customCss": "Le CSS personnalisé peut remplacer le token inspecté.",
+        "preferences": "L’aperçu montre uniquement le thème. Vos préférences personnelles s’appliquent également lors de son utilisation.",
+        "personalTypography": "Utiliser mes polices, tailles et interlignes",
+        "saved": "Enregistré",
+        "error": "Erreur",
+        "enabled": "Activé",
+        "editCss": "Modifier le CSS",
+        "saveCss": "Enregistrer l’extrait",
+        "noSnippets": "Aucun extrait CSS personnel.",
+        "deleteConfirm": "Supprimer ce thème ?",
+        "removeVariant": "Supprimer la variante",
+        "schema": "Exporter le schéma JSON",
+        "light": "Clair",
+        "dark": "Sombre",
+        "catalogMismatch": "L’identifiant du thème ne correspond pas au catalogue de la communauté.",
+        "previewNotes": "Notes",
+        "previewIdeas": "Idées",
+        "previewWelcome": "Bienvenue",
+        "previewSearch": "Rechercher dans l’aperçu",
+        "previewSearchPlaceholder": "Rechercher…",
+        "previewNewNote": "Nouvelle note"
+      },
       "label": "Magasin à thème",
       "desc": "Parcourir et télécharger des thèmes créés par la communauté pour enrichir votre apparence d'éditeur.",
       "submit_theme": "Soumettre un sujet",
@@ -731,7 +970,10 @@
   "workspace": {
     "info": "Informations sur la zone de travail",
     "none": "Espace de travail non ouvert",
-    "searchPlaceholder": "Rechercher des espaces de travail…",
+    "searchPlaceholder": "Rechercher des espaces de travail et fichiers récents…",
+    "open": "Ouvrir",
+    "openFileOrFolder": "Ouvrir un fichier ou un dossier",
+    "recentFiles": "Fichiers récents",
     "sync_mode": {
       "git_local": {
         "name": "Git local",
@@ -750,6 +992,7 @@
   },
   "command": {
     "id_descriptions": {
+      "app_commandPalette": "Palette de commandes",
       "app_quickOpen": "Ouverture rapide",
       "app_openFolder": "Ouvrir un dossier",
       "app_openSetting": "Ouvrir la fenêtre des paramètres",
@@ -966,7 +1209,22 @@
     },
     "livePreview": {
       "largeDeferred": "L’aperçu volumineux est en pause. Le code source complet reste disponible.",
-      "renderLarge": "Afficher l’aperçu volumineux (peut prendre du temps)"
+      "renderLarge": "Afficher l’aperçu volumineux (peut prendre du temps)",
+      "actions": "Actions du bloc {{kind}}",
+      "copied": "Code source copié",
+      "copy": "Copier le code source",
+      "copying": "Copie du code source…",
+      "editSource": "Modifier le code source",
+      "editSourceForKind": "Modifier le code source de {{kind}}",
+      "hideSource": "Masquer le code source",
+      "kind": {
+        "html": "HTML",
+        "math": "Mathématiques",
+        "mermaid": "Mermaid"
+      },
+      "preview": "Aperçu de {{kind}}",
+      "retryCopy": "Réessayer de copier le code source",
+      "sourceEditor": "Éditeur de code source de {{kind}}"
     },
     "sourceFallback": {
       "longLine": "Les lignes très longues défilent horizontalement pour préserver la fluidité de l’édition.",
@@ -994,7 +1252,42 @@
       "loading": "Loading image…",
       "edit": "Edit address"
     },
-    "preview": { "retry": "Retry" }
+    "preview": {
+      "retry": "Retry"
+    },
+    "snippets": {
+      "title": "Insérer un extrait",
+      "search": "Rechercher un extrait…",
+      "manage": "Gérer les extraits…",
+      "blank": "Nouveau bloc vide",
+      "stale": "Le point d’insertion a changé. Rouvrez le sélecteur."
+    },
+    "table": {
+      "actions": "Actions du tableau",
+      "alignment": "Alignement de la colonne",
+      "copy": "Copier",
+      "cut": "Couper",
+      "paste": "Coller",
+      "selectAll": "Tout sélectionner",
+      "action": {
+        "column": "Actions de colonne",
+        "columnAt": "Actions de la colonne {{index}}",
+        "row": "Actions de ligne",
+        "rowAt": "Actions de la ligne {{index}}"
+      },
+      "addColumnAfter": "Insérer une colonne à droite",
+      "addColumnBefore": "Insérer une colonne à gauche",
+      "addRowAfter": "Insérer une ligne en dessous",
+      "addRowBefore": "Insérer une ligne au-dessus",
+      "alignCenter": "Centrer la colonne",
+      "alignLeft": "Aligner la colonne à gauche",
+      "alignNone": "Réinitialiser l’alignement de la colonne",
+      "alignRight": "Aligner la colonne à droite",
+      "deleteColumn": "Supprimer la colonne actuelle",
+      "deleteRow": "Supprimer la ligne actuelle",
+      "deleteTable": "Supprimer le tableau",
+      "duplicateRow": "Dupliquer la ligne"
+    }
   },
   "inline_insert": {
     "insert_link": "Insert link",
@@ -1023,5 +1316,160 @@
     "open_error": "Unable to open this link.",
     "copy_error": "Unable to copy this address.",
     "single_block": "Select text within one paragraph or table cell."
+  },
+  "history": {
+    "title": "Historique local",
+    "description": "Consultez les modifications et restaurez une version sous forme de brouillon non enregistré.",
+    "enabled": "Activer l’historique local",
+    "enabled_description": "Conserve les versions des documents ouverts dans MarkFlowy. La protection des brouillons reste active lorsque cette option est désactivée.",
+    "retention": "Historique ordinaire : 30 jours, jusqu’à 100 versions par document et un objectif de 1 Go. Les brouillons non enregistrés et les sessions actives sont protégés.",
+    "count": "{{count}} versions",
+    "clear_title": "Gérer l’historique",
+    "clear_description": "Supprime l’historique sans effacer vos fichiers ni vos brouillons. Les modifications suivantes peuvent créer de nouvelles versions si la fonction est activée.",
+    "clear_workspace": "Supprimer l’historique de l’espace actuel",
+    "clear_loose": "Supprimer l’historique des documents indépendants",
+    "clear_all": "Supprimer l’historique de tous les espaces",
+    "clear_confirm": "Supprimer définitivement {{count}} versions ? Jusqu’à {{size}} Mo de contenu non partagé peuvent être libérés. Les fichiers et brouillons sont conservés.",
+    "all_workspaces": "Tous les espaces et documents indépendants",
+    "loose": "Documents indépendants",
+    "delete": "Supprimer l’historique",
+    "empty": "Aucun historique pour le moment.",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "before": "Avant les modifications",
+    "after": "Dernier résultat",
+    "refresh": "Nouvelles modifications · actualiser la comparaison",
+    "loading": "Chargement de la comparaison…",
+    "compare_failed": "Impossible de charger la comparaison. Le texte original est affiché ; vous pouvez toujours restaurer cette version.",
+    "select": "Sélectionnez une version pour consulter ses modifications.",
+    "restore_before": "Restaurer avant les modifications",
+    "restore": "Restaurer cette version",
+    "merging": "Regroupement des modifications",
+    "kind_save": "Enregistré",
+    "kind_external": "Modifications externes",
+    "kind_ai": "Modification par IA",
+    "kind_checkpoint": "Point de contrôle du brouillon",
+    "kind_restore": "Avant restauration",
+    "kind_discard": "Avant abandon",
+    "kind_overwrite": "Avant remplacement",
+    "kind_autosave": "Enregistrement automatique",
+    "kind_opened": "Version initiale",
+    "protected": "Brouillon protégé",
+    "pending": "Protection du brouillon…",
+    "failed": "Échec de la protection du brouillon",
+    "paused": "Brouillon restauré · enregistrer manuellement",
+    "large": "Document volumineux : affichage du texte original.",
+    "compare_current": "Comparer au brouillon actuel",
+    "compare_version": "Comparer à une autre version",
+    "compare_batch": "Comparer avant et après",
+    "snapshot": "Version sélectionnée",
+    "current": "Brouillon actuel",
+    "versions": "Versions",
+    "split": "Vue côte à côte",
+    "unified": "Vue unifiée",
+    "full_context": "Afficher tout le contexte",
+    "previous_change": "Modification précédente",
+    "next_change": "Modification suivante",
+    "no_changes": "Aucune différence",
+    "change_position": "Modification {{current}} / {{total}}",
+    "added_lines": "Lignes ajoutées : {{count}}",
+    "removed_lines": "Lignes supprimées : {{count}}",
+    "unchanged_lines": "$ lignes inchangées · cliquer pour développer",
+    "retry": "Réessayer la protection",
+    "coarse": "Les différences sont simplifiées dans le temps de calcul imparti ; le texte complet est conservé.",
+    "compute_large": "Calculer les différences du document volumineux",
+    "deleted": "{{count}} versions supprimées.",
+    "kind_write-pending": "Écriture de fichier interrompue",
+    "kind_recovered-save": "Enregistrement récupéré",
+    "budget_limited": "L’historique a atteint sa capacité cible. Les points de contrôle automatiques et les nouvelles sessions IA sont suspendus ; les brouillons et copies de sécurité restent protégés. Supprimez l’historique inutile pour reprendre."
+  },
+  "document_preview": {
+    "html_title": "Aperçu HTML",
+    "pdf_title": "Lecteur PDF",
+    "refresh": "Actualiser",
+    "run_scripts": "Exécuter les scripts",
+    "loading": "Chargement…",
+    "load_failed": "Impossible de charger ce fichier.",
+    "retry": "Réessayer",
+    "resources_blocked": "Ressources non chargées",
+    "resource_folder_hint": "Ouvrez le dossier contenant ce document et ses ressources comme espace de travail, puis actualisez l’aperçu.",
+    "resource_errors": {
+      "not_found": "Fichier introuvable.",
+      "permission_denied": "L’accès en lecture à ce fichier a été refusé.",
+      "outside_root": "En dehors du dossier du document ou de l’espace de travail.",
+      "too_large": "La ressource ou l’aperçu développé dépasse la taille limite.",
+      "unsupported": "Type de ressource ou URL non pris en charge.",
+      "invalid_css": "Impossible d’analyser cette feuille de style.",
+      "resource_limit": "Importation circulaire ou limite de nombre ou de profondeur des ressources atteinte.",
+      "read_failed": "Impossible de lire cette ressource."
+    },
+    "previous_page": "Page précédente",
+    "next_page": "Page suivante",
+    "page": "Numéro de page",
+    "zoom_out": "Réduire",
+    "zoom_in": "Agrandir",
+    "fit_width": "Ajuster à la largeur",
+    "search": "Rechercher dans le PDF",
+    "previous_match": "Résultat précédent",
+    "next_match": "Résultat suivant",
+    "password_required": "Saisissez le mot de passe du PDF",
+    "password_incorrect": "Mot de passe incorrect. Réessayez.",
+    "unlock": "Déverrouiller",
+    "cancel": "Annuler"
+  },
+  "snippets": {
+    "library": "Bibliothèque d’extraits",
+    "description": "Réutilisez des formules, des diagrammes et du code dans vos espaces locaux.",
+    "kind": "Type",
+    "kinds": {
+      "math": "Math",
+      "mermaid": "Mermaid",
+      "code": "Code"
+    },
+    "search": "Rechercher un extrait…",
+    "new": "Nouvel extrait",
+    "copy": "Dupliquer",
+    "copyCustom": "Créer une copie personnalisée",
+    "copySuffix": "(copie)",
+    "show": "Afficher",
+    "hide": "Masquer",
+    "hidden": "Masqué",
+    "delete": "Supprimer",
+    "deleteTitle": "Supprimer « {{title}} » ?",
+    "builtin": "Intégré",
+    "custom": "Personnalisé",
+    "unsaved": "Modifications non enregistrées",
+    "name": "Nom",
+    "language": "Langage du code",
+    "languagePlaceholder": "Ex. typescript ; vide pour du texte brut",
+    "source": "Source",
+    "sourceHelp": "Saisissez uniquement la source, sans délimiteurs ``` ou $$ externes. Le texte et les espaces sont insérés tels quels ; les variables ne sont pas développées.",
+    "save": "Enregistrer",
+    "discard": "Abandonner",
+    "unsavedTitle": "Enregistrer les modifications ?",
+    "unsavedDescription": "Enregistrez ou abandonnez vos modifications avant de quitter cet extrait.",
+    "loadError": "Impossible de charger les extraits",
+    "saveError": "Échec de l’enregistrement",
+    "retry": "Réessayer",
+    "noResults": "Aucun extrait correspondant",
+    "conflict": "La bibliothèque a changé dans une autre fenêtre. Votre brouillon est conservé. Dupliquez-le ou abandonnez les modifications et sélectionnez à nouveau l’original.",
+    "preview": "Aperçu",
+    "previewAgain": "Actualiser l’aperçu",
+    "previewStale": "La source a changé. Actualisez l’aperçu.",
+    "previewError": "Aperçu indisponible. Vous pouvez enregistrer la source.",
+    "builtins": {
+      "math-fraction": "Fraction",
+      "math-root": "Racine carrée",
+      "math-sum": "Somme",
+      "math-matrix": "Matrice",
+      "mermaid-flow": "Organigramme",
+      "mermaid-sequence": "Diagramme de séquence",
+      "mermaid-class": "Diagramme de classes",
+      "mermaid-state": "Diagramme d’états",
+      "code-json": "Objet JSON",
+      "code-typescript": "Fonction TypeScript",
+      "code-python": "Fonction Python",
+      "code-bash": "Script Bash"
+    }
   }
 }

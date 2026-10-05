@@ -1,15 +1,20 @@
 import { runInNewContext } from 'node:vm'
-import { cleanup, render } from '@testing-library/react'
+import { act, cleanup, render } from '@testing-library/react'
 import { useMemo, type ComponentType } from 'react'
 import ts from 'typescript'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { CapricornRuntimeOptions } from './capricornRuntimeAdapter'
+import { resolveCodeEditorPreferences } from './codeEditorSettings'
 import {
   capricornClipboardCommands,
   createCapricornKeybindingConfiguration,
 } from './capricornKeybindings'
 import textEditorSource from './TextEditor.tsx?raw'
 import { EditorViewType } from '@/constants/editorViewType'
+import useFileTextDirectionStore, {
+  getFileTextDirectionKey,
+  normalizeEditorTextDirection,
+} from '@/stores/useFileTextDirectionStore'
 
 // Exercise the host's real settings selectors, options and memo dependencies
 // without mounting file watchers or native services.
@@ -28,30 +33,62 @@ if (!editor?.body) throw new Error('TextEditor implementation was not found')
 const names = new Set([
   'editorRootFontSize',
   'editorRootLineHeight',
+  'editorSourceFontSize',
+  'editorSourceLineHeight',
+  'resolveTypography',
+  'sourceFontSize',
+  'sourceLineHeight',
+  'rootLineHeight',
+  'editorProps',
+  'printStyleToken',
+  'themeFontSize',
+  'wysiwygRootLineHeight',
   'linkEditMode',
+  'globalTextDirection',
+  'textDirectionKey',
+  'textDirection',
   'editorPlaceholder',
   'codeBlockLineWrapping',
+  'codeEditorPreferences',
   'editorKeybingMap',
   'editorKeybindingsLoaded',
   'capricornRuntimeOptions',
 ])
-const statements = editor.body.statements.filter(
-  (node) =>
-    ts.isVariableStatement(node) &&
-    names.has(node.declarationList.declarations[0].name.getText(source)),
-)
-if (statements.length !== names.size)
+function bindingNames(name: ts.BindingName): string[] {
+  if (ts.isIdentifier(name)) return [name.text]
+  return name.elements.flatMap((element) =>
+    ts.isBindingElement(element) ? bindingNames(element.name) : [],
+  )
+}
+const found = new Set<string>()
+const statements = editor.body.statements.filter((node) => {
+  if (!ts.isVariableStatement(node)) return false
+  const declared = node.declarationList.declarations.flatMap((declaration) =>
+    bindingNames(declaration.name),
+  )
+  const selected = declared.filter((name) => names.has(name))
+  selected.forEach((name) => found.add(name))
+  return selected.length > 0
+})
+if (found.size !== names.size)
   throw new Error('Editor typography declarations were not found')
 const compiled = ts.transpileModule(
   `
-  function Harness({ settings, keymap, onOptions }) {
+  function Harness({
+    settings, keymap, semanticTheme, onOptions,
+    viewType = EditorViewType.WYSIWYG, isHtml = false,
+    fileId = 'typography-test', filePath,
+  }) {
+    const id = fileId;
+    const currentViewType = viewType;
     const useAppSettingStore = (selector) => selector({ settingData: settings });
+    const useCodeEditorPreferences = () => resolveCodeEditorPreferences(settings);
     const useEditorKeybindingStore = (selector) => selector({
       editorKeybingMap: keymap ?? emptyKeymap,
       editorKeybindingsLoaded: keymap !== undefined,
     });
     ${statements.map((node) => node.getText(source)).join('\n')}
-    onOptions(capricornRuntimeOptions);
+    onOptions(capricornRuntimeOptions, editorProps, printStyleToken);
     return null;
   }
   Harness;
@@ -60,17 +97,27 @@ const compiled = ts.transpileModule(
 ).outputText
 const Harness = runInNewContext(compiled, {
   useMemo,
+  resolveCodeEditorPreferences,
+  rmeRuntime: undefined,
+  useFileTextDirectionStore,
+  getFileTextDirectionKey,
+  normalizeEditorTextDirection,
   curFile: { id: 'note' },
-  currentViewType: EditorViewType.WYSIWYG,
+  content: 'Example',
+  delegate: undefined,
+  id: 'typography-test',
+  fileTypeConfig: {},
+  sourceCodeEditorSpellcheck: false,
   EditorViewType,
   editorColorScheme: 'light',
   editorTypewriterScroll: false,
   externalChangeResolving: false,
   savePathReserved: false,
   wysiwygEditorSpellcheck: true,
-  getOrCreateDelegateOptions: () => ({}),
+  delegateOptions: {},
   capricornLocalization: {},
   capricornClipboard: {},
+  snippetOptions: { items: [] },
   handleCapricornClipboardResult: vi.fn(),
   capricornClipboardCommands,
   createCapricornKeybindingConfiguration,
@@ -80,17 +127,131 @@ const Harness = runInNewContext(compiled, {
   settings: {
     editor_root_font_size?: number
     editor_root_line_height?: string
+    editor_source_font_size?: number
+    editor_source_line_height?: string
     editor_link_edit_mode?: 'popover' | 'markdown'
+    editor_text_direction?: unknown
     editor_placeholder?: boolean
     wysiwyg_editor_codemirror_line_wrap?: boolean
+    editor_code_font_size?: number | null
+    editor_code_line_height?: string | null
+    theme_use_personal_typography?: boolean
+    embedded_code_editor_line_numbers?: string
+    source_code_editor_line_numbers?: string
   }
   keymap?: Record<string, string>
+  fileId?: string
+  filePath?: string
+  viewType?: (typeof EditorViewType)[keyof typeof EditorViewType]
+  isHtml?: boolean
+  semanticTheme?: {
+    'font.editor.size': string
+    'font.editor.lineHeight': string
+    'font.source.size'?: string
+    'font.source.lineHeight'?: string
+  }
   onOptions: (options: CapricornRuntimeOptions) => void
 }>
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  useFileTextDirectionStore.setState({ directions: {} })
+})
 
 describe('TextEditor Capricorn typography settings', () => {
+  it('forwards embedded display and typography while keeping source typography independent', () => {
+    const onOptions = vi.fn()
+    const settings = {
+      editor_root_font_size: 16, editor_source_font_size: 24,
+      editor_code_font_size: 20, editor_code_line_height: '1.8',
+      embedded_code_editor_line_numbers: 'off', source_code_editor_line_numbers: 'sparse',
+    }
+    const { rerender } = render(<Harness settings={settings} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].codeEditor.lineNumbers).toBe('off')
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      fontSize: '16px', '--cap-code-font-size': '20px', '--cap-code-line-height': '1.8',
+    })
+    rerender(<Harness settings={{ ...settings, theme_use_personal_typography: false }} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      '--cap-code-font-size': 'calc(16px * 0.875)', '--cap-code-line-height': undefined,
+    })
+    rerender(<Harness settings={{}} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].codeEditor.lineNumbers).toBeUndefined()
+  })
+  it('shares overrides between panes of one file while other files keep following the global direction', () => {
+    const first = vi.fn()
+    const second = vi.fn()
+    const other = vi.fn()
+    const file = { id: 'note', path: '/notes/mixed.md' }
+    const content = (globalDirection: string) => (
+      <>
+        <Harness
+          fileId={file.id}
+          filePath={file.path}
+          settings={{ editor_text_direction: globalDirection }}
+          onOptions={first}
+        />
+        <Harness
+          fileId={file.id}
+          filePath={file.path}
+          viewType={EditorViewType.PREVIEW}
+          settings={{ editor_text_direction: globalDirection }}
+          onOptions={second}
+        />
+        <Harness
+          fileId='other'
+          filePath='/notes/other.md'
+          settings={{ editor_text_direction: globalDirection }}
+          onOptions={other}
+        />
+      </>
+    )
+    const { rerender } = render(content('ltr'))
+    act(() => useFileTextDirectionStore.getState().setDirection(file, 'rtl'))
+    expect(first.mock.lastCall?.[0].textDirection).toBe('rtl')
+    expect(second.mock.lastCall?.[0].textDirection).toBe('rtl')
+    expect(other.mock.lastCall?.[0].textDirection).toBe('ltr')
+    act(() => useFileTextDirectionStore.getState().setDirection(file, 'auto'))
+    rerender(content('rtl'))
+    expect(first.mock.lastCall?.[0].textDirection).toBe('auto')
+    expect(second.mock.lastCall?.[0].textDirection).toBe('auto')
+    expect(other.mock.lastCall?.[0].textDirection).toBe('rtl')
+    act(() => useFileTextDirectionStore.getState().setDirection(file, undefined))
+    expect(first.mock.lastCall?.[0].textDirection).toBe('rtl')
+    expect(second.mock.lastCall?.[0].textDirection).toBe('rtl')
+    rerender(content('ltr'))
+    expect(first.mock.lastCall?.[0].textDirection).toBe('ltr')
+  })
+
+  it.each([EditorViewType.WYSIWYG, EditorViewType.PREVIEW])(
+    'updates body direction and defaults missing or invalid preferences to auto in %s',
+    (viewType) => {
+      const onOptions = vi.fn()
+      const { rerender } = render(
+        <Harness settings={{}} viewType={viewType} onOptions={onOptions} />,
+      )
+      expect(onOptions.mock.lastCall?.[0].textDirection).toBe('auto')
+      for (const [saved, expected] of [
+        ['rtl', 'rtl'],
+        ['ltr', 'ltr'],
+        ['auto', 'auto'],
+        ['rtl', 'rtl'],
+        [undefined, 'auto'],
+        [null, 'auto'],
+        ['invalid', 'auto'],
+      ]) {
+        rerender(
+          <Harness
+            settings={{ editor_text_direction: saved }}
+            viewType={viewType}
+            onOptions={onOptions}
+          />,
+        )
+        expect(onOptions.mock.lastCall?.[0].textDirection).toBe(expected)
+      }
+    },
+  )
+
   it('forwards the existing code wrap setting and restores its default when unset', () => {
     const onOptions = vi.fn()
     const { rerender } = render(<Harness settings={{}} onOptions={onOptions} />)
@@ -149,7 +310,10 @@ describe('TextEditor Capricorn typography settings', () => {
   it('updates size and line height independently and honors values formerly treated as defaults', () => {
     const onOptions = vi.fn()
     const { rerender } = render(<Harness settings={{}} onOptions={onOptions} />)
-    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({ fontSize: 16, lineHeight: '1.7' })
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      fontSize: '16px',
+      lineHeight: '1.7',
+    })
 
     for (const [fontSize, lineHeight] of [
       [24, '1.8'],
@@ -163,10 +327,98 @@ describe('TextEditor Capricorn typography settings', () => {
         />,
       )
       expect(onOptions.mock.lastCall?.[0].style).toEqual({
-        fontSize,
+        fontSize: `${fontSize}px`,
         lineHeight,
-        '--cap-code-font-size': `${fontSize * 0.875}px`,
+        '--cap-code-font-size': `calc(${fontSize}px * 0.875)`,
+        '--cap-editor-content-width': 'var(--mf-reader-content-width)',
       })
     }
+  })
+  it('uses resolved theme typography, including relative CSS lengths', () => {
+    const onOptions = vi.fn()
+    const { rerender } = render(
+      <Harness
+        settings={{}}
+        semanticTheme={{ 'font.editor.size': '1.2rem', 'font.editor.lineHeight': '1.9' }}
+        onOptions={onOptions}
+      />,
+    )
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      fontSize: '1.2rem',
+      lineHeight: '1.9',
+      '--cap-code-font-size': 'calc(1.2rem * 0.875)',
+    })
+    rerender(
+      <Harness
+        settings={{}}
+        semanticTheme={{ 'font.editor.size': '18px', 'font.editor.lineHeight': '1.6' }}
+        onOptions={onOptions}
+      />,
+    )
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      fontSize: '18px',
+      lineHeight: '1.6',
+    })
+  })
+  it('updates source typography without changing document typography across modes', () => {
+    const onOptions = vi.fn()
+    const { rerender } = render(
+      <Harness settings={{}} viewType={EditorViewType.SOURCECODE} onOptions={onOptions} />,
+    )
+    expect(onOptions.mock.lastCall?.[1].styleToken).toMatchObject({
+      rootFontSize: '15px',
+      rootLineHeight: '1.6',
+    })
+    const settings = {
+      editor_root_font_size: 18,
+      editor_root_line_height: '1.8',
+      editor_source_font_size: 14,
+      editor_source_line_height: '1.5',
+    }
+    rerender(
+      <Harness settings={settings} viewType={EditorViewType.SOURCECODE} onOptions={onOptions} />,
+    )
+    expect(onOptions.mock.lastCall?.[1].styleToken).toMatchObject({
+      rootFontSize: '14px',
+      rootLineHeight: '1.5',
+    })
+    expect(onOptions.mock.lastCall?.[0].style).toMatchObject({
+      fontSize: '18px',
+      lineHeight: '1.8',
+    })
+    expect(onOptions.mock.lastCall?.[2]).toMatchObject({
+      rootFontSize: '18px',
+      rootLineHeight: '1.8',
+    })
+    rerender(
+      <Harness settings={settings} viewType={EditorViewType.PREVIEW} onOptions={onOptions} />,
+    )
+    expect(onOptions.mock.lastCall?.[1].styleToken).toMatchObject({
+      rootFontSize: '18px',
+      rootLineHeight: '1.8',
+    })
+    rerender(<Harness settings={settings} isHtml onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[1].styleToken.rootFontSize).toBe('14px')
+  })
+
+  it('uses source theme typography independently of document theme typography', () => {
+    const onOptions = vi.fn()
+    render(
+      <Harness
+        settings={{ editor_source_font_size: 14 }}
+        viewType={EditorViewType.SOURCECODE}
+        semanticTheme={{
+          'font.editor.size': '20px',
+          'font.editor.lineHeight': '1.8',
+          'font.source.size': '1rem',
+          'font.source.lineHeight': '1.5',
+        }}
+        onOptions={onOptions}
+      />,
+    )
+    expect(onOptions.mock.lastCall?.[1].styleToken).toMatchObject({
+      rootFontSize: '1rem',
+      rootLineHeight: '1.5',
+    })
   })
 })

@@ -41,7 +41,7 @@ export const MfIconButton = (props: MfIconButtonProps) => {
 
   if (tooltipProps) {
     return (
-      <Tooltip style={{ zIndex: 11 }} {...tooltipProps}>
+      <Tooltip {...tooltipProps}>
         <i ref={iconRef} className={iconCls} onClick={onClick}></i>
       </Tooltip>
     )

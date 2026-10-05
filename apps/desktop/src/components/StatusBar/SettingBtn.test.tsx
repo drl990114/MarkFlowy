@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import useContextMenuStore, { type IShowContextMenuParams } from '@/stores/useContextMenuStore'
 import { AppMenuButton } from '../TitleBar/AppMenuButton'
 import { CenterMenu } from './SettingBtn'
 
@@ -13,6 +14,7 @@ vi.mock('@/i18n', () => ({
     t: (key: string) =>
       ({
         'about.label': 'About',
+        'command_palette.title': 'Command Palette',
         'common.menu': 'Menu',
         'settings.label': 'Settings',
         'settings.display.theme.mode.system': 'System',
@@ -40,7 +42,13 @@ describe('application menu', () => {
   beforeEach(() => {
     settingMenuTestState.setThemeMode.mockReset()
     settingMenuTestState.showContextMenu.mockReset()
+    useContextMenuStore.getState().hide()
+    settingMenuTestState.showContextMenu.mockImplementation((params: IShowContextMenuParams) => {
+      useContextMenuStore.getState().show(params)
+    })
   })
+
+  afterEach(cleanup)
 
   it('exposes the migrated application menu from the title bar', () => {
     render(<AppMenuButton />)
@@ -60,6 +68,11 @@ describe('application menu', () => {
     expect(settingMenuTestState.showContextMenu).toHaveBeenCalledWith(
       expect.objectContaining({
         items: [
+          expect.objectContaining({
+            commandId: 'app_commandPalette',
+            label: 'Command Palette',
+            value: 'command-palette',
+          }),
           expect.objectContaining({ label: 'About', value: 'about' }),
           expect.objectContaining({ label: 'Theme', value: 'theme' }),
           expect.objectContaining({
@@ -90,7 +103,42 @@ describe('application menu', () => {
     fireEvent.click(trigger)
 
     expect(settingMenuTestState.showContextMenu).toHaveBeenCalledWith(
-      expect.objectContaining({ x: 12, y: 98 }),
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            commandId: 'app_commandPalette',
+            label: 'Command Palette',
+            value: 'command-palette',
+          }),
+        ]),
+        x: 12,
+        y: 98,
+      }),
     )
+  })
+
+  it('marks only the owning menu trigger expanded until the menu closes or is replaced', () => {
+    render(<CenterMenu />)
+    const trigger = screen.getByRole('button', { name: 'Settings' })
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+
+    fireEvent.click(trigger)
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+
+    act(() => useContextMenuStore.getState().hide())
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+
+    fireEvent.click(trigger)
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+
+    act(() => {
+      useContextMenuStore.getState().show({
+        items: [{ label: 'Editor action', value: 'editor-action' }],
+        x: 200,
+        y: 200,
+      })
+    })
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
   })
 })

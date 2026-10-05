@@ -1,6 +1,18 @@
+import type { CapricornSnippetsOptions } from '@/features/snippets/types'
+import type { CodeEditorSettings } from './codeEditorSettings'
+export type {
+  CapricornSnippet,
+  CapricornSnippetKind,
+  CapricornSnippetsOptions,
+} from '@/features/snippets/types'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { createCapricornResumeApi } from './capricornResume'
 import { getCapricornActiveHeadingId } from './capricornHeadingViewport'
+import {
+  setEmbeddedCodeMirrorViewResolver,
+  trackEmbeddedCodeMirrorFocus,
+} from './embeddedCodeMirrorFocus'
+import type { EmbeddedCodeFocusSnapshot } from './embeddedCodeMirrorFocus'
 
 export interface CapricornFileWithProgress {
   file: File
@@ -31,6 +43,9 @@ export type CapricornBlockType =
 export type CapricornMarkType = 'bold' | 'code' | 'italic'
 
 export interface CapricornCommandApi {
+  insertCodeBlock?: (source: string, options?: { language?: string }) => void
+  insertMathBlock?: (source: string) => void
+  insertMermaidBlock?: (source: string) => void
   insertLink?: (link: { href: string; text?: string; title?: string }) => void
   updateLink?: (update: { href?: string; title?: string | null }) => void
   removeLink?: () => void
@@ -134,8 +149,19 @@ export interface CapricornKeybindingConfiguration {
   )[]
 }
 
+/** Accept existing CSSProperties values as well as runtime theme variables. */
+export type CapricornThemeStyle =
+  | React.CSSProperties
+  | (React.CSSProperties & Partial<Record<`--cap-${string}`, string | number>>)
+
 export interface CapricornEditorSettings {
+  /** Opt-in body caret animation. Respects reduced motion and defaults to false. */
+  caretAnimation?: boolean
+  /** Paragraph direction, independent of interface localization and Markdown. */
+  textDirection?: 'auto' | 'ltr' | 'rtl'
+  snippets?: false | CapricornSnippetsOptions
   codeBlockLineWrapping?: boolean
+  codeEditor?: CodeEditorSettings
   linkEditMode?: 'popover' | 'markdown'
   className?: string
   colorScheme?: 'dark' | 'light' | 'system'
@@ -144,7 +170,7 @@ export interface CapricornEditorSettings {
   placeholder?: boolean | string | CapricornPlaceholderOptions
   readOnly?: boolean
   spellCheck?: boolean
-  style?: React.CSSProperties
+  style?: CapricornThemeStyle
   typewriter?: boolean | { enabled?: boolean }
 }
 
@@ -186,6 +212,7 @@ export interface CapricornCopilotOptions {
 }
 
 export interface CapricornRuntimeOptions extends CapricornEditorSettings {
+  onProgress?: (progress: CapricornRuntimeProgress) => void
   commands?: readonly {
     id: `host.${string}`
     label: string
@@ -221,13 +248,13 @@ export interface CapricornRuntimeOptions extends CapricornEditorSettings {
   }
 }
 
-// Keep enough content rendered ahead of Desktop's throttled scroll events to
-// avoid exposing placeholders during ordinary trackpad and wheel scrolling.
+// Keep a few screens ready ahead of fast scrolling on tall Desktop viewports.
+// First paint is still sized to the viewport rather than this entire buffer.
 export const CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS = {
-  bufferRange: 900,
+  bufferRange: 3600,
   enable: true,
   enableScrollAnchoring: true,
-  firstPaintBlockSize: 40,
+  firstPaintBlockSize: 96,
 } as const satisfies NonNullable<CapricornRuntimeOptions['virtualize']>
 
 interface CapricornRuntimeChangeEvent {
@@ -318,8 +345,10 @@ export interface CapricornRuntimeProgress {
     | 'parse'
     | 'transfer'
     | 'hydrate'
+    | 'plugins'
     | 'model'
     | 'index'
+    | 'controller'
     | 'mount'
     | 'ready'
   elapsedMs: number
@@ -332,7 +361,6 @@ export interface CapricornRuntimeProgress {
 
 export interface CapricornRuntimeAsyncOptions extends CapricornRuntimeOptions {
   signal?: AbortSignal
-  onProgress?: (progress: CapricornRuntimeProgress) => void
 }
 
 export type CapricornRuntimeAsyncFactory = (
@@ -351,11 +379,18 @@ export function requiresAsyncCapricornOpen(markdown: string): boolean {
 }
 
 export function getCapricornFirstPaintBlockSize(viewportHeight: number): number {
-  return Math.max(1, Math.min(40, Math.ceil((viewportHeight || 640) / 24) + 2))
+  return Math.max(
+    1,
+    Math.min(
+      CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS.firstPaintBlockSize,
+      Math.ceil((viewportHeight || 640) / 24) + 2,
+    ),
+  )
 }
 
 export interface CapricornRuntimeAdapter {
   readonly resume?: ReturnType<typeof createCapricornResumeApi>
+  captureEmbeddedCodeFocus?: () => EmbeddedCodeFocusSnapshot | null
   validateKeybindings: (configuration: CapricornKeybindingConfiguration) => {
     ok: boolean
     diagnostics: readonly { message: string }[]
@@ -420,6 +455,7 @@ export function createCapricornRuntimeAdapter({
     linkOpenMode: options.linkOpenMode ?? 'modifier',
     onEditInline: ({ kind, key, focus }) => requestInlineEdit(kind, key, focus),
   })
+  const embeddedCodeFocus = trackEmbeddedCodeMirrorFocus(container)
   let applyingHostMarkdown = false
   let currentMarkdown = options.markdown ?? ''
   let markdownSnapshotDirty = false
@@ -448,6 +484,7 @@ export function createCapricornRuntimeAdapter({
   const destroySession = () => {
     if (destroyed) return
     destroyed = true
+    embeddedCodeFocus.destroy()
     session.selection?.release()
     inlineEditListeners.clear()
     uiStateListeners.clear()
@@ -511,6 +548,7 @@ export function createCapricornRuntimeAdapter({
     validateKeybindings: (configuration) =>
       session.keybindings.validateConfiguration(configuration),
     resume: createCapricornResumeApi(session),
+    captureEmbeddedCodeFocus: embeddedCodeFocus.capture,
     selection: session.selection,
     requestInlineEdit,
     subscribeInlineEdit(listener) {
@@ -648,11 +686,17 @@ export function loadCapricornRuntimeFactory(): Promise<CapricornRuntimeFactory> 
   }
 
   if (!runtimeFactoryPromise) {
-    runtimeFactoryPromise = import('virtual:markflowy-capricorn-runtime')
-      .then((runtimeModule) => {
+    runtimeFactoryPromise = Promise.all([
+      import('virtual:markflowy-capricorn-runtime'),
+      // Focus restoration is optional; its chunk must not disable an otherwise usable runtime.
+      import('@codemirror/view').catch(() => undefined),
+    ])
+      .then(([runtimeModule, codeMirror]) => {
         if (typeof runtimeModule.createCapricornRuntime !== 'function') {
           throw new TypeError('The Capricorn package does not expose createCapricornRuntime.')
         }
+
+        if (codeMirror) setEmbeddedCodeMirrorViewResolver(codeMirror.EditorView.findFromDOM)
 
         loadedRuntimeFactory = runtimeModule.createCapricornRuntime as CapricornRuntimeFactory
         loadedRuntimeAsyncFactory =

@@ -53,6 +53,7 @@ import {
   getPdfPrintWindowRequest,
   openPdfPrintWindow,
   PDF_PRINT_WINDOW_DATA_EVENT,
+  PDF_PRINT_WINDOW_PREPARED_EVENT,
   PDF_PRINT_WINDOW_READY_EVENT,
   PDF_PRINT_WINDOW_RESULT_EVENT,
   type PdfPrintWindowDocument,
@@ -129,6 +130,32 @@ describe('PDF print window protocol', () => {
 
     tauriMocks.windows[0]?.handlers.get('tauri://destroyed')?.({ payload: null })
     await expect(printing).resolves.toBeNull()
+  })
+
+  it('reports preparation once without finishing or destroying the native print task', async () => {
+    const onPrepared = vi.fn()
+    const finished = vi.fn()
+    const printing = openPdfPrintWindow(printDocument, new AbortController().signal, { onPrepared })
+    void printing.then(finished)
+    await vi.waitFor(() => expect(tauriMocks.windows).toHaveLength(1))
+    const printWindow = tauriMocks.windows[0]!
+    const notify = tauriMocks.sourceHandlers.get(PDF_PRINT_WINDOW_PREPARED_EVENT)!
+    const message = { jobId: '42', sourceLabel: 'main', windowLabel: printWindow.label }
+
+    notify({ payload: { ...message, jobId: 'other' } })
+    notify({ payload: { ...message, sourceLabel: 'other' } })
+    notify({ payload: { ...message, windowLabel: 'other' } })
+    expect(onPrepared).not.toHaveBeenCalled()
+    notify({ payload: message })
+    notify({ payload: message })
+    await Promise.resolve()
+    expect(onPrepared).toHaveBeenCalledOnce()
+    expect(finished).not.toHaveBeenCalled()
+    expect(printWindow.destroy).not.toHaveBeenCalled()
+
+    printWindow.handlers.get('tauri://destroyed')?.({ payload: null })
+    await expect(printing).resolves.toBeNull()
+    expect(tauriMocks.sourceHandlers.size).toBe(0)
   })
 
   it('destroys the dedicated window when the owning editor is closed', async () => {

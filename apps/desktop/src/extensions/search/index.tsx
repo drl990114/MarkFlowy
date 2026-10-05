@@ -8,6 +8,7 @@ import { resolveFileExcludePatterns } from '@/helper/file-exclude'
 import { getFileObject, getFileObjectByPath, setFileObjectByPath } from '@/helper/files'
 import { createFile, getFolderPathFromPath } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
+import { searchFiles } from '@/services/file-search'
 import { cn } from '@/lib/cn'
 import { useEditorStore } from '@/stores'
 import {
@@ -16,7 +17,6 @@ import {
 } from '@/components/EditorArea/editorSearchStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { invoke } from '@tauri-apps/api/core'
 import type { LucideIcon } from 'lucide-react'
 import {
   CaseSensitiveIcon,
@@ -284,6 +284,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
   const parentRef = useRef<HTMLDivElement>(null)
   const focusRequestFrameRef = useRef<number | null>(null)
   const searchRequestIdRef = useRef(0)
+  const searchAbortRef = useRef<AbortController | undefined>(undefined)
 
   const normalizedResultList = useMemo(
     () => normalizeSearchResults(resultList, resultQuery, resultCaseSensitive),
@@ -445,6 +446,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
 
       if (!queryText) {
         searchRequestIdRef.current += 1
+        searchAbortRef.current?.abort()
         setHasSearched(false)
         setIsSearching(false)
         setSearchError('')
@@ -454,12 +456,15 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
 
       const requestId = searchRequestIdRef.current + 1
       searchRequestIdRef.current = requestId
+      searchAbortRef.current?.abort()
+      const controller = new AbortController()
+      searchAbortRef.current = controller
       setHasSearched(true)
       setIsSearching(true)
       setSearchError('')
 
       try {
-        const res = await invoke<{ data: SearchInfo[] }>('search_files_async', {
+        const res = await searchFiles<{ data: SearchInfo[] }>({
           query: {
             dir: workspace,
             name_text: '.md',
@@ -469,11 +474,10 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
             content_case_sensitive: caseSensitive,
             file_exclude_patterns: fileExcludePatterns,
           },
-        })
+        }, 'global', controller.signal)
 
         if (searchRequestIdRef.current !== requestId) return
 
-        logger.info('res', res)
         const previousMatch = restore ? useSearchStore.getState().activeMatch : undefined
         const restoredFile = previousMatch
           ? normalizeSearchResults(res.data, queryText, caseSensitive).find(
@@ -514,6 +518,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
         addSearchResult([])
         setExpandIdMap({})
       } finally {
+        if (searchAbortRef.current === controller) searchAbortRef.current = undefined
         if (searchRequestIdRef.current === requestId) {
           setIsSearching(false)
         }
@@ -537,6 +542,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
     if (store.hasSearched && store.searchKeyword.trim()) void handleSearch(true)
     return () => {
       searchRequestIdRef.current += 1
+      searchAbortRef.current?.abort()
     }
     // A workspace mounts once; editing a query must still wait for Enter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -544,6 +550,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
 
   const toggleCaseSensitive = useCallback(() => {
     searchRequestIdRef.current += 1
+    searchAbortRef.current?.abort()
     setHasSearched(false)
     setIsSearching(false)
     setSearchError('')
@@ -616,6 +623,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
       const nextKeyword = e.target.value
 
       searchRequestIdRef.current += 1
+      searchAbortRef.current?.abort()
       setHasSearched(false)
       setIsSearching(false)
       setSearchError('')
@@ -634,6 +642,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
 
   const handleClearSearch = useCallback(() => {
     searchRequestIdRef.current += 1
+    searchAbortRef.current?.abort()
     setHasSearched(false)
     setIsSearching(false)
     setSearchError('')

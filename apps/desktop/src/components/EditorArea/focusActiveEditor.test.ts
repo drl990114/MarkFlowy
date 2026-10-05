@@ -1,8 +1,19 @@
-import { afterEach, describe, expect, it } from 'vitest'
-import { focusActiveEditor, isEditorPanelBlankTarget } from './focusActiveEditor'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { CapricornRuntimeAdapter } from './capricornRuntimeAdapter'
+import { setCapricornEditor } from './capricornEditorRegistry'
+import { sourceCodeCodemirrorViewMap } from './sourceCodeEditorInstances'
+import {
+  captureActiveEditorFocus,
+  focusActiveEditor,
+  isEditorPanelBlankTarget,
+  scheduleActiveEditorFocus,
+} from './focusActiveEditor'
 
 afterEach(() => {
   document.body.replaceChildren()
+  setCapricornEditor('test-file', undefined)
+  sourceCodeCodemirrorViewMap.clear()
+  vi.restoreAllMocks()
 })
 
 describe('focusActiveEditor', () => {
@@ -45,6 +56,47 @@ describe('focusActiveEditor', () => {
 
   it('returns false when no active editor is mounted', () => {
     expect(focusActiveEditor()).toBe(false)
+  })
+
+  it('restores the rich editor selection and its keyboard input outside the panel', () => {
+    document.body.innerHTML = `
+      <div data-editor-id="test-file" data-editor-active="true" tabindex="-1">
+        <div data-mf-editor-mode="wysiwyg"><button tabindex="0">Block menu</button></div>
+      </div>
+      <textarea data-cap-input></textarea>
+    `
+    const input = document.querySelector('textarea')!
+    const restore = vi.fn(() => true)
+    const release = vi.fn()
+    const editor = {
+      focus: vi.fn(() => input.focus()),
+      selection: { capture: () => ({ id: 'original-range' }), restore, release },
+    } as unknown as CapricornRuntimeAdapter
+    setCapricornEditor('test-file', editor)
+    const snapshot = captureActiveEditorFocus()!
+
+    expect(snapshot.restore()).toBe(true)
+    expect(restore).toHaveBeenCalledWith('original-range')
+    expect(document.activeElement).toBe(input)
+    expect(focusActiveEditor()).toBe(true)
+    expect(document.activeElement).toBe(input)
+    snapshot.release()
+    expect(release).toHaveBeenCalledWith('original-range')
+
+    setCapricornEditor('test-file', undefined)
+    expect(snapshot.restore()).toBe(false)
+    expect(editor.focus).toHaveBeenCalledTimes(2)
+  })
+
+  it('cancels pending restoration when settings reopen before the next frame', () => {
+    const cancelFrame = vi.spyOn(window, 'cancelAnimationFrame')
+    vi.spyOn(window, 'requestAnimationFrame').mockReturnValue(15)
+    const snapshot = { restore: vi.fn(), release: vi.fn() }
+    const cancel = scheduleActiveEditorFocus(snapshot)
+    cancel()
+    expect(cancelFrame).toHaveBeenCalledWith(15)
+    expect(snapshot.restore).not.toHaveBeenCalled()
+    expect(snapshot.release).toHaveBeenCalledOnce()
   })
 })
 

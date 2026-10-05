@@ -40,13 +40,13 @@ describe('Explorer file tree density', () => {
     expect(EXPLORER_FILE_TREE_INDENT_SIZE).toBe(20)
     expect(css).toContain('padding:06px')
     expect(css).toContain('border-radius:0')
-    expect(css).toContain('font-size:var(--mf-ui-font-body)')
+    expect(css).toContain('font-size:var(--mf-ui-font-control)')
     expect(css).toContain('font-weight:400')
-    expect(css).toContain('line-height:var(--mf-line-height)')
-    expect(css).toContain('letter-spacing:var(--mf-ui-tracking-body)')
+    expect(css).toContain('line-height:var(--mf-ui-line-height-control)')
+    expect(css).toContain('letter-spacing:var(--mf-ui-tracking-control)')
     expect(css).toContain('width:16px;height:16px;line-height:0')
     expect(css).toContain(
-      'height:22px;padding:04px;font-size:var(--mf-ui-font-body);line-height:var(--mf-ui-line-height-body)',
+      'height:22px;padding:04px;font-size:var(--mf-ui-font-control);line-height:var(--mf-ui-line-height-control)',
     )
   })
 
@@ -63,7 +63,7 @@ describe('Explorer file tree density', () => {
       /\.mf-file-tree-item:hover>\[data-mf-file-tree-node\]\{background-color:var\(--mf-ui-control-hover-bg/,
     )
     expect(css).toMatch(
-      /\.mf-file-tree-item:focus-visible>\[data-mf-file-tree-node\]\{outline:none;text-decoration-line:underline/,
+      /\.mf-file-tree-item:focus-visible>\[data-mf-file-tree-node\]\{outline:none;box-shadow:inset0002pxvar\(--mf-control-focus/,
     )
     expect(css).toMatch(
       /\[data-mf-file-tree-node\]\[data-mf-file-tree-drop-highlight='true'\]\{background-color:var\(--mf-primary-soft/,

@@ -159,6 +159,10 @@ describe('useLayoutStore Dock state', () => {
     expect(JSON.parse(localStorage.getItem(DOCK_PREFERENCES_STORAGE_KEY) ?? '{}')).toEqual({
       version: 2,
       state: {
+        documentDocks: {
+          leftBar: { activePanelId: 'bookmarks', size: 240, visible: false },
+          rightBar: { activePanelId: 'toc', size: 280, visible: false },
+        },
         leftBar: { activePanelId: 'bookmarks', size: 240, visible: true },
         rightBar: { activePanelId: 'toc', size: 420, visible: true },
         leftStartup: 'restore',
@@ -203,5 +207,22 @@ describe('Dock restart preferences', () => {
     expect(() => store.getState().setLeftBarVisible(false)).not.toThrow()
     expect(store.getState().leftBar.visible).toBe(false)
     denied.mockRestore()
+  })
+})
+
+describe('document and workspace dock preferences', () => {
+  it('starts documents collapsed, remembers their tools, and restores the workspace layout', () => {
+    useLayoutStore.getState().setWorkspaceContext(false)
+    expect(useLayoutStore.getState().leftBar).toMatchObject({ activePanelId: 'bookmarks', visible: false })
+    expect(useLayoutStore.getState().rightBar.visible).toBe(false)
+    useLayoutStore.getState().toggleDockPanel('right', 'ai')
+    useLayoutStore.getState().setWorkspaceContext(true)
+    expect(useLayoutStore.getState().leftBar).toMatchObject({ activePanelId: 'explorer', visible: true })
+    expect(useLayoutStore.getState().rightBar).toMatchObject({ activePanelId: 'toc', visible: true })
+    useLayoutStore.getState().setWorkspaceContext(false)
+    expect(useLayoutStore.getState().rightBar).toMatchObject({ activePanelId: 'ai', visible: true })
+    useLayoutStore.getState().openExplorer()
+    expect(useLayoutStore.getState().leftBar).toMatchObject({ activePanelId: 'bookmarks', visible: false })
+    useLayoutStore.getState().setWorkspaceContext(true)
   })
 })
