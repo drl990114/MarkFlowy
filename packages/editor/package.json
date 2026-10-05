@@ -139,7 +139,7 @@
     "codemirror-lang-latex": "^0.2.0",
     "color": "^4.2.3",
     "dayjs": "^1.11.13",
-    "dompurify": "^3.4.15",
+    "dompurify": "^3.4.16",
     "escape-string-regexp": "^4.0.0",
     "fuse.js": "^7.1.0",
     "html-parse-stringify": "^3.0.1",
