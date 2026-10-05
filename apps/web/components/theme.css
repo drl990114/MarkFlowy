@@ -56,7 +56,7 @@ button.mf-preference-trigger:disabled {
   width: max-content;
   min-width: 196px;
   max-width: min(280px, calc(100vw - 24px));
-  max-height: var(--popover-available-height);
+  max-height: var(--radix-dropdown-menu-content-available-height);
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 6px;
@@ -73,12 +73,12 @@ button.mf-preference-trigger:disabled {
   text-align: left;
   opacity: 0;
   transform: translateY(-4px) scale(0.97);
-  transform-origin: var(--popover-transform-origin);
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
   transition:
     opacity 140ms ease,
     transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.mf-preference-menu[role='menu'][data-enter] {
+.mf-preference-menu[role='menu'][data-state='open'] {
   opacity: 1;
   transform: translateY(0) scale(1);
 }

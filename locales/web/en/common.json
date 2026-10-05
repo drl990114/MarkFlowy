@@ -201,8 +201,8 @@
     "hero": {
       "eyebrow": "LOCAL FIRST. IDEAS FORWARD.",
       "title": "Your ideas, in full flow.",
-      "lead": "A local-first Markdown editor for everything you want to write.",
-      "description": "Move from quick notes to longer drafts with visual and source editing, and bring in AI when it helps.",
+      "lead": "A Markdown editor crafted for smooth editing and focused writing.",
+      "description": "Local-first, with visual and source editing. Your AI assistant can use the official Skill to open, save, and export documents in MarkFlowy.",
       "try": "Try online",
       "platforms": "Made for the way you work"
     },

@@ -132,17 +132,25 @@ export default function Ribbon() {
     <div ref={ref} className='mf-hero-ribbon' aria-hidden='true'>
       <svg viewBox='0 0 1400 800' preserveAspectRatio='xMidYMid slice' focusable='false'>
         <defs>
-          <linearGradient id={`${id}-silk`} x1='0' y1='0' x2='1' y2='.6'>
+          <linearGradient id={`${id}-silk`} x1='0' y1='0' x2='1' y2='.8'>
             <stop stopColor='var(--mf-wave-light)' />
-            <stop offset='.4' stopColor='var(--mf-wave-primary)' />
-            <stop offset='.75' stopColor='var(--mf-wave-accent)' />
+            <stop offset='.3' stopColor='var(--mf-wave-primary)' />
+            <stop offset='.7' stopColor='var(--mf-wave-accent)' />
             <stop offset='1' stopColor='var(--mf-wave-light)' />
+          </linearGradient>
+          <linearGradient id={`${id}-mist`} x1='1' y1='0' x2='0' y2='1'>
+            <stop stopColor='var(--mf-wave-accent)' />
+            <stop offset='.5' stopColor='var(--mf-wave-light)' />
+            <stop offset='1' stopColor='var(--mf-wave-depth)' />
           </linearGradient>
         </defs>
         <path
-          d='M80 -200 C190 260 580 265 1010 740 L1290 960 C1100 190 1450 -110 600 -240 Z'
+          d='M-160 90 C220 430 530 -120 930 30 S1290 360 1560 130 L1540 310 C1230 550 940 120 710 200 S230 550 -160 270 Z'
+          fill={`url(#${id}-mist)`}
+        />
+        <path
+          d='M-160 510 C240 270 480 790 860 580 S1250 290 1560 560 L1540 770 C1180 460 1030 860 680 810 S160 500 -160 760 Z'
           fill={`url(#${id}-silk)`}
-          opacity='.5'
         />
       </svg>
       <canvas ref={canvasRef} />

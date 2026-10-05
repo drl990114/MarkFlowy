@@ -1,7 +1,7 @@
 import { createWaveGeometry } from './waveGeometry'
 
-// The supplied reference uses a folded sheet, three spatial twists and slow
-// noise displacement. Keep those mechanics in a small, isolated WebGL pass.
+// Two flowing sheets share one mesh and shader. Their shallow, opposing arcs
+// frame the writing instead of cutting diagonally through the entire hero.
 const vertexSource = `#version 300 es
 precision highp float;
 in vec3 a_position;
@@ -10,6 +10,8 @@ uniform float u_time;
 uniform vec2 u_size;
 uniform vec3 u_rotation;
 uniform vec2 u_position;
+uniform float u_phase;
+uniform float u_scale;
 out vec2 v_uv;
 
 vec2 gradient(vec2 p) {
@@ -30,23 +32,24 @@ vec3 rotateAround(vec3 p, vec3 axis, float angle) {
   axis = normalize(axis);
   return p * cos(angle) + cross(axis, p) * sin(angle) + axis * dot(axis, p) * (1.0 - cos(angle));
 }
-float falloff(float position, float power) {
-  return exp2(-exp2(power) * pow(position, power));
-}
 void main() {
   v_uv = a_uv;
-  vec3 p = a_position;
-  float phase = (17500.0 + u_time) * 0.00004;
-  p.y -= 7.821 * noise(vec2(p.x * 0.005831 + phase, p.z * 0.016001 + phase));
-  p = rotateAround(p, vec3(0.5,0,0.5), 0.41 * falloff(a_uv.x,0.7));
-  p = rotateAround(p, vec3(0,0.5,0.5), -0.65 * falloff(a_uv.y,3.63));
-  p = rotateAround(p, vec3(0.5,0,0.5), -0.58 * falloff(a_uv.y,3.95));
-  p *= vec3(9,8,5);
+  float phase = u_time * 0.00012 + u_phase;
+  float along = a_position.x / 400.0;
+  vec3 p = vec3(
+    along * u_size.x * 1.55,
+    a_position.z / 200.0 * u_size.y * 0.72,
+    a_position.y * 7.0
+  );
+  p = rotateAround(p, vec3(1,0,0), 0.35 + sin(along * 4.2 + phase * 0.6) * 0.6);
+  p.y += sin(along * 5.0 + phase) * u_size.y * 0.16;
+  p.z += noise(vec2(along * 3.0 + phase * 0.3, a_uv.x * 2.0)) * 45.0;
+  p *= u_scale;
   p = rotateAround(p, vec3(0,0,1), u_rotation.z);
   p = rotateAround(p, vec3(0,1,0), u_rotation.y);
   p = rotateAround(p, vec3(1,0,0), u_rotation.x);
-  p.xy += u_position;
-  // Orthographic camera, with the reference's slight horizontal perspective.
+  p.xy += u_position * u_size;
+  // A shallow orthographic perspective keeps the folds readable at every size.
   p.x -= p.z * 0.02;
   gl_Position = vec4(p.xy / (u_size * 0.5), -p.z / 10000.0, 1.0);
 }`
@@ -59,6 +62,7 @@ uniform vec3 u_light;
 uniform vec3 u_accent;
 uniform vec3 u_depth;
 uniform float u_sheen;
+uniform float u_tint;
 uniform vec2 u_size;
 out vec4 outColor;
 float grain(vec2 p) { return fract(sin(dot(p,vec2(12.9898,78.233))) * 43758.5453); }
@@ -69,6 +73,7 @@ void main() {
   vec3 color = mix(light,depth,smoothstep(0.06,0.48,v_uv.x));
   color = mix(color,u_accent,smoothstep(0.48,0.85,v_uv.x));
   color = mix(color,light,smoothstep(0.84,1.0,v_uv.x));
+  color = mix(color, mix(u_light,u_accent,0.58), u_tint);
   color = mix(color,vec3(1.0),(0.12 + smoothstep(0.25,0.96,v_uv.y) * 0.25) * u_sheen);
   float slope = clamp(0.5 + dFdy(v_uv.y) * u_size.y * 0.99,0.0,1.0);
   float glow = smoothstep(0.0,0.834,pow(slope,0.806));
@@ -164,6 +169,9 @@ export function createWaveRenderer(canvas: HTMLCanvasElement): WaveRenderer | nu
       'u_sheen',
       'u_rotation',
       'u_position',
+      'u_phase',
+      'u_scale',
+      'u_tint',
     ].map((key) => [key, gl.getUniformLocation(program, key)]),
   )
   const updateColors = () => {
@@ -187,22 +195,14 @@ export function createWaveRenderer(canvas: HTMLCanvasElement): WaveRenderer | nu
   gl.enable(gl.DEPTH_TEST)
   gl.clearColor(0, 0, 0, 0)
   const resize = () => {
-    const { width, height } = canvas.getBoundingClientRect()
+    const width = Math.max(1, canvas.clientWidth)
+    const height = Math.max(1, canvas.clientHeight)
     // Bound fill cost as well as resolution on very wide displays.
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(2400000 / (width * height)))
     canvas.width = Math.max(1, Math.round(width * dpr))
     canvas.height = Math.max(1, Math.round(height * dpr))
     gl.viewport(0, 0, canvas.width, canvas.height)
     gl.uniform2f(uniforms.u_size, width, height)
-    const small = window.innerWidth < 640
-    const medium = window.innerWidth < 1264
-    gl.uniform3f(
-      uniforms.u_rotation,
-      small ? -0.5 : medium ? -0.64 : -0.44959265,
-      -0.11759265,
-      small ? 1.64 : medium ? 1.68 : 1.87440735,
-    )
-    gl.uniform2f(uniforms.u_position, small ? 320 : medium ? 525 : 380, small ? -315 : -301.7)
   }
   resize()
   return {
@@ -211,6 +211,20 @@ export function createWaveRenderer(canvas: HTMLCanvasElement): WaveRenderer | nu
     draw(time) {
       gl.uniform1f(uniforms.u_time, time)
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+      // The farther sheet drifts along the upper edge, with a softer material.
+      gl.uniform1f(uniforms.u_phase, 2.7)
+      gl.uniform1f(uniforms.u_scale, 0.92)
+      gl.uniform1f(uniforms.u_tint, 0.48)
+      gl.uniform3f(uniforms.u_rotation, -0.35, 0.12, -0.28)
+      gl.uniform2f(uniforms.u_position, -0.04, 0.34)
+      gl.drawElements(gl.TRIANGLES, geometry.indices.length, gl.UNSIGNED_SHORT, 0)
+      // Independent depth gives the closer fold a clean silhouette at crossings.
+      gl.clear(gl.DEPTH_BUFFER_BIT)
+      gl.uniform1f(uniforms.u_phase, 0.4)
+      gl.uniform1f(uniforms.u_scale, 1.08)
+      gl.uniform1f(uniforms.u_tint, 0.08)
+      gl.uniform3f(uniforms.u_rotation, 0.18, -0.08, 0.24)
+      gl.uniform2f(uniforms.u_position, 0.06, -0.38)
       gl.drawElements(gl.TRIANGLES, geometry.indices.length, gl.UNSIGNED_SHORT, 0)
     },
     dispose,

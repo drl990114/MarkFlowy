@@ -10,7 +10,7 @@ import SiteArrow from '../components/site/Arrow'
 import Contributors from '../components/site/Contributors'
 import SiteFooter from '../components/site/Footer'
 import HomeMotion from '../components/site/HomeMotion'
-import PlatformMarquee from '../components/site/PlatformMarquee'
+import Platforms from '../components/site/Platforms'
 import Preview from '../components/site/Preview'
 import ProjectStats from '../components/site/ProjectStats'
 import Reveal from '../components/site/Reveal'
@@ -68,10 +68,14 @@ export default function Index({
               </Link>
             </div>
           </div>
-          <PlatformMarquee />
+          <Platforms />
         </section>
         <section className='mf-preview-section' id='preview'>
           <div className='mf-container mf-preview-layout'>
+            <figure className='mf-preview-product'>
+              <Preview />
+              <figcaption className='mf-preview-caption'>{t('site.preview.note')}</figcaption>
+            </figure>
             <Reveal className='mf-preview-copy'>
               <p className='mf-eyebrow'>{t('site.preview.eyebrow')}</p>
               <h2 className='mf-section-title'>{t('site.preview.title')}</h2>
@@ -81,10 +85,6 @@ export default function Index({
                 <SiteArrow />
               </Link>
             </Reveal>
-            <figure className='mf-preview-product'>
-              <Preview />
-              <figcaption className='mf-preview-caption'>{t('site.preview.note')}</figcaption>
-            </figure>
           </div>
         </section>
         <SingleFile />

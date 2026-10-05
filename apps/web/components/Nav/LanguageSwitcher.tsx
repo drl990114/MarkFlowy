@@ -34,6 +34,8 @@ export default function LanguageSwitcher({ className, style }: LanguageSwitcherP
 
   const handleLanguageChange = (locale: string) => {
     const { pathname, asPath, query } = router
+    // Keep the explicit choice ahead of Accept-Language on later visits to /.
+    document.cookie = `NEXT_LOCALE=${encodeURIComponent(locale)}; Path=/; Max-Age=31536000; SameSite=Lax`
     void router.push({ pathname, query }, asPath, { locale })
   }
 
