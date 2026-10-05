@@ -1,46 +1,47 @@
 # UPDATE LOG
 
-## v1.0.0 (Unreleased)
+## v1.0.0
 
-Release notes in preparation. This section describes the current V1 work; it does not announce a published download.
+After around three years of development and refinement, MarkFlowy has finally reached v1.0.0. Thank you to everyone who has used it, shared feedback, and contributed along the way.
 
 Highlights:
 
-- **A workspace for local Markdown.** Work with individual files or folders, recent files and workspaces, tabs, split editors, bookmarks, an outline, Quick Open, and workspace search. Use the title-bar folder button to open files or folders, including a folder in another window.
-- **Visual, source, and reading modes.** Write with tables, task lists, code, math, Mermaid, block conversion, and reusable snippets. The rebuilt editor supports large documents, improved selection, and mixed-direction text. Configure automatic, left-to-right, or right-to-left body text globally or per document; source and code stay left to right.
+- **Meet Capricorn, the new editor engine.** Capricorn powers WYSIWYG and Preview modes, with loading and rendering optimized for large Markdown documents. Both modes share the same renderer for a more consistent editing and reading experience. Source Code mode remains available through the editor toolbar's **More → View** menu.
+
+- **A quieter space for a single file.** Open a Markdown file and start writing without opening a folder first. With one document open and no workspace folder, the tab bar folds away automatically; click the document name to rename it, or move the pointer to the bottom edge to reveal the status bar. Opening another document or splitting the editor brings the tabs back.
+
+- **A workspace when you need one.** Work with recent files and folders, draggable tabs, split editors, bookmarks, an outline, Quick Open, and workspace search. Use the title-bar workspace menu to open files or folders, revisit recent work, or open a folder in another window.
+
+- **Richer Markdown editing.** Write with tables, task lists, code, math, Mermaid, and block conversion. Select text for the floating formatting toolbar, use the block handle's **Convert to** menu, or right-click a table data row and choose **Duplicate row**. Improved selections and mixed-direction text support make editing more flexible; body text direction can be set globally or per document while source and code stay left to right.
+
+- **Your own Mermaid, math, and code snippets.** Save frequently used diagrams, formulas, and code in **Settings → Snippet Library**, with custom entries, editable copies of built-in examples, and previews. In WYSIWYG mode, type `/` and choose a snippet from the **Mermaid**, **Math**, or **Code** submenu, or reuse one in an existing block through its toolbar's **Insert snippet** button. Snippets are stored locally and available across workspaces.
+
 - **Commands and focus.** Open the command palette with **Cmd/Ctrl + Shift + P**, search files with **Cmd/Ctrl + P**, or enter Zen mode with **Cmd/Ctrl + Shift + F**. Search and customize bindings in Settings.
+
 - **Your appearance, your theme.** Use the visual theme editor to create, inspect, preview, and export declarative JSON themes. Light and dark variants, semantic colors, typography, and personal CSS snippets can be managed from Settings.
-- **Local history and recovery.** Review and compare previous versions, configure history retention, restore saved drafts after a normal exit or reload, and review conflicts when files change outside the app.
-- **Optional AI and flexible export.** Configure chat and Copilot independently with your preferred provider, including local Ollama. Export HTML and images, print to PDF, or use an installed Pandoc for DOCX, ODT, and EPUB.
-- **Refined desktop controls.** More compact title, tab, status, and settings areas; a file-tree action to reveal the active file; clearer encoding and line-ending controls; and improved localization. Error reporting is now opt-in and disabled by default.
 
-Before upgrading:
+- **Code editing that fits your habits.** Under **Settings → Editor**, configure indentation, automatic bracket closing, visible whitespace, and code typography. Source Code and embedded code editors have separate options for line wrapping, line numbers, and active-line highlighting; changes apply to open editors.
 
-- The editor rewrite and new theme system change behavior compared with older releases. Keep backups and check representative documents before moving an existing collection.
-- Legacy JS/npm themes and automatically loaded CSS are no longer executed. Convert themes to JSON and import personal CSS snippets explicitly; see the [theme migration guide](../../docs/en/Extension/CustomTheme.md#migrating-older-themes). Original legacy files remain on disk.
-- Cloud AI and remote endpoints receive the context you send. Local inference requires both a local endpoint and a local model. Local history is not a replacement for backups.
-- These notes do not establish a new performance benchmark or completion of platform release testing. Download availability follows the published GitHub Release assets.
+- **Local history and recovery.** Open **More → Local history** to review and compare previous versions, and configure retention in Settings. Restore saved drafts after a normal exit or reload, including unnamed documents and unsaved edits, and review conflicts when files change outside the app.
+
+- **Refined desktop controls and everyday fixes.** More compact title, tab, status, and settings areas; a file-tree action to reveal the active file; clearer encoding and line-ending controls; and improved localization. Fixed editor focus restoration after closing Settings, undo handling in split editors, and file-tree ordering after file operations. Error reporting is now opt-in and disabled by default.
 
 ---
 
-发布说明准备中。本节记录当前 V1 工作，不代表安装包已正式发布。
+历经三年多的开发与打磨，MarkFlowy 终于迎来了 v1.0.0。感谢每一位使用、反馈和参与贡献的朋友，陪伴这个项目走到今天。
 
 主要更新：
 
-- **围绕本地 Markdown 的工作区。** 支持单文件与文件夹、最近文件与工作区、标签页、分屏、书签、目录、快速打开及工作区搜索。通过标题栏的文件夹按钮打开文件或文件夹，也可在新窗口打开文件夹。
-- **所见即所得、源码与阅读模式。** 支持表格、任务列表、代码、公式、Mermaid、块类型转换和可复用片段。重构后的编辑器支持大文档、改进的选区及混合方向正文；可全局或按文档设置自动、从左到右、从右到左，源码与代码保持从左到右。
+- **认识全新的 Capricorn 编辑器内核。** Capricorn 驱动所见即所得与预览模式，针对大篇幅 Markdown 优化加载与渲染。两种模式共用同一套渲染，让编辑与阅读的显示效果更一致；源码模式继续保留，可通过编辑器工具栏的**更多 → 视图**切换。
+- **更安静的单文件写作。** 直接打开 Markdown 文件即可开始写作，无需先打开文件夹。未打开工作区文件夹且只有一个文档时，标签栏会自动收起；点击文档名称即可重命名，将鼠标移到窗口底边可显示状态栏。打开另一份文档或拆分编辑器后，标签栏自动恢复。
+- **需要时，再展开工作区。** 支持最近文件与文件夹、标签页拖拽、分屏、书签、目录、快速打开及工作区搜索。通过标题栏的工作区菜单打开文件或文件夹、返回最近的工作，也可在新窗口打开文件夹。
+- **更完整的 Markdown 编辑体验。** 支持表格、任务列表、代码、公式、Mermaid 和块类型转换。选中文字即可使用浮动格式工具栏，通过块操作按钮的**转换为**菜单调整内容类型，也可右键表格数据行选择**复制当前行**。改进选区与混合方向文本支持，正文方向可全局或按文档设置，源码与代码保持从左到右。
+- **为 Mermaid、公式和代码块配置常用片段。** 在**设置 → 片段库**中保存常用图表、公式和代码，支持新建自定义片段、复制内置示例后修改，以及预览效果。所见即所得模式下，输入 `/` 后从 **Mermaid、Math 或 Code** 的子菜单选择片段，也可通过已有块工具栏的**插入片段**按钮复用。片段保存在本地，可跨工作区使用。
 - **命令与专注写作。** 按 **Cmd/Ctrl + Shift + P** 打开命令面板，按 **Cmd/Ctrl + P** 快速打开文件，按 **Cmd/Ctrl + Shift + F** 开关 Zen 模式，并在设置中搜索和自定义快捷键。
 - **自己的外观与主题。** 通过可视化主题编辑器创建、检查、预览和导出声明式 JSON 主题；在设置中管理浅色与深色变体、语义颜色、字体排版和个人 CSS 片段。
-- **本地历史与恢复。** 查看并比较早期版本、配置保留策略、恢复正常退出或刷新前保存的草稿，并在外部文件修改与编辑内容冲突时进行确认。
-- **可选 AI 与多种导出。** 对话和 Copilot 分别配置服务商与模型，支持本地 Ollama；导出 HTML、图片，通过打印保存 PDF，安装 Pandoc 后导出 DOCX、ODT 和 EPUB。
-- **更紧凑的桌面交互。** 改进标题栏、标签栏、状态栏和设置布局，新增文件树定位当前文件入口，完善编码、换行符控制与多语言文案。错误报告改为主动选择开启，默认关闭。
-
-升级前须知：
-
-- 编辑器重构与主题系统调整会影响部分旧版行为。迁移已有文档前，请备份并检查有代表性的文件。
-- 旧 JS/npm 主题与自动加载的 CSS 不再执行。请将主题转为 JSON，手动导入个人 CSS 片段；详见[主题迁移指南](../../docs/zh/Extension/CustomTheme.md)。原有旧版文件会保留。
-- 云端 AI 与远程地址会收到发送的上下文；本地推理需要同时使用本地服务地址与本地模型。本地历史不能替代备份。
-- 本说明不代表新增性能基准或已完成各平台发布验收，安装包以正式 GitHub Release 附件为准。
+- **更贴合习惯的代码编辑。** 在**设置 → 编辑器**中调整缩进、括号自动补全、空白字符显示和代码排版。源码编辑器与内嵌代码编辑器可分别设置自动换行、行号和当前行高亮，修改后即时应用到已打开的编辑器。
+- **本地历史与恢复。** 通过**更多 → 本地历史**查看并比较早期版本，在设置中配置保留策略。正常退出或刷新后可恢复已保存的草稿，包括未命名文档与未保存修改；外部文件修改与编辑内容冲突时，会提示确认。
+- **更紧凑的桌面交互与日常修复。** 改进标题栏、标签栏、状态栏和设置布局，新增文件树定位当前文件入口，完善编码、换行符控制与多语言文案。修复关闭设置后的编辑器焦点恢复、分屏编辑时的撤销归属，以及文件操作后的文件树排序问题。错误报告改为主动选择开启，默认关闭。
 
 ## v0.101.1
 
