@@ -590,16 +590,15 @@ html:has(.mf-site-header[data-open='true']) {
   inset: 0;
   width: 100%;
   height: 100%;
-  transition: opacity 700ms ease;
-}
-.mf-site .mf-hero-ribbon canvas {
+  /* The static fallback has a different shape; never show it while loading. */
   opacity: 0;
+  transition: opacity 240ms var(--mf-site-ease);
 }
-.mf-site .mf-hero-ribbon[data-ready='true'] canvas {
+.mf-site .mf-hero-ribbon[data-state='ready'] canvas {
   opacity: 1;
 }
-.mf-site .mf-hero-ribbon[data-ready='true'] svg {
-  opacity: 0;
+.mf-site .mf-hero-ribbon[data-state='fallback'] svg {
+  opacity: 1;
 }
 .mf-site .mf-hero-content {
   display: flex;
@@ -1510,6 +1509,9 @@ html:has(.mf-site-header[data-open='true']) {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .mf-site .mf-hero-ribbon[data-state='pending'] svg {
+    opacity: 1;
+  }
   .mf-site .mf-hero-ribbon :is(canvas, svg) {
     transition: none;
   }

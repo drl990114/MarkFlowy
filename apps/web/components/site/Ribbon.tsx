@@ -9,6 +9,8 @@ export default function Ribbon() {
     const root = ref.current
     const canvas = canvasRef.current
     if (!root || !canvas) return
+    root.dataset.state = 'pending'
+    root.dataset.running = 'false'
     let renderer: WaveRenderer | null = null
     let disposed = false
     let loading = false
@@ -57,22 +59,33 @@ export default function Ribbon() {
       }
     }
     const load = async () => {
-      if (renderer || loading || disposed) return
+      if (renderer || loading || disposed || media.matches) return
       loading = true
       try {
         const { createWaveRenderer } = await import('./waveRenderer')
-        if (disposed) return
+        if (disposed || media.matches) return
         renderer = createWaveRenderer(canvas)
         if (renderer) {
           renderer.draw(time)
-          root.dataset.ready = 'true'
+          root.dataset.state = 'ready'
           update()
+        } else {
+          root.dataset.state = 'fallback'
         }
       } catch {
-        // The server-rendered illustration remains visible if WebGL is unavailable.
+        if (!disposed) {
+          renderer?.dispose()
+          renderer = null
+          root.dataset.state = 'fallback'
+          update()
+        }
       } finally {
         loading = false
       }
+    }
+    const onMotionChange = () => {
+      if (visible) void load()
+      update()
     }
     const observer = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting
@@ -98,7 +111,7 @@ export default function Ribbon() {
     if (header) navigation.observe(header, { attributes: true, attributeFilter: ['data-open'] })
     if (home)
       navigation.observe(home, { attributes: true, attributeFilter: ['data-motion-running'] })
-    media.addEventListener('change', update)
+    media.addEventListener('change', onMotionChange)
     document.addEventListener('visibilitychange', update)
     const onContextLost = (event: Event) => {
       event.preventDefault()
@@ -106,7 +119,7 @@ export default function Ribbon() {
       frame = 0
       renderer?.dispose()
       renderer = null
-      root.dataset.ready = 'false'
+      root.dataset.state = 'fallback'
       root.dataset.running = 'false'
     }
     const onContextRestored = () => {
@@ -121,7 +134,7 @@ export default function Ribbon() {
       resize.disconnect()
       navigation.disconnect()
       theme.disconnect()
-      media.removeEventListener('change', update)
+      media.removeEventListener('change', onMotionChange)
       document.removeEventListener('visibilitychange', update)
       canvas.removeEventListener('webglcontextlost', onContextLost)
       canvas.removeEventListener('webglcontextrestored', onContextRestored)
@@ -129,7 +142,7 @@ export default function Ribbon() {
     }
   }, [])
   return (
-    <div ref={ref} className='mf-hero-ribbon' aria-hidden='true'>
+    <div ref={ref} className='mf-hero-ribbon' data-state='pending' aria-hidden='true'>
       <svg viewBox='0 0 1400 800' preserveAspectRatio='xMidYMid slice' focusable='false'>
         <defs>
           <linearGradient id={`${id}-silk`} x1='0' y1='0' x2='1' y2='.8'>
