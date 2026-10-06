@@ -8,10 +8,13 @@ import { DEFAULT_TEXT_METADATA } from '../../textFileFormat'
 import { MenuList } from './MenuList'
 import useFileTextDirectionStore, { getFileTextDirectionKey } from '@/stores/useFileTextDirectionStore'
 import { writeSettingData } from '@/services/app-setting'
+import { commandRegistry } from '@/commands'
+import type { Bookmark } from '@/extensions/bookmarks/types'
 
 const mocks = vi.hoisted(() => ({
   showMenu: vi.fn<(params: IShowContextMenuParams) => void>(),
   save: vi.fn(),
+  findBookmark: vi.fn<(path: string) => Bookmark | undefined>(),
   files: {
     pane: { id: 'pane', name: 'pane.md', path: '/pane.md', kind: 'file', ext: 'md' },
     other: { id: 'other', name: 'other.md', path: '/other.md', kind: 'file', ext: 'md' },
@@ -56,8 +59,8 @@ vi.mock('@/stores/useFileTypeConfigStore', () => ({
     }),
   },
 }))
-vi.mock('@/extensions/bookmarks/useBookMarksStore', () => ({
-  default: { getState: () => ({ findMark: () => undefined }) },
+vi.mock('@/extensions/bookmarks/store', () => ({
+  useBookmarkStore: { getState: () => ({ findBookmark: mocks.findBookmark }) },
 }))
 vi.mock('@/services/app-setting', () => ({ writeSettingData: vi.fn() }))
 vi.mock('@/services/dialog', () => ({ dialog: { info: vi.fn() } }))
@@ -74,6 +77,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   useFileTextDirectionStore.setState({ directions: {} })
   mocks.save.mockResolvedValue(true)
+  mocks.findBookmark.mockReset()
   fileSaveCoordinator.loadSnapshot('pane', {
     content: 'text',
     revision: 'disk',
@@ -94,6 +98,34 @@ function openMenu(editorId: string, value = 'text_encoding') {
     (item) => 'value' in item && item.value === value,
   )
 }
+
+describe('toolbar bookmarks', () => {
+  it('edits the bookmark belonging to this pane using the new target model', () => {
+    const bookmark: Bookmark = {
+      id: 'bookmark-pane',
+      title: 'My notes',
+      target: { kind: 'localFile', path: '/pane.md' },
+      tags: ['work'],
+      createdAt: 100,
+    }
+    mocks.findBookmark.mockImplementation((path) => path === '/pane.md' ? bookmark : undefined)
+
+    const item = openMenu('pane', 'BookMark')
+    expect(mocks.findBookmark).toHaveBeenCalledWith('/pane.md')
+    expect(item).toMatchObject({ checked: true })
+    if (!item || !('handler' in item)) throw new Error('Bookmark action missing')
+    act(() => item.handler?.())
+    expect(commandRegistry.execute).toHaveBeenCalledWith('edit_bookmark_dialog', bookmark)
+  })
+
+  it('offers creation for an unbookmarked target without using the active pane', () => {
+    const item = openMenu('pane', 'BookMark')
+    expect(item).toMatchObject({ checked: false })
+    if (!item || !('handler' in item)) throw new Error('Bookmark action missing')
+    act(() => item.handler?.())
+    expect(commandRegistry.execute).toHaveBeenCalledWith('open_bookmark_dialog', mocks.files.pane)
+  })
+})
 
 describe('toolbar file encoding', () => {
   it('shows and saves the toolbar document encoding when another pane is globally active', async () => {

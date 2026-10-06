@@ -9,7 +9,8 @@ describe('BookMarkViewItem', () => {
     const onClick = vi.fn()
     const bookmark = {
       id: 'bookmark-1',
-      path: '/workspace/notes.md',
+      target: { kind: 'localFile' as const, path: '/workspace/notes.md' },
+      createdAt: 1,
       tags: ['work'],
       title: 'Project notes',
     }

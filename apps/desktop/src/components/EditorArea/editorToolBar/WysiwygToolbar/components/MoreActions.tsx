@@ -1,5 +1,5 @@
 import { commandRegistry } from '@/commands'
-import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
+import { useBookmarkStore } from '@/extensions/bookmarks/store'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
 import { FileResultCode } from '@/helper/filesys'
@@ -46,8 +46,7 @@ export const MoreActions = () => {
   const handleMoreAction = useCallback(() => {
     const rect = ref.current?.getBoundingClientRect()
     if (rect === undefined) return
-    const { findMark } = useBookMarksStore.getState()
-    const curBookMark = findMark(curFile?.path || '')
+    const curBookMark = useBookmarkStore.getState().findBookmark(curFile?.path || '')
 
     showContextMenu({
       x: rect.x,

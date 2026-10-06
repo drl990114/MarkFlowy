@@ -2,23 +2,25 @@ import classNames from 'classnames'
 import { ChevronRightIcon } from 'lucide-react'
 import { memo } from 'react'
 import styled from 'styled-components'
-import type { TagView } from '.'
+import { useTranslation } from '@/i18n'
 import { BookMarkViewItem } from './BookMarkViewItem'
-import useBookMarksStore from './useBookMarksStore'
-import type { BookMarkItem } from './useBookMarksStore'
+import type { BookmarkGroup } from './query'
+import type { Bookmark } from './types'
+import { useBookmarkViewStore } from './viewStore'
 
 interface TagsViewItemProps {
-  onOpen: (bookmark: BookMarkItem) => void
-  tagView: TagView
+  onOpen: (bookmark: Bookmark) => void
+  tagView: BookmarkGroup
 }
 
 export const TagsViewItem = memo((props: TagsViewItemProps) => {
   const { onOpen, tagView } = props
-  const expand = useBookMarksStore((state) => state.expandedTags.includes(tagView.tag))
-  const toggleTag = useBookMarksStore((state) => state.toggleTag)
+  const { t } = useTranslation()
+  const expand = useBookmarkViewStore((state) => state.expandedGroupIds.includes(tagView.id))
+  const toggleGroup = useBookmarkViewStore((state) => state.toggleGroup)
 
   const toggleExpand = () => {
-    toggleTag(tagView.tag)
+    toggleGroup(tagView.id)
   }
 
   const tagViewIconCls = classNames('arrow-icon', {
@@ -26,7 +28,7 @@ export const TagsViewItem = memo((props: TagsViewItemProps) => {
   })
 
   return (
-    <Container key={tagView.tag}>
+    <Container>
       <button
         aria-expanded={expand}
         className='bookmark-tagsview__header bookmark-list__item'
@@ -36,7 +38,7 @@ export const TagsViewItem = memo((props: TagsViewItemProps) => {
         <span aria-hidden='true' className={tagViewIconCls}>
           <ChevronRightIcon size={14} strokeWidth={1.75} />
         </span>
-        <span>{tagView.tag}</span>
+        <span>{tagView.kind === 'untagged' ? t('bookmarks.untagged') : tagView.tag}</span>
       </button>
       {expand ? (
         <div className='bookmark-tagsview__child'>

@@ -2,7 +2,7 @@ import { commandRegistry } from '@/commands'
 import { openLocalHistory } from '@/components/LocalHistory/historyDialogStore'
 import { EditorViewType } from '@/constants/editorViewType'
 import { showContextMenu } from '@/components/ui-v2/ContextMenu'
-import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
+import { useBookmarkStore } from '@/extensions/bookmarks/store'
 import bus from '@/helper/eventBus'
 import useFileCacheStore, { getFileObject } from '@/helper/files'
 import { isTextfileType } from '@/helper/fileTypeHandler'
@@ -168,8 +168,7 @@ export const MenuList = memo((props: MenuListProps) => {
     const latestFilePath = latestFile?.path || filePath
     const { getFileTypeConfigById } = useFileTypeConfigStore.getState()
     const curFileTypeConfig = getFileTypeConfigById(targetEditorId || '')
-    const { findMark } = useBookMarksStore.getState()
-    const curBookMark = findMark(latestFilePath || '')
+    const curBookMark = useBookmarkStore.getState().findBookmark(latestFilePath || '')
 
     const items: DesktopMenuItemData[] = []
 

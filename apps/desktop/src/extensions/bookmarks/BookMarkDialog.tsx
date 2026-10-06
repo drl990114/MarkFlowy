@@ -3,83 +3,165 @@ import { Button } from '@/components/ui/button'
 import { Dialog } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { TagCombobox } from '@/components/ui/tag-combobox'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
-import useBookMarksStore from './useBookMarksStore'
+import { collectBookmarkTags, selectVisibleBookmarks } from './query'
+import { normalizeBookmarkError } from './repository'
+import { loadBookmarkLibrary, mutateBookmark, useBookmarkStore } from './store'
+import type { Bookmark } from './types'
+
+interface BookmarkDraft {
+  id?: string
+  title: string
+  path: string
+  tags: string[]
+}
+
+interface DraftError {
+  kind: 'load' | 'conflict' | 'missing' | 'save'
+  message?: string
+}
+
+function toDraft(bookmark: Bookmark): BookmarkDraft {
+  return { id: bookmark.id, title: bookmark.title, path: bookmark.target.path, tags: bookmark.tags }
+}
 
 export const BookMarkDialog: React.FC = () => {
   const [open, setOpen] = useState(false)
-  const [name, setName] = useState('')
-  const [path, setPath] = useState('')
-  const [saveError, setSaveError] = useState<string | null>(null)
+  const [draft, setDraft] = useState<BookmarkDraft>({ title: '', path: '', tags: [] })
+  const [revision, setRevision] = useState<number | null>(null)
+  const [saveError, setSaveError] = useState<DraftError | null>(null)
   const [saving, setSaving] = useState(false)
-  const [tags, setTags] = useState<string[]>([])
-  const { tagList, addBookMark } = useBookMarksStore()
+  const [loading, setLoading] = useState(false)
+  const sessionRef = useRef(0)
+  const savingSessionRef = useRef<number | null>(null)
+  const library = useBookmarkStore((state) => state.library)
+  const pendingRemovals = useBookmarkStore((state) => state.pendingRemovals)
   const { t } = useTranslation()
 
   useEffect(() => {
+    const beginDraft = async (nextDraft: BookmarkDraft) => {
+      const session = ++sessionRef.current
+      setDraft(nextDraft)
+      setRevision(null)
+      setSaveError(null)
+      setSaving(false)
+      setLoading(true)
+      setOpen(true)
+
+      if (useBookmarkStore.getState().loadStatus !== 'ready') await loadBookmarkLibrary()
+      if (session !== sessionRef.current) return
+      const current = useBookmarkStore.getState()
+      setLoading(false)
+      if (current.loadStatus !== 'ready') {
+        setSaveError({ kind: 'load', message: current.loadError ?? undefined })
+        return
+      }
+      if (nextDraft.id) {
+        const bookmark = current.library.items.find((item) => item.id === nextDraft.id)
+        if (!bookmark) {
+          setSaveError({ kind: 'missing' })
+          return
+        }
+        setDraft(toDraft(bookmark))
+      }
+      setRevision(current.library.revision)
+    }
+
     const d1 = commandRegistry.registerCommand({
       id: 'open_bookmark_dialog',
-      handler: (file) => {
-        setPath(file.path)
-        setName(file.name)
-        setTags([])
-        setSaveError(null)
-        setOpen(true)
-      },
+      handler: (file: { path: string; name: string }) =>
+        beginDraft({ path: file.path, title: file.name, tags: [] }),
     })
-
     const d2 = commandRegistry.registerCommand({
       id: 'edit_bookmark_dialog',
-      handler: (bookmark) => {
-        setPath(bookmark.path)
-        setName(bookmark.title)
-        setTags(bookmark.tags)
-        setSaveError(null)
-        setOpen(true)
-      },
+      handler: (bookmark: Bookmark) => beginDraft(toDraft(bookmark)),
     })
 
     return () => {
+      sessionRef.current += 1
       d1.dispose()
       d2.dispose()
     }
   }, [])
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value)
-  }
-
   const handleConfirm = async () => {
+    const session = sessionRef.current
+    if (revision === null || loading || savingSessionRef.current === session) return
+    savingSessionRef.current = session
     setSaveError(null)
     setSaving(true)
     try {
-      await addBookMark({
-        title: name,
-        path,
-        tags,
-      })
-      setOpen(false)
+      await mutateBookmark(
+        draft.id
+          ? { type: 'update', id: draft.id, changes: { title: draft.title, tags: draft.tags } }
+          : {
+              type: 'create',
+              input: {
+                title: draft.title,
+                target: { kind: 'localFile', path: draft.path },
+                tags: draft.tags,
+              },
+            },
+        revision,
+      )
+      if (session === sessionRef.current) setOpen(false)
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : String(error))
+      if (session !== sessionRef.current) return
+      const failure = normalizeBookmarkError(error)
+      const conflict = failure.code === 'conflict'
+      setSaveError({ kind: conflict ? 'conflict' : 'save', message: failure.message })
+      if (conflict) setRevision(null)
     } finally {
-      setSaving(false)
+      if (savingSessionRef.current === session) savingSessionRef.current = null
+      if (session === sessionRef.current) setSaving(false)
     }
   }
 
+  const handleReload = async () => {
+    const session = sessionRef.current
+    setLoading(true)
+    await loadBookmarkLibrary()
+    if (session !== sessionRef.current) return
+    const current = useBookmarkStore.getState()
+    setLoading(false)
+    if (current.loadStatus !== 'ready') {
+      setSaveError({ kind: 'load', message: current.loadError ?? undefined })
+      return
+    }
+    if (draft.id) {
+      const bookmark = current.library.items.find((item) => item.id === draft.id)
+      if (!bookmark) {
+        setRevision(null)
+        setSaveError({ kind: 'missing' })
+        return
+      }
+      setDraft(toDraft(bookmark))
+    }
+    setRevision(current.library.revision)
+    setSaveError(null)
+  }
+
   const handleClose = () => {
+    sessionRef.current += 1
     setSaveError(null)
     setOpen(false)
   }
 
-  const handleTagChange = (newValue: string[]) => {
-    setTags(newValue)
-  }
-
   const tagOptions = useMemo(
-    () => tagList.map((tag) => ({ value: tag, label: tag })),
-    [tagList],
+    () => collectBookmarkTags(selectVisibleBookmarks(library.items, pendingRemovals))
+      .map((tag) => ({ value: tag, label: tag })),
+    [library.items, pendingRemovals],
   )
+  const busy = saving || loading
+  const canReload = saveError !== null && saveError.kind !== 'save'
+  const errorLabel = saveError?.kind === 'conflict'
+    ? t('bookmarks.saveConflict')
+    : saveError?.kind === 'missing'
+      ? t('bookmarks.noLongerExists')
+      : saveError?.kind === 'load'
+        ? t('bookmarks.loadError')
+        : t('bookmarks.saveError')
 
   return (
     <Dialog.Root
@@ -100,30 +182,24 @@ export const BookMarkDialog: React.FC = () => {
             </span>
             <span
               className='min-w-0 break-all py-1 text-ui-caption text-foreground-secondary'
-              title={path}
+              title={draft.path}
             >
-              {path}
+              {draft.path}
             </span>
 
-            <label
-              className='text-right text-ui-control text-foreground-secondary'
-              htmlFor='bookmark-name'
-            >
+            <label className='text-right text-ui-control text-foreground-secondary' htmlFor='bookmark-name'>
               {t('bookmarks.name')}
             </label>
             <Input
               aria-invalid={saveError ? true : undefined}
-              disabled={saving}
+              disabled={busy}
               id='bookmark-name'
               inputSize='sm'
-              value={name}
-              onChange={handleNameChange}
+              value={draft.title}
+              onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
             />
 
-            <span
-              className='text-right text-ui-control text-foreground-secondary'
-              id='bookmark-tags-label'
-            >
+            <span className='text-right text-ui-control text-foreground-secondary' id='bookmark-tags-label'>
               {t('bookmarks.tags')}
             </span>
             <div className='min-w-0'>
@@ -131,13 +207,13 @@ export const BookMarkDialog: React.FC = () => {
                 allowCreate
                 aria-labelledby='bookmark-tags-label'
                 createLabel={t('bookmarks.create_tag')}
-                disabled={saving}
+                disabled={busy}
                 emptyText={t('bookmarks.no_tags_found')}
-                onValuesChange={handleTagChange}
+                onValuesChange={(tags) => setDraft((current) => ({ ...current, tags }))}
                 options={tagOptions}
                 placeholder={t('bookmarks.tag_placeholder')}
                 removeLabel={(tag) => t('bookmarks.remove_tag', { tag })}
-                values={tags}
+                values={draft.tags}
               />
             </div>
             {saveError ? (
@@ -145,19 +221,35 @@ export const BookMarkDialog: React.FC = () => {
                 className='col-span-2 rounded-sm border border-destructive/45 bg-destructive/10 px-2 py-1.5 text-ui-caption text-destructive'
                 role='alert'
               >
-                <span className='font-medium'>{t('bookmarks.saveError')}</span>
-                <span className='ml-1 break-all'>{saveError}</span>
+                <span className='font-medium'>{errorLabel}</span>
+                {saveError.kind === 'load' || saveError.kind === 'save' ? (
+                  <span className='ml-1 break-all'>{saveError.message}</span>
+                ) : null}
+                {canReload ? (
+                  <Button
+                    className='mt-2'
+                    disabled={busy}
+                    onClick={() => void handleReload()}
+                    size='sm'
+                    variant='outline'
+                  >
+                    {t(draft.id ? 'bookmarks.reloadBookmark' : 'bookmarks.reloadLibrary')}
+                  </Button>
+                ) : null}
               </div>
             ) : null}
           </div>
         </Dialog.Body>
 
         <Dialog.Footer>
-          <Button disabled={saving} onClick={handleClose} variant='outline'>
+          <Button disabled={busy} onClick={handleClose} variant='outline'>
             {t('common.cancel')}
           </Button>
-          <Button disabled={saving || name.trim().length === 0} onClick={() => void handleConfirm()}>
-            {saving ? t('bookmarks.saving') : t('common.confirm')}
+          <Button
+            disabled={busy || revision === null || draft.title.trim().length === 0}
+            onClick={() => void handleConfirm()}
+          >
+            {saving ? t('bookmarks.saving') : loading ? t('bookmarks.loading') : t('common.confirm')}
           </Button>
         </Dialog.Footer>
       </Dialog.Content>

@@ -40,8 +40,8 @@ vi.mock('@/components/EditorArea/focusActiveEditor', () => ({
 vi.mock('@/components/StatusBar', () => ({ default: () => null }))
 vi.mock('@/components/WorkspaceOpenError', () => ({ WorkspaceOpenError: () => null }))
 vi.mock('@/extensions/bookmarks/BookMarkDialog', () => ({ BookMarkDialog: () => null }))
-vi.mock('@/extensions/bookmarks/useBookMarksStore', () => ({
-  default: () => ({ getBookMarkList: vi.fn() }),
+vi.mock('@/extensions/bookmarks/store', () => ({
+  subscribeBookmarkLibrary: vi.fn(() => vi.fn()),
 }))
 vi.mock('@/extensions/quick-open/QuickOpenDialog', () => ({ QuickOpenDialog: () => null }))
 vi.mock('@/extensions/command-palette/CommandPaletteDialog', () => ({

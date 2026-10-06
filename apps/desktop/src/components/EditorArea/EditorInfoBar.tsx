@@ -1,6 +1,6 @@
 import { commandRegistry } from '@/commands'
 import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
-import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
+import { useBookmarkStore } from '@/extensions/bookmarks/store'
 import bus from '@/helper/eventBus'
 import { getFileObject } from '@/helper/files'
 import { FileResultCode } from '@/helper/filesys'
@@ -103,8 +103,7 @@ export const EditorInfoBar = memo(() => {
   const handleMoreAction = useCallback(() => {
     const rect = ref1.current?.getBoundingClientRect()
     if (rect === undefined) return
-    const { findMark } = useBookMarksStore.getState()
-    const curBookMark = findMark(curFile?.path || '')
+    const curBookMark = useBookmarkStore.getState().findBookmark(curFile?.path || '')
     const curFileTypeConfig = useFileTypeConfigStore
       .getState()
       .getFileTypeConfigById(curFile?.id || '')

@@ -1,9 +1,9 @@
 import { Badge } from '@/components/ui/badge'
-import type { BookMarkItem } from './useBookMarksStore'
+import type { Bookmark } from './types'
 
 interface BookMarkViewItemProps {
-  bookmark: BookMarkItem
-  onClick: (bookmark: BookMarkItem) => void
+  bookmark: Bookmark
+  onClick: (bookmark: Bookmark) => void
   showTags?: boolean
 }
 

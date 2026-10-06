@@ -214,7 +214,6 @@
     "remove_tag": "Remove {{tag}}",
     "no_tags_found": "No tags found.",
     "empty": "No bookmarks",
-    "emptyTags": "No tagged bookmarks",
     "loading": "Loading bookmarks…",
     "loadError": "Couldn’t load bookmarks",
     "retry": "Retry",
@@ -224,7 +223,19 @@
     "undo": "Undo",
     "removeFailed": "Couldn’t delete the bookmark",
     "saving": "Saving…",
-    "saveError": "Couldn’t save the bookmark."
+    "saveError": "Couldn’t save the bookmark.",
+    "sort": "Sort bookmarks",
+    "sortNameAsc": "Name: A to Z",
+    "sortNameDesc": "Name: Z to A",
+    "sortNewest": "Newest first",
+    "sortOldest": "Oldest first",
+    "untagged": "Untagged",
+    "saveConflict": "Bookmarks changed in another window. Your edits are still here. Reload before saving again.",
+    "noLongerExists": "This bookmark was deleted in another window. Your edits are still here.",
+    "reloadBookmark": "Reload and replace current edits",
+    "reloadLibrary": "Reload latest bookmarks",
+    "legacyCleanupWarning": "Your bookmarks were upgraded, but the previous bookmark file could not be removed. Retry to finish cleanup.",
+    "legacyConflictWarning": "A previous bookmark file has not been migrated or has changed. It has been kept, and your current bookmarks remain available."
   },
   "welcome": {
     "title": "Welcome back to {{appName}}",

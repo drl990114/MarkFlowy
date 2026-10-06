@@ -214,7 +214,6 @@
     "remove_tag": "Eliminar {{tag}}",
     "no_tags_found": "No se encontraron etiquetas.",
     "empty": "No hay marcadores",
-    "emptyTags": "No hay marcadores con etiquetas",
     "loading": "Cargando marcadores…",
     "loadError": "No se pudieron cargar los marcadores",
     "retry": "Reintentar",
@@ -224,7 +223,19 @@
     "undo": "Deshacer",
     "removeFailed": "No se pudo eliminar el marcador",
     "saving": "Guardando…",
-    "saveError": "No se pudo guardar el marcador."
+    "saveError": "No se pudo guardar el marcador.",
+    "sort": "Ordenar marcadores",
+    "sortNameAsc": "Nombre: de A a Z",
+    "sortNameDesc": "Nombre: de Z a A",
+    "sortNewest": "Más recientes primero",
+    "sortOldest": "Más antiguos primero",
+    "untagged": "Sin etiquetas",
+    "saveConflict": "Los marcadores cambiaron en otra ventana. Tus cambios se conservan. Recarga antes de volver a guardar.",
+    "noLongerExists": "Este marcador se eliminó en otra ventana. Tus cambios se conservan.",
+    "reloadBookmark": "Recargar y reemplazar los cambios",
+    "reloadLibrary": "Recargar los últimos marcadores",
+    "legacyCleanupWarning": "Tus marcadores se actualizaron, pero no se pudo eliminar el archivo anterior. Reintenta para completar la limpieza.",
+    "legacyConflictWarning": "Un archivo anterior de marcadores no se ha migrado o ha cambiado. Se ha conservado y tus marcadores actuales siguen disponibles."
   },
   "file": {
     "save_dialog_title": "Guardar archivo",

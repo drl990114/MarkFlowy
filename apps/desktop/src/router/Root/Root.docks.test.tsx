@@ -31,8 +31,8 @@ vi.mock('@/components/Layout', () => ({
   PageLayout: (props: ComponentProps<'div'>) => <div {...props} />,
 }))
 vi.mock('@/extensions/bookmarks/BookMarkDialog', () => ({ BookMarkDialog: () => null }))
-vi.mock('@/extensions/bookmarks/useBookMarksStore', () => ({
-  default: () => ({ getBookMarkList: vi.fn() }),
+vi.mock('@/extensions/bookmarks/store', () => ({
+  subscribeBookmarkLibrary: vi.fn(() => vi.fn()),
 }))
 vi.mock('@/extensions/quick-open/QuickOpenDialog', () => ({ QuickOpenDialog: () => null }))
 vi.mock('@/extensions/command-palette/CommandPaletteDialog', () => ({ CommandPaletteDialog: () => null }))

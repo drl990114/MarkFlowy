@@ -7,7 +7,7 @@ import { scheduleDockFocus } from '@/components/SideBar/DockSwitcher'
 import RightBar from '@/components/SideBar/RightBar'
 import StatusBar from '@/components/StatusBar'
 import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
-import useBookMarksStore from '@/extensions/bookmarks/useBookMarksStore'
+import { subscribeBookmarkLibrary } from '@/extensions/bookmarks/store'
 import { QuickOpenDialog } from '@/extensions/quick-open/QuickOpenDialog'
 import { CommandPaletteDialog } from '@/extensions/command-palette/CommandPaletteDialog'
 import { useTranslation } from '@/i18n'
@@ -105,8 +105,6 @@ function Root() {
     })
   }, [t])
 
-  const { getBookMarkList } = useBookMarksStore()
-
   useLayoutEffect(() => {
     const leftPanel = leftPanelRef.current
     const rightPanel = rightPanelRef.current
@@ -181,9 +179,7 @@ function Root() {
     return () => window.removeEventListener('keydown', handleKeyDownCapture, true)
   }, [zenModeActive])
 
-  useEffect(() => {
-    getBookMarkList()
-  }, [getBookMarkList])
+  useEffect(subscribeBookmarkLibrary, [])
 
   // Listen for live-preview fullscreen events from editor package
   // to adjust sidebar/statusbar z-index so fullscreen content is not obscured

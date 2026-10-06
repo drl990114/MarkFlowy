@@ -214,7 +214,6 @@
     "remove_tag": "Supprimer {{tag}}",
     "no_tags_found": "Aucune étiquette trouvée.",
     "empty": "Aucun favori",
-    "emptyTags": "Aucun favori étiqueté",
     "loading": "Chargement des favoris…",
     "loadError": "Impossible de charger les favoris",
     "retry": "Réessayer",
@@ -224,7 +223,19 @@
     "undo": "Annuler",
     "removeFailed": "Impossible de supprimer le favori",
     "saving": "Enregistrement…",
-    "saveError": "Impossible d’enregistrer le favori."
+    "saveError": "Impossible d’enregistrer le favori.",
+    "sort": "Trier les favoris",
+    "sortNameAsc": "Nom : de A à Z",
+    "sortNameDesc": "Nom : de Z à A",
+    "sortNewest": "Les plus récents d’abord",
+    "sortOldest": "Les plus anciens d’abord",
+    "untagged": "Sans étiquette",
+    "saveConflict": "Les favoris ont changé dans une autre fenêtre. Vos modifications sont conservées. Rechargez avant de réessayer.",
+    "noLongerExists": "Ce favori a été supprimé dans une autre fenêtre. Vos modifications sont conservées.",
+    "reloadBookmark": "Recharger et remplacer les modifications",
+    "reloadLibrary": "Recharger les derniers favoris",
+    "legacyCleanupWarning": "Vos favoris ont été mis à jour, mais l’ancien fichier n’a pas pu être supprimé. Réessayez pour terminer le nettoyage.",
+    "legacyConflictWarning": "Un ancien fichier de favoris n’a pas été migré ou a changé. Il a été conservé et vos favoris actuels restent disponibles."
   },
   "file": {
     "save_dialog_title": "Enregistrer le fichier",

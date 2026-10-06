@@ -220,7 +220,6 @@
     "remove_tag": "移除 {{tag}}",
     "no_tags_found": "未找到标签。",
     "empty": "暂无书签",
-    "emptyTags": "暂无带标签的书签",
     "loading": "正在加载书签…",
     "loadError": "无法加载书签",
     "retry": "重试",
@@ -230,7 +229,19 @@
     "undo": "撤销",
     "removeFailed": "无法删除书签",
     "saving": "正在保存…",
-    "saveError": "无法保存书签。"
+    "saveError": "无法保存书签。",
+    "sort": "排序书签",
+    "sortNameAsc": "名称升序",
+    "sortNameDesc": "名称降序",
+    "sortNewest": "收藏时间：最新优先",
+    "sortOldest": "收藏时间：最早优先",
+    "untagged": "未分类",
+    "saveConflict": "书签已在其他窗口更新。当前输入已保留，请重新加载后再保存。",
+    "noLongerExists": "此书签已在其他窗口删除，当前输入已保留。",
+    "reloadBookmark": "重新加载并替换当前输入",
+    "reloadLibrary": "重新加载最新书签",
+    "legacyCleanupWarning": "书签已升级，但旧书签文件未能删除。可重试完成清理。",
+    "legacyConflictWarning": "发现尚未迁移或已变化的旧书签文件，已将其保留。当前书签可继续使用。"
   },
   "welcome": {
     "title": "欢迎回到 {{appName}}",
