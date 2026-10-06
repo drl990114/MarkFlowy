@@ -9,6 +9,7 @@ import { Logo } from '../Nav/Logo'
 import NavButton from '../Nav/NavButton'
 import ThemeSwitcher from '../ThemeSwitcher'
 import SiteArrow from './Arrow'
+import BrandWordmark from './BrandWordmark'
 import { siteMenus, type SiteMenu } from './navigation'
 
 export interface SiteHeaderProps {
@@ -439,7 +440,7 @@ export default function SiteHeader({
             }}
           >
             <Logo size={28} />
-            <span>MarkFlowy</span>
+            <BrandWordmark paused={open} />
           </Link>
           {renderDesktopNavigation()}
           <div
