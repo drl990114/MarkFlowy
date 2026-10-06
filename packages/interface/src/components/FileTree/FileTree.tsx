@@ -17,7 +17,12 @@ import { useFileSystem } from '../../contexts/FileSystemContext'
 import { useFileTree } from '../../contexts/FileTreeContext'
 import type { IFile } from '../../types/file'
 import FileNode from './FileNode'
-import type { ContextMenuItem, FileNodeComponentProps, FileTreeNodeIconRenderer } from './FileNode'
+import type {
+  ContextMenuItem,
+  FileNodeComponentProps,
+  FileTreeDeletionRequest,
+  FileTreeNodeIconRenderer,
+} from './FileNode'
 import {
   captureFileMutationTarget,
   collectFileMutationProtection,
@@ -71,6 +76,8 @@ export interface FileTreeProps {
     children: (dimens: { width: number; height: number }) => React.ReactNode
   }>
   onShowConfirm: (params: { title: string; onConfirm: () => void }) => void
+  /** Let the host present a product-specific deletion confirmation. */
+  onRequestDelete?: (request: FileTreeDeletionRequest) => void
   onShowInputConfirm?: (params: {
     title: string
     confirmText?: string
@@ -131,6 +138,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
     disableFileOperations = false,
     fillFlexParentComponent: FillFlexParent,
     onShowConfirm,
+    onRequestDelete,
     onShowInputConfirm,
     onShowContextMenu,
     getFileObject,
@@ -169,9 +177,26 @@ const FileTree: FC<FileTreeProps> = (props) => {
   // The pinned row lives outside react-arborist's provider, so a root toggle
   // needs one host render to read the NodeApi's updated open state.
   const [, setStickyRootRevision] = useState(0)
+  const mountedRef = useRef(false)
+  useEffect(() => {
+    mountedRef.current = true
+    return () => { mountedRef.current = false }
+  }, [])
   const currentDataRef = useRef(data)
   currentDataRef.current = data
-  const getCurrentFolderData = useCallback(() => currentDataRef.current, [])
+  const getCurrentFolderData = useCallback(
+    () => mountedRef.current ? currentDataRef.current : [],
+    [],
+  )
+  const requestDelete = useCallback((request: FileTreeDeletionRequest) => {
+    onRequestDelete?.({
+      ...request,
+      onConfirm: async () => {
+        if (!mountedRef.current) return
+        await request.onConfirm()
+      },
+    })
+  }, [onRequestDelete])
   const commitFolderData = useCallback((nextData: IFile[]) => {
     currentDataRef.current = nextData
     setFolderDataPure(nextData)
@@ -627,6 +652,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
       onFocusActiveFile={focusActiveFile}
       isRoot={isRoot}
       onShowConfirm={onShowConfirm}
+      onRequestDelete={onRequestDelete ? requestDelete : undefined}
       onShowInputConfirm={onShowInputConfirm}
       onShowContextMenu={onShowContextMenu}
       getFileObject={getFileObject}

@@ -27,6 +27,8 @@ export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   onFocusActiveFile?: (id: string) => Promise<void> | void
   isRoot?: boolean
   onShowConfirm: (params: { title: string; onConfirm: () => void }) => void
+  /** Let the host present a product-specific deletion confirmation. */
+  onRequestDelete?: (request: FileTreeDeletionRequest) => void
   onShowInputConfirm?: (params: {
     title: string
     confirmText?: string
@@ -63,6 +65,13 @@ export type FileTreeNodeIconRenderer = (
   file: IFile,
   state: { isLoading: boolean; isOpen: boolean },
 ) => React.ReactNode
+
+export interface FileTreeDeletionRequest {
+  /** Snapshot of the requested entry, captured before the confirmation opens. */
+  file: IFile
+  mode: 'permanent' | 'trash'
+  onConfirm: () => Promise<void>
+}
 
 export interface ContextMenuItem {
   label: string
@@ -143,6 +152,7 @@ function FileNode({
   onFocusActiveFile,
   isRoot = false,
   onShowConfirm,
+  onRequestDelete,
   onShowInputConfirm,
   onShowContextMenu,
   getFileObject,
@@ -180,31 +190,73 @@ function FileNode({
     revealInFolder,
   } = useFileSystem()
 
-  const delFileHandler = () => {
+  const requestDeletion = (mode: FileTreeDeletionRequest['mode']) => {
     const target = captureFileMutationTarget(node.data)
-    if (!target) return Promise.resolve()
+    const root = getCurrentFolderData()[0]
+    const workspace = root ? captureFileMutationTarget(root) : undefined
+    if (
+      !target ||
+      !workspace ||
+      (target.id === workspace.id && target.path === workspace.path)
+    ) return
+    const file: IFile = {
+      id: target.id,
+      path: target.path,
+      name: node.data.name,
+      kind: node.data.kind,
+      ext: node.data.ext,
+    }
+    const isCurrentWorkspace = (data: IFile[]) =>
+      data[0]?.id === workspace.id && data[0]?.path === workspace.path
 
-    return runFileMutation(async (lease) => {
-      const mutationTree = new SimpleTree(getCurrentFolderData())
-      const currentNode = getCurrentFileMutationNode(mutationTree, getFileObject, target)
-      if (!currentNode) return
-      const protection = collectFileMutationProtection(
-        [currentNode.data],
-        getFileObject,
-        getFileIdsByPathPrefix,
-      )
-      lease.protectFileIds(protection.fileIds)
-      lease.protectPaths(protection.paths)
+    const onConfirm = async () => {
+      try {
+        await runFileMutation(async (lease) => {
+          const currentData = getCurrentFolderData()
+          if (!isCurrentWorkspace(currentData)) return
+          if (currentData[0]?.id === target.id && currentData[0]?.path === target.path) return
+          const mutationTree = new SimpleTree(currentData)
+          const currentNode = getCurrentFileMutationNode(mutationTree, getFileObject, target)
+          if (!currentNode) return
+          const protection = collectFileMutationProtection(
+            [currentNode.data],
+            getFileObject,
+            getFileIdsByPathPrefix,
+          )
+          lease.protectFileIds(protection.fileIds)
+          lease.protectPaths(protection.paths)
 
-      await deleteNode(currentNode.data)
-      mutationTree.drop({ id: target.id })
-      if (deleteFileObjectsByPathPrefix) {
-        deleteFileObjectsByPathPrefix(target.path)
-      } else {
-        deletePathEntry?.(target.path)
+          await (mode === 'permanent' ? deleteNode : trashNode)(currentNode.data)
+
+          // Directory reads can update other branches during the backend call.
+          // Apply the successful removal to the latest tree instead of the snapshot.
+          const latestData = getCurrentFolderData()
+          if (!isCurrentWorkspace(latestData)) return
+          const currentTree = new SimpleTree(latestData)
+          if (!getCurrentFileMutationNode(currentTree, getFileObject, target)) return
+          currentTree.drop({ id: target.id })
+          if (deleteFileObjectsByPathPrefix) {
+            deleteFileObjectsByPathPrefix(target.path)
+          } else {
+            deletePathEntry?.(target.path)
+          }
+          setFolderData(currentTree.data)
+        })
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : String(error))
       }
-      setFolderData(mutationTree.data)
-    })
+    }
+
+    if (onRequestDelete) {
+      onRequestDelete({ file, mode, onConfirm })
+    } else {
+      onShowConfirm({
+        title: mode === 'permanent'
+          ? `Are you sure you want to delete ${file.name}?`
+          : `Are you sure you want to move ${file.name} to trash?`,
+        onConfirm,
+      })
+    }
   }
 
   const isPending = [
@@ -519,55 +571,22 @@ function FileNode({
       })
     }
 
-    items.push({
-      value: node.data.kind === 'dir' ? 'delete_folder' : 'delete_file',
-      label:
-        node.data.kind === 'dir'
-          ? t('contextmenu.explorer.delete_folder')
-          : t('contextmenu.explorer.delete_file'),
-      handler: () => {
-        onShowConfirm({
-          title: `Are you sure you want to delete ${node.data.name}?`,
-          onConfirm: delFileHandler,
-        })
-      },
-    })
+    if (!isRoot) {
+      items.push({
+        value: node.data.kind === 'dir' ? 'delete_folder' : 'delete_file',
+        label:
+          node.data.kind === 'dir'
+            ? t('contextmenu.explorer.delete_folder')
+            : t('contextmenu.explorer.delete_file'),
+        handler: () => requestDeletion('permanent'),
+      })
 
-    items.push({
-      value: 'trash',
-      label: t('contextmenu.explorer.moveto_trash'),
-      handler: () => {
-        onShowConfirm({
-          title: `Are you sure you want to move ${node.data.name} to trash?`,
-          onConfirm: () => {
-            const target = captureFileMutationTarget(node.data)
-            if (!target) return
-
-            void runFileMutation(async (lease) => {
-              const mutationTree = new SimpleTree(getCurrentFolderData())
-              const currentNode = getCurrentFileMutationNode(mutationTree, getFileObject, target)
-              if (!currentNode) return
-              const protection = collectFileMutationProtection(
-                [currentNode.data],
-                getFileObject,
-                getFileIdsByPathPrefix,
-              )
-              lease.protectFileIds(protection.fileIds)
-              lease.protectPaths(protection.paths)
-
-              await trashNode(currentNode.data)
-              mutationTree.drop({ id: target.id })
-              if (deleteFileObjectsByPathPrefix) {
-                deleteFileObjectsByPathPrefix(target.path)
-              } else {
-                deletePathEntry?.(target.path)
-              }
-              setFolderData(mutationTree.data)
-            })
-          },
-        })
-      },
-    })
+      items.push({
+        value: 'trash',
+        label: t('contextmenu.explorer.moveto_trash'),
+        handler: () => requestDeletion('trash'),
+      })
+    }
 
     if (revealInFolder) {
       items.push({

@@ -1,6 +1,6 @@
 import { getExplorerStateStore } from '@/stores/useExplorerStateStore'
 import { FileTree } from '@markflowy/interface'
-import type { ContextMenuItem } from '@markflowy/interface'
+import type { ContextMenuItem, FileTreeDeletionRequest } from '@markflowy/interface'
 import type { IFile } from '@/helper/filesys'
 import { dialog } from '@/services/dialog'
 import { getUnsavedFileIds } from '@/services/checkUnsavedFiles'
@@ -158,6 +158,15 @@ const Explorer: FC<ExplorerProps> = (props) => {
     [t],
   )
 
+  const handleRequestDelete = useCallback(
+    ({ file, mode, onConfirm }: FileTreeDeletionRequest) => {
+      void dialog.confirmFileDeletion({ file, mode }).then(async (action) => {
+        if (action === 'confirm') await onConfirm()
+      }).catch((error: unknown) => logger.error('File deletion confirmation failed', error))
+    },
+    [],
+  )
+
   const handleShowInputConfirm = useCallback(
     ({
       title,
@@ -277,6 +286,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
               }>
             }
             onShowConfirm={handleShowConfirm}
+            onRequestDelete={handleRequestDelete}
             onShowInputConfirm={handleShowInputConfirm}
             onShowContextMenu={handleShowContextMenu}
             getFileObject={getFileObject}

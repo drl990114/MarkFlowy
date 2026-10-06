@@ -1520,5 +1520,22 @@
       "incompatible": "The browser version does not support PDF export with heading bookmarks.",
       "settings_hint": "Install Chrome, Chromium, or Edge, or select its executable in Settings → Export."
     }
+  },
+  "file_deletion": {
+    "permanent_title": "「{{name}}」を完全に削除しますか？",
+    "trash_title": "「{{name}}」をゴミ箱に移動しますか？",
+    "permanent_action": "完全に削除",
+    "trash_action": "ゴミ箱に移動",
+    "counting": "集計中…",
+    "counts": "ファイル {{files}} 個 · サブフォルダー {{folders}} 個",
+    "files_only": "ファイル {{files}} 個",
+    "folders_only": "サブフォルダー {{folders}} 個",
+    "short_scope": "隠し項目と除外された項目も含みます",
+    "short_partial": "少なくともファイル {{files}} 個 · サブフォルダー {{folders}} 個",
+    "partial_hint": "集計は未完了です。実際の件数はこれより多い場合があります。",
+    "empty": "空のフォルダー",
+    "symlink": "リンクのみを削除します。リンク先には影響しません。",
+    "count_failed": "内容を集計できません。もう一度お試しください。",
+    "permanent_warning": "完全に削除されます。取り消せません。"
   }
 }

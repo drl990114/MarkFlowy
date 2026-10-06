@@ -4,7 +4,12 @@ export type { FileTreeProps } from './FileTree'
 export { default as FileNode } from './FileNode'
 export { default as NewFileInput } from './NewFileInput'
 export { default as FileTreeStyles } from './FileTreeStyles'
-export type { ContextMenuItem, FileNodeComponentProps, FileTreeNodeIconRenderer } from './FileNode'
+export type {
+  ContextMenuItem,
+  FileNodeComponentProps,
+  FileTreeDeletionRequest,
+  FileTreeNodeIconRenderer,
+} from './FileNode'
 export type { FileTreeItemData, FileTreeStylesProps } from './FileTreeStyles'
 export * from './types'
 export * from './file-operator'

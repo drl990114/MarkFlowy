@@ -115,7 +115,7 @@ pub fn acquire_security_scope(_path: &Path) -> bool {
 
 /// 主动确保工作区根路径的安全范围已激活（读文件前调用，避免 PermissionDenied 重试）
 #[cfg(target_os = "macos")]
-fn ensure_workspace_scope_active(file_path: &Path) {
+pub(crate) fn ensure_workspace_scope_active(file_path: &Path) {
     // 快速检查：路径是否已在活跃的 scope 下
     if path_has_active_security_scope(&security_scope_key(file_path)) {
         return;
@@ -135,7 +135,7 @@ fn ensure_workspace_scope_active(file_path: &Path) {
 }
 
 #[cfg(not(target_os = "macos"))]
-fn ensure_workspace_scope_active(_file_path: &Path) {}
+pub(crate) fn ensure_workspace_scope_active(_file_path: &Path) {}
 
 #[cfg(target_os = "macos")]
 pub fn release_security_scope(path: &Path) -> bool {

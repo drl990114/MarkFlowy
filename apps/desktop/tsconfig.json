@@ -16,6 +16,9 @@
       "@markflowy/i18n/desktop": [
         "../../packages/i18n/src/desktop.ts"
       ],
+      "@markflowy/interface": [
+        "../../packages/interface/src/index.ts"
+      ],
       "@markflowy/theme/semantic": [
         "../../packages/theme/src/semantic/index.ts"
       ],

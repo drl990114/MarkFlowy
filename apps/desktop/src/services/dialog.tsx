@@ -15,6 +15,10 @@ import {
   MODAL_INPUT_ID,
 } from '@/components/Modal'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import {
+  FileDeletionConfirm,
+  type FileDeletionConfirmProps,
+} from '@/components/Explorer/FileDeletionConfirm'
 import { writeSettingPatch } from './app-setting'
 
 type DialogPreferences = Record<string, string>
@@ -110,8 +114,16 @@ const inputConfirm = async (options: InputConfirmOptions) => {
 const imageInsert = async () =>
   enqueueModal(() => NiceModal.show<ImageInsertSelection | null>(MODAL_IMAGE_INSERT_ID))
 
+const confirmFileDeletion = (options: FileDeletionConfirmProps) =>
+  enqueueModal(() => NiceModal.show<
+    string | null,
+    Parameters<typeof FileDeletionConfirm>[0],
+    FileDeletionConfirmProps
+  >(FileDeletionConfirm, options))
+
 export const dialog = {
   confirm,
+  confirmFileDeletion,
   imageInsert,
   info,
   inputConfirm,

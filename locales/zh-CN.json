@@ -1520,5 +1520,22 @@
       "incompatible": "当前浏览器版本不支持带标题书签的 PDF 导出。",
       "settings_hint": "请安装 Chrome、Chromium 或 Edge，或在「设置 → 导出」中选择其可执行文件。"
     }
+  },
+  "file_deletion": {
+    "permanent_title": "永久删除“{{name}}”？",
+    "trash_title": "将“{{name}}”移到回收站？",
+    "permanent_action": "永久删除",
+    "trash_action": "移到回收站",
+    "counting": "正在统计…",
+    "counts": "{{files}} 个文件 · {{folders}} 个子文件夹",
+    "files_only": "{{files}} 个文件",
+    "folders_only": "{{folders}} 个子文件夹",
+    "short_scope": "含隐藏和排除的项目",
+    "short_partial": "至少 {{files}} 个文件 · {{folders}} 个子文件夹",
+    "partial_hint": "统计不完整，实际数量可能更多。",
+    "empty": "空文件夹",
+    "symlink": "仅移除链接，不影响目标内容。",
+    "count_failed": "无法统计内容，请重试。",
+    "permanent_warning": "永久删除，无法撤销。"
   }
 }

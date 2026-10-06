@@ -1520,5 +1520,22 @@
       "incompatible": "The browser version does not support PDF export with heading bookmarks.",
       "settings_hint": "Install Chrome, Chromium, or Edge, or select its executable in Settings → Export."
     }
+  },
+  "file_deletion": {
+    "permanent_title": "Supprimer définitivement « {{name}} » ?",
+    "trash_title": "Déplacer « {{name}} » dans la corbeille ?",
+    "permanent_action": "Supprimer définitivement",
+    "trash_action": "Déplacer dans la corbeille",
+    "counting": "Comptage…",
+    "counts": "{{files}} fichiers · {{folders}} sous-dossiers",
+    "files_only": "{{files}} fichiers",
+    "folders_only": "{{folders}} sous-dossiers",
+    "short_scope": "Inclut les éléments masqués et exclus",
+    "short_partial": "Au moins {{files}} fichiers · {{folders}} sous-dossiers",
+    "partial_hint": "Comptage incomplet. Il peut y avoir plus d’éléments.",
+    "empty": "Dossier vide",
+    "symlink": "Seul le lien sera supprimé. Sa cible n’est pas affectée.",
+    "count_failed": "Impossible de compter le contenu. Réessayez.",
+    "permanent_warning": "Suppression définitive et irréversible."
   }
 }

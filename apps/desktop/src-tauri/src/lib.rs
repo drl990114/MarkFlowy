@@ -9,6 +9,7 @@ mod e2e;
 mod fc;
 mod document_preview;
 mod file_copy;
+mod file_deletion;
 mod font;
 mod local_history;
 mod menu;
@@ -1741,6 +1742,7 @@ pub fn run() {
             fc::cmd::copy_file_by_from,
             fc::cmd::create_folder,
             fc::cmd::delete_folder,
+            file_deletion::summarize_folder_for_deletion,
             fc::cmd::file_exists,
             fc::cmd::is_text_file,
             fc::cmd::move_files_to_target_folder,
