@@ -88,11 +88,7 @@ export const Markdown = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: '../../docs',
-  contentDirExclude: [
-    ...contentDirExcludeDefault,
-    'github-api-encoding-bug-report.md',
-    'github-workspace-bug-report.md',
-  ],
+  contentDirExclude: [...contentDirExcludeDefault],
   documentTypes: [Post, Markdown],
   markdown: {
     remarkPlugins: [remarkGfm],

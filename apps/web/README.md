@@ -38,7 +38,15 @@ README changes belong in `README.src.md`; regenerate all three language outputs 
 
 ## Product screenshots
 
-README and website screenshots use the same public sample workspace. See [capture notes](../../docs/SCREENSHOTS.md) for image paths, dimensions, and the reproduction steps. Keep `next/image` dimensions in `Preview.tsx` and `FeatureList.tsx` aligned with the captured files.
+README and website screenshots use the same [public sample workspace](../../public/screenshot-workspace). Capture a separate `MarkFlowy Studio` window in native macOS full-screen mode, using English and the built-in light/dark themes. The five views are visual editing, Markdown source, dark mode, Chat AI with an unsent prompt, and a single document with the folder closed, sidebars hidden, and full-width writing disabled. Restore the original preferences after capture.
+
+Retain the 3024 × 1898 native images in `public/screenshot-frames/originals/`. Check for the pointer and spotlight before framing; the [cleanup record](../../public/screenshot-frames/capture-patches/README.md) describes the existing captures. Regenerate all presentation images and duplicate README assets from the repository root:
+
+```sh
+fnm exec --using=24 node scripts/render-screenshot-frames.mjs
+```
+
+Presentation images are 3456 × 2304. If capture dimensions change, update the renderer and `next/image` dimensions in `Preview.tsx`, `SingleFile.tsx`, and `FeatureList.tsx` together. The renderer preserves and checks the native screenshot pixels.
 
 ## Deployment and measurement
 
