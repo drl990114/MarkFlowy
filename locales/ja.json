@@ -791,6 +791,24 @@
         "automatic": "自動検出を使用",
         "check_again": "再確認",
         "install_guide": "インストールガイド"
+      },
+      "pdf": {
+        "label": "PDF export",
+        "executable": {
+          "label": "PDF export browser",
+          "desc": "MarkFlowy uses a local Chrome, Chromium, or Edge browser to export PDF with heading bookmarks. Detect it automatically or select its executable."
+        },
+        "status": {
+          "checking": "Checking for a PDF export browser…",
+          "ready": "Browser {{version}} is ready.",
+          "invalid_executable": "The configured path is not a valid supported browser executable.",
+          "incompatible": "The browser was found, but its version does not support PDF heading bookmarks.",
+          "not_found": "No compatible PDF export browser was found.",
+          "save_failed": "The browser setting could not be saved. Try again."
+        },
+        "select": "Select browser executable",
+        "automatic": "Use automatic detection",
+        "check_again": "Check again"
       }
     },
     "display": {
@@ -1474,6 +1492,33 @@
       "code-typescript": "TypeScript 関数",
       "code-python": "Python 関数",
       "code-bash": "Bash スクリプト"
+    }
+  },
+  "pdf_export": {
+    "title": "Export PDF",
+    "description": "Export a searchable PDF with heading bookmarks using a local Chrome, Chromium, or Edge browser.",
+    "paper_size": "Paper size",
+    "orientation": "Orientation",
+    "portrait": "Portrait",
+    "landscape": "Landscape",
+    "include_outline": "Include heading bookmarks",
+    "outline_hint": "Turn document headings into a navigable PDF outline. Documents without headings have no bookmarks.",
+    "export": "Export PDF",
+    "print": "Print…",
+    "exporting": "Exporting PDF…",
+    "success": "PDF saved to {{path}}.",
+    "failed": "PDF export failed. Your document has been preserved.",
+    "image_warning": "{{count}} images could not be loaded. Check the exported PDF.",
+    "browser_check_failed": "The PDF export browser could not be checked. Try again in Settings → Export.",
+    "cancelled": "PDF export cancelled.",
+    "system_print": "System print…",
+    "system_print_hint": "System print is also available. Saving as PDF through the print dialog does not guarantee heading bookmarks.",
+    "browser": {
+      "checking": "Checking the PDF export browser…",
+      "ready": "Browser {{version}} is ready.",
+      "not_found": "No compatible PDF export browser was found.",
+      "incompatible": "The browser version does not support PDF export with heading bookmarks.",
+      "settings_hint": "Install Chrome, Chromium, or Edge, or select its executable in Settings → Export."
     }
   }
 }

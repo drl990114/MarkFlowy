@@ -4,6 +4,7 @@ import { desktopLightTheme } from '@markflowy/theme'
 import * as rmeRuntime from 'rme'
 import { createImageExportSurface, type ImageExportSurface } from './imageExportSurface'
 import { exportHtmlDocument } from './exportHtmlDocument'
+import { buildPdfExportDocument } from './pdf-export/pdfExportDocument'
 import { i18nInit } from '@markflowy/i18n'
 import { Preview, ThemeProvider, type PreviewImageHydration } from 'rme'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -164,8 +165,15 @@ describe('workspace RME static preview for JPG export', () => {
       await act(async () => {
         result = createImageExportSurface({
           source,
-          markdown:
+          markdown: [
             '## 表格 Table\n\n[Anchor](#表格-table)\n\nInline $x^2$\n\n$$\n\\frac{a}{b}\n$$\n\n```mermaid\nflowchart LR\n A-->B\n```\n\n<script>alert(1)</script>\n\n<div onclick="alert(1)" style="background:url(https://bad.invalid)">Safe text</div>\n\nFinal paragraph',
+            '### 重复标题',
+            '| 名称 | 结果 |\n| --- | --- |\n| 表格内容 | 可选文本 |',
+            '### 重复标题',
+            '```typescript\nconst exportCode = "kept";\n```',
+            '###### 深层标题',
+            '跳级标题后的可选文字。',
+          ].join('\n\n'),
           delegateOptions: {},
           styleToken: { rootFontSize: '16px', rootLineHeight: '1.7' },
           theme: desktopLightTheme,
@@ -203,6 +211,39 @@ describe('workspace RME static preview for JPG export', () => {
       ).toBeNull()
       expect(html).not.toContain('bad.invalid')
       expect(exported.head.querySelector('style')?.textContent?.length).toBeGreaterThan(500)
+      const preview = surface!.element.querySelector<HTMLElement>('.mf-preview-content')!
+      const pdf = await buildPdfExportDocument({
+        root: surface!.element,
+        html: preview.innerHTML,
+        title: 'Portable PDF',
+        paperSize: process.env.MARKFLOWY_PDF_TEST_PAPER === 'letter' ? 'letter' : 'a4',
+        landscape: process.env.MARKFLOWY_PDF_TEST_LANDSCAPE === 'true',
+      })
+      if (process.env.MARKFLOWY_PDF_TEST_HTML_OUTPUT) {
+        const { writeFile } = await import('node:fs/promises')
+        await writeFile(process.env.MARKFLOWY_PDF_TEST_HTML_OUTPUT, pdf.html, 'utf8')
+      }
+      const pdfDocument = new DOMParser().parseFromString(pdf.html, 'text/html')
+      const wrapperClasses = Array.from(preview.parentElement!.classList)
+      expect(wrapperClasses.length).toBeGreaterThan(0)
+      for (const name of wrapperClasses)
+        expect(pdfDocument.querySelector(`.${name}`)).not.toBeNull()
+      const pdfStyles = pdfDocument.head.querySelector('style')!.textContent!
+      expect(wrapperClasses.some((name) => pdfStyles.includes(`.${name}`))).toBe(true)
+      expect(pdfDocument.querySelectorAll('svg')).toHaveLength(3)
+      expect(pdfDocument.getElementById('表格-table')?.textContent).toBe('表格 Table')
+      expect(pdf.headingCount).toBe(4)
+      expect([...pdfDocument.querySelectorAll('h2,h3,h6')].map((heading) => heading.id)).toEqual([
+        '表格-table',
+        '重复标题',
+        '重复标题-1',
+        '深层标题',
+      ])
+      expect(pdfDocument.querySelector('table')?.textContent).toContain('可选文本')
+      expect(pdfDocument.querySelector('pre code')?.textContent).toBe('const exportCode = "kept";')
+      expect(
+        pdfDocument.querySelector('script,[inert],[aria-hidden="true"],[data-mf-image-export]'),
+      ).toBeNull()
     } finally {
       await act(async () => surface?.dispose())
       expect(document.querySelector('[data-mf-image-export]')).toBeNull()

@@ -41,6 +41,7 @@ pub_struct!(AppConf {
     open_file_in_new_window: Option<bool>,
     error_reporting_enabled: Option<bool>,
     webview_zoom: Option<String>,
+    pdf_browser_executable_path: Option<String>,
     copilot_provider: Option<String>,
     copilot_model: Option<String>,
     copilot_enabled: Option<bool>,
@@ -668,6 +669,7 @@ impl AppConf {
             open_file_in_new_window: Some(true),
             error_reporting_enabled: Some(false),
             webview_zoom: Some("1.0".to_string()),
+            pdf_browser_executable_path: None,
             copilot_provider: Some("".to_string()),
             copilot_model: Some("".to_string()),
             copilot_enabled: Some(false),
@@ -822,6 +824,7 @@ impl AppConf {
             open_file_in_new_window,
             error_reporting_enabled,
             webview_zoom,
+            pdf_browser_executable_path,
             copilot_provider,
             copilot_model,
             copilot_enabled,
@@ -1252,7 +1255,7 @@ mod tests {
         parse_hex_color, read_file_exclude_patterns_from_path, read_startup_appearance_file,
         remove_startup_appearance_file, startup_appearance_changed, startup_theme_identity_changed,
         write_startup_appearance_file, AppConf, ResolvedThemeMode, StartupAppearance,
-        StartupPalette, ThemePreference, STARTUP_APPEARANCE_SCHEMA_VERSION,
+        StartupPalette, ThemePreference, STARTUP_APPEARANCE_SCHEMA_VERSION, STORE_KEY,
     };
     fn valid_appearance() -> StartupAppearance {
         StartupAppearance {
@@ -1304,6 +1307,81 @@ mod tests {
             let saved = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
             let restored = typography_default_conf().merge_conf(saved);
             assert_eq!(restored.open_file_in_new_window, Some(enabled));
+        }
+    }
+
+    #[test]
+    fn pdf_browser_path_defaults_to_automatic_for_legacy_configs() {
+        let legacy: AppConf = serde_json::from_value(serde_json::json!({
+            "language": "zh",
+            "editor_root_font_size": 18
+        }))
+        .expect("legacy config without a PDF browser setting");
+        let restored = typography_default_conf().merge_conf(legacy);
+        let value = serde_json::to_value(restored).expect("serialize legacy config");
+        assert_eq!(value["language"], "zh");
+        assert_eq!(value["editor_root_font_size"], 18);
+        assert_eq!(
+            value.get("pdf_browser_executable_path"),
+            Some(&serde_json::Value::Null)
+        );
+    }
+
+    #[test]
+    fn pdf_browser_path_survives_patches_and_store_json_roundtrip() {
+        let directory = tempfile::tempdir().expect("tempdir");
+        let path = directory.path().join("markflowy_store.bin");
+        for executable in [
+            "/Applications/Google Chrome.app",
+            "/Users/test/浏览器/Chrome App/Contents/MacOS/Google Chrome",
+            "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+            "/usr/bin/google-chrome",
+        ] {
+            let candidate = typography_default_conf()
+                .amend(serde_json::json!({ "pdf_browser_executable_path": executable }))
+                .amend(serde_json::json!({ "language": "zh" }));
+            let value = serde_json::to_value(candidate).expect("serialize config for Store");
+            assert_eq!(value["pdf_browser_executable_path"], executable);
+
+            // Store persists this envelope as JSON. Exercise the actual AppConf
+            // schema at both write and reload boundaries without a Tauri app.
+            std::fs::write(
+                &path,
+                serde_json::to_vec(&serde_json::json!({ STORE_KEY: value }))
+                    .expect("serialize Store envelope"),
+            )
+            .expect("save Store envelope");
+            let stored: serde_json::Value =
+                serde_json::from_slice(&std::fs::read(&path).expect("read Store envelope"))
+                    .expect("deserialize Store envelope");
+            let saved: AppConf = serde_json::from_value(stored[STORE_KEY].clone())
+                .expect("deserialize config from Store");
+            let restored = typography_default_conf().merge_conf(saved);
+            let reloaded = serde_json::to_value(restored).expect("serialize reloaded config");
+            assert_eq!(reloaded["pdf_browser_executable_path"], executable);
+            assert_eq!(reloaded["language"], "zh");
+        }
+    }
+
+    #[test]
+    fn pdf_browser_path_can_be_cleared_to_automatic_after_reload() {
+        for reset in [
+            serde_json::Value::String(String::new()),
+            serde_json::Value::Null,
+        ] {
+            let changed = typography_default_conf().amend(serde_json::json!({
+                "pdf_browser_executable_path": "/Applications/Google Chrome.app"
+            }));
+            let cleared = changed.amend(serde_json::json!({
+                "pdf_browser_executable_path": reset
+            }));
+            let saved: AppConf = serde_json::from_value(
+                serde_json::to_value(cleared).expect("serialize cleared config"),
+            )
+            .expect("deserialize cleared config");
+            let restored = typography_default_conf().merge_conf(saved);
+            let value = serde_json::to_value(restored).expect("serialize reloaded config");
+            assert_eq!(value.get("pdf_browser_executable_path"), Some(&reset));
         }
     }
 

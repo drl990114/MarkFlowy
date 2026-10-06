@@ -21,6 +21,10 @@ const translations: Record<string, string> = {
   'settings.ai.Google.api_key.label': 'API key',
   'settings.display.theme.dark_theme.label': 'Dark theme',
   'settings.display.theme.dark_theme.desc': 'Theme used in dark mode',
+  'settings.export.label': 'Export',
+  'settings.export.pdf.label': 'PDF export',
+  'settings.export.pdf.executable.label': 'PDF export browser',
+  'settings.export.pdf.executable.desc': 'Chrome, Chromium or Edge browser for PDF bookmarks',
 }
 
 const translate = (key: string) => translations[key] ?? key
@@ -62,5 +66,13 @@ describe('settings search index', () => {
 
   it('returns no results for a blank query', () => {
     expect(filterSettingSearchEntries(entries, '   ', translate)).toEqual([])
+  })
+
+  it('finds the PDF browser setting from browser names and reveals the PDF group', () => {
+    const result = filterSettingSearchEntries(entries, 'chromium', translate).find(
+      (entry) => entry.settingKey === 'pdf_browser_executable_path',
+    )
+    expect(result).toMatchObject({ categoryKey: 'export', groupKey: 'pdf' })
+    expect(getSettingSearchPath(result!, translate)).toEqual(['Export', 'PDF export'])
   })
 })

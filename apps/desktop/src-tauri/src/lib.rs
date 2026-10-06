@@ -13,6 +13,7 @@ mod font;
 mod local_history;
 mod menu;
 mod pandoc;
+mod pdf_export;
 mod reliable_cli;
 mod search;
 mod setup;
@@ -1753,6 +1754,10 @@ pub fn run() {
             fc::cmd::export_html_to_path,
             pandoc::probe_pandoc,
             pandoc::export_markdown_with_pandoc,
+            pdf_export::probe_pdf_browser,
+            pdf_export::prepare_pdf_export,
+            pdf_export::commit_pdf_export,
+            pdf_export::cancel_pdf_export,
             fc::cmd::is_dir,
             fc::cmd::get_path_name,
             fc::cmd::get_file_normal_info,

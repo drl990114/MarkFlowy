@@ -1,7 +1,7 @@
 import bus from '@/helper/eventBus'
 import type { MenuItemData } from 'zens'
 
-export const PDF_PRINT_EVENT = 'editor_export_pdf'
+export const PDF_PRINT_EVENT = 'editor_print_pdf'
 
 export function requestPdfPrint(): void {
   bus.emit(PDF_PRINT_EVENT)
@@ -9,7 +9,7 @@ export function requestPdfPrint(): void {
 
 export function createPdfPrintMenuItem(label: string): MenuItemData {
   return {
-    value: 'export_pdf',
+    value: 'print_pdf',
     label,
     handler: requestPdfPrint,
   }

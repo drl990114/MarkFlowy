@@ -1,12 +1,17 @@
 import bus from '@/helper/eventBus'
 import { act } from 'react'
-import { waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { createRoot, type Root } from 'react-dom/client'
+import { Toaster, toast as sonnerToast } from 'sonner'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { PDF_PRINT_EVENT } from './pdfPrintMenuItem'
 import { PdfPrintController } from './PdfPrintController'
 import type { preparePrintDocument } from './printDocument'
 import * as rmeRuntime from '../rmeRuntime'
+import useAppSettingStore from '@/stores/useAppSettingStore'
+import { PDF_EXPORT_EVENT } from '../pdf-export/pdfExportMenuItem'
+import type { PdfExportDialogProps } from '../pdf-export/PdfExportDialog'
+import type * as PdfExportService from '../pdf-export/pdfExport'
 
 const previewState = vi.hoisted(() => ({
   docs: [] as string[],
@@ -23,11 +28,77 @@ const printMocks = vi.hoisted(() => ({
 }))
 
 const toastMocks = vi.hoisted(() => ({
-  dismiss: vi.fn(),
-  error: vi.fn(),
-  loading: vi.fn(() => 'loading-toast'),
-  success: vi.fn(),
-  warning: vi.fn(),
+  dismiss: vi.fn<typeof sonnerToast.dismiss>(),
+  error: vi.fn<typeof sonnerToast.error>(),
+  loading: vi.fn<typeof sonnerToast.loading>(() => 'loading-toast'),
+  success: vi.fn<typeof sonnerToast.success>(),
+  warning: vi.fn<typeof sonnerToast.warning>(),
+}))
+
+const exportMocks = vi.hoisted(() => ({
+  probeBrowser: vi.fn(),
+  exportPdf: vi.fn(),
+  buildDocument: vi.fn(),
+  save: vi.fn(),
+  reveal: vi.fn(),
+}))
+
+const exportUi = vi.hoisted(() => ({ props: undefined as PdfExportDialogProps | undefined }))
+const translate = vi.hoisted(() => (key: string, values?: { count?: number; path?: string }) => {
+  if (values?.count !== undefined) return `${key}:${values.count}`
+  if (values?.path) return `${key}:${values.path}`
+  return key
+})
+
+vi.mock('@tauri-apps/plugin-dialog', () => ({ save: exportMocks.save }))
+vi.mock('@tauri-apps/plugin-opener', () => ({ revealItemInDir: exportMocks.reveal }))
+vi.mock('../pdf-export/pdfExport', async (importOriginal) => {
+  const original = await importOriginal<typeof PdfExportService>()
+  return {
+    ...original,
+    probePdfBrowser: exportMocks.probeBrowser,
+    exportPdfWithBrowser: exportMocks.exportPdf,
+  }
+})
+vi.mock('../pdf-export/pdfExportDocument', () => ({
+  buildPdfExportDocument: exportMocks.buildDocument,
+}))
+vi.mock('../pdf-export/PdfExportDialog', () => ({
+  PdfExportDialog: (props: PdfExportDialogProps) => {
+    exportUi.props = props
+    return (
+      <div role='dialog' aria-label='PDF export'>
+        <p role='status'>
+          {props.busy
+            ? 'pdf_export.exporting'
+            : props.checking
+              ? 'Checking browser'
+              : (props.browserInfo?.version ?? 'No browser')}
+        </p>
+        {props.error ? <p role='alert'>{props.error}</p> : null}
+        <button
+          disabled={props.busy || props.checking || !props.browserInfo?.compatible}
+          onClick={() =>
+            props.onExport({ paperSize: 'a4', landscape: false, includeOutline: true })
+          }
+        >
+          Export A4
+        </button>
+        <button
+          disabled={props.busy || props.checking || !props.browserInfo?.compatible}
+          onClick={() =>
+            props.onExport({ paperSize: 'letter', landscape: true, includeOutline: false })
+          }
+        >
+          Export Letter
+        </button>
+        <button disabled={props.busy} onClick={props.onPrint}>
+          System print
+        </button>
+        <button onClick={() => props.onOpenChange(false)}>Cancel export</button>
+      </div>
+    )
+  },
 }))
 
 vi.mock('@/helper/logger', () => ({
@@ -35,20 +106,7 @@ vi.mock('@/helper/logger', () => ({
 }))
 
 vi.mock('@/i18n', () => ({
-  useTranslation: () => ({
-    t: (key: string, values?: { count?: number }) =>
-      values?.count === undefined ? key : `${key}:${values.count}`,
-  }),
-}))
-
-vi.mock('@/stores/useAppSettingStore', () => ({
-  default: (selector: (state: unknown) => unknown) =>
-    selector({
-      settingData: {
-        editor_code_font_family: 'Fira Code',
-        editor_root_font_family: 'Open Sans',
-      },
-    }),
+  useTranslation: () => ({ t: translate }),
 }))
 
 vi.mock('zens', () => ({
@@ -116,13 +174,33 @@ describe('PdfPrintController', () => {
     previewState.error = null
     previewState.hydration = { settled: Promise.resolve() }
     previewState.onHydrationChange = undefined
+    useAppSettingStore.setState({
+      settingData: {
+        editor_code_font_family: 'Fira Code',
+        editor_root_font_family: 'Open Sans',
+      },
+    })
+    exportUi.props = undefined
+    exportMocks.probeBrowser.mockReset().mockResolvedValue({
+      available: true,
+      compatible: true,
+      version: 'Chromium 130',
+      executablePath: '/local/chromium',
+    })
+    exportMocks.buildDocument.mockReset().mockResolvedValue({
+      html: '<html><body>Prepared PDF snapshot</body></html>',
+      headingCount: 2,
+    })
+    exportMocks.exportPdf.mockReset().mockResolvedValue({ outputPath: '/exports/draft.pdf' })
+    exportMocks.save.mockReset().mockResolvedValue('/exports/draft.pdf')
+    exportMocks.reveal.mockReset().mockResolvedValue(undefined)
     printMocks.preparePrintDocument.mockReset().mockResolvedValue({ failedImageCount: 0 })
     printMocks.openPdfPrintWindow.mockReset().mockResolvedValue({
       failedImageCount: 0,
       jobId: '1',
       status: 'complete',
     })
-    Object.values(toastMocks).forEach((mock) => mock.mockClear())
+    Object.values(toastMocks).forEach((mock) => mock.mockReset())
     container = document.createElement('div')
     document.body.append(container)
     root = createRoot(container)
@@ -134,17 +212,25 @@ describe('PdfPrintController', () => {
     vi.restoreAllMocks()
   })
 
-  async function renderController(getContent = () => '# Current unsaved Markdown') {
+  async function renderController(
+    getContent = () => '# Current unsaved Markdown',
+    filePath?: string,
+    withNotifications = false,
+  ) {
     await act(async () => {
       root.render(
-        <PdfPrintController
-          active
-          enabled
-          fileName='draft.md'
-          getContent={getContent}
-          delegateOptions={{}}
-          styleToken={{ rootFontSize: '18px', rootLineHeight: '1.8' }}
-        />,
+        <>
+          <PdfPrintController
+            active
+            enabled
+            fileName='draft.md'
+            filePath={filePath}
+            getContent={getContent}
+            delegateOptions={{}}
+            styleToken={{ rootFontSize: '18px', rootLineHeight: '1.8' }}
+          />
+          {withNotifications ? <Toaster closeButton /> : null}
+        </>,
       )
     })
   }
@@ -152,6 +238,26 @@ describe('PdfPrintController', () => {
   async function requestPrint() {
     await act(async () => bus.emit(PDF_PRINT_EVENT))
     await waitFor(() => expect(printMocks.openPdfPrintWindow).toHaveBeenCalled())
+  }
+
+  async function requestExport() {
+    await act(async () => bus.emit(PDF_EXPORT_EVENT))
+    await screen.findByRole('dialog', { name: 'PDF export' })
+    await waitFor(() => expect(exportUi.props?.checking).toBe(false))
+  }
+
+  async function clickExport(name = 'Export A4') {
+    await act(async () => fireEvent.click(screen.getByRole('button', { name })))
+  }
+
+  function deferred<T>() {
+    let resolve!: (value: T) => void
+    let reject!: (reason?: unknown) => void
+    const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+      resolve = resolvePromise
+      reject = rejectPromise
+    })
+    return { promise, resolve, reject }
   }
 
   it('loads the renderer only on demand and releases the print lock after an import failure', async () => {
@@ -270,9 +376,7 @@ describe('PdfPrintController', () => {
 
     await act(async () => settleCurrent())
     await waitFor(() => expect(printMocks.openPdfPrintWindow).toHaveBeenCalledOnce())
-    expect(printMocks.openPdfPrintWindow.mock.calls[0]?.[0].html).toContain(
-      'Cold Mermaid render',
-    )
+    expect(printMocks.openPdfPrintWindow.mock.calls[0]?.[0].html).toContain('Cold Mermaid render')
   })
 
   it('keeps an opened print window alive when Preview hydration changes', async () => {
@@ -338,9 +442,10 @@ describe('PdfPrintController', () => {
   it('dismisses progress when prepared even if native completion never arrives', async () => {
     let closeWindow!: () => void
     printMocks.openPdfPrintWindow.mockImplementation(
-      () => new Promise((resolve) => {
-        closeWindow = () => resolve(null)
-      }),
+      () =>
+        new Promise((resolve) => {
+          closeWindow = () => resolve(null)
+        }),
     )
     await renderController()
     await requestPrint()
@@ -423,6 +528,285 @@ describe('PdfPrintController', () => {
     })
   })
 
+  it.each([
+    { button: 'Export A4', paperSize: 'a4', landscape: false, includeOutline: true },
+    { button: 'Export Letter', paperSize: 'letter', landscape: true, includeOutline: false },
+  ])('exports the captured unsaved document with selected options: $button', async (options) => {
+    const getContent = vi.fn(() => '# Captured unsaved document')
+    await renderController(getContent, '/notes/draft.md')
+    await requestExport()
+    expect(previewState.docs).toEqual([])
+
+    // Editing or renaming after opening the dialog must not change this job.
+    getContent.mockReturnValue('# Later document content')
+    await renderController(getContent, '/other/renamed.md')
+    await clickExport(options.button)
+    await waitFor(() => expect(exportMocks.exportPdf).toHaveBeenCalledOnce())
+
+    expect(getContent).toHaveBeenCalledOnce()
+    expect(previewState.docs).toContain('# Captured unsaved document')
+    expect(previewState.docs).not.toContain('# Later document content')
+    expect(exportMocks.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        defaultPath: 'draft.pdf',
+        filters: [{ name: 'PDF', extensions: ['pdf'] }],
+      }),
+    )
+    expect(exportMocks.buildDocument).toHaveBeenCalledWith(
+      expect.objectContaining({
+        html: expect.stringContaining('Captured unsaved document'),
+        title: 'draft.md',
+        fileFolderPath: '/notes',
+        paperSize: options.paperSize,
+        landscape: options.landscape,
+      }),
+    )
+    expect(exportMocks.exportPdf).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourcePath: '/notes/draft.md',
+        outputPath: '/exports/draft.pdf',
+        executablePath: '/local/chromium',
+        html: '<html><body>Prepared PDF snapshot</body></html>',
+        paperSize: options.paperSize,
+        landscape: options.landscape,
+        includeOutline: options.includeOutline,
+        jobId: expect.any(String),
+      }),
+      expect.any(AbortSignal),
+    )
+    expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
+    expect(toastMocks.success).toHaveBeenCalledWith(
+      'pdf_export.success:/exports/draft.pdf',
+      expect.any(Object),
+    )
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+  })
+
+  it('does not render or prepare resources when the native save picker is cancelled', async () => {
+    exportMocks.save.mockResolvedValueOnce(null)
+    const load = vi.spyOn(rmeRuntime, 'loadRmeRuntime')
+    await renderController()
+    await requestExport()
+    await clickExport()
+
+    expect(load).not.toHaveBeenCalled()
+    expect(previewState.docs).toEqual([])
+    expect(printMocks.preparePrintDocument).not.toHaveBeenCalled()
+    expect(exportMocks.buildDocument).not.toHaveBeenCalled()
+    expect(exportMocks.exportPdf).not.toHaveBeenCalled()
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Export A4' }).disabled).toBe(
+      false,
+    )
+    await clickExport()
+    await waitFor(() => expect(exportMocks.exportPdf).toHaveBeenCalledOnce())
+  })
+
+  it.each([
+    { available: true, compatible: false },
+    { available: false, compatible: true },
+  ])(
+    'rejects unsupported or unavailable browser capabilities before opening a save picker: %j',
+    async (capability) => {
+      exportMocks.probeBrowser.mockResolvedValue({
+        ...capability,
+        version: 'Unsupported browser',
+        executablePath: '/unsupported/browser',
+      })
+      await renderController()
+      await requestExport()
+      // Exercise the controller guard even if a caller invokes its callback.
+      await act(async () =>
+        exportUi.props?.onExport({ paperSize: 'a4', landscape: false, includeOutline: true }),
+      )
+      expect(exportMocks.save).not.toHaveBeenCalled()
+      expect(previewState.docs).toEqual([])
+      expect(exportMocks.exportPdf).not.toHaveBeenCalled()
+    },
+  )
+
+  it('cancels resource preparation and releases the lock before a PDF process starts', async () => {
+    printMocks.preparePrintDocument.mockImplementation(
+      ({ signal }) =>
+        new Promise((_resolve, reject) => {
+          signal?.addEventListener(
+            'abort',
+            () => reject(new DOMException('Cancelled', 'AbortError')),
+            { once: true },
+          )
+        }),
+    )
+    await renderController()
+    await requestExport()
+    await clickExport()
+    await waitFor(() => expect(printMocks.preparePrintDocument).toHaveBeenCalledOnce())
+    const preparationSignal = printMocks.preparePrintDocument.mock.calls[0]![0].signal!
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Cancel export' })))
+
+    expect(preparationSignal.aborted).toBe(true)
+    expect(exportMocks.buildDocument).not.toHaveBeenCalled()
+    expect(exportMocks.exportPdf).not.toHaveBeenCalled()
+    expect(toastMocks.error).not.toHaveBeenCalled()
+    expect(document.querySelector('.mf-pdf-print-root')).toBeNull()
+    printMocks.preparePrintDocument.mockResolvedValue({ failedImageCount: 0 })
+    await requestPrint()
+  })
+
+  it('aborts a running PDF export and keeps a newer dialog alive when old work rejects', async () => {
+    const oldExport = deferred<{ outputPath: string }>()
+    exportMocks.exportPdf.mockReturnValueOnce(oldExport.promise)
+    const getContent = vi.fn(() => '# First snapshot')
+    await renderController(getContent)
+    await requestExport()
+    await clickExport()
+    await waitFor(() => expect(exportMocks.exportPdf).toHaveBeenCalledOnce())
+    const signal = exportMocks.exportPdf.mock.calls[0]![1] as AbortSignal
+
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Cancel export' })))
+    expect(signal.aborted).toBe(true)
+    getContent.mockReturnValue('# New snapshot')
+    await requestExport()
+    await act(async () => oldExport.reject(new DOMException('Old export cancelled', 'AbortError')))
+
+    expect(screen.getByRole('dialog', { name: 'PDF export' })).toBeTruthy()
+    expect(toastMocks.error).not.toHaveBeenCalled()
+    await act(async () => bus.emit(PDF_PRINT_EVENT))
+    expect(getContent).toHaveBeenCalledTimes(2)
+    expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
+    await clickExport()
+    await waitFor(() => expect(exportMocks.exportPdf).toHaveBeenCalledTimes(2))
+    expect(exportMocks.buildDocument.mock.calls.at(-1)?.[0].html).toContain('New snapshot')
+  })
+
+  it('ignores a save picker reply after export cancellation', async () => {
+    const picker = deferred<string | null>()
+    exportMocks.save.mockReturnValueOnce(picker.promise)
+    const load = vi.spyOn(rmeRuntime, 'loadRmeRuntime')
+    await renderController()
+    await requestExport()
+    await clickExport()
+    expect(exportMocks.save).toHaveBeenCalledOnce()
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Cancel export' })))
+    await act(async () => picker.resolve('/exports/cancelled.pdf'))
+
+    expect(load).not.toHaveBeenCalled()
+    expect(previewState.docs).toEqual([])
+    expect(exportMocks.exportPdf).not.toHaveBeenCalled()
+    expect(toastMocks.error).not.toHaveBeenCalled()
+    await requestPrint()
+  })
+
+  it('uses the captured snapshot for system print fallback without a compatible browser', async () => {
+    exportMocks.probeBrowser.mockResolvedValue({ available: false, compatible: false })
+    const getContent = vi.fn(() => '# Print fallback snapshot')
+    await renderController(getContent)
+    await requestExport()
+    getContent.mockReturnValue('# Later content')
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'System print' })))
+    await waitFor(() => expect(printMocks.openPdfPrintWindow).toHaveBeenCalledOnce())
+
+    expect(printMocks.openPdfPrintWindow.mock.calls[0]?.[0].html).toContain(
+      'Print fallback snapshot',
+    )
+    expect(getContent).toHaveBeenCalledOnce()
+    expect(exportMocks.save).not.toHaveBeenCalled()
+    expect(exportMocks.exportPdf).not.toHaveBeenCalled()
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('shares one lock across export, duplicate export and system print requests', async () => {
+    const picker = deferred<string | null>()
+    exportMocks.save.mockReturnValueOnce(picker.promise)
+    const getContent = vi.fn(() => '# One document snapshot')
+    await renderController(getContent)
+    await act(async () => {
+      bus.emit(PDF_EXPORT_EVENT)
+      bus.emit(PDF_EXPORT_EVENT)
+      bus.emit(PDF_PRINT_EVENT)
+    })
+    await screen.findByRole('dialog', { name: 'PDF export' })
+    await waitFor(() => expect(exportUi.props?.checking).toBe(false))
+    expect(getContent).toHaveBeenCalledOnce()
+    expect(exportMocks.probeBrowser).toHaveBeenCalledOnce()
+    await clickExport()
+    await act(async () => {
+      exportUi.props?.onExport({ paperSize: 'letter', landscape: true, includeOutline: false })
+      exportUi.props?.onPrint()
+      bus.emit(PDF_PRINT_EVENT)
+    })
+    expect(exportMocks.save).toHaveBeenCalledOnce()
+    expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
+    expect(getContent).toHaveBeenCalledOnce()
+    await act(async () => picker.resolve('/exports/draft.pdf'))
+    await waitFor(() => expect(exportMocks.exportPdf).toHaveBeenCalledOnce())
+  })
+
+  it('ignores an export request while system print preparation owns the shared lock', async () => {
+    const preparation = deferred<{ failedImageCount: number }>()
+    printMocks.preparePrintDocument.mockReturnValueOnce(preparation.promise)
+    const getContent = vi.fn(() => '# Already printing')
+    await renderController(getContent)
+    await act(async () => bus.emit(PDF_PRINT_EVENT))
+    await waitFor(() => expect(printMocks.preparePrintDocument).toHaveBeenCalledOnce())
+    await act(async () => bus.emit(PDF_EXPORT_EVENT))
+    expect(getContent).toHaveBeenCalledOnce()
+    expect(exportMocks.probeBrowser).not.toHaveBeenCalled()
+    expect(screen.queryByRole('dialog')).toBeNull()
+    await act(async () => preparation.resolve({ failedImageCount: 0 }))
+    await waitFor(() => expect(printMocks.openPdfPrintWindow).toHaveBeenCalledOnce())
+  })
+
+  it('discards an obsolete browser probe when settings change while the dialog is open', async () => {
+    const first = deferred<PdfExportService.PdfBrowserInfo>()
+    const current = deferred<PdfExportService.PdfBrowserInfo>()
+    exportMocks.probeBrowser
+      .mockReset()
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(current.promise)
+    await renderController()
+    await act(async () => bus.emit(PDF_EXPORT_EVENT))
+    await screen.findByRole('dialog', { name: 'PDF export' })
+    await act(async () =>
+      useAppSettingStore.setState({ settingData: { pdf_browser_executable_path: '/new/browser' } }),
+    )
+    await waitFor(() => expect(exportMocks.probeBrowser).toHaveBeenLastCalledWith('/new/browser'))
+    await act(async () =>
+      current.resolve({
+        available: true,
+        compatible: true,
+        version: 'New browser',
+        executablePath: '/new/browser',
+      }),
+    )
+    await act(async () =>
+      first.resolve({
+        available: true,
+        compatible: true,
+        version: 'Old browser',
+        executablePath: '/old/browser',
+      }),
+    )
+    expect(screen.getByRole('status').textContent).toBe('New browser')
+
+    await clickExport()
+    await waitFor(() => expect(exportMocks.exportPdf).toHaveBeenCalledOnce())
+    expect(exportMocks.exportPdf.mock.calls[0]?.[0].executablePath).toBe('/new/browser')
+  })
+
+  it('clears a failed probe message after the browser path is corrected', async () => {
+    exportMocks.probeBrowser.mockRejectedValueOnce(new Error('Initial browser probe failed'))
+    await renderController()
+    await requestExport()
+    expect(screen.getByRole('alert').textContent).toBe('Initial browser probe failed')
+    await act(async () =>
+      useAppSettingStore.setState({
+        settingData: { pdf_browser_executable_path: '/corrected/browser' },
+      }),
+    )
+    await waitFor(() => expect(exportUi.props?.checking).toBe(false))
+    expect(screen.getByRole('status').textContent).toBe('Chromium 130')
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
   it('does not subscribe when the active file is not Markdown', async () => {
     const getContent = vi.fn(() => 'plain text')
     await act(async () => {
@@ -438,10 +822,146 @@ describe('PdfPrintController', () => {
       )
     })
 
-    act(() => bus.emit(PDF_PRINT_EVENT))
+    act(() => {
+      bus.emit(PDF_PRINT_EVENT)
+      bus.emit(PDF_EXPORT_EVENT)
+    })
     await act(async () => Promise.resolve())
 
     expect(getContent).not.toHaveBeenCalled()
     expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
+    expect(exportMocks.probeBrowser).not.toHaveBeenCalled()
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  describe('PDF export notifications with real Sonner', () => {
+    beforeEach(() => {
+      toastMocks.loading.mockImplementation(sonnerToast.loading)
+      toastMocks.dismiss.mockImplementation(sonnerToast.dismiss)
+      toastMocks.success.mockImplementation(sonnerToast.success)
+      toastMocks.error.mockImplementation(sonnerToast.error)
+      toastMocks.warning.mockImplementation(sonnerToast.warning)
+    })
+
+    async function renderWithNotifications() {
+      await renderController(undefined, undefined, true)
+      act(() => sonnerToast.info('Existing notice', { duration: Infinity }))
+      await screen.findByText('Existing notice')
+    }
+
+    async function expectNoLoadingNotifications() {
+      // Sonner queues creation and animates removal. Checking only dismiss()
+      // misses a loading notification inserted after it was dismissed.
+      await act(async () => {
+        await new Promise<void>((resolve) => setTimeout(resolve, 500))
+      })
+      expect(document.querySelectorAll('[data-sonner-toast][data-type="loading"]')).toHaveLength(
+        0,
+      )
+      expect(screen.getByText('Existing notice')).toBeTruthy()
+    }
+
+    it('keeps dialog progress through hydration replacement and only notifies on completion', async () => {
+      const first = deferred<void>()
+      const current = deferred<void>()
+      previewState.hydration = { settled: first.promise }
+      printMocks.preparePrintDocument.mockImplementation(
+        ({ hydration, signal }) =>
+          new Promise((resolve, reject) => {
+            signal?.addEventListener(
+              'abort',
+              () => reject(new DOMException('Preparation replaced', 'AbortError')),
+              { once: true },
+            )
+            void hydration.settled.then(() => resolve({ failedImageCount: 0 }))
+          }),
+      )
+      await renderWithNotifications()
+      await requestExport()
+      await clickExport()
+      expect(screen.getByRole('status').textContent).toBe('pdf_export.exporting')
+
+      const firstSignal = printMocks.preparePrintDocument.mock.calls[0]![0].signal!
+      await act(async () => {
+        first.resolve()
+        previewState.onHydrationChange?.(null)
+        previewState.hydration = { settled: current.promise }
+        previewState.onHydrationChange?.(previewState.hydration)
+      })
+      expect(firstSignal.aborted).toBe(true)
+      expect(printMocks.preparePrintDocument).toHaveBeenCalledTimes(2)
+      expect(screen.getByRole('status').textContent).toBe('pdf_export.exporting')
+      expect(exportMocks.exportPdf).not.toHaveBeenCalled()
+
+      await act(async () => current.resolve())
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+      await expectNoLoadingNotifications()
+      expect(screen.getByText('pdf_export.success:/exports/draft.pdf')).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: 'contextmenu.explorer.show_in_folder' }))
+      expect(exportMocks.reveal).toHaveBeenCalledWith('/exports/draft.pdf')
+      expect(toastMocks.error).not.toHaveBeenCalled()
+    })
+
+    it('leaves an error notification without stale progress after an immediate preparation failure', async () => {
+      printMocks.preparePrintDocument.mockRejectedValueOnce(new Error('PDF resources failed'))
+      await renderWithNotifications()
+      await requestExport()
+      await clickExport()
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+      await expectNoLoadingNotifications()
+      expect(screen.getByText('PDF resources failed')).toBeTruthy()
+      expect(exportMocks.exportPdf).not.toHaveBeenCalled()
+      expect(toastMocks.success).not.toHaveBeenCalled()
+    })
+
+    it.each(['cancel', 'unmount'] as const)(
+      'leaves no progress notification after %s during preparation and allows another export',
+      async (end) => {
+        printMocks.preparePrintDocument.mockImplementationOnce(
+          ({ signal }) =>
+            new Promise((_resolve, reject) => {
+              signal?.addEventListener(
+                'abort',
+                () => reject(new DOMException('Cancelled', 'AbortError')),
+                { once: true },
+              )
+            }),
+        )
+        await renderWithNotifications()
+        await requestExport()
+        await clickExport()
+        expect(screen.getByRole('status').textContent).toBe('pdf_export.exporting')
+        const preparationSignal = printMocks.preparePrintDocument.mock.calls[0]![0].signal!
+        const toaster = document.querySelector('[data-sonner-toaster]')
+        await act(async () => {
+          if (end === 'cancel') {
+            fireEvent.click(screen.getByRole('button', { name: 'Cancel export' }))
+          } else {
+            // Keep the same Toaster mounted while the editor/controller unmounts.
+            root.render(
+              <>
+                {null}
+                <Toaster closeButton />
+              </>,
+            )
+          }
+        })
+        expect(preparationSignal.aborted).toBe(true)
+        expect(document.querySelector('[data-sonner-toaster]')).toBe(toaster)
+        expect(screen.queryByRole('dialog')).toBeNull()
+        expect(exportMocks.exportPdf).not.toHaveBeenCalled()
+        await expectNoLoadingNotifications()
+        expect(toastMocks.error).not.toHaveBeenCalled()
+        expect(toastMocks.success).not.toHaveBeenCalled()
+
+        if (end === 'unmount') await renderController(undefined, undefined, true)
+        await requestExport()
+        await clickExport()
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+        await expectNoLoadingNotifications()
+        expect(exportMocks.exportPdf).toHaveBeenCalledOnce()
+        expect(screen.getByText('pdf_export.success:/exports/draft.pdf')).toBeTruthy()
+      },
+    )
   })
 })

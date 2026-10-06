@@ -12,6 +12,7 @@ import { toast } from 'zens'
 import { EditorAreaActionButton } from '../../../EditorAreaAction'
 import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 import { createPdfPrintMenuItem } from '../../../pdf-print/pdfPrintMenuItem'
+import { createPdfExportMenuItem } from '../../../pdf-export/pdfExportMenuItem'
 import { createPandocExportMenuItem } from '../../../pandoc-export/pandocExportMenuItem'
 
 export const MoreActions = () => {
@@ -74,7 +75,8 @@ export const MoreActions = () => {
             bus.emit('editor_export_html')
           },
         },
-        createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')),
+        createPdfExportMenuItem(t('pdf_export.export')),
+        createPdfPrintMenuItem(t('pdf_export.print')),
         createPandocExportMenuItem(t),
         {
           value: 'export_image',

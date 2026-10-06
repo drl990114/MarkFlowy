@@ -1,4 +1,5 @@
 import { getExportableImageSrc } from '@/helper/image'
+import postcss from 'postcss'
 import valueParser from 'postcss-value-parser'
 import GithubSlugger from './html-export/github-slugger/index.js'
 
@@ -102,6 +103,18 @@ function createImageEmbedder(fileFolderPath?: string) {
 
 type EmbedImage = ReturnType<typeof createImageEmbedder>
 
+export interface ExportDocumentResourceOptions {
+  /** PDF exports freeze the fonts used by the prepared document as data URLs. */
+  embedFont?: (source: string) => Promise<string>
+  /** Include the retained renderer wrappers when selecting scoped CSS rules. */
+  styleRoot?: HTMLElement
+}
+
+export interface PreparedExportDocumentContent {
+  content: HTMLElement
+  css: string
+}
+
 async function embedCssImages(css: string, doc: Document, embed: EmbedImage): Promise<string> {
   const parsed = valueParser(css)
   const pending: Promise<void>[] = []
@@ -146,6 +159,69 @@ function splitSelectors(value: string): string[] {
   return [...selectors, value.slice(start).trim()]
 }
 
+const normalizeFontFamily = (value: string) =>
+  value
+    .trim()
+    .replace(/^(['"])(.*)\1$/, '$2')
+    .toLowerCase()
+
+async function embedFontSource(
+  source: string,
+  baseUrl: string,
+  embed: NonNullable<ExportDocumentResourceOptions['embedFont']>,
+): Promise<string> {
+  // Chromium supports the first packaged URL (normally WOFF2). Keeping a
+  // single embedded source avoids fetching the WOFF/TTF fallbacks as well.
+  for (const candidate of splitSelectors(source)) {
+    const parsed = valueParser(candidate)
+    let url: valueParser.FunctionNode | undefined
+    parsed.walk((node) => {
+      if (node.type === 'function' && node.value.toLowerCase() === 'url') {
+        url = node
+        return false
+      }
+    })
+    if (!url) continue
+    const raw = valueParser
+      .stringify(url.nodes)
+      .trim()
+      .replace(/^(['"])(.*)\1$/, '$2')
+    const embedded = await embed(new URL(raw, baseUrl).href)
+    url.nodes = [{ type: 'string', quote: '"', value: embedded, sourceIndex: 0, sourceEndIndex: 0 }]
+    return parsed.toString()
+  }
+  throw new Error('A document font has no portable source for PDF export.')
+}
+
+async function embedContentStyles(
+  css: string,
+  doc: Document,
+  embed: EmbedImage,
+  options: ExportDocumentResourceOptions,
+): Promise<string> {
+  if (!options.embedFont) return embedCssImages(css, doc, embed)
+  const parsed = postcss.parse(css)
+  parsed.walkAtRules('import', (rule) => {
+    rule.remove()
+  })
+  const pending: Promise<void>[] = []
+  parsed.walkDecls((declaration) => {
+    pending.push(
+      (async () => {
+        const fontSource =
+          declaration.prop.toLowerCase() === 'src' &&
+          declaration.parent?.type === 'atrule' &&
+          declaration.parent.name.toLowerCase() === 'font-face'
+        declaration.value = fontSource
+          ? await embedFontSource(declaration.value, doc.baseURI, options.embedFont!)
+          : await embedCssImages(declaration.value, doc, embed)
+      })(),
+    )
+  })
+  await Promise.all(pending)
+  return parsed.toString()
+}
+
 function matchesExport(selector: string, root: HTMLElement): boolean {
   const target = selector.replace(/::[\w-]+(?:\([^)]*\))?/g, '')
   try {
@@ -168,9 +244,25 @@ function addFontFallback(style: CSSStyleDeclaration, code = false): void {
   }
 }
 
-async function collectExportStyles(root: HTMLElement, embed: EmbedImage): Promise<string> {
+async function collectExportStyles(
+  root: HTMLElement,
+  embed: EmbedImage,
+  options: ExportDocumentResourceOptions,
+): Promise<string> {
   const doc = root.ownerDocument
-  const readRules = async (rules: CSSRuleList): Promise<string> => {
+  const usedFonts = new Set<string>()
+  const fontFaces: { style: CSSStyleDeclaration; baseUrl: string }[] = []
+  const collectFonts = (style: CSSStyleDeclaration) => {
+    for (const family of splitSelectors(style.getPropertyValue('font-family')))
+      if (family) usedFonts.add(normalizeFontFamily(family))
+  }
+  if (options.embedFont) {
+    for (const element of [root, ...Array.from(root.querySelectorAll('*'))]) {
+      const computed = doc.defaultView?.getComputedStyle(element)
+      if (computed) collectFonts(computed)
+    }
+  }
+  const readRules = async (rules: CSSRuleList, baseUrl: string): Promise<string> => {
     const selected: string[] = []
     for (const rule of Array.from(rules)) {
       if ('selectorText' in rule && 'style' in rule) {
@@ -181,8 +273,11 @@ async function collectExportStyles(root: HTMLElement, embed: EmbedImage): Promis
         if (!selectors.length) continue
         const style = doc.createElement('span').style
         style.cssText = styleRule.style.cssText
+        if (options.embedFont) collectFonts(style)
         addFontFallback(style, /(?:pre|code|\.cm-|\.tok-)/.test(selectors.join(',')))
         selected.push(`${selectors.join(',')}{${await embedCssImages(style.cssText, doc, embed)}}`)
+      } else if (options.embedFont && rule.type === 5 && 'style' in rule) {
+        fontFaces.push({ style: (rule as CSSFontFaceRule).style, baseUrl })
       } else if (rule.cssText.startsWith('@layer ') && !('cssRules' in rule)) {
         selected.push(rule.cssText)
       } else if (
@@ -190,12 +285,12 @@ async function collectExportStyles(root: HTMLElement, embed: EmbedImage): Promis
         (rule.type === 4 || rule.type === 12 || rule.cssText.startsWith('@layer '))
       ) {
         const group = rule as CSSGroupingRule
-        const content = await readRules(group.cssRules)
+        const content = await readRules(group.cssRules, baseUrl)
         if (content)
           selected.push(`${rule.cssText.slice(0, rule.cssText.indexOf('{'))}{${content}}`)
       }
-      // No @import, @font-face or unrelated application rules: exported HTML
-      // uses the selected document styles and stable local font fallbacks.
+      // HTML keeps stable local font fallbacks. PDF additionally freezes used
+      // font faces below; neither profile imports unrelated application rules.
     }
     return selected.join('\n')
   }
@@ -207,9 +302,24 @@ async function collectExportStyles(root: HTMLElement, embed: EmbedImage): Promis
     } catch {
       // Cross-origin host styles cannot be inspected. The preview's own styled
       // rules are same-origin CSSOM sheets and remain available here.
+      if (options.embedFont)
+        throw new Error('A document stylesheet could not be read for PDF export.')
       continue
     }
-    styles.push(await readRules(rules))
+    styles.push(await readRules(rules, sheet.href || doc.baseURI))
+  }
+  for (const face of fontFaces) {
+    if (!usedFonts.has(normalizeFontFamily(face.style.getPropertyValue('font-family')))) continue
+    const fontCss = postcss.parse(`@font-face{${face.style.cssText}}`)
+    const source = await embedFontSource(
+      face.style.getPropertyValue('src'),
+      face.baseUrl,
+      options.embedFont!,
+    )
+    fontCss.walkDecls('src', (declaration) => {
+      declaration.value = source
+    })
+    styles.push(fontCss.toString())
   }
   return styles.filter(Boolean).join('\n')
 }
@@ -251,21 +361,21 @@ function addHeadingAnchors(root: HTMLElement): void {
   }
 }
 
-const escapeStyleText = (css: string) => css.replace(/<\/style/gi, '<\\/style')
+export const escapeExportStyleText = (css: string) => css.replace(/<\/style/gi, '<\\/style')
 
-/** Serialize the already-sanitized static preview, never raw Markdown/user HTML. */
-export async function exportHtmlDocument(
+/** Prepare the already-sanitized static preview, never raw Markdown/user HTML. */
+export async function prepareExportDocumentContent(
   html: string,
   root: HTMLElement | null,
-  title: string,
   fileFolderPath?: string,
-): Promise<string> {
+  options: ExportDocumentResourceOptions = {},
+): Promise<PreparedExportDocumentContent> {
   const doc = root?.ownerDocument ?? document
   const content = (root?.cloneNode(false) as HTMLElement | undefined) ?? doc.createElement('div')
   content.innerHTML = html
   const source = root ?? content
   const embed = createImageEmbedder(fileFolderPath)
-  const css = await collectExportStyles(source, embed)
+  const css = await collectExportStyles(options.styleRoot || source, embed, options)
   copyUsedVariables(source, content, css + content.outerHTML)
 
   for (const image of Array.from(content.querySelectorAll('img'))) {
@@ -276,7 +386,7 @@ export async function exportHtmlDocument(
     image.removeAttribute('loading')
     image.removeAttribute('data-rme-original-src')
   }
-  for (const image of Array.from(content.querySelectorAll('svg image, svg use'))) {
+  for (const image of Array.from(content.querySelectorAll('svg image, svg use, svg feImage'))) {
     const href =
       image.getAttribute('href') || image.getAttributeNS('http://www.w3.org/1999/xlink', 'href')
     if (!href) continue
@@ -300,7 +410,9 @@ export async function exportHtmlDocument(
     element.style.cssText = await embedCssImages(element.style.cssText, doc, embed)
   }
   for (const style of Array.from(content.querySelectorAll('style'))) {
-    style.textContent = escapeStyleText(await embedCssImages(style.textContent || '', doc, embed))
+    style.textContent = escapeExportStyleText(
+      await embedContentStyles(style.textContent || '', doc, embed, options),
+    )
   }
   content
     .querySelectorAll('.cm-copy-btn, .mf-live-preview-toolbar')
@@ -330,10 +442,22 @@ export async function exportHtmlDocument(
   ]) {
     content.style.removeProperty(property)
   }
+  return { content, css }
+}
+
+/** Serialize the already-sanitized static preview, never raw Markdown/user HTML. */
+export async function exportHtmlDocument(
+  html: string,
+  root: HTMLElement | null,
+  title: string,
+  fileFolderPath?: string,
+): Promise<string> {
+  const doc = root?.ownerDocument ?? document
+  const { content, css } = await prepareExportDocumentContent(html, root, fileFolderPath)
   content.classList.add('mf-html-export')
   const layout =
     'html,body{margin:0;min-height:100%}.mf-html-export{box-sizing:border-box;max-width:100%;padding:clamp(16px,4vw,40px)}.mf-html-export img{max-width:100%;height:auto}'
-  const styles = escapeStyleText(`${css}\n${layout}`)
+  const styles = escapeExportStyleText(`${css}\n${layout}`)
   const bodyStyle = doc.createElement('body').style
   for (const property of ['background-color', 'color', 'font-family']) {
     bodyStyle.setProperty(property, content.style.getPropertyValue(property))

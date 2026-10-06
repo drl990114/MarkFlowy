@@ -3070,6 +3070,7 @@ function TextEditor(props: TextEditorProps) {
           active={active}
           enabled={fileTypeConfig.type === 'markdown'}
           fileName={curFile.name}
+          filePath={curFile.path}
           getContent={getExportContent}
           delegateOptions={editorProps.delegateOptions!}
           styleToken={printStyleToken}

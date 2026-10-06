@@ -36,6 +36,7 @@ import {
 import { isDivider, Space, toast } from 'zens'
 import { EditorAreaActionButton } from '../../EditorAreaAction'
 import { createPdfPrintMenuItem } from '../../pdf-print/pdfPrintMenuItem'
+import { createPdfExportMenuItem } from '../../pdf-export/pdfExportMenuItem'
 import { createPandocExportMenuItem } from '../../pandoc-export/pandocExportMenuItem'
 import { fileSaveCoordinator } from '../../fileSaveCoordinator'
 import { TextEncodingDialog } from '../../text-encoding/TextEncodingDialog'
@@ -407,7 +408,10 @@ export const MenuList = memo((props: MenuListProps) => {
           },
         ]
         if (curFileTypeConfig?.type === 'markdown') {
-          exportItems.push(createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')))
+          exportItems.push(
+            createPdfExportMenuItem(t('pdf_export.export')),
+            createPdfPrintMenuItem(t('pdf_export.print')),
+          )
         }
         exportItems.push({
           value: 'export_image',

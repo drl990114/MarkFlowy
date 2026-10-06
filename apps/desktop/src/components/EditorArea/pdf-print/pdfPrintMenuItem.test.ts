@@ -9,11 +9,11 @@ describe('createPdfPrintMenuItem', () => {
 
   it('uses the localized label and triggers the internal PDF print event', () => {
     const emit = vi.spyOn(bus, 'emit')
-    const item = createPdfPrintMenuItem('Print / Export PDF')
+    const item = createPdfPrintMenuItem('Print')
 
     expect(item).toMatchObject({
-      label: 'Print / Export PDF',
-      value: 'export_pdf',
+      label: 'Print',
+      value: 'print_pdf',
     })
     if ('handler' in item) item.handler?.()
 

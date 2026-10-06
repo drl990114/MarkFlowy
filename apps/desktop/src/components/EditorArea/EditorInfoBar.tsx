@@ -26,6 +26,7 @@ import { Space, toast } from 'zens'
 import { showContextMenu } from '../ui-v2/ContextMenu'
 import { EditorAreaActionButton } from './EditorAreaAction'
 import { createPdfPrintMenuItem } from './pdf-print/pdfPrintMenuItem'
+import { createPdfExportMenuItem } from './pdf-export/pdfExportMenuItem'
 import { createPandocExportMenuItem } from './pandoc-export/pandocExportMenuItem'
 
 type FileNormalInfo = {
@@ -136,7 +137,8 @@ export const EditorInfoBar = memo(() => {
         },
         ...(curFileTypeConfig?.type === 'markdown'
           ? [
-              createPdfPrintMenuItem(t('contextmenu.editor_tab.export_pdf')),
+              createPdfExportMenuItem(t('pdf_export.export')),
+              createPdfPrintMenuItem(t('pdf_export.print')),
               createPandocExportMenuItem(t),
             ]
           : []),

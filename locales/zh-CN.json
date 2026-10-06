@@ -784,6 +784,24 @@
         "automatic": "使用自动探测",
         "check_again": "重新检测",
         "install_guide": "安装说明"
+      },
+      "pdf": {
+        "label": "PDF 导出",
+        "executable": {
+          "label": "PDF 导出浏览器",
+          "desc": "MarkFlowy 使用本机 Chrome、Chromium 或 Edge 导出带有标题书签的 PDF。可自动检测，也可选择其可执行文件。"
+        },
+        "status": {
+          "checking": "正在检测 PDF 导出浏览器…",
+          "ready": "浏览器 {{version}} 已就绪。",
+          "invalid_executable": "配置的路径不是有效的受支持浏览器可执行文件。",
+          "incompatible": "已找到浏览器，但其版本不支持 PDF 标题书签。",
+          "not_found": "未找到兼容的 PDF 导出浏览器。",
+          "save_failed": "无法保存浏览器设置，请重试。"
+        },
+        "select": "选择浏览器可执行文件",
+        "automatic": "使用自动检测",
+        "check_again": "重新检测"
       }
     },
     "keyboard": {
@@ -1474,6 +1492,33 @@
       "code-typescript": "TypeScript 函数",
       "code-python": "Python 函数",
       "code-bash": "Bash 脚本"
+    }
+  },
+  "pdf_export": {
+    "title": "导出 PDF",
+    "description": "使用本机 Chrome、Chromium 或 Edge 浏览器，导出可搜索并带有标题书签的 PDF。",
+    "paper_size": "纸张尺寸",
+    "orientation": "页面方向",
+    "portrait": "纵向",
+    "landscape": "横向",
+    "include_outline": "包含标题书签",
+    "outline_hint": "将文档标题转换为可跳转的 PDF 目录。没有标题的文档不会生成书签。",
+    "export": "导出 PDF",
+    "print": "打印…",
+    "exporting": "正在导出 PDF…",
+    "success": "PDF 已保存到 {{path}}。",
+    "failed": "PDF 导出失败，文档内容已保留。",
+    "image_warning": "{{count}} 张图片未能加载，请检查导出的 PDF。",
+    "browser_check_failed": "无法检测 PDF 导出浏览器，请在「设置 → 导出」中重新检测。",
+    "cancelled": "已取消 PDF 导出。",
+    "system_print": "系统打印…",
+    "system_print_hint": "也可以使用系统打印。通过打印对话框另存为 PDF 时，不保证包含标题目录书签。",
+    "browser": {
+      "checking": "正在检测 PDF 导出浏览器…",
+      "ready": "浏览器 {{version}} 已就绪。",
+      "not_found": "未找到兼容的 PDF 导出浏览器。",
+      "incompatible": "当前浏览器版本不支持带标题书签的 PDF 导出。",
+      "settings_hint": "请安装 Chrome、Chromium 或 Edge，或在「设置 → 导出」中选择其可执行文件。"
     }
   }
 }

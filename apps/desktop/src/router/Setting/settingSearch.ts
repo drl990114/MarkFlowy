@@ -28,6 +28,14 @@ type SupplementalField = Pick<
 
 const supplementalFields: SupplementalField[] = [
   {
+    categoryKey: 'export',
+    groupKey: 'pdf',
+    groupI18nKey: 'settings.export.pdf.label',
+    settingKey: 'pdf_browser_executable_path',
+    titleI18nKey: 'settings.export.pdf.executable.label',
+    descI18nKey: 'settings.export.pdf.executable.desc',
+  },
+  {
     categoryKey: 'display',
     groupKey: 'Theme',
     groupI18nKey: 'settings.display.theme.label',
