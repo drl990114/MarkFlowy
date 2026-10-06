@@ -1277,7 +1277,8 @@
     "image": {
       "unavailable": "Image unavailable",
       "loading": "Loading image…",
-      "edit": "Edit address"
+      "edit": "Edit address",
+      "resetSize": "Restore automatic size"
     },
     "preview": {
       "retry": "Retry"
@@ -1319,7 +1320,11 @@
       "deleteColumn": "Delete current column",
       "deleteRow": "Delete current row",
       "deleteTable": "Delete table",
-      "duplicateRow": "Duplicate row"
+      "duplicateRow": "Duplicate row",
+      "moveRowUp": "Move row up",
+      "moveRowDown": "Move row down",
+      "moveColumnLeft": "Move column left",
+      "moveColumnRight": "Move column right"
     }
   },
   "inline_insert": {

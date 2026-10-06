@@ -1283,7 +1283,8 @@
     "image": {
       "unavailable": "Image unavailable",
       "loading": "Loading image…",
-      "edit": "Edit address"
+      "edit": "Edit address",
+      "resetSize": "Restaurar tamaño automático"
     },
     "preview": {
       "retry": "Retry"
@@ -1319,7 +1320,11 @@
       "deleteColumn": "Eliminar columna actual",
       "deleteRow": "Eliminar fila actual",
       "deleteTable": "Eliminar tabla",
-      "duplicateRow": "Duplicar fila"
+      "duplicateRow": "Duplicar fila",
+      "moveRowUp": "Subir fila",
+      "moveRowDown": "Bajar fila",
+      "moveColumnLeft": "Mover columna a la izquierda",
+      "moveColumnRight": "Mover columna a la derecha"
     }
   },
   "inline_insert": {

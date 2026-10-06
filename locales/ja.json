@@ -1283,7 +1283,8 @@
     "image": {
       "unavailable": "Image unavailable",
       "loading": "Loading image…",
-      "edit": "Edit address"
+      "edit": "Edit address",
+      "resetSize": "自動サイズに戻す"
     },
     "preview": {
       "retry": "Retry"
@@ -1319,7 +1320,11 @@
       "deleteColumn": "現在の列を削除",
       "deleteRow": "現在の行を削除",
       "deleteTable": "表を削除",
-      "duplicateRow": "行を複製"
+      "duplicateRow": "行を複製",
+      "moveRowUp": "行を上に移動",
+      "moveRowDown": "行を下に移動",
+      "moveColumnLeft": "列を左に移動",
+      "moveColumnRight": "列を右に移動"
     }
   },
   "inline_insert": {

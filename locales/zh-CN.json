@@ -1277,7 +1277,8 @@
     "image": {
       "unavailable": "图片无法加载",
       "loading": "正在加载图片…",
-      "edit": "修改地址"
+      "edit": "修改地址",
+      "resetSize": "恢复自动尺寸"
     },
     "preview": {
       "retry": "重试"
@@ -1319,7 +1320,11 @@
       "deleteColumn": "删除当前列",
       "deleteRow": "删除当前行",
       "deleteTable": "删除表格",
-      "duplicateRow": "复制当前行"
+      "duplicateRow": "复制当前行",
+      "moveRowUp": "上移一行",
+      "moveRowDown": "下移一行",
+      "moveColumnLeft": "左移一列",
+      "moveColumnRight": "右移一列"
     }
   },
   "inline_insert": {
