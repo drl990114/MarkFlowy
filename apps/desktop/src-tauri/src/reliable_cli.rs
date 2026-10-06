@@ -638,19 +638,72 @@ async fn dispatch(app: tauri::AppHandle, id: &str) -> Result<(), Receipt> {
             "Unsupported request protocol",
         ));
     }
-    let mut selected = request.window_id.clone();
+    if now_ms() >= request.deadline || !dir.exists() {
+        return Err(Receipt::error(id, "timeout", "Window did not become ready"));
+    }
+    if dir.join("receipt.json").exists()
+        || bridge()
+            .lock()
+            .map_err(|error| Receipt::error(id, "bridge_unavailable", error))?
+            .pending
+            .contains_key(id)
+    {
+        return Ok(());
+    }
+    // Cold-launch delivery starts early in setup. Settings and security
+    // bookmarks need the configured app directory before a file window opens.
+    loop {
+        if now_ms() >= request.deadline || !dir.exists() {
+            return Err(Receipt::error(
+                id,
+                "timeout",
+                "Application did not become ready",
+            ));
+        }
+        let configured = super::APP_DIR
+            .lock()
+            .map_err(|error| Receipt::error(id, "configuration_unavailable", error))?
+            .contains_key(&0);
+        if configured {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(25)).await;
+    }
+    let mut selected = request.window_id.clone().or_else(|| {
+        super::window_manager::get_focused_editor_window(&app)
+            .map(|window| window.label().to_string())
+    });
+    let open_in_new_window = super::should_open_cli_file_in_new_window(
+        &request.operation,
+        request.window_id.as_deref(),
+        super::conf::AppConf::open_file_in_new_window(&app),
+        request
+            .path
+            .as_deref()
+            .zip(selected.as_deref())
+            .is_some_and(|(path, label)| {
+                super::window_manager::file_is_in_window_workspace(Path::new(path), label)
+            }),
+    );
+    if open_in_new_window {
+        let path = request
+            .path
+            .clone()
+            .ok_or_else(|| Receipt::error(id, "invalid_request", "Missing file path"))?;
+        super::fc::cmd::save_security_bookmark(&path);
+        selected = Some(
+            super::window_manager::create_new_window(app.clone(), Some(path))
+                .await
+                .map_err(|error| Receipt::error(id, "window_open_failed", error))?,
+        );
+    }
     loop {
         if now_ms() >= request.deadline || !dir.exists() {
             return Err(Receipt::error(id, "timeout", "Window did not become ready"));
         }
         if selected.is_none() {
-            selected = super::window_manager::get_focused_window(&app)
-                .filter(|window| window.label() == "main" || window.label().starts_with("main_"))
-                .map(|window| window.label().to_string())
-                .or_else(|| {
-                    app.get_webview_window("main")
-                        .map(|window| window.label().to_string())
-                });
+            selected = super::window_manager::get_focused_editor_window(&app)
+                .map(|window| window.label().to_string());
         }
         if let Some(window_id) = &selected {
             if let Some(window) = app.get_webview_window(window_id) {
@@ -704,6 +757,12 @@ async fn dispatch(app: tauri::AppHandle, id: &str) -> Result<(), Receipt> {
                     bridge().lock().unwrap().pending.remove(id);
                     return Ok(());
                 }
+            } else if open_in_new_window {
+                return Err(Receipt::error(
+                    id,
+                    "window_closed",
+                    "Target file window closed before becoming ready",
+                ));
             } else if request.window_id.is_some() && !app.webview_windows().is_empty() {
                 return Err(Receipt::error(
                     id,

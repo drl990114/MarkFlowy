@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({ invoke: vi.fn(), emit: vi.fn(), consent: vi.fn() }))
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
 vi.mock('@tauri-apps/api/event', () => ({ emit: mocks.emit }))
-vi.mock('@/helper/logger', () => ({ logger: { error: vi.fn() } }))
+vi.mock('@/helper/logger', () => ({ logger: { error: vi.fn(), debug: vi.fn(), info: vi.fn() } }))
 vi.mock('@/startup/sentry', () => ({ syncErrorReportingPreference: mocks.consent }))
 import useAppSettingStore from '@/stores/useAppSettingStore'
-import { writeSettingData, writeSettingPatch } from './app-setting'
+import { appSettingStoreSetup, writeSettingData, writeSettingPatch } from './app-setting'
 
 let backend: Record<string, unknown>
 const commit = (data: Record<string, unknown>) => {
@@ -22,6 +22,25 @@ beforeEach(() => {
 })
 
 describe('settings transactions', () => {
+  it('opens single files in new windows by default when config loading fails', async () => {
+    mocks.invoke.mockRejectedValueOnce(new Error('config unavailable'))
+    const defaults = await appSettingStoreSetup()
+    expect(defaults.open_file_in_new_window).toBe(true)
+    expect(useAppSettingStore.getState().settingData.open_file_in_new_window).toBe(true)
+  })
+
+  it('persists disabling new windows while preserving other settings', async () => {
+    await writeSettingData({ key: 'open_file_in_new_window' }, false)
+    expect(mocks.invoke).toHaveBeenCalledWith('save_app_conf', {
+      data: { open_file_in_new_window: false },
+    })
+    expect(useAppSettingStore.getState().settingData).toEqual({
+      language: 'en',
+      theme_mode: 'light',
+      open_file_in_new_window: false,
+    })
+  })
+
   it('enables reports only after consent is saved, and a later revocation wins over queued writes', async () => {
     let release!: () => void
     mocks.invoke.mockImplementationOnce(

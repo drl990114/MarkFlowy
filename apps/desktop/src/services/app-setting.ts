@@ -28,6 +28,7 @@ export const appSettingStoreSetup = async () => {
       language: 'en',
       webview_zoom: '1.0',
       auto_update: false,
+      open_file_in_new_window: true,
     }
     setSettingData(defaultSetting)
     syncErrorReportingPreference(false)

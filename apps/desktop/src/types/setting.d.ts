@@ -71,6 +71,7 @@ declare namespace Setting {
 
   type SwitchSettingItem = {
     type: 'switch'
+    defaultValue?: boolean
   } & BaseSettingItem
 
   type SliderSettingItem = {

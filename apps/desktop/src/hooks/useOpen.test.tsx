@@ -2,6 +2,7 @@ import { act, cleanup, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import useLayoutStore from '@/stores/useLayoutStore'
 import useEditorStore from '@/stores/useEditorStore'
+import useAppSettingStore from '@/stores/useAppSettingStore'
 import useOpen from './useOpen'
 
 const useOpenTestState = vi.hoisted(() => ({
@@ -56,6 +57,7 @@ vi.mock('@/stores/useOpenedCacheStore', () => ({
 }))
 
 beforeEach(() => {
+  useAppSettingStore.setState({ settingData: { open_file_in_new_window: false } })
   useEditorStore.setState({ folderData: [{ id: 'workspace', name: 'Workspace', path: '/current', kind: 'dir' }] })
   useOpenTestState.addRecentWorkspace.mockReset().mockResolvedValue(undefined)
   useOpenTestState.addExistingFile.mockReset().mockResolvedValue(undefined)
@@ -74,6 +76,74 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('useOpen', () => {
+  it('opens a recent file in a separate window by default without replacing the source session', async () => {
+    useAppSettingStore.setState({ settingData: {} })
+    useOpenTestState.invoke.mockResolvedValue('file-window')
+    const { result } = renderHook(() => useOpen())
+
+    await act(async () => result.current.openFilePath('/documents/notes.md'))
+
+    expect(useOpenTestState.invoke).toHaveBeenCalledWith('create_new_window', {
+      path: '/documents/notes.md',
+    })
+    expect(useOpenTestState.addExistingFile).not.toHaveBeenCalled()
+    expect(useOpenTestState.addRecentWorkspace).not.toHaveBeenCalled()
+    expect(useOpenTestState.switchWorkspace).not.toHaveBeenCalled()
+    expect(useOpenTestState.openDialog).not.toHaveBeenCalled()
+  })
+
+  it('uses the latest preference when the same open callback is called again', async () => {
+    const { result } = renderHook(() => useOpen())
+    const openFilePath = result.current.openFilePath
+    useAppSettingStore.setState({ settingData: { open_file_in_new_window: true } })
+    await act(async () => openFilePath('/documents/first.md'))
+    useAppSettingStore.setState({ settingData: { open_file_in_new_window: false } })
+    await act(async () => openFilePath('/documents/second.md'))
+
+    expect(useOpenTestState.invoke).toHaveBeenCalledTimes(2)
+    expect(useOpenTestState.addExistingFile).toHaveBeenCalledOnce()
+    expect(useOpenTestState.addExistingFile).toHaveBeenCalledWith(
+      expect.objectContaining({ path: '/documents/second.md' }),
+    )
+  })
+
+  it('opens a picked file in a new window after saving its security bookmark', async () => {
+    useAppSettingStore.setState({ settingData: { open_file_in_new_window: true } })
+    useOpenTestState.openDialog.mockResolvedValue('/documents/notes.md')
+    const { result } = renderHook(() => useOpen())
+
+    await act(async () => result.current.openFile())
+
+    expect(useOpenTestState.invoke).toHaveBeenNthCalledWith(1, 'save_security_bookmark', {
+      path: '/documents/notes.md',
+    })
+    expect(useOpenTestState.invoke).toHaveBeenNthCalledWith(2, 'is_file_in_workspace', {
+      path: '/documents/notes.md',
+      rootPath: '/current',
+    })
+    expect(useOpenTestState.invoke).toHaveBeenNthCalledWith(3, 'create_new_window', {
+      path: '/documents/notes.md',
+    })
+    expect(useOpenTestState.addExistingFile).not.toHaveBeenCalled()
+  })
+
+  it('opens a file from the current workspace locally even with new windows enabled', async () => {
+    useAppSettingStore.setState({ settingData: { open_file_in_new_window: true } })
+    useOpenTestState.invoke.mockResolvedValue(true)
+    const { result } = renderHook(() => useOpen())
+
+    await act(async () => result.current.openFilePath('/current/docs/notes.md'))
+
+    expect(useOpenTestState.invoke).toHaveBeenCalledWith('is_file_in_workspace', {
+      path: '/current/docs/notes.md',
+      rootPath: '/current',
+    })
+    expect(useOpenTestState.invoke).not.toHaveBeenCalledWith('create_new_window', expect.anything())
+    expect(useOpenTestState.addExistingFile).toHaveBeenCalledWith({
+      fileName: 'notes.md', ext: 'md', path: '/current/docs/notes.md',
+    })
+  })
+
   it('reopens a recent file through the existing document flow without a folder or file dialog', async () => {
     useEditorStore.setState({ folderData: null })
     const { result } = renderHook(() => useOpen())

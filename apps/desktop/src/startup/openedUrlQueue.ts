@@ -1,15 +1,17 @@
+import type { FileOpenTarget } from '@/services/open-file'
+
 export interface OpenedUrlQueue {
   drain: () => Promise<void>
-  enqueue: (urls: string[]) => Promise<void>
+  enqueue: (urls: string[], target?: FileOpenTarget) => Promise<void>
 }
 
 export const createOpenedUrlQueue = (
-  handleBatch: (urls: string[]) => Promise<void>,
+  handleBatch: (urls: string[], target: FileOpenTarget) => Promise<void>,
 ): OpenedUrlQueue => {
   const scheduledUrls = new Set<string>()
   let tail: Promise<void> = Promise.resolve()
 
-  const enqueue = (urls: string[]) => {
+  const enqueue = (urls: string[], target: FileOpenTarget = 'preference') => {
     const batch = [...new Set(urls)].filter((url) => {
       if (scheduledUrls.has(url)) return false
       scheduledUrls.add(url)
@@ -17,7 +19,7 @@ export const createOpenedUrlQueue = (
     })
     if (batch.length === 0) return tail
 
-    const execution = tail.then(() => handleBatch(batch))
+    const execution = tail.then(() => handleBatch(batch, target))
     const settled = execution.finally(() => {
       batch.forEach((url) => scheduledUrls.delete(url))
     })

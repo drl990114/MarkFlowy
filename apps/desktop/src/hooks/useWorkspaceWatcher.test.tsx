@@ -128,4 +128,71 @@ describe('useWorkspaceWatcher', () => {
     resolveWatch?.(unwatch)
     await waitFor(() => expect(unwatch).toHaveBeenCalledOnce())
   })
+
+  it('registers a standalone document path and follows a renamed file', async () => {
+    mocks.watch.mockResolvedValue(vi.fn())
+    setFileObject('document', {
+      id: 'document', name: 'notes.md', kind: 'file', path: '/documents/notes.md',
+    })
+    useEditorStore.setState({ folderData: null, opened: ['document'] })
+
+    renderHook(() => useWorkspaceWatcher())
+
+    await waitFor(() => expect(mocks.invoke).toHaveBeenCalledWith('update_window_path', {
+      windowLabel: 'main', newPath: '/documents/notes.md',
+    }))
+
+    act(() => {
+      setFileObject('document', {
+        id: 'document', name: 'renamed.md', kind: 'file', path: '/documents/renamed.md',
+      })
+    })
+
+    await waitFor(() => expect(mocks.invoke).toHaveBeenLastCalledWith('update_window_path', {
+      windowLabel: 'main', newPath: '/documents/renamed.md',
+    }))
+  })
+
+  it('clears the standalone path when the window has multiple documents or no documents', async () => {
+    mocks.watch.mockResolvedValue(vi.fn())
+    setFileObject('one', { id: 'one', name: 'one.md', kind: 'file', path: '/documents/one.md' })
+    setFileObject('two', { id: 'two', name: 'two.md', kind: 'file', path: '/documents/two.md' })
+    useEditorStore.setState({ folderData: null, opened: ['one'] })
+    renderHook(() => useWorkspaceWatcher())
+    await waitFor(() => expect(mocks.invoke).toHaveBeenLastCalledWith('update_window_path', {
+      windowLabel: 'main', newPath: '/documents/one.md',
+    }))
+
+    act(() => useEditorStore.setState({ opened: ['one', 'two'] }))
+    await waitFor(() => expect(mocks.invoke).toHaveBeenLastCalledWith('update_window_path', {
+      windowLabel: 'main', newPath: undefined,
+    }))
+
+    act(() => useEditorStore.setState({ opened: ['two'] }))
+    await waitFor(() => expect(mocks.invoke).toHaveBeenLastCalledWith('update_window_path', {
+      windowLabel: 'main', newPath: '/documents/two.md',
+    }))
+
+    act(() => useEditorStore.setState({ opened: [] }))
+    await waitFor(() => expect(mocks.invoke).toHaveBeenLastCalledWith('update_window_path', {
+      windowLabel: 'main', newPath: undefined,
+    }))
+  })
+
+  it('registers the workspace root ahead of an independent document path', async () => {
+    mocks.watch.mockResolvedValue(vi.fn())
+    setFileObject('document', {
+      id: 'document', name: 'notes.md', kind: 'file', path: '/documents/notes.md',
+    })
+    useEditorStore.setState({ opened: ['document'] })
+
+    renderHook(() => useWorkspaceWatcher())
+
+    await waitFor(() => expect(mocks.invoke).toHaveBeenCalledWith('update_window_path', {
+      windowLabel: 'main', newPath: '/workspace/one',
+    }))
+    expect(mocks.invoke).not.toHaveBeenCalledWith('update_window_path', {
+      windowLabel: 'main', newPath: '/documents/notes.md',
+    })
+  })
 })

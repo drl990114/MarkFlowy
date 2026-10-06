@@ -41,6 +41,13 @@ export const useWorkspaceWatcher = () => {
   const setWorkspace = useWorkspaceStore((state) => state.setWorkspace)
 
   const rootPath = folderData?.[0]?.path
+  const windowPath = rootPath ?? (opened.length === 1 ? getFileObject(opened[0])?.path : undefined)
+  useEffect(() => {
+    void invoke('update_window_path', {
+      windowLabel: currentWindow.label,
+      newPath: windowPath,
+    }).catch((error: unknown) => logger.warn('Failed to update the window path', error))
+  }, [windowPath])
   useEffect(() => { resetExternalFileChanges() }, [sessionRevision])
   const loosePaths = JSON.stringify(
     opened
@@ -93,15 +100,6 @@ export const useWorkspaceWatcher = () => {
       const ws = await getWorkspace()
       if (stopped) return
       setWorkspace(ws)
-
-      try {
-        await invoke('update_window_path', {
-          windowLabel: currentWindow.label,
-          newPath: rootPath,
-        })
-      } catch (error) {
-        logger.warn('Failed to update the window workspace path', error)
-      }
 
       if (rootPath) {
         logger.info('rootPath', rootPath)

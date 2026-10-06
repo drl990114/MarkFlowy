@@ -11,7 +11,7 @@ const SwitchSettingItem: React.FC<SettingItemProps<Setting.SwitchSettingItem>> =
   const { item } = props
   const { settingData } = useAppSettingStore()
   const { t } = useTranslation()
-  const curValue = Boolean(settingData[item.key])
+  const curValue = Boolean(settingData[item.key] ?? item.defaultValue)
 
   const handleChange = useCallback(
     (checked: boolean) => {

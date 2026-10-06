@@ -92,6 +92,13 @@ export const getSettingMap = (
       },
       App: {
         i18nKey: 'settings.general.app.label',
+        open_file_in_new_window: {
+          key: 'open_file_in_new_window',
+          title: { i18nKey: 'settings.general.app.open_file_in_new_window.label' },
+          desc: { i18nKey: 'settings.general.app.open_file_in_new_window.desc' },
+          type: 'switch',
+          defaultValue: true,
+        },
         auto_update: {
           key: 'auto_update',
           title: {

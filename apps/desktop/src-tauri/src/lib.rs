@@ -704,8 +704,17 @@ fn target_window<'a>(
 ) -> Option<tauri::WebviewWindow> {
     match window_id {
         Some(id) => app.get_webview_window(id),
-        None => window_manager::get_focused_window(app),
+        None => window_manager::get_focused_editor_window(app),
     }
+}
+
+fn should_open_cli_file_in_new_window(
+    operation: &str,
+    window_id: Option<&str>,
+    enabled: bool,
+    in_current_workspace: bool,
+) -> bool {
+    enabled && operation == "open" && window_id.is_none() && !in_current_workspace
 }
 
 fn emit_open_to_window(
@@ -714,7 +723,31 @@ fn emit_open_to_window(
     path: String,
     kind: &str,
 ) -> Result<(), String> {
-    let window = target_window(app, window_id).ok_or_else(|| "Window not found".to_string())?;
+    let starting_window = target_window(app, window_id);
+    let operation = if kind == "file" || (kind == "auto" && !Path::new(&path).is_dir()) {
+        "open"
+    } else {
+        "workspace"
+    };
+    if should_open_cli_file_in_new_window(
+        operation,
+        window_id,
+        conf::AppConf::open_file_in_new_window(app),
+        starting_window.as_ref().is_some_and(|window| {
+            window_manager::file_is_in_window_workspace(Path::new(&path), window.label())
+        }),
+    ) {
+        let app = app.clone();
+        tauri::async_runtime::spawn(async move {
+            fc::cmd::save_security_bookmark(&path);
+            if let Err(error) = window_manager::create_new_window(app, Some(path)).await {
+                eprintln!("CLI file window open failed: {error}");
+            }
+        });
+        return Ok(());
+    }
+
+    let window = starting_window.ok_or_else(|| "Window not found".to_string())?;
     window.set_focus().map_err(|e| e.to_string())?;
     window
         .emit(
@@ -725,6 +758,39 @@ fn emit_open_to_window(
             },
         )
         .map_err(|e| e.to_string())
+}
+
+#[cfg(test)]
+mod cli_open_window_tests {
+    use super::should_open_cli_file_in_new_window;
+
+    #[test]
+    fn untargeted_file_open_follows_the_window_preference() {
+        assert!(should_open_cli_file_in_new_window(
+            "open", None, true, false
+        ));
+        assert!(!should_open_cli_file_in_new_window(
+            "open", None, false, false
+        ));
+        assert!(!should_open_cli_file_in_new_window(
+            "open", None, true, true
+        ));
+    }
+
+    #[test]
+    fn explicit_targets_and_other_cli_operations_keep_their_window() {
+        assert!(!should_open_cli_file_in_new_window(
+            "open",
+            Some("main"),
+            true,
+            false
+        ));
+        for operation in ["workspace", "export", "status", "wait", "save", "focus"] {
+            assert!(!should_open_cli_file_in_new_window(
+                operation, None, true, false
+            ));
+        }
+    }
 }
 
 fn handle_running_cli_command(app: &tauri::AppHandle, args: &[String], cwd: Option<&str>) {
@@ -1702,6 +1768,7 @@ pub fn run() {
             app::window_manager::get_window_instances,
             app::window_manager::update_window_path,
             app::window_manager::check_window_by_path,
+            app::window_manager::is_file_in_workspace,
             app::window_manager::focus_window_by_label,
             keybindings::cmd::get_keyboard_infos,
             keybindings::cmd::update_keybinding,

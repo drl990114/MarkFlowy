@@ -422,6 +422,10 @@
       "label": "général",
       "app": {
         "label": "application",
+        "open_file_in_new_window": {
+          "label": "Ouvrir les fichiers individuels dans une nouvelle fenêtre",
+          "desc": "Ouvre les fichiers individuels hors de l’espace de travail actuel dans une nouvelle fenêtre. Les fichiers de l’espace de travail actuel restent dans la fenêtre actuelle. Désactivez cette option pour ouvrir tous les fichiers dans la fenêtre actuelle."
+        },
         "automatic_updates": {
           "label": "Mise à jour automatique",
           "desc": "Vérifier automatiquement les mises à jour et les installer au lancement de l'application."

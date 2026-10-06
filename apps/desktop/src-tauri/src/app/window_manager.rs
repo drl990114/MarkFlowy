@@ -1,6 +1,11 @@
 use crate::WINDOW_INSTANCES;
 use serde::Serialize;
-use std::{path::PathBuf, sync::Mutex, sync::OnceLock, time::Instant};
+use std::{
+    path::{Path, PathBuf},
+    sync::Mutex,
+    sync::OnceLock,
+    time::Instant,
+};
 use tauri::{command, AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 use uuid;
 
@@ -292,6 +297,26 @@ pub fn check_window_by_path(_app: AppHandle, path: String) -> Result<Option<Stri
     Ok(None)
 }
 
+pub(crate) fn file_is_in_workspace(path: &Path, root_path: &Path) -> bool {
+    let (Ok(path), Ok(root_path)) = (path.canonicalize(), root_path.canonicalize()) else {
+        return false;
+    };
+    root_path.is_dir() && path.is_file() && path.starts_with(root_path)
+}
+
+#[command]
+pub fn is_file_in_workspace(path: String, root_path: String) -> bool {
+    file_is_in_workspace(Path::new(&path), Path::new(&root_path))
+}
+
+pub(crate) fn file_is_in_window_workspace(path: &Path, window_label: &str) -> bool {
+    let root_path = WINDOW_INSTANCES
+        .lock()
+        .ok()
+        .and_then(|instances| instances.get(window_label).cloned());
+    root_path.is_some_and(|root_path| file_is_in_workspace(path, &root_path))
+}
+
 /// 获取最近激活的窗口标签。
 pub fn get_last_opened_window_label() -> String {
     WINDOW_RECENCY
@@ -323,6 +348,27 @@ pub fn get_focused_window(app: &AppHandle) -> Option<tauri::WebviewWindow> {
     get_last_opened_window(app)
 }
 
+pub(crate) fn get_focused_editor_window(app: &AppHandle) -> Option<tauri::WebviewWindow> {
+    let is_editor = |label: &str| label == "main" || label.starts_with("main_");
+    if let Some(window) = app
+        .webview_windows()
+        .into_values()
+        .find(|window| is_editor(window.label()) && window.is_focused().unwrap_or(false))
+    {
+        return Some(window);
+    }
+    let recent_labels = WINDOW_RECENCY
+        .lock()
+        .unwrap_or_else(|error| error.into_inner())
+        .clone();
+    recent_labels
+        .iter()
+        .rev()
+        .filter(|label| is_editor(label))
+        .find_map(|label| app.get_webview_window(label))
+        .or_else(|| app.get_webview_window("main"))
+}
+
 /// 聚焦指定标签的窗口
 #[command]
 pub fn focus_window_by_label(_app: AppHandle, window_label: String) -> Result<bool, String> {
@@ -338,13 +384,81 @@ pub fn focus_window_by_label(_app: AppHandle, window_label: String) -> Result<bo
 #[cfg(test)]
 mod tests {
     use super::{
-        serialize_javascript_string, serialize_javascript_value, should_persist_window_state,
-        update_window_recency, WindowBootstrap,
+        file_is_in_workspace, serialize_javascript_string, serialize_javascript_value,
+        should_persist_window_state, update_window_recency, WindowBootstrap,
     };
     use crate::app::conf::{
         ResolvedThemeMode, StartupAppearance, StartupPalette, ThemePreference,
         STARTUP_APPEARANCE_SCHEMA_VERSION,
     };
+    use std::fs;
+
+    #[test]
+    fn workspace_membership_uses_native_components_and_normalizes_parent_segments() {
+        let directory = tempfile::tempdir().unwrap();
+        let root = directory.path().join("work");
+        fs::create_dir_all(root.join("notes")).unwrap();
+        fs::write(root.join("note.md"), "note").unwrap();
+        fs::write(root.join("notes/child.md"), "child").unwrap();
+
+        assert!(file_is_in_workspace(&root.join("notes/child.md"), &root));
+        assert!(file_is_in_workspace(&root.join("notes/../note.md"), &root));
+        assert!(file_is_in_workspace(
+            &root.join("note.md"),
+            &root.join("notes/..")
+        ));
+
+        let sibling = directory.path().join("work-other");
+        fs::create_dir(&sibling).unwrap();
+        fs::write(sibling.join("note.md"), "other").unwrap();
+        assert!(!file_is_in_workspace(&sibling.join("note.md"), &root));
+        assert!(!file_is_in_workspace(
+            &root.join("../work-other/note.md"),
+            &root
+        ));
+    }
+
+    #[test]
+    fn single_file_bindings_and_missing_paths_are_not_workspace_roots() {
+        let directory = tempfile::tempdir().unwrap();
+        let document = directory.path().join("note.md");
+        fs::write(&document, "note").unwrap();
+        assert!(!file_is_in_workspace(&document, &document));
+        assert!(!file_is_in_workspace(directory.path(), directory.path()));
+        assert!(!file_is_in_workspace(
+            &directory.path().join("missing.md"),
+            directory.path()
+        ));
+        assert!(!file_is_in_workspace(
+            &document,
+            &directory.path().join("missing")
+        ));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn workspace_membership_resolves_symlinks_in_both_directions() {
+        use std::os::unix::fs::symlink;
+
+        let directory = tempfile::tempdir().unwrap();
+        let root = directory.path().join("work");
+        fs::create_dir(&root).unwrap();
+        let document = root.join("note.md");
+        fs::write(&document, "note").unwrap();
+        let root_alias = directory.path().join("work-alias");
+        symlink(&root, &root_alias).unwrap();
+        let document_alias = directory.path().join("note-alias.md");
+        symlink(&document, &document_alias).unwrap();
+        assert!(file_is_in_workspace(&root_alias.join("note.md"), &root));
+        assert!(file_is_in_workspace(&document, &root_alias));
+        assert!(file_is_in_workspace(&document_alias, &root));
+
+        let outside = directory.path().join("outside.md");
+        fs::write(&outside, "outside").unwrap();
+        let outside_alias = root.join("outside-alias.md");
+        symlink(&outside, &outside_alias).unwrap();
+        assert!(!file_is_in_workspace(&outside_alias, &root));
+    }
 
     fn test_appearance() -> StartupAppearance {
         StartupAppearance {

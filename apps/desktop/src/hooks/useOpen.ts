@@ -1,7 +1,6 @@
-import { getFileNameFromPath } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { dialog } from '@/services/dialog'
-import { addExistingMarkdownFileEdit } from '@/services/editor-file'
+import { openStandaloneFile } from '@/services/open-file'
 import {
   OPEN_WORKSPACE_EXPLORER_EVENT,
   switchWorkspaceInCurrentWindow,
@@ -15,12 +14,6 @@ import { invoke } from '@tauri-apps/api/core'
 import { open } from '@tauri-apps/plugin-dialog'
 import { useCallback } from 'react'
 import { useTranslation } from '@/i18n'
-
-const getExtFromPath = (path: string) => {
-  const fileName = getFileNameFromPath(path) || ''
-  const dotIndex = fileName.lastIndexOf('.')
-  return dotIndex > -1 ? fileName.slice(dotIndex + 1) : ''
-}
 
 const openExplorerInWindow = async (windowLabel: string) => {
   if (windowLabel === currentWindow.label) {
@@ -126,11 +119,7 @@ const useOpen = () => {
   }, [openFolder, openFolderInNewWindow])
 
   const openFilePath = useCallback(async (path: string) => {
-    await addExistingMarkdownFileEdit({
-      fileName: getFileNameFromPath(path) || 'new-file.md',
-      ext: getExtFromPath(path),
-      path,
-    })
+    await openStandaloneFile(path)
   }, [])
 
   const openFile = useCallback(async () => {

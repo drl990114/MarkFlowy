@@ -7,16 +7,15 @@ import { commandRegistry } from '@/commands'
 import { listenForCliRequests } from '@/services/cli'
 import bus from '@/helper/eventBus'
 import { hasFileExcludePatternsChanged } from '@/helper/file-exclude'
-import { getFileObjectByPath } from '@/helper/files'
 import { getFileNameFromPath, releaseSecurityScope } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
 import { i18nInit, t } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
+import { openExternalPaths } from '@/services/open-external-paths'
 import {
   addExistingMarkdownFileEdit,
   ensureDocument,
-  removePristineDocuments,
 } from '@/services/editor-file'
 import {
   createWindowSessionPersistence,
@@ -42,7 +41,7 @@ import {
   switchWorkspaceSession,
 } from '@/services/workspace-session'
 import { refreshWorkspaceDirectory } from '@/services/workspace-refresh'
-import { createNewWindow, currentWindow } from '@/services/windows'
+import { currentWindow } from '@/services/windows'
 import { useEditorStore } from '@/stores'
 import { consumeOpenedUrls, normalizeOpenedUrls, restoreOpenedUrls } from '@/startup/appearance'
 import { createAppStartupCoordinator } from '@/startup/appStartupCoordinator'
@@ -84,6 +83,7 @@ let workspaceCacheStore: LazyStore | undefined
 let windowSessionPersistence: ReturnType<typeof createWindowSessionPersistence> | undefined
 let startupSession: WindowSession | undefined
 let isolateStartupDrafts = false
+let collectingStartupOpenedPaths = false
 let preserveStartupDocuments = false
 
 const setupDraftRecovery = async (
@@ -192,53 +192,10 @@ async function appThemeLibrarySetup() {
   }
 }
 
-async function handleOpenedPaths(openedPaths: string[]) {
-  removePristineDocuments()
-  const { addOpenedFile, setActiveId } = useEditorStore.getState()
-
-  logger.debug('handleOpenedPaths', openedPaths)
-
-  const handleOpenedPath = async (openedPath: string) => {
-    const isDir = await invoke<boolean>('is_dir', { path: openedPath })
-
-    if (isDir) {
-      const rootPath = useEditorStore.getState().getRootPath()
-      if (openedPath === rootPath) {
-        await requestWorkspaceSwitch(openedPath)
-        return
-      }
-      if (rootPath || openedPaths.length > 1) {
-        await createNewWindow({ path: openedPath })
-      } else {
-        await requestWorkspaceSwitch(openedPath)
-      }
-    } else {
-      const existingFile = getFileObjectByPath(openedPath)
-      if (existingFile) {
-        setActiveId(existingFile.id)
-        addOpenedFile(existingFile.id)
-      } else {
-        const fileName = getFileNameFromPath(openedPath) || 'new-file.md'
-        await addExistingMarkdownFileEdit({
-          fileName,
-          ext: getExtFromPath(openedPath),
-          path: openedPath,
-        })
-      }
-    }
-  }
-
-  if (openedPaths.length === 1) {
-    await handleOpenedPath(openedPaths[0])
-  } else {
-    await Promise.all(openedPaths.map(handleOpenedPath))
-  }
-}
-
-const openedUrlQueue = createOpenedUrlQueue(async (openedUrls) => {
+const openedUrlQueue = createOpenedUrlQueue(async (openedUrls, target) => {
   const openedPaths = openedUrls.map((path) => (path.startsWith('file://') ? path.slice(7) : path))
   try {
-    await handleOpenedPaths(openedPaths)
+    await openExternalPaths(openedPaths, target, requestWorkspaceSwitch)
     // Also consume after success in case native eval completed just after the
     // event callback claimed this batch.
     consumeOpenedUrls(openedUrls)
@@ -292,6 +249,7 @@ const readWorkspaceInputs = createWorkspaceInputReader(async () => {
 })
 
 async function appWorkspaceSetup(signal: AbortSignal) {
+  collectingStartupOpenedPaths = true
   startupSession = undefined
   isolateStartupDrafts = currentWindow.label !== 'main'
   preserveStartupDocuments = false
@@ -319,7 +277,7 @@ async function appWorkspaceSetup(signal: AbortSignal) {
       const openedUrls = consumeOpenedUrls(window.openedUrls)
       if (openedUrls.length > 0) {
         logger.debug('Processing window.openedUrls:', openedUrls)
-        await openedUrlQueue.enqueue(openedUrls)
+        await openedUrlQueue.enqueue(openedUrls, handledOpenedPaths ? 'preference' : 'current')
         handledOpenedPaths = true
         throwIfStartupCancelled(signal)
         continue
@@ -331,6 +289,7 @@ async function appWorkspaceSetup(signal: AbortSignal) {
       await openedUrlQueue.drain()
       if (normalizeOpenedUrls(window.openedUrls).length === 0) break
     }
+    collectingStartupOpenedPaths = false
     if (handledOpenedPaths) {
       isolateStartupDrafts = !useEditorStore.getState().getRootPath()
       preserveStartupDocuments = true
@@ -379,6 +338,8 @@ async function appWorkspaceSetup(signal: AbortSignal) {
     logger.error('Failed to load workspace', error)
     logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     throw error
+  } finally {
+    collectingStartupOpenedPaths = false
   }
 }
 
@@ -541,11 +502,17 @@ export const useAppRuntimeSetup = () => {
       'opened-urls',
       async ({ payload }) => {
         logger.debug('Received opened-urls event:', payload)
+        // The shell mounts before workspace inputs finish loading. Keep early
+        // native events in the bootstrap inbox so the target window claims its
+        // initial file locally instead of forwarding it to another new window.
+        if (collectingStartupOpenedPaths) {
+          restoreOpenedUrls(payload)
+          return
+        }
         const openedUrls = consumeOpenedUrls(payload)
         if (openedUrls.length > 0) {
           try {
             await openedUrlQueue.enqueue(openedUrls)
-            currentWindow.setFocus()
           } catch (error) {
             logger.error('Failed to handle opened paths', error)
           }

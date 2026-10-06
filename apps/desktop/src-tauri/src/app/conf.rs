@@ -38,6 +38,7 @@ pub_struct!(AppConf {
     dark_theme: Option<String>,
     language: Option<String>,
     auto_update: Option<bool>,
+    open_file_in_new_window: Option<bool>,
     error_reporting_enabled: Option<bool>,
     webview_zoom: Option<String>,
     copilot_provider: Option<String>,
@@ -664,6 +665,7 @@ impl AppConf {
             dark_theme: Some("MarkFlowy Dark".to_string()),
             language: Some("en".to_string()),
             auto_update: Some(false),
+            open_file_in_new_window: Some(true),
             error_reporting_enabled: Some(false),
             webview_zoom: Some("1.0".to_string()),
             copilot_provider: Some("".to_string()),
@@ -817,6 +819,7 @@ impl AppConf {
             autosave,
             local_history_enabled,
             auto_update,
+            open_file_in_new_window,
             error_reporting_enabled,
             webview_zoom,
             copilot_provider,
@@ -982,6 +985,12 @@ impl AppConf {
 
     pub fn get_theme_with_app(app: &AppHandle) -> String {
         Self::read_with_app(app).theme.unwrap().to_lowercase()
+    }
+
+    pub fn open_file_in_new_window(app: &AppHandle) -> bool {
+        Self::read_with_app(app)
+            .open_file_in_new_window
+            .unwrap_or(true)
     }
 
     fn theme_id_for_mode(&self, mode: ResolvedThemeMode) -> String {
@@ -1281,6 +1290,20 @@ mod tests {
             let saved = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
             let restored = typography_default_conf().merge_conf(saved);
             assert_eq!(restored.error_reporting_enabled, Some(enabled));
+        }
+    }
+
+    #[test]
+    fn single_files_default_to_new_windows_and_preserve_explicit_choices() {
+        let defaults = typography_default_conf().merge_conf(empty_conf());
+        assert_eq!(defaults.open_file_in_new_window, Some(true));
+        for enabled in [false, true] {
+            let changed = defaults.clone().amend(serde_json::json!({
+                "open_file_in_new_window": enabled
+            }));
+            let saved = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
+            let restored = typography_default_conf().merge_conf(saved);
+            assert_eq!(restored.open_file_in_new_window, Some(enabled));
         }
     }
 

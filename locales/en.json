@@ -488,6 +488,10 @@
       "label": "general",
       "app": {
         "label": "application",
+        "open_file_in_new_window": {
+          "label": "Open single files in a new window",
+          "desc": "Open standalone files outside the current workspace in a new window. Files in the current workspace stay in the current window. Turn off to open all files in the current window."
+        },
         "automatic_updates": {
           "label": "Automatic update",
           "desc": "Automatically check for updates and install them when the application starts."

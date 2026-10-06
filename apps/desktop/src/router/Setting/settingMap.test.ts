@@ -78,6 +78,14 @@ describe('Editor setting map', () => {
 })
 
 describe('General setting map', () => {
+  it('enables opening standalone files in new windows by default', () => {
+    expect(getSettingMap().general.App.open_file_in_new_window).toMatchObject({
+      key: 'open_file_in_new_window',
+      type: 'switch',
+      defaultValue: true,
+    })
+  })
+
   it('uses a translation key for the file-exclusion placeholder', () => {
     expect(getSettingMap().general.Misc.fileExcludePatterns.placeholderI18nKey).toBe(
       'settings.general.misc.file_exclude_patterns.placeholder',
