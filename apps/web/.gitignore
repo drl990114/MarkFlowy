@@ -16,6 +16,9 @@ __diff_output__
 # build
 .next
 
+# Contentlayer data and cache are regenerated from docs/.
+.contentlayer/
+
 # Yarn 3
 .pnp.*
 .yarn/*

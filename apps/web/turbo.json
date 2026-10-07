@@ -11,7 +11,7 @@
       ]
     },
     "build": {
-      "outputs": ["$TURBO_EXTENDS$", ".contentlayer/generated/**"],
+      "outputs": ["$TURBO_EXTENDS$", ".contentlayer/generated/**", ".contentlayer/package.json"],
       "env": ["MARKFLOWY_CLOUD_API_URL", "NEXT_PUBLIC_API_URL"],
       "inputs": [
         "$TURBO_DEFAULT$",

@@ -20,17 +20,18 @@ Markdown responses are served through a server-side page rewrite, with the HTML 
 
 ## Local validation
 
-Run `yarn workspace @markflowy/web dev` to refresh Contentlayer types/data while developing. The repository tracks generated Contentlayer files; regenerate them with the tool rather than editing them. Alternatively run `yarn exec contentlayer2 dev` from this directory for content generation without starting Next.js.
+Run `yarn workspace @markflowy/web dev` to generate Contentlayer types/data and watch document changes while developing. The entire `.contentlayer/` directory is ignored by Git; commit the source documents in `docs/` and `contentlayer.config.js` changes instead. On a fresh checkout, generate content before running the type or generated-content checks below. Alternatively run `yarn exec contentlayer2 dev --clearCache` from this directory for content generation without starting Next.js; wait for the generated-document message before running checks in another terminal.
 
 From the repository root:
 
 ```sh
 yarn workspace @markflowy/web build:types
 yarn workspace @markflowy/web test
+yarn workspace @markflowy/web test:content
 yarn translate:check
 ```
 
-`build:types` runs `tsc --noEmit`; it does not build the website. The GEO tests exercise the real generated corpus and detect stale bodies/metadata, invalid language links, incorrect sitemap entries, and missing table rendering. Use the repository's ESLint 8 runner on the TypeScript files changed by the task, without `--fix`.
+`build:types` runs `tsc --noEmit`; it does not build the website. The GEO unit tests read source documents and check language links and sitemap entries. `test:content` compares the generated corpus with those sources to detect stale bodies/metadata, added or deleted documents, and missing table rendering. Use the repository's ESLint 8 runner on the TypeScript files changed by the task, without `--fix`.
 
 With the development server running, `yarn workspace @markflowy/web test:geo:http` checks actual HTML metadata, all Markdown links advertised by `llms.txt`, HEAD/405/404 behavior, and indexing controls. Set `GEO_BASE_URL` when using a port other than 3100. These checks caught the need to run Markdown rewrites in `beforeFiles`, before the static documentation catch-all.
 
@@ -49,6 +50,8 @@ fnm exec --using=24 node scripts/render-screenshot-frames.mjs
 Presentation images are 3456 × 2304. If capture dimensions change, update the renderer and `next/image` dimensions in `Preview.tsx`, `SingleFile.tsx`, and `FeatureList.tsx` together. The renderer preserves and checks the native screenshot pixels.
 
 ## Deployment and measurement
+
+The Web `build` script regenerates Contentlayer data with `--clearCache` before running Next.js; `build:prod` and `build:vercel` use this same script. Turbo includes repository-root `docs/**` in the Web build inputs, so source document edits, additions, and deletions invalidate its cached build even though `.contentlayer/` is ignored. Cached builds restore the generated collection, types, and package manifest. CI builds before checking application types and generated content. Content changes reach production on the next deployment using these build scripts; generated files do not need to be committed.
 
 After the normal website deployment:
 
