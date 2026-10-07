@@ -18,6 +18,16 @@ Markdown responses are served through a server-side page rewrite, with the HTML 
 
 `robots.txt` allows public crawling. Training preferences are independent of search access and should be reviewed together with CDN rules. An allowed user-agent string from a local test does not prove that requests from the provider's actual crawler network are accepted. See [OpenAI crawler controls](https://developers.openai.com/api/docs/bots).
 
+## Search and social previews
+
+`components/SeoHead.tsx` renders search descriptions, [Open Graph](https://ogp.me/), and [Twitter large-image card tags](https://nextjs.org/docs/app/api-reference/functions/generate-metadata#twitter) through the existing Pages Router `next/head`. Titles and descriptions remain page-specific; the shared English and Chinese images use the website's white, navy, and blue/violet ribbon design. The PNGs at `/social/markflowy-en.png` and `/social/markflowy-zh.png` are 1200 × 630 and do not need JavaScript or image generation at request time.
+
+For a custom image, pass `{ url, alt, width, height, type }` to `SeoHead`. A string URL remains supported, but unknown dimensions and MIME type are omitted. Do not add a `twitter:site` or `twitter:creator` handle unless its ownership is confirmed.
+
+The homepage also emits `WebSite` and `SoftwareApplication` JSON-LD with verified product facts. This describes the site and application; it does not claim ratings or guarantee a rich search result. Public pages permit large image previews; private application routes retain `noindex, nofollow`.
+
+After deployment, check the actual HTML and image responses before using platform preview debuggers. X, Facebook, LinkedIn, and chat apps may cache an older preview; local SSR tests do not confirm that a platform has refreshed its cache or that a search engine has indexed the change.
+
 ## Local validation
 
 Run `yarn workspace @markflowy/web dev` to generate Contentlayer types/data and watch document changes while developing. The entire `.contentlayer/` directory is ignored by Git; commit the source documents in `docs/` and `contentlayer.config.js` changes instead. On a fresh checkout, generate content before running the type or generated-content checks below. Alternatively run `yarn exec contentlayer2 dev --clearCache` from this directory for content generation without starting Next.js; wait for the generated-document message before running checks in another terminal.

@@ -37,9 +37,11 @@ function MyApp({ Component, pageProps, router }: AppProps) {
             crossOrigin='anonymous'
           />
         )}
-        {/^\/(auth|workspace|settings)(\/|$)/.test(router.pathname) && (
+        {/^\/(auth|workspace|settings)(\/|$)/.test(router.pathname) ? (
           <meta name='robots' content='noindex, nofollow' key='robots' />
-        )}
+        ) : website && !['/404', '/_error'].includes(router.pathname) ? (
+          <meta name='robots' content='max-image-preview:large' key='robots' />
+        ) : null}
       </Head>
 
       <ThemeProvider website={website}>

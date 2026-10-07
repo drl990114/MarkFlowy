@@ -5,7 +5,7 @@
   "docs": {
     "tableOfContents": "本页目录",
     "content": {
-      "description": "浏览 MarkFlowy 文档。"
+      "description": "从这里开始使用 MarkFlowy：安装应用、编辑本地 Markdown 文件、切换所见即所得与源码模式，以及配置可选的 AI 辅助。"
     },
     "sidebar": {
       "gettingStarted": "快速开始"
@@ -42,9 +42,9 @@
     "hero": {
       "title": "MarkFlowy",
       "subtitle": "本地优先的 Markdown 编辑器，专注大文档编辑与可选的 AI 辅助。",
-      "description": "MarkFlowy 是面向 macOS、Windows 和 Linux 的本地优先 Markdown 编辑器，专注大文档编辑，可选接入云端 AI 或本地 Ollama 模型。",
+      "description": "让想法流动，专注每一次写作。MarkFlowy 是适用于 macOS、Windows 和 Linux 的本地优先 Markdown 编辑器，支持所见即所得与源码编辑，可选接入云端 AI 或本地 Ollama 模型。",
       "download": "立即下载",
-      "metaTitle": "MarkFlowy — Markdown 编辑、大文档性能与可选 AI"
+      "metaTitle": "MarkFlowy — 本地优先的 Markdown 编辑器"
     },
     "statRings": {
       "platforms": "桌面平台",
@@ -103,7 +103,7 @@
   },
   "releases": {
     "title": "版本发布",
-    "meta_description": "MarkFlowy 版本更新说明。",
+    "meta_description": "查看 MarkFlowy 各版本的新功能、编辑体验改进与问题修复，下载适用于 macOS、Windows 和 Linux 的 Markdown 编辑器。",
     "description_before_link": "这里汇总了 MarkFlowy 的最新版本。点击版本可查看详细变更与更新，可前往",
     "github_link": "GitHub Releases",
     "description_after_link": "下载。",

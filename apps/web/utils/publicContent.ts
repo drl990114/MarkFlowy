@@ -3,8 +3,62 @@ export const SITE_LOCALES = ['en', 'zh'] as const
 export type SiteLocale = (typeof SITE_LOCALES)[number]
 
 export const SITE_DESCRIPTION: Record<SiteLocale, string> = {
-  en: 'A local-first Markdown editor for macOS, Windows, and Linux, focused on large documents and optional AI with cloud providers or local Ollama models.',
-  zh: 'MarkFlowy 是面向 macOS、Windows 和 Linux 的本地优先 Markdown 编辑器，专注大文档编辑，可选接入云端 AI 或本地 Ollama 模型。',
+  en: 'Find your writing flow with MarkFlowy, a local-first Markdown editor for macOS, Windows, and Linux. Visual and source editing, with optional AI assistance.',
+  zh: '让想法流动，专注每一次写作。MarkFlowy 是适用于 macOS、Windows 和 Linux 的本地优先 Markdown 编辑器，支持所见即所得与源码编辑，可选接入云端 AI 或本地 Ollama 模型。',
+}
+
+export interface SocialImage {
+  url: string
+  alt: string
+  width?: number
+  height?: number
+  type?: string
+}
+
+export function getSocialImage(locale: SiteLocale): SocialImage {
+  return {
+    url: `${SITE_ORIGIN}/social/markflowy-${locale}.png`,
+    width: 1200,
+    height: 630,
+    type: 'image/png',
+    alt:
+      locale === 'zh'
+        ? 'MarkFlowy：让想法流动，专注每一次写作。白色背景上的蓝紫色丝带与本地优先 Markdown 编辑器标语。'
+        : 'MarkFlowy: Your ideas, in full flow. Blue and violet ribbons on white, with the local-first Markdown editor tagline.',
+  }
+}
+
+/** Describe the product without inventing reviews, pricing, or search-result eligibility. */
+export function getHomeStructuredData(locale: SiteLocale, description: string) {
+  const url = getPageUrl('/', locale)
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_ORIGIN}/#website`,
+        name: 'MarkFlowy',
+        url: `${SITE_ORIGIN}/`,
+        inLanguage: ['en', 'zh-CN'],
+      },
+      {
+        '@type': 'SoftwareApplication',
+        '@id': `${SITE_ORIGIN}/#application`,
+        name: 'MarkFlowy',
+        url,
+        description,
+        applicationCategory: 'ProductivityApplication',
+        operatingSystem: 'macOS, Windows, Linux',
+        image: getSocialImage(locale).url,
+        downloadUrl: 'https://github.com/drl990114/MarkFlowy/releases',
+        sameAs: ['https://github.com/drl990114/MarkFlowy'],
+      },
+    ],
+  }
+}
+
+export function serializeStructuredData(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, '\\u003c')
 }
 
 export const PUBLIC_PAGES = [

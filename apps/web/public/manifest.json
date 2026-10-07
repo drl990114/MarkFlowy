@@ -3,6 +3,6 @@
   "short_name": "MarkFlowy",
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#da936a",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff"
 }

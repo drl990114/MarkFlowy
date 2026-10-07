@@ -5,7 +5,7 @@
   "docs": {
     "tableOfContents": "On this page",
     "content": {
-      "description": "Browse the MarkFlowy documentation."
+      "description": "Get started with MarkFlowy: install the app, edit local Markdown files, switch between visual and source editing, and set up optional AI assistance."
     },
     "sidebar": {
       "gettingStarted": "Getting Started"
@@ -42,9 +42,9 @@
     "hero": {
       "title": "MarkFlowy",
       "subtitle": "A local-first Markdown editor focused on large documents and optional AI.",
-      "description": "A local-first Markdown editor for macOS, Windows, and Linux, focused on large documents and optional AI with cloud providers or local Ollama models.",
+      "description": "Find your writing flow with MarkFlowy, a local-first Markdown editor for macOS, Windows, and Linux. Visual and source editing, with optional AI assistance.",
       "download": "Download Now",
-      "metaTitle": "MarkFlowy — Markdown editing, performance, and optional AI"
+      "metaTitle": "MarkFlowy — Local-first Markdown editor"
     },
     "statRings": {
       "platforms": "Platforms",
@@ -103,7 +103,7 @@
   },
   "releases": {
     "title": "Releases",
-    "meta_description": "MarkFlowy release notes.",
+    "meta_description": "Explore MarkFlowy releases, new editing features, improvements, and fixes. Download the Markdown editor for macOS, Windows, and Linux.",
     "description_before_link": "Here are the latest releases of MarkFlowy. Click a version to see its detailed changes and updates. Download it from",
     "github_link": "GitHub Releases",
     "description_after_link": ".",
