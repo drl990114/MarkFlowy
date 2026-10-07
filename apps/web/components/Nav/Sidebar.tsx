@@ -16,7 +16,7 @@ const Sidebar = styled.nav<SidebarProps>`
   font-family: var(--body);
 
   left: 0;
-  top: ${navbarHeight}px;
+  top: var(--mf-site-header-height, ${navbarHeight}px);
   bottom: 0;
   right: auto;
   width: ${sidebarWidth / 16}rem;

@@ -72,7 +72,7 @@ const SidebarBackdrop = styled.button<{ $isVisible: boolean }>`
 
   @media (max-width: ${1000 / 16}em) {
     position: fixed;
-    inset: ${navbarHeight}px 0 0;
+    inset: var(--mf-site-header-height, ${navbarHeight}px) 0 0;
     z-index: 1;
     display: block;
     padding: 0;
