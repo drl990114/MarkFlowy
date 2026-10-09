@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import i18n, { i18nInit } from '../../../../../../packages/i18n/src/desktop'
+import i18n, { createInstance, i18nInit, locales, type Langs } from '../../../../../../packages/i18n/src/desktop'
 import { formatTextFileError, getTextFileErrorCode } from './textFileError'
 
 beforeEach(async () => { await i18nInit({ lng: 'cn' }) })
@@ -40,9 +40,24 @@ describe('text file error presentation', () => {
     expect(result).not.toContain('offset')
   })
 
-  it.each(['frFR', 'es', 'ja'])('provides readable fallback copy for %s', async (lng) => {
+  it.each(Object.keys(locales) as Langs[])('uses the current locale encoding-confirmation copy for %s', async (lng) => {
     await i18nInit({ lng })
-    expect(formatTextFileError('text_confirm_encoding: Confirm it.', i18n.t)).toContain(
+    const expected = i18n.getResource(lng, 'translation', 'text_encoding.errors.confirm_encoding')
+    expect(expected).toEqual(expect.any(String))
+    expect(expected).not.toBe('')
+    expect(formatTextFileError('text_confirm_encoding: Confirm it.', i18n.t)).toBe(expected)
+  })
+
+  it.each(['frFR', 'es', 'ja'])('provides readable fallback copy when %s lacks the translation', async (lng) => {
+    // Keep the missing-translation fixture independent of completed locale copy.
+    const translations = createInstance()
+    await translations.init({
+      lng,
+      fallbackLng: i18n.options.fallbackLng,
+      resources: { en: { translation: i18n.getResourceBundle('en', 'translation') } },
+    })
+    expect(translations.getResource(lng, 'translation', 'text_encoding.errors.confirm_encoding')).toBeUndefined()
+    expect(formatTextFileError('text_confirm_encoding: Confirm it.', translations.t)).toContain(
       'The detected encoding has not been confirmed.',
     )
   })
