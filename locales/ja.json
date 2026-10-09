@@ -45,7 +45,7 @@
     "empty": "一致するファイルがありません",
     "no_recent": "最近開いたファイルはありません。ファイル名を入力してワークスペースを検索してください。",
     "no_workspace": "ワークスペースを開いてファイルを検索してください",
-    "show_more": "さらに表示（残り {{count}} 件）",
+    "show_more": "さらに表示 (残り {{count}} 件)",
     "keyboard_hint": "↑ ↓ で選択 · Enter で開く · Esc で閉じる"
   },
   "app_name": "MarkFlowy",
@@ -73,7 +73,7 @@
   "common": {
     "none": "なし",
     "name": "名前",
-    "ok": "ok",
+    "ok": "OK",
     "confirm": "確認",
     "cancel": "キャンセル",
     "close": "閉じる",
@@ -84,7 +84,7 @@
     "folder": "フォルダー",
     "fetching": "読み込み中...",
     "submit": "送信",
-    "addHeader": "Headerを追加",
+    "addHeader": "ヘッダーを追加",
     "addPattern": "パターンを追加",
     "key": "キー",
     "value": "値",
@@ -104,7 +104,7 @@
     "overwrite": "上書き",
     "reloaded": "外部の変更を読み込みました",
     "overwritten": "ディスク版を上書きしました",
-    "read_failed": "最新のディスク版を読み込めませんでした。もう一度お試しください。",
+    "read_failed": "最新のディスク版を読み込めませんでした。もう一度試してください。",
     "resolve_failed": "ファイルの変更を解決できませんでした。現在の内容は保持されています。"
   },
   "view": {
@@ -112,7 +112,7 @@
     "theme": {
       "label": "テーマ"
     },
-    "wysiwyg": "Wysiwyg",
+    "wysiwyg": "WYSIWYG",
     "source_code": "ソースコード",
     "preview": "プレビュー"
   },
@@ -143,7 +143,7 @@
     "local_filter": "画像",
     "select_local": "ローカル画像を選択",
     "selecting_local": "選択中...",
-    "local_error": "選択した画像を開くか読み込むことができませんでした。もう一度お試しください。",
+    "local_error": "選択した画像を開くか読み込むことができませんでした。もう一度試してください。",
     "local_behavior_hint": "ローカル画像には「設定 > 画像 > ローカル画像の挿入動作」が適用されます。"
   },
   "image_preview": {
@@ -167,29 +167,29 @@
     "unsave_and_close": "直接閉じる",
     "continue_without_save": "保存せずに続行",
     "convert_text": "簡繁変換",
-    "convert_simplified_to_traditional_tw": "簡体字 → 繁体字（台湾）",
-    "convert_simplified_to_traditional_hk": "簡体字 → 繁体字（香港）",
+    "convert_simplified_to_traditional_tw": "簡体字 → 繁体字 (台湾)",
+    "convert_simplified_to_traditional_hk": "簡体字 → 繁体字 (香港)",
     "convert_traditional_to_simplified": "繁体字 → 簡体字"
   },
   "confirm": {
     "move": {
-      "description": "「{{name}}」を移動してもよろしいですか？"
+      "description": "「{{name}}」を移動しますか?"
     },
     "replace": {
-      "description": "「{{name}}」という名前のファイルまたはフォルダーは、すでに宛先フォルダーに存在します。置き換えますか？"
+      "description": "「{{name}}」という名前のファイルまたはフォルダーは、すでに宛先フォルダーに存在します。置き換えますか?"
     },
     "delete": {
-      "description": "「{{name}}」を削除してもよろしいですか？"
+      "description": "「{{name}}」を削除しますか?"
     },
     "trash": {
-      "description": "「{{name}}」をゴミ箱に移動してもよろしいですか？"
+      "description": "「{{name}}」をごみ箱に移動しますか?"
     },
     "edit_filename_cancel": {
-      "description": "名前の変更内容を保存しますか？"
+      "description": "名前の変更内容を保存しますか?"
     },
     "close": {
-      "title": "変更を保存しますか？",
-      "description": "未保存のファイルがあります。終了してもよろしいですか？"
+      "title": "変更を保存しますか?",
+      "description": "未保存のファイルがあります。終了しますか?"
     }
   },
   "error": {
@@ -263,15 +263,15 @@
     "emptyFolder": "空のフォルダー",
     "unsupportedFileType": "サポート外のファイル形式です",
     "unsupportedFileTypeDesc": "このファイル形式の表示または編集は現在サポートされていません。",
-    "unsupportedFileTypeLink": "GitHubでサポートをリクエスト",
+    "unsupportedFileTypeLink": "GitHub でサポートをリクエスト",
     "info": "ファイル情報",
-    "lastModified": "前回の更新",
+    "lastModified": "最終更新",
     "size": "ファイルサイズ",
     "newTab": "新しいタブ",
     "path": "ファイルパス",
-    "clearRecent": "記録をクリア",
+    "clearRecent": "履歴をクリア",
     "openFolderModal": {
-      "title": "フォルダを開くにはどうすればいいですか?",
+      "title": "フォルダーを開くにはどうすればいいですか?",
       "currentWindow": "現在のウィンドウ",
       "newWindow": "新しいウィンドウ"
     }
@@ -279,11 +279,11 @@
   "about": {
     "description": "AI 搭載のクロスプラットフォーム Markdown エディタ。",
     "powered_by_tauri": "Tauri {{version}} を使用",
-    "label": "About",
+    "label": "このアプリについて",
     "version": "バージョン",
     "newVersion": "新しいバージョン",
     "install": "インストール",
-    "author": "著者",
+    "author": "作者",
     "release": "リリース",
     "website": "ウェブサイト",
     "feedback": "フィードバック",
@@ -300,19 +300,19 @@
       "rename": "名前の変更",
       "delete_file": "ファイルの削除",
       "delete_folder": "フォルダーの削除",
-      "moveto_trash": "ゴミ箱に移動",
+      "moveto_trash": "ごみ箱に移動",
       "copy": "コピー",
       "duplicate_file": "複製を作成",
       "copy_to": "指定先にコピー…",
       "copy_to_title": "コピー先のフォルダーを選択",
       "absolute_path": "絶対パス",
       "relative_path": "相対パス",
-      "duplicate_success": "複製を作成しました：{{name}}",
+      "duplicate_success": "複製を作成しました : {{name}}",
       "copy_to_success": "{{name}} を {{folder}} にコピーしました",
-      "copy_failed": "ファイルをコピーできませんでした：{{reason}}",
+      "copy_failed": "ファイルをコピーできませんでした : {{reason}}",
       "copy_path": "パスをコピー",
       "copy_relative_path": "相対パスをコピー",
-      "show_in_folder": "Finderで表示"
+      "show_in_folder": "フォルダーで表示"
     },
     "editor_tab": {
       "close": "閉じる",
@@ -322,8 +322,8 @@
       "close_others": "他を閉じる",
       "close_right": "右を閉じる",
       "close_all": "すべて閉じる",
-      "export_html": "HTMLにエクスポート",
-      "export_pdf": "印刷 / PDFにエクスポート",
+      "export_html": "HTML にエクスポート",
+      "export_pdf": "印刷 / PDF にエクスポート",
       "export_pdf_failed": "この文書を印刷用に準備できませんでした。",
       "export_pdf_image_warning": "{{count}} 個の画像を読み込めませんでした。代替テキストを印刷します。",
       "export_pdf_embedded_media": "インタラクティブコンテンツ",
@@ -358,7 +358,7 @@
   },
   "notification": {},
   "search": {
-    "line": "{{number}} 行目:",
+    "line": "{{number}} 行目 :",
     "search_empty": "一致する検索結果が見つかりませんでした",
     "text": "検索",
     "caseSensitive": "大文字と小文字を区別",
@@ -368,7 +368,7 @@
     "searching": "検索中",
     "searchingDesc": "現在のワークスペースの Markdown ファイルを検索しています",
     "searchingWithKeyword": "「{{keyword}}」を検索中...",
-    "resultSummary": "{{files}} ファイル、{{matches}} 件一致: {{keyword}}",
+    "resultSummary": "{{files}} ファイル、{{matches}} 件一致 : {{keyword}}",
     "emptyDesc": "別のキーワードを試すか、大文字小文字の区別をオフにしてください",
     "search_failed": "検索に失敗しました"
   },
@@ -387,25 +387,25 @@
     "save_with_encoding": "この文字コードで保存",
     "save_failed": "まだ保存されていません。内容と選択した文字コードは保持されています。保存時のメッセージを確認し、再試行してください。",
     "errors": {
-      "invalid_encoding": "This file cannot be read with the selected encoding. Preview another encoding and check the text before reopening it.",
-      "unsupported_encoding": "The file encoding could not be identified or is not supported. Open Text encoding and line endings, select an encoding, and preview it before reopening.",
-      "binary": "This file contains binary data and cannot be opened as text.",
-      "invalid_bom": "The file’s encoding marker (BOM) does not match the selected encoding. Choose the matching encoding and try again.",
-      "unmappable": "The current encoding cannot save some characters. Your content is still in the editor. Save as UTF-8, or remove the unsupported characters and try again.",
-      "unmappable_character": "{{encoding}} cannot save the character “{{character}}”. Your content is still in the editor. Save as UTF-8, or remove this character and try again.",
-      "confirm_encoding": "The detected encoding has not been confirmed. Your content is still in the editor. Open Text encoding and line endings, preview the text, then choose Save with this encoding.",
-      "noncanonical": "The original byte mapping cannot be preserved after editing. Choose a different encoding such as UTF-8, or save a copy.",
-      "not_reversible": "The selected encoding would change some characters. Choose UTF-8 or another encoding that preserves the complete text before saving.",
-      "ambiguous_bom": "The text begins with an invisible encoding marker. Choose the BOM variant of the current Unicode encoding before saving.",
-      "finish_input": "Finish the current text input before trying again.",
-      "save_first": "Save the file before previewing another encoding.",
-      "retry_read": "The file is changing. Wait for the changes to finish, then preview it again.",
-      "preview_again": "The document or its file has changed. Preview it again before applying the new encoding.",
-      "draft_pending": "The current content has not yet been protected by a recovery draft. Try again before reopening the file.",
-      "invalid_unicode": "The text contains an invalid character sequence. The original file was not written. Correct the affected text and try again.",
-      "save_failed": "Not saved yet. Your content is still in the editor. Check that the file is writable and try again, or save a copy.",
-      "read_failed": "Unable to read the file. Check that it still exists and you have permission to read it, then try again.",
-      "preview_failed": "The encoding operation could not be completed. Your current content has been kept. Please try again."
+      "invalid_encoding": "このファイルは選択した文字コードでは読み取れません。別の文字コードをプレビューして内容を確認してから、開き直してください。",
+      "unsupported_encoding": "ファイルの文字コードを特定できないか、サポートされていません。「文字コードと改行」を開き、文字コードを選んでプレビューしてから開き直してください。",
+      "binary": "このファイルにはバイナリデータが含まれているため、テキストとして開けません。",
+      "invalid_bom": "ファイルの文字コードマーカー (BOM) が選択した文字コードと一致しません。一致する文字コードを選んで再試行してください。",
+      "unmappable": "現在の文字コードでは一部の文字を保存できません。内容はエディタに残っています。UTF-8 で保存するか、対応していない文字を削除して再試行してください。",
+      "unmappable_character": "{{encoding}} では文字「{{character}}」を保存できません。内容はエディタに残っています。UTF-8 で保存するか、この文字を削除して再試行してください。",
+      "confirm_encoding": "検出された文字コードが確認されていません。内容はエディタに残っています。「文字コードと改行」を開いてテキストをプレビューし、「この文字コードで保存」を選んでください。",
+      "noncanonical": "編集後に元のバイト対応を保持できません。UTF-8 などの別の文字コードを選ぶか、コピーとして保存してください。",
+      "not_reversible": "選択した文字コードでは一部の文字が変化します。保存前に、全文を保持できる UTF-8 などの文字コードを選んでください。",
+      "ambiguous_bom": "テキストの先頭に不可視の文字コードマーカーがあります。保存前に、現在の Unicode 文字コードの BOM 付きバリアントを選んでください。",
+      "finish_input": "現在のテキスト入力を確定してから再試行してください。",
+      "save_first": "別の文字コードをプレビューする前にファイルを保存してください。",
+      "retry_read": "ファイルが変更中です。変更が完了するのを待ってから、もう一度プレビューしてください。",
+      "preview_again": "文書またはそのファイルが変更されました。新しい文字コードを適用する前に、もう一度プレビューしてください。",
+      "draft_pending": "現在の内容はまだ復元用の下書きで保護されていません。ファイルを開き直す前にもう一度試してください。",
+      "invalid_unicode": "テキストに無効な文字シーケンスが含まれています。元のファイルは書き込まれていません。該当箇所を修正して再試行してください。",
+      "save_failed": "まだ保存されていません。内容はエディタに残っています。ファイルが書き込み可能か確認して再試行するか、コピーとして保存してください。",
+      "read_failed": "ファイルを読み取れません。ファイルが存在し、読み取り権限があることを確認して再試行してください。",
+      "preview_failed": "文字コード操作を完了できませんでした。現在の内容は保持されています。もう一度試してください。"
     }
   },
   "settings": {
@@ -420,7 +420,7 @@
     "back_to_settings": "設定一覧に戻る",
     "search_placeholder": "設定を検索...",
     "search_empty": "一致する設定がありません",
-    "search_results": "{{count}}件の結果",
+    "search_results": "{{count}} 件の結果",
     "navigation": {
       "preferences": "環境設定",
       "writing": "執筆とファイル",
@@ -435,7 +435,7 @@
         "restore": "前回の状態を復元",
         "description": "次回の起動時に適用します。選択したパネルとサイドバーの開閉状態を記憶します。"
       },
-      "label": "一般",
+      "label": "全般",
       "app": {
         "label": "アプリケーション",
         "open_file_in_new_window": {
@@ -471,18 +471,18 @@
         "file_exclude_patterns": {
           "label": "ファイル除外リスト",
           "desc": "エクスプローラーと検索から一致するファイルやフォルダーを除外します。1 行に 1 つの gitignore 形式のパターンを入力します。",
-          "placeholder": "例: **/node_modules/*"
+          "placeholder": "例 : **/node_modules/*"
         }
       },
       "desc": "アプリケーションの共通設定。"
     },
     "editor": {
-      "label": "エディター",
+      "label": "エディタ",
       "style": {
         "label": "スタイル",
         "full_width": {
           "label": "フルサイズ",
-          "desc": "エディターをフルサイズに設定します。"
+          "desc": "エディタをフルサイズに設定します。"
         },
         "font_size": {
           "label": "本文の文字サイズ",
@@ -502,26 +502,26 @@
         },
         "font_family": {
           "label": "フォントファミリー",
-          "desc": "エディターのルートフォントファミリーを設定します。"
+          "desc": "エディタのルートフォントファミリーを設定します。"
         },
         "code_font_family": {
           "label": "コードフォントファミリー",
-          "desc": "エディターのコードフォントファミリーを設定します。"
+          "desc": "エディタのコードフォントファミリーを設定します。"
         }
       },
       "behavior": {
-        "label": "行為",
+        "label": "動作",
         "md_default_mode": {
-          "label": "Markdownデフォルトモード",
-          "desc": "Markdownファイルを新規作成するときのデフォルト編集モードを設定します。"
+          "label": "Markdown の既定モード",
+          "desc": "Markdown ファイルを新規作成するときの既定の編集モードを設定します。"
         },
         "text_direction": {
           "follow_global": "全体設定に従う",
           "label": "本文の方向",
           "desc": "WYSIWYG とプレビューの本文方向を設定します。自動では段落ごとに方向を判定します。",
           "auto": "自動",
-          "ltr": "左から右（LTR）",
-          "rtl": "右から左（RTL）"
+          "ltr": "左から右 (LTR)",
+          "rtl": "右から左 (RTL)"
         },
         "typewriter_scroll": {
           "label": "タイプライターのスクロール",
@@ -534,14 +534,14 @@
         "insert_date_format": {
           "label": "挿入する日付形式",
           "desc": "現在の日付を挿入コマンドで使う日付形式です。YYYY-MM-DD や YYYY-MM-DD HH:mm などの Day.js 形式トークンを使えます。",
-          "preview": "プレビュー:"
+          "preview": "プレビュー :"
         }
       },
       "wysiwyg": {
-        "label": "所見即所得",
+        "label": "WYSIWYG",
         "codemirror_linewrap": {
-          "label": "コードブロック改行",
-          "desc": "コードブロック中の行の文字数が時を超えて改行しますか?"
+          "label": "コードブロックの折り返し",
+          "desc": "コードブロック内の行を、一定の文字数を超えたら折り返しますか?"
         },
         "live_preview_block_behavior": {
           "label": "ライブプレビューブロック",
@@ -553,10 +553,10 @@
         },
         "spellcheck": {
           "label": "スペルチェック",
-          "desc": "Wysiwygモードでスペルチェックを有効にするかどうか。"
+          "desc": "WYSIWYG モードでスペルチェックを有効にするかどうか。"
         }
       },
-      "desc": "Markdownエディタの設定オプションには、スタイル、動作、表示モードに関する設定が含まれます。",
+      "desc": "Markdown エディタの設定オプションには、スタイル、動作、表示モードに関する設定が含まれます。",
       "sourcecode": {
         "label": "ソースコード",
         "spellcheck": {
@@ -580,7 +580,7 @@
         "indent_size": {
           "label": "インデント幅",
           "desc": "スペースのインデントは既定で 2 桁です。タブはソースモードでは 4 桁、埋め込みコードでは 2 桁で表示されます。幅を指定すると両方に適用されます。",
-          "default": "2 桁（タブ幅はモードによる）"
+          "default": "2 桁 (タブ幅はモードによる)"
         },
         "auto_close": {
           "label": "括弧と引用符を自動で閉じる",
@@ -595,7 +595,7 @@
         "line_wrap": {
           "label": "長い行を折り返す",
           "desc": "改行文字を挿入せず、編集領域の端で長い行を折り返します。極端に長い行では横スクロールが維持される場合があります。",
-          "mixed_default": "領域ごと（既定値）",
+          "mixed_default": "領域ごと (既定値)",
           "mixed_desc": "既定では通常のコードブロックは折り返さず、プレビューブロックのソースとフロントマターは折り返します。オンまたはオフを選ぶと統一できます。極端に長い行は横スクロールのままになる場合があります。"
         },
         "line_numbers": {
@@ -611,23 +611,23 @@
         "font_size": {
           "label": "コードの文字サイズ",
           "desc": "既定では本文の文字サイズの 87.5% で、本文に合わせて変わります。カスタムを選ぶとサイズを固定できます。",
-          "default": "本文に合わせる（{{value}} px）",
-          "relative_default": "本文に合わせる（87.5%）",
+          "default": "本文に合わせる ({{value}} px)",
+          "relative_default": "本文に合わせる (87.5%)",
           "unit": "{{value}} px"
         },
         "line_height": {
           "label": "コードの行の高さ",
           "desc": "行の高さは文字サイズに対する倍率です。既定は 1.6 倍で、カスタムを選ぶと行間を調整できます。",
-          "default": "1.6 倍（既定値）",
+          "default": "1.6 倍 (既定値)",
           "unit": "{{value}} 倍"
         },
-        "default_value": "{{value}}（既定値）",
+        "default_value": "{{value}} (既定値)",
         "typography_disabled": "「個人設定のフォント、文字サイズ、行間を使用」がオフのため、カスタムの文字サイズと行の高さは現在適用されません。"
       }
     },
     "keyboard": {
       "label": "キーボードショートカット",
-      "shortcut_conflict": "このショートカットキーはすでに占有されています",
+      "shortcut_conflict": "このショートカットキーはすでに使用されています",
       "table_label": "キーボードショートカット表",
       "command": "コマンド",
       "keybinding": "ショートカット",
@@ -638,9 +638,9 @@
       "save": "保存",
       "load_failed": "ショートカットを読み込めません。設定ファイルを確認して再試行してください。",
       "save_failed": "保存できませんでした。以前の設定は保持されています。再試行してください。",
-      "invalid_binding": "主キーを含む有効な組み合わせを押してください。",
+      "invalid_binding": "修飾キー以外のキーを含む有効な組み合わせを押してください。",
       "reserved_binding": "この組み合わせは入力、移動、またはクリップボード用です。別の組み合わせを選んでください。",
-      "unsupported_binding": "現在のエディターはこの組み合わせに対応していません。",
+      "unsupported_binding": "現在のエディタはこの組み合わせに対応していません。",
       "conflict_with": "「{{command}}」で使用中です。先にそのショートカットを変更してください。",
       "saving": "保存中…",
       "unbound": "未割り当て",
@@ -652,7 +652,7 @@
       "modified_only": "変更済みのみ",
       "retry": "再試行",
       "scope_app": "アプリ内",
-      "scope_editor": "エディター内",
+      "scope_editor": "エディタ内",
       "modified": "変更済み",
       "system_binding": "システム管理",
       "no_results": "一致するショートカットはありません",
@@ -663,68 +663,68 @@
       "ChatGPT": {
         "label": "ChatGPT",
         "api_base": {
-          "label": "API Base",
-          "desc": "API Base for ChatGPT."
+          "label": "API ベース URL",
+          "desc": "ChatGPT の API ベース URL。"
         },
         "api_key": {
-          "label": "API Key",
-          "desc": "API key for ChatGPT."
+          "label": "API キー",
+          "desc": "ChatGPT の API キー。"
         },
         "models": {
-          "label": "Models",
-          "desc": "モデルのリストをカンマで区切って指定します。デフォルトは \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+          "label": "モデル一覧",
+          "desc": "モデルのリストをカンマで区切って指定します。既定は \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
         }
       },
       "DeepSeek": {
         "label": "DeepSeek",
         "api_base": {
-          "label": "API Base",
-          "desc": "API Base for DeepSeek."
+          "label": "API ベース URL",
+          "desc": "DeepSeek の API ベース URL。"
         },
         "api_key": {
-          "label": "API Key",
-          "desc": "API key for DeepSeek."
+          "label": "API キー",
+          "desc": "DeepSeek の API キー。"
         },
         "models": {
-          "label": "Models",
-          "desc": "モデルのリストをカンマで区切って指定します。デフォルトは \"\""
+          "label": "モデル一覧",
+          "desc": "モデルのリストをカンマで区切って指定します。既定は \"\""
         }
       },
       "Ollama": {
         "label": "Ollama",
         "api_base": {
-          "label": "API Base",
-          "desc": "API Base for Ollama."
+          "label": "API ベース URL",
+          "desc": "Ollama の API ベース URL。"
         },
         "models": {
-          "label": "Models",
-          "desc": "利用可能なモデルはデフォルトで自動検出されるため、通常は追加設定は不要です。互換性維持、または自動検出できない場合のフォールバックとしてのみ、カンマ区切りのモデル一覧を指定してください。"
+          "label": "モデル一覧",
+          "desc": "利用可能なモデルは既定で自動検出されるため、通常は追加設定は不要です。互換性維持、または自動検出できない場合のフォールバックとしてのみ、カンマ区切りのモデル一覧を指定してください。"
         }
       },
       "model": {
-        "label": "AIモデル"
+        "label": "AI モデル"
       },
       "Google": {
         "label": "Google",
         "api_base": {
-          "label": "API Base",
-          "desc": "Google AIのAPIアドレス."
+          "label": "API ベース URL",
+          "desc": "Google AI の API アドレス。"
         },
         "api_key": {
-          "label": "APIキー",
-          "desc": "Google AIのAPIキー。"
+          "label": "API キー",
+          "desc": "Google AI の API キー。"
         },
         "models": {
           "label": "モデルリスト",
-          "desc": "モデルリスト。モデル名をコンマで分割し、デフォルトは「」です"
+          "desc": "モデルのリストをカンマで区切って指定します。既定は \"\""
         }
       },
-      "desc": "AIモデル構成、baseUrlが空の場合はデフォルトで公式アドレスが要求され、リクエストヘッダーはキーなどの情報を設定するために使用できます。具体的には、サービスプロバイダのドキュメントに基づいてください。"
+      "desc": "AI モデルの構成です。baseUrl が空の場合は既定で公式アドレスにリクエストします。リクエストヘッダーはキーなどの情報の設定に使用できます。詳細はサービスプロバイダーのドキュメントを参照してください。"
     },
     "resetAppConf": {
       "label": "アプリケーション設定のリセット",
-      "desc": "アプリケーション設定をリセットして、デフォルト設定に戻します。テーマ、言語、自動保存など全ての設定がリセットされ、元に戻すことはできません。",
-      "success": "アプリケーション設定がデフォルト値にリセットされました。"
+      "desc": "アプリケーション設定をリセットして、既定の設定に戻します。テーマ、言語、自動保存などすべての設定がリセットされ、元に戻すことはできません。",
+      "success": "アプリケーション設定が既定値にリセットされました。"
     },
     "image": {
       "label": "画像",
@@ -732,52 +732,52 @@
         "label": "エディタ貼り付けイベント",
         "when_paste_image": {
           "label": "貼り付けたテキストに画像が含まれている場合",
-          "desc": "エディタで画像を貼り付けるときのデフォルトの動作を選択します。",
+          "desc": "エディタで画像を貼り付けるときの既定の動作を選択します。",
           "options": {
             "do_nothing": "操作なし",
-            "save_to_local_relative": "作業エリアへの相対パスを保存します",
+            "save_to_local_relative": "ワークスペースへの相対パスに保存",
             "save_to_local_absolute": "グローバル絶対パスに保存",
-            "paste_as_base64": "Base64エンコードに貼り付けます",
-            "save_to_file_relative": "相対的な現在のファイルへのパスを保存します"
+            "paste_as_base64": "Base64 エンコードとして貼り付け",
+            "save_to_file_relative": "現在のファイルへの相対パスに保存"
           }
         },
         "paste_image_save_absolute_path": {
           "label": "グローバル絶対パス",
-          "desc": "「ピクチャをペースト」すると、このパスにピクチャが保存されます。"
+          "desc": "画像を貼り付けると、画像がこのパスに保存されます。"
         },
         "paste_image_save_relative_path": {
-          "label": "作業エリア相対パス",
-          "desc": "「画像を貼り付ける」時、画像はあなたのルールに基づいて現在の作業エリアに対するパスを計算し、このパスに保存します。"
+          "label": "ワークスペース相対パス",
+          "desc": "「画像を貼り付ける」時、画像はあなたのルールに基づいて現在のワークスペースに対するパスを計算し、このパスに保存します。"
         },
         "paste_image_save_relative_path_rule": {
           "label": "パスルール",
-          "desc": "サポートされる変数：${documentPath}（現在のファイルの親フォルダパス）、${fileName}（拡張子なしの現在のファイル名）。例：${documentPath}/photo/${fileName}"
+          "desc": "サポートされる変数 : ${documentPath} (現在のファイルの親フォルダーパス)、${fileName} (拡張子なしの現在のファイル名)。例 : ${documentPath}/photo/${fileName}"
         }
       },
       "upload_img": {
         "label": "ローカル画像を挿入",
         "when_upload_image": {
           "label": "ローカル画像の挿入動作",
-          "desc": "コンピューターから選択、エディターへドロップ、またはスクリーンショットソフトから貼り付けたローカル画像の既定の動作を選択します。",
+          "desc": "コンピューターから選択、エディタへドロップ、またはスクリーンショットソフトから貼り付けたローカル画像の既定の動作を選択します。",
           "options": {
             "insert_path": "元のファイルパスを直接挿入",
             "save_to_local_absolute": "グローバル絶対パスに保存",
-            "save_to_local_relative": "作業エリアへの相対パスを保存します",
-            "paste_as_base64": "Base64エンコードに貼り付けます",
-            "save_to_file_relative": "相対的な現在のファイルへのパスを保存します"
+            "save_to_local_relative": "ワークスペースへの相対パスに保存",
+            "paste_as_base64": "Base64 エンコードとして貼り付け",
+            "save_to_file_relative": "現在のファイルへの相対パスに保存"
           }
         },
         "upload_image_save_absolute_path": {
           "label": "グローバル絶対パス",
-          "desc": "「画像をアップロードするとき」に、このパスに画像が保存されます。"
+          "desc": "画像をアップロードすると、画像がこのパスに保存されます。"
         },
         "upload_image_save_relative_path": {
-          "label": "作業エリア相対パス",
+          "label": "ワークスペース相対パス",
           "desc": "「画像をアップロードする」の場合、画像はルールに基づいて現在のワークスペースに対するパスを計算し、このパスに保存します"
         },
         "upload_image_save_relative_path_rule": {
           "label": "パスルール",
-          "desc": "サポートされる変数：${documentPath}（現在のファイルの親フォルダパス）、${fileName}（拡張子なしの現在のファイル名）。例：${documentPath}/photo/${fileName}"
+          "desc": "サポートされる変数 : ${documentPath} (現在のファイルの親フォルダーパス)、${fileName} (拡張子なしの現在のファイル名)。例 : ${documentPath}/photo/${fileName}"
         }
       },
       "desc": "画像処理とアップロードの設定には、画像の貼り付け、画像ファイルの保存パスと動作設定が含まれます。"
@@ -804,29 +804,29 @@
         "install_guide": "インストールガイド"
       },
       "pdf": {
-        "label": "PDF export",
+        "label": "PDF エクスポート",
         "executable": {
-          "label": "PDF export browser",
-          "desc": "MarkFlowy uses a local Chrome, Chromium, or Edge browser to export PDF with heading bookmarks. Detect it automatically or select its executable."
+          "label": "PDF エクスポート用ブラウザ",
+          "desc": "MarkFlowy はローカルの Chrome、Chromium、Edge ブラウザを使用して、見出しブックマーク付きの PDF をエクスポートします。自動検出するか、実行ファイルを選択してください。"
         },
         "status": {
-          "checking": "Checking for a PDF export browser…",
-          "ready": "Browser {{version}} is ready.",
-          "invalid_executable": "The configured path is not a valid supported browser executable.",
-          "incompatible": "The browser was found, but its version does not support PDF heading bookmarks.",
-          "not_found": "No compatible PDF export browser was found.",
-          "save_failed": "The browser setting could not be saved. Try again."
+          "checking": "PDF エクスポート用ブラウザを確認しています…",
+          "ready": "ブラウザ {{version}} を使用できます。",
+          "invalid_executable": "設定されたパスは有効な対応ブラウザの実行ファイルではありません。",
+          "incompatible": "ブラウザは見つかりましたが、このバージョンは PDF の見出しブックマークに対応していません。",
+          "not_found": "互換性のある PDF エクスポート用ブラウザが見つかりません。",
+          "save_failed": "ブラウザ設定を保存できませんでした。再試行してください。"
         },
-        "select": "Select browser executable",
-        "automatic": "Use automatic detection",
-        "check_again": "Check again"
+        "select": "ブラウザの実行ファイルを選択",
+        "automatic": "自動検出を使用",
+        "check_again": "再確認"
       }
     },
     "display": {
       "label": "外観",
       "theme": {
-        "unavailable": "{{name}}（利用不可）",
-        "unavailable_help": "選択したテーマが見つかりません：{{names}}。一時的に内蔵テーマを使用し、元の選択は保持します。JSON テーマを再インポートするか、別のテーマを選択してください。旧 JS テーマと自動読み込みの CSS は手動で移行する必要があります。",
+        "unavailable": "{{name}} (利用不可)",
+        "unavailable_help": "選択したテーマが見つかりません : {{names}}。一時的に内蔵テーマを使用し、元の選択は保持します。JSON テーマを再インポートするか、別のテーマを選択してください。旧 JS テーマと自動読み込みの CSS は手動で移行する必要があります。",
         "migration_guide": "テーマ移行ガイド",
         "label": "テーマ",
         "mode": {
@@ -858,30 +858,30 @@
           "desc": "ページ全体の表示スケールをズームまたは拡大します"
         }
       },
-      "desc": "アプリケーションの外観と表示設定には、インタフェースのズーム、テーマなどの視覚的な関連構成が含まれます。"
+      "desc": "アプリケーションの外観と表示の設定です。インターフェースの拡大縮小やテーマなど、見た目に関する設定が含まれます。"
     },
     "support": {
       "label": "サポート",
-      "desc": "あなたのすべてのサポートは私たちにとって重要です! このオープンソースのプロジェクトをより良くするには、次の方法で参加してください",
-      "github_star": "GitHubでStarを点灯させる",
-      "github_star_desc": "このプロジェクトが好きなら、GitHubでStarをください。これが私たちにとって最大の励ましです!",
-      "github_issue": "Issueまたは提案を提出する",
-      "github_issue_desc": "問題が発生した場合やアドバイスがある場合は、GitHubでIssueを提出してください。"
+      "desc": "皆さまのご支援は私たちにとって大切です。このオープンソースプロジェクトをより良くするために、次の方法でご参加いただけます。",
+      "github_star": "GitHub で Star を付ける",
+      "github_star_desc": "このプロジェクトが好きなら、GitHub で Star をください。これが私たちにとって最大の励ましです!",
+      "github_issue": "Issue または提案を提出する",
+      "github_issue_desc": "問題が発生した場合やアドバイスがある場合は、GitHub で Issue を提出してください。"
     },
     "copilot": {
       "label": "Copilot",
-      "desc": "AIは文章の配置を補助して、あなたが配置したAIベンダーとモデルを選択して、パラメータ量2b程度以下の小さなモデルを選択して、応答速度を高めることを提案します。",
+      "desc": "AI 補助ライティングの設定です。設定済みの AI プロバイダーとモデルを選択してください。応答速度を上げるため、パラメータ数が 2B 程度以下の小さなモデルを推奨します。",
       "enable": {
-        "label": "Copilotを有効にする",
-        "desc": "AI補助ライティング機能を有効にする"
+        "label": "Copilot を有効にする",
+        "desc": "AI 補助ライティング機能を有効にする"
       },
       "provider": {
-        "label": "供給業者",
-        "desc": "AIサービスプロバイダを選択します"
+        "label": "プロバイダー",
+        "desc": "AI サービスプロバイダーを選択します"
       },
       "model": {
         "label": "モデル",
-        "desc": "使用するAIモデルを選択します"
+        "desc": "使用する AI モデルを選択します"
       }
     },
     "themeStore": {
@@ -921,7 +921,7 @@
         "advanced": "詳細設定 JSON / CSS",
         "options": "テーマのオプション",
         "previewOptions": "プレビューのオプション",
-        "closeAdvanced": "詳細エディターを閉じる",
+        "closeAdvanced": "詳細エディタを閉じる",
         "noTokens": "一致するトークンはありません",
         "css": "テーマの CSS",
         "json": "テーマの JSON",
@@ -931,7 +931,7 @@
         "catalog": "コミュニティテーマ",
         "install": "インストール",
         "emptyCatalog": "JSON 形式のコミュニティテーマが公開されると、ここに表示されます。",
-        "replace": "同じ ID のテーマが既に存在します。置き換えますか？",
+        "replace": "同じ ID のテーマが既に存在します。置き換えますか?",
         "replaceAction": "置き換える",
         "cancel": "キャンセル",
         "saveCopy": "コピーを保存",
@@ -939,7 +939,7 @@
         "resume": "下書きを再開",
         "discard": "下書きを破棄",
         "preview": "テーマのプレビュー",
-        "loadError": "エディターのプレビューを読み込めませんでした。",
+        "loadError": "エディタのプレビューを読み込めませんでした。",
         "retry": "再試行",
         "linked": "リンク済み",
         "inherited": "既定値",
@@ -952,7 +952,7 @@
         "editCss": "CSS を編集",
         "saveCss": "スニペットを保存",
         "noSnippets": "個人用 CSS スニペットはありません。",
-        "deleteConfirm": "このテーマを削除しますか？",
+        "deleteConfirm": "このテーマを削除しますか?",
         "removeVariant": "バリエーションを削除",
         "schema": "JSON スキーマをエクスポート",
         "light": "ライト",
@@ -965,15 +965,15 @@
         "previewSearchPlaceholder": "検索…",
         "previewNewNote": "新規ノート"
       },
-      "label": "テーマショップ",
+      "label": "テーマストア",
       "desc": "コミュニティが作成したテーマを閲覧してダウンロードし、エディタの外観を豊かにします。",
-      "submit_theme": "トピックの送信",
+      "submit_theme": "テーマを送信",
       "name": "名称",
       "mode": "モード",
       "version": "バージョン",
-      "author": "著者",
+      "author": "作者",
       "description": "説明",
-      "tags": "ラベル",
+      "tags": "タグ",
       "action": "操作",
       "official": "公式",
       "builtin": "内蔵",
@@ -982,13 +982,13 @@
       "uninstall": "アンインストール",
       "only_installed": "インストール済みのみを見る",
       "no_local_themes": "ローカルテーマなし",
-      "remove_local_theme": "ローカルトピック \"{{name}}\" を削除しますか?これにより、フォルダの下のファイルが削除されます。",
+      "remove_local_theme": "ローカルテーマ「{{name}}」を削除しますか? これにより、フォルダー内のファイルが削除されます。",
       "online_themes": "オンラインテーマ",
-      "local_css_files": "ローカルCSSファイル",
+      "local_css_files": "ローカル CSS ファイル",
       "install_theme": "テーマをインストール",
-      "install_theme_confirm": "{{name}} をインストールしますか？",
+      "install_theme_confirm": "{{name}} をインストールしますか?",
       "uninstall_theme": "テーマをアンインストール",
-      "uninstall_theme_confirm": "{{name}} をアンインストールしますか？"
+      "uninstall_theme_confirm": "{{name}} をアンインストールしますか?"
     }
   },
   "updater": {
@@ -997,8 +997,8 @@
     "downloading": "新しいバージョンをダウンロードしています…",
     "install_success": "アップデートをインストールしました。",
     "restart": "再起動",
-    "install_failed": "アップデートをインストールできませんでした: {{error}}",
-    "check_failed": "アップデートを確認できませんでした: {{error}}"
+    "install_failed": "アップデートをインストールできませんでした : {{error}}",
+    "check_failed": "アップデートを確認できませんでした : {{error}}"
   },
   "workspace": {
     "info": "ワークスペース情報",
@@ -1010,57 +1010,57 @@
     "sync_mode": {
       "git_local": {
         "name": "Git Local",
-        "description": "ローカルGitリポジトリと同期"
+        "description": "ローカル Git リポジトリと同期"
       },
       "git_remote": {
         "name": "Git Remote",
-        "description": "リモートGitリポジトリと同期"
+        "description": "リモート Git リポジトリと同期"
       },
       "pure_local": {
         "name": "Pure Local",
         "description": "ローカルワークスペースのみ"
       }
     },
-    "label": "ブック"
+    "label": "ワークスペース"
   },
   "command": {
     "id_descriptions": {
       "app_commandPalette": "コマンドパレット",
       "app_quickOpen": "クイックオープン",
-      "app_openFolder": "フォルダを開く",
+      "app_openFolder": "フォルダーを開く",
       "app_openSetting": "設定ウィンドウを開く",
-      "app_toggleLeftsidebarVisible": "左サイドバーを切り替えて表示",
-      "app_toggleRightsidebarVisible": "表示される右サイドバーの切り替え",
-      "app_toggleZenMode": "Zenモードを切り替え",
+      "app_toggleLeftsidebarVisible": "左サイドバーの表示を切り替える",
+      "app_toggleRightsidebarVisible": "右サイドバーの表示を切り替える",
+      "app_toggleZenMode": "Zen モードを切り替える",
       "app_save": "現在のアクティブな編集ファイルを保存する",
-      "app_findReplaceEditor": "エディタで見つけて置き換える",
+      "app_findReplaceEditor": "エディタで検索と置換をする",
       "app_closeCurrentEditorTab": "現在のエディタタブを閉じる",
       "app_hide": "アプリケーションを隠す",
-      "app_toggleEditorType": "ソースコード/WYSIWYGモードを切り替える",
-      "app_splitEditorRight": "エディタを右に分割",
-      "app_splitEditorDown": "エディタを下に分割",
-      "editor_copy": "選択したテキストをエディタでコピーする",
-      "editor_cut": "エディタで選択したテキストをカット",
-      "editor_redo": "再実行",
-      "editor_undo": "元に",
+      "app_toggleEditorType": "ソースコード/WYSIWYG モードを切り替える",
+      "app_splitEditorRight": "エディタを右に分割する",
+      "app_splitEditorDown": "エディタを下に分割する",
+      "editor_copy": "エディタで選択したテキストをコピーする",
+      "editor_cut": "エディタで選択したテキストを切り取る",
+      "editor_redo": "やり直す",
+      "editor_undo": "元に戻す",
       "editor_paste": "選択したテキストをエディタに貼り付ける",
-      "editor_toggleStrong": "太字マークへのトグル",
-      "editor_toggleEmphasis": "イタリックマークへのトグル",
-      "editor_toggleCodeText": "コードマークへの切り替え",
-      "editor_toggleDelete": "マークを削除するトグル",
-      "editor_insertCurrentDate": "現在の日付を挿入",
-      "editor_toggleH1": "H1へのトグル",
-      "editor_toggleH2": "H2へのトグル",
-      "editor_toggleH3": "H3へのトグル",
-      "editor_toggleH4": "H4へのトグル",
-      "editor_toggleH5": "H5へのトグル",
-      "editor_toggleH6": "H6へのトグル"
+      "editor_toggleStrong": "太字マークに切り替える",
+      "editor_toggleEmphasis": "斜体マークに切り替える",
+      "editor_toggleCodeText": "コードマークに切り替える",
+      "editor_toggleDelete": "取り消し線マークに切り替える",
+      "editor_insertCurrentDate": "現在の日付を挿入する",
+      "editor_toggleH1": "H1 に切り替える",
+      "editor_toggleH2": "H2 に切り替える",
+      "editor_toggleH3": "H3 に切り替える",
+      "editor_toggleH4": "H4 に切り替える",
+      "editor_toggleH5": "H5 に切り替える",
+      "editor_toggleH6": "H6 に切り替える"
     }
   },
   "request": {
     "headers_config": {
-      "label": "リクエストヘッダの設定",
-      "desc": "カスタムHTTPリクエストヘッダーを追加し、複数のキー値ペア構成をサポートします。"
+      "label": "リクエストヘッダーの設定",
+      "desc": "カスタム HTTP リクエストヘッダーを追加し、キーと値のペアを複数構成できます。"
     }
   },
   "ai": {
@@ -1074,15 +1074,15 @@
     "request_failed": "リクエストに失敗しました",
     "settings": "設定",
     "new_chat": "新しい会話",
-    "welcome_title": "今日は何をお手伝いしましょうか？",
-    "welcome_description": "質問したり、アイデアを探ったり、現在の文書をコンテキストに追加できます。",
+    "welcome_title": "今日は何をお手伝いしましょうか?",
+    "welcome_description": "質問したり、アイデアを探したり、現在の文書をコンテキストに追加できます。",
     "try_asking": "質問例",
     "prompt_document_title": "この文書を要約",
     "prompt_document_description": "アクティブな文書をコンテキストとして使用",
     "prompt_document_value": "現在の文書を要約し、重要なポイントを示してください。",
     "prompt_explain_title": "トピックを説明",
     "prompt_explain_description": "複雑な内容をわかりやすく分解",
-    "prompt_explain_value": "このトピックを実例とともにわかりやすく説明してください：",
+    "prompt_explain_value": "このトピックを実例とともにわかりやすく説明してください : ",
     "ask_placeholder": "何でも質問してください… @ でコンテキストを追加",
     "current_document": "現在の文書",
     "no_active_document": "アクティブな文書がありません",
@@ -1106,7 +1106,7 @@
     "search_open_tabs": "開いているタブを検索…",
     "no_open_tabs": "開いているタブはありません",
     "no_context_files_available": "追加できる開いているファイルはありません",
-    "selected_context_files": "コンテキストファイル（{{count}}/8）",
+    "selected_context_files": "コンテキストファイル ({{count}}/8)",
     "context_limit_reached": "追加できるファイルは最大 8 件です",
     "remove_attachment": "{{name}} を削除",
     "attachment_missing": "ファイルが見つかりません",
@@ -1129,14 +1129,14 @@
     "copy": "コピー",
     "copied": "コピーしました",
     "delete": "削除",
-    "new_chat_confirm_title": "新しい会話を始めますか？",
+    "new_chat_confirm_title": "新しい会話を始めますか?",
     "new_chat_confirm_description": "現在のワークスペースの会話が消去されます。",
     "new_chat_confirm": "新しい会話を始める",
     "cancel": "キャンセル",
     "export_empty": "エクスポートする会話がありません"
   },
   "welcome": {
-    "title": "{{appName}} へようこそ",
+    "title": "{{appName}} へおかえりなさい",
     "subtitle": "Markdown に集中できるワークスペース",
     "getStarted": "はじめる",
     "recentWorkspaces": "最近のワークスペース",
@@ -1145,10 +1145,10 @@
   },
   "statusBar": {
     "label": "ステータスバー",
-    "words": "ワード",
+    "words": "単語",
     "chars": "文字",
-    "pureChars": "純文字",
-    "pureCharsOption": "純文字（空白・改行を除く）",
+    "pureChars": "文字 (空白除く)",
+    "pureCharsOption": "文字数 (空白・改行を除く)",
     "displaySettings": "表示設定"
   },
   "titleBar": {
@@ -1158,8 +1158,8 @@
     "restore": "ウィンドウを元のサイズに戻す"
   },
   "zenMode": {
-    "openFileFirst": "Zenモードに入るにはドキュメントを開いてください",
-    "exitHint": "Zenモード · {{shortcut}} または Esc を2回押して終了",
+    "openFileFirst": "Zen モードに入るにはドキュメントを開いてください",
+    "exitHint": "Zen モード · {{shortcut}} または Esc を2回押して終了",
     "shortcutFallback": "Cmd/Ctrl+Shift+F"
   },
   "capricorn": {
@@ -1185,7 +1185,7 @@
     },
     "blockHandle": {
       "convertOrMove": "クリックで変換 · ドラッグで移動",
-      "convert": "{{target}}を変換",
+      "convert": "{{target}} を変換",
       "kind": {
         "block": "ブロック",
         "blockquote": "引用",
@@ -1210,8 +1210,8 @@
         "reference": "参照定義",
         "table": "表"
       },
-      "moveOrSelect": "{{target}}を移動または選択",
-      "select": "{{target}}を選択"
+      "moveOrSelect": "{{target}} を移動または選択",
+      "select": "{{target}} を選択"
     },
     "selection": {
       "selectAllHint": "{{shortcut}} をもう一度押すとドキュメント全体を選択",
@@ -1223,7 +1223,7 @@
       "italic": "斜体",
       "strike": "取り消し線",
       "highlight": "ハイライト",
-      "link": "Insert link"
+      "link": "リンクを挿入"
     },
     "editor": {
       "loading": "Capricorn エディタを読み込んでいます",
@@ -1242,7 +1242,7 @@
     },
     "livePreview": {
       "largeDeferred": "大きなプレビューは一時停止中です。ソース全体は引き続き利用できます。",
-      "renderLarge": "大きなプレビューを描画（時間がかかる場合があります）",
+      "renderLarge": "大きなプレビューを描画 (時間がかかる場合があります)",
       "actions": "{{kind}} ブロックの操作",
       "copied": "ソースをコピーしました",
       "copy": "ソースをコピー",
@@ -1257,7 +1257,7 @@
       },
       "preview": "{{kind}} のプレビュー",
       "retryCopy": "ソースのコピーを再試行",
-      "sourceEditor": "{{kind}} のソースエディター"
+      "sourceEditor": "{{kind}} のソースエディタ"
     },
     "sourceFallback": {
       "longLine": "非常に長い行は横スクロール表示にして、ソース編集の応答性を保ちます。",
@@ -1281,13 +1281,13 @@
       "invalidAddress": "有効なリンク先アドレスを入力してください。"
     },
     "image": {
-      "unavailable": "Image unavailable",
-      "loading": "Loading image…",
-      "edit": "Edit address",
+      "unavailable": "画像を表示できません",
+      "loading": "画像を読み込み中…",
+      "edit": "アドレスを編集",
       "resetSize": "自動サイズに戻す"
     },
     "preview": {
-      "retry": "Retry"
+      "retry": "再試行"
     },
     "snippets": {
       "title": "スニペットを挿入",
@@ -1328,46 +1328,46 @@
     }
   },
   "inline_insert": {
-    "insert_link": "Insert link",
-    "edit_link": "Edit link",
-    "insert_image": "Insert image",
-    "edit_image": "Edit image",
-    "address": "Address",
-    "text": "Text",
-    "alt": "Description",
-    "optional": "Optional",
-    "choose_image": "Choose local image…",
-    "change": "Change",
-    "replace_image": "Replace image",
-    "edit_alt": "Edit description",
-    "remove": "Remove",
-    "unlink": "Remove link",
-    "insert": "Insert",
-    "save": "Save",
-    "close": "Close",
-    "inserting": "Inserting…",
-    "open": "Open link",
-    "copy": "Copy address",
-    "invalid_address": "Enter a valid address or file path.",
-    "local_error": "Unable to select this image. Try again.",
-    "insert_error": "Unable to insert. Your input has been kept.",
-    "open_error": "Unable to open this link.",
-    "copy_error": "Unable to copy this address.",
-    "single_block": "Select text within one paragraph or table cell."
+    "insert_link": "リンクを挿入",
+    "edit_link": "リンクを編集",
+    "insert_image": "画像を挿入",
+    "edit_image": "画像を編集",
+    "address": "アドレス",
+    "text": "テキスト",
+    "alt": "説明",
+    "optional": "任意",
+    "choose_image": "ローカル画像を選択…",
+    "change": "変更",
+    "replace_image": "画像を置き換え",
+    "edit_alt": "説明を編集",
+    "remove": "削除",
+    "unlink": "リンクを解除",
+    "insert": "挿入",
+    "save": "保存",
+    "close": "閉じる",
+    "inserting": "挿入中…",
+    "open": "リンクを開く",
+    "copy": "アドレスをコピー",
+    "invalid_address": "有効なアドレスまたはファイルパスを入力してください。",
+    "local_error": "この画像を選択できませんでした。再試行してください。",
+    "insert_error": "挿入できませんでした。入力内容は保持されています。",
+    "open_error": "このリンクを開けませんでした。",
+    "copy_error": "このアドレスをコピーできませんでした。",
+    "single_block": "1 つの段落または表のセル内でテキストを選択してください。"
   },
   "history": {
     "title": "ローカル履歴",
     "description": "変更を確認し、過去のバージョンを未保存の下書きとして復元します。",
     "enabled": "ローカル履歴を有効にする",
     "enabled_description": "MarkFlowy で開いた文書のバージョンを保存します。無効にしても下書きの保護は継続します。",
-    "retention": "通常の履歴は30日間、文書ごとに100バージョンまで、容量の目安は1 GBです。未保存の下書きと進行中の編集は保護されます。",
+    "retention": "通常の履歴は 30日間、文書ごとに 100バージョンまで、容量の目安は 1 GBです。未保存の下書きと進行中の編集は保護されます。",
     "count": "{{count}} バージョン",
     "clear_title": "保存した履歴の管理",
     "clear_description": "ファイルと未保存の下書きを残して履歴を削除します。有効な間は、その後の変更で新しい履歴が作成されます。",
     "clear_workspace": "現在のワークスペースの履歴を削除",
     "clear_loose": "独立した文書の履歴を削除",
     "clear_all": "すべてのワークスペースの履歴を削除",
-    "clear_confirm": "{{count}} 件の履歴を完全に削除しますか？共有されていないデータを最大 {{size}} MB 解放できます。ファイルと未保存の下書きは保持されます。",
+    "clear_confirm": "{{count}} 件の履歴を完全に削除しますか?共有されていないデータを最大 {{size}} MB 解放できます。ファイルと未保存の下書きは保持されます。",
     "all_workspaces": "すべてのワークスペースと独立した文書",
     "loose": "独立した文書",
     "delete": "履歴を削除",
@@ -1396,7 +1396,7 @@
     "pending": "下書きを保護中…",
     "failed": "下書きの保護に失敗",
     "paused": "復元した下書き · 手動で保存してください",
-    "large": "大きな文書：元のテキストを表示しています。",
+    "large": "大きな文書 : 元のテキストを表示しています。",
     "compare_current": "現在の下書きと比較",
     "compare_version": "別のバージョンと比較",
     "compare_batch": "変更前と変更後を比較",
@@ -1410,8 +1410,8 @@
     "next_change": "次の変更",
     "no_changes": "変更はありません",
     "change_position": "変更 {{current}} / {{total}}",
-    "added_lines": "追加行数: {{count}}",
-    "removed_lines": "削除行数: {{count}}",
+    "added_lines": "追加行数 : {{count}}",
+    "removed_lines": "削除行数 : {{count}}",
     "unchanged_lines": "変更のない $ 行 · クリックして展開",
     "retry": "保護を再試行",
     "coarse": "計算時間内に差分を簡略化して表示しています。全文は保持されます。",
@@ -1460,31 +1460,31 @@
     "description": "数式、図、コードをローカルの各ワークスペースで再利用します。",
     "kind": "種類",
     "kinds": {
-      "math": "Math（数式）",
-      "mermaid": "Mermaid（図）",
-      "code": "Code（コード）"
+      "math": "Math (数式)",
+      "mermaid": "Mermaid (図)",
+      "code": "Code (コード)"
     },
     "search": "スニペットを検索…",
     "new": "新規スニペット",
     "copy": "複製",
     "copyCustom": "カスタムとして複製",
-    "copySuffix": "（コピー）",
+    "copySuffix": " (コピー)",
     "show": "表示",
     "hide": "非表示",
     "hidden": "非表示",
     "delete": "削除",
-    "deleteTitle": "「{{title}}」を削除しますか？",
+    "deleteTitle": "「{{title}}」を削除しますか?",
     "builtin": "組み込み",
     "custom": "カスタム",
     "unsaved": "未保存の変更",
     "name": "名前",
     "language": "コードの言語",
-    "languagePlaceholder": "例: typescript。空欄はプレーンテキスト",
+    "languagePlaceholder": "例 : typescript。空欄はプレーンテキスト",
     "source": "ソース",
     "sourceHelp": "外側の ``` や $$ を付けずにソースだけを入力してください。文字、空白、改行はそのまま挿入され、変数は展開されません。",
     "save": "保存",
     "discard": "変更を破棄",
-    "unsavedTitle": "スニペットの変更を保存しますか？",
+    "unsavedTitle": "スニペットの変更を保存しますか?",
     "unsavedDescription": "移動する前に変更を保存または破棄してください。",
     "loadError": "スニペットを読み込めません",
     "saveError": "保存できません",
@@ -1511,37 +1511,37 @@
     }
   },
   "pdf_export": {
-    "title": "Export PDF",
-    "description": "Export a searchable PDF with heading bookmarks using a local Chrome, Chromium, or Edge browser.",
-    "paper_size": "Paper size",
-    "orientation": "Orientation",
-    "portrait": "Portrait",
-    "landscape": "Landscape",
-    "include_outline": "Include heading bookmarks",
-    "outline_hint": "Turn document headings into a navigable PDF outline. Documents without headings have no bookmarks.",
-    "export": "Export PDF",
-    "print": "Print…",
-    "exporting": "Exporting PDF…",
-    "success": "PDF saved to {{path}}.",
-    "failed": "PDF export failed. Your document has been preserved.",
-    "image_warning": "{{count}} images could not be loaded. Check the exported PDF.",
-    "browser_check_failed": "The PDF export browser could not be checked. Try again in Settings → Export.",
-    "cancelled": "PDF export cancelled.",
-    "system_print": "System print…",
-    "system_print_hint": "System print is also available. Saving as PDF through the print dialog does not guarantee heading bookmarks.",
+    "title": "PDF をエクスポート",
+    "description": "ローカルの Chrome、Chromium、Edge ブラウザを使用して、検索可能で見出しブックマーク付きの PDF をエクスポートします。",
+    "paper_size": "用紙サイズ",
+    "orientation": "向き",
+    "portrait": "縦",
+    "landscape": "横",
+    "include_outline": "見出しブックマークを含める",
+    "outline_hint": "文書の見出しをナビゲート可能な PDF アウトラインに変換します。見出しのない文書にはブックマークが付きません。",
+    "export": "PDF をエクスポート",
+    "print": "印刷…",
+    "exporting": "PDF をエクスポートしています…",
+    "success": "PDF を {{path}} に保存しました。",
+    "failed": "PDF のエクスポートに失敗しました。文書は保持されています。",
+    "image_warning": "{{count}} 個の画像を読み込めませんでした。エクスポートした PDF を確認してください。",
+    "browser_check_failed": "PDF エクスポート用ブラウザを確認できませんでした。設定 → エクスポート で再試行してください。",
+    "cancelled": "PDF のエクスポートをキャンセルしました。",
+    "system_print": "システム印刷…",
+    "system_print_hint": "システム印刷も利用できます。印刷ダイアログから PDF として保存しても、見出しブックマークは保証されません。",
     "browser": {
-      "checking": "Checking the PDF export browser…",
-      "ready": "Browser {{version}} is ready.",
-      "not_found": "No compatible PDF export browser was found.",
-      "incompatible": "The browser version does not support PDF export with heading bookmarks.",
-      "settings_hint": "Install Chrome, Chromium, or Edge, or select its executable in Settings → Export."
+      "checking": "PDF エクスポート用ブラウザを確認しています…",
+      "ready": "ブラウザ {{version}} を使用できます。",
+      "not_found": "互換性のある PDF エクスポート用ブラウザが見つかりません。",
+      "incompatible": "このブラウザのバージョンは、見出しブックマーク付き PDF のエクスポートに対応していません。",
+      "settings_hint": "Chrome、Chromium、Edge をインストールするか、設定 → エクスポート で実行ファイルを選択してください。"
     }
   },
   "file_deletion": {
-    "permanent_title": "「{{name}}」を完全に削除しますか？",
-    "trash_title": "「{{name}}」をゴミ箱に移動しますか？",
+    "permanent_title": "「{{name}}」を完全に削除しますか?",
+    "trash_title": "「{{name}}」をごみ箱に移動しますか?",
     "permanent_action": "完全に削除",
-    "trash_action": "ゴミ箱に移動",
+    "trash_action": "ごみ箱に移動",
     "counting": "集計中…",
     "counts": "ファイル {{files}} 個 · サブフォルダー {{folders}} 個",
     "files_only": "ファイル {{files}} 個",
@@ -1551,7 +1551,7 @@
     "partial_hint": "集計は未完了です。実際の件数はこれより多い場合があります。",
     "empty": "空のフォルダー",
     "symlink": "リンクのみを削除します。リンク先には影響しません。",
-    "count_failed": "内容を集計できません。もう一度お試しください。",
+    "count_failed": "内容を集計できません。もう一度試してください。",
     "permanent_warning": "完全に削除されます。取り消せません。"
   }
 }
