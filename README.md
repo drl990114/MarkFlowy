@@ -191,20 +191,27 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/CMOS4000">
+            <img src="https://avatars.githubusercontent.com/u/94772159?v=4" width="90;" alt="CMOS4000"/>
+            <br />
+            <sub><b>CMOS4000</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/codex">
             <img src="https://avatars.githubusercontent.com/u/267193182?v=4" width="90;" alt="codex"/>
             <br />
             <sub><b>Codex</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/SamDc73">
             <img src="https://avatars.githubusercontent.com/u/144215270?v=4" width="90;" alt="SamDc73"/>
             <br />
             <sub><b>Husam Alshehadat</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/jing2uo">
             <img src="https://avatars.githubusercontent.com/u/3081432?v=4" width="90;" alt="jing2uo"/>
@@ -246,15 +253,15 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>Coolvitto</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/dai">
             <img src="https://avatars.githubusercontent.com/u/12391?v=4" width="90;" alt="dai"/>
             <br />
             <sub><b>Dai</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/fossabot">
             <img src="https://avatars.githubusercontent.com/u/29791463?v=4" width="90;" alt="fossabot"/>
