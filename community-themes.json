@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": "theblue-markflowy",
+    "name": "TheBlue",
+    "author": "太极",
+    "version": "1.0.0",
+    "url": "https://raw.githubusercontent.com/CMOS4000/TheBlue/main/MarkFlowy/theblue-markflowy.json"
+  }
+]
