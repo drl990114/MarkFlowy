@@ -159,6 +159,10 @@ export async function runHistoryCli(request: CliRequest, fileId?: string) {
       [
         'history_disabled',
         'history_invalidated',
+        'history_draft_changed',
+        'history_snapshot_mismatch',
+        'history_corrupt',
+        'invalid_draft_owner',
         'history_session_busy',
         'history_budget_exceeded',
         'content_conflict',

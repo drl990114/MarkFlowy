@@ -15,6 +15,7 @@ import { pendingDraftSnapshot, waitForAllDraftRecovery } from './draftRecoverySt
 import { flushDraftProtection, protectedDraftDescriptor } from './local-history'
 import { isPristineDocument } from './pristine-document'
 import { persistentDiskRevision } from './draftDiskRevision'
+import { resolveDraftRecoveryBeforeClose } from './draftRecoveryActions'
 import {
   draftManifestSchema, recoverySessionSchema, RELOAD_DOCUMENT_PREFIX,
   RELOAD_SESSION_KEY, SESSION_KEY_PREFIX,
@@ -24,6 +25,53 @@ import {
 export { draftSessionSchema, RELOAD_SESSION_KEY, SESSION_KEY_PREFIX } from './draftSessionFormat'
 export type { DraftDocument, DraftSession } from './draftSessionFormat'
 export type DraftSessionStore = Pick<LazyStore, 'entries' | 'set' | 'delete' | 'save'>
+
+/** Retain failed recovery sources before releasing their tab. Reload bodies must
+ * become durable text here; sessionStorage alone does not survive window close. */
+export async function retainPendingDrafts(
+  cache: DraftSessionStore | undefined,
+  windowLabel: string,
+  rootPath: string | undefined,
+  documents: RecoveryDocument[],
+) {
+  if (!cache) throw new Error('Workspace cache is not ready.')
+  const references: DraftManifest['documents'] = []
+  const bodies: DraftDocument[] = []
+  for (const { source, ...doc } of documents) {
+    if (source.kind === 'native') references.push({ ...doc, source })
+    else {
+      const content: unknown = source.kind === 'inline'
+        ? source.content
+        : JSON.parse(window.sessionStorage.getItem(source.key) ?? 'null')
+      if (typeof content !== 'string') throw new Error('A reload draft body is unavailable.')
+      bodies.push({ ...doc, content })
+    }
+  }
+  const sessions: (DraftSession | DraftManifest)[] = []
+  if (references.length) sessions.push({ version: 2, rootPath, documents: references })
+  if (bodies.length) sessions.push({ version: 1, rootPath, documents: bodies })
+  const keys: string[] = []
+  const rollback = async () => {
+    try {
+      for (const key of keys) await cache.delete(key)
+      await cache.save()
+    } catch (error) {
+      logger.error('Failed to remove cancelled draft retention', error)
+    }
+  }
+  try {
+    for (const session of sessions) {
+      const key = `${SESSION_KEY_PREFIX}${windowLabel}:${nanoid()}`
+      keys.push(key)
+      await cache.set(key, session)
+    }
+    await cache.save()
+  } catch (error) {
+    await rollback()
+    throw error
+  }
+  return rollback
+}
 
 function captureDraftSession(): DraftSession {
   const editor = useEditorStore.getState()
@@ -166,7 +214,7 @@ export async function closeWithDraftRecovery(
   windowLabel: string,
   close: () => Promise<void>,
 ) {
-  await waitForAllDraftRecovery()
+  if (!await resolveDraftRecoveryBeforeClose()) return false
   return savePathCoordinator.runExclusive(
     FILE_MUTATION_QUEUE_KEY,
     'window-close',

@@ -16,7 +16,7 @@ import { getUnsavedFileIds, guardUnsavedFilesAsync } from './checkUnsavedFiles'
 import { restoreRecentFileHistory } from './recent-files'
 import { ensureCachedFileByPath, workspaceCachedPaths, restoreWorkspaceCache, type WorkspaceCachePersistence } from './workspace-cache'
 import { currentWindow } from './windows'
-import { waitForAllDraftRecovery } from './draftRecoveryState'
+import { resolveDraftRecoveryBeforeClose } from './draftRecoveryActions'
 import { flushDraftProtection } from './local-history'
 import { removePristineDocuments } from './editor-file'
 
@@ -32,7 +32,7 @@ export async function releaseDetachedWorkspaceScopes() {
 
 /** Attach/detach the directory without closing or remounting any live editor. */
 export async function attachWorkspaceSession(path: string | undefined, persistence: WorkspaceCachePersistence) {
-  await waitForAllDraftRecovery()
+  if (!await resolveDraftRecoveryBeforeClose()) return false
   return savePathCoordinator.runExclusive(FILE_MUTATION_QUEUE_KEY, 'workspace-context', async () => {
     const previousRoot = useEditorStore.getState().getRootPath()
     if (previousRoot === path) return true
@@ -90,7 +90,7 @@ function captureUnsavedDocuments() {
 
 export async function switchWorkspaceSession(path: string, persistence: WorkspaceCachePersistence) {
   if (!useEditorStore.getState().getRootPath()) return attachWorkspaceSession(path, persistence)
-  await waitForAllDraftRecovery()
+  if (!await resolveDraftRecoveryBeforeClose()) return false
   for (;;) {
     const currentRootPath = useEditorStore.getState().getRootPath()
     if (currentRootPath === path) return true

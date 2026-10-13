@@ -2,6 +2,11 @@
   "drafts": {
     "reload_failed": "Could not preserve unsaved documents for reload. Save your files and try again.",
     "restore_failed": "Could not restore unsaved documents. The cached drafts have been kept.",
+    "close_failed_description": "Retry recovery, or keep the affected drafts for recovery next time and close their documents.",
+    "keep_and_close": "Keep draft and close",
+    "keep_failed": "Could not preserve the draft for closing. The document has been kept open.",
+    "close_failed": "Could not safely close the window. Your documents have been kept open. Please try again.",
+    "error_details": "Error details",
     "restored": "Recovered {{count}} unsaved documents."
   },
   "link_editing": {

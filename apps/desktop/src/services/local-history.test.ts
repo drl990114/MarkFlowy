@@ -99,6 +99,15 @@ afterEach(() => {
 })
 
 describe('background draft protection', () => {
+  it('detaches a retained recovery writer without retiring its protected body', async () => {
+    const draft = { document: doc, writer: 'main:recovered', sequence: 12, content: 'recovered', paused: true }
+    await history.bindRecoveredDraft('file', draft)
+    expect(history.ownsHistoryDraft('file', draft)).toBe(true)
+    await history.retainHistoryDraftOnClose('file')
+    expect(history.ownsHistoryDraft('file', draft)).toBe(false)
+    expect(calls('presence')).toContainEqual({ documentId: doc.id, owner: draft.writer, dirty: false })
+    expect(calls('finishDraft')).toEqual([])
+  })
   it('persists a stable disk baseline without changing the live CAS revision', async () => {
     const fingerprint = `existing:1:2:136:1791132580162384580:sha256:${'a'.repeat(64)}`
     const revision = `${fingerprint}:path-generation:3:file-generation:3`

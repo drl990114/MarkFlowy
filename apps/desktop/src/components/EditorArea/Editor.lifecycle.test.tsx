@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { EditorViewType } from '@/constants/editorViewType'
 import useFileCacheStore, { delSaveOpenedEditorEntries, getSaveOpenedEditorEntries, setFileObject, setSaveOpenedEditorEntries } from '@/helper/files'
-import { registerDraftRecovery } from '@/services/draftRecoveryState'
+import { registerDraftRecovery, waitForDraftRecovery } from '@/services/draftRecoveryState'
 import type { FileTypeConfig } from '@/helper/fileTypeHandler'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
@@ -92,6 +92,58 @@ afterEach(() => {
 })
 
 describe('Editor initialization lifecycle', () => {
+  it('does not treat a cancelled recovery as a successfully loaded document', async () => {
+    setFileObject('cancelled', { id: 'cancelled', name: 'draft.md', kind: 'file' })
+    useFileTypeConfigStore.getState().setFileTypeConfig('cancelled', markdownConfig)
+    harness.getFileTypeConfig.mockResolvedValue(markdownConfig)
+    let reject!: (error: Error) => void
+    const pending = new Promise<void>((_resolve, fail) => { reject = fail })
+    const release = registerDraftRecovery('cancelled', () => pending)
+    try {
+      const view = render(<Editor id='cancelled' active visible />)
+      await act(async () => {
+        release()
+        reject(new DOMException('Draft recovery canceled.', 'AbortError'))
+      })
+      await view.findByRole('alert')
+      expect(view.queryByTestId('text-editor')).toBeNull()
+      expect(harness.getFileTypeConfig).not.toHaveBeenCalled()
+    } finally { cleanup(); release() }
+  })
+  it('leaves the error surface after recovery succeeds from a close-dialog retry', async () => {
+    setFileObject('external-retry', { id: 'external-retry', name: 'draft.md', kind: 'file' })
+    harness.getFileTypeConfig.mockResolvedValue(markdownConfig)
+    let failing = true
+    const release = registerDraftRecovery('external-retry', async () => {
+      if (failing) throw new Error('history_draft_changed')
+      setFileObject('external-retry', { id: 'external-retry', name: 'draft.md', kind: 'file', content: 'latest draft' })
+      release()
+    })
+    try {
+      const view = render(<Editor id='external-retry' active visible />)
+      await view.findByRole('alert')
+      expect(view.getByText('drafts.error_details')).toBeTruthy()
+      expect(view.queryByTestId('text-editor')).toBeNull()
+      failing = false
+      await act(async () => waitForDraftRecovery('external-retry'))
+      await view.findByTestId('text-editor')
+      expect(view.queryByRole('alert')).toBeNull()
+    } finally { release() }
+  })
+
+  it('offers a direct keep-and-close action on the recovery error surface', async () => {
+    setFileObject('keep-draft', { id: 'keep-draft', name: 'draft.md', kind: 'file' })
+    const keep = vi.fn(async () => {})
+    const release = registerDraftRecovery('keep-draft', async () => { throw new Error('history_corrupt') }, undefined, keep)
+    try {
+      const view = render(<Editor id='keep-draft' active visible />)
+      await view.findByRole('alert')
+      fireEvent.click(view.getByRole('button', { name: 'drafts.keep_and_close' }))
+      await waitFor(() => expect(keep).toHaveBeenCalledOnce())
+      expect(harness.getFileTypeConfig).not.toHaveBeenCalled()
+      expect(view.queryByTestId('text-editor')).toBeNull()
+    } finally { cleanup(); release() }
+  })
   it('keeps a failed draft gated and allows retry without mounting an empty editor', async () => {
     setFileObject('retry-draft', { id: 'retry-draft', name: 'draft.md', kind: 'file' })
     useFileTypeConfigStore.getState().setFileTypeConfig('retry-draft', markdownConfig)

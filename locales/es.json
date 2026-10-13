@@ -2,6 +2,11 @@
   "drafts": {
     "reload_failed": "No se pudieron conservar los documentos sin guardar. Guarda los archivos antes de recargar.",
     "restore_failed": "No se pudieron restaurar los documentos sin guardar. Se han conservado los borradores en caché.",
+    "close_failed_description": "Reintenta la recuperación o conserva los borradores afectados para recuperarlos la próxima vez y cierra sus documentos.",
+    "keep_and_close": "Conservar borrador y cerrar",
+    "keep_failed": "No se pudo conservar el borrador para cerrar. El documento sigue abierto.",
+    "close_failed": "No se pudo cerrar la ventana de forma segura. Tus documentos siguen abiertos. Inténtalo de nuevo.",
+    "error_details": "Detalles del error",
     "restored": "Se recuperaron {{count}} documentos sin guardar."
   },
   "link_editing": {

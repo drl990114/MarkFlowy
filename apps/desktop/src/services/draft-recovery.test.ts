@@ -12,6 +12,7 @@ import { readStableFileSnapshot } from '@/components/EditorArea/fileSnapshot'
 import { markExternalFileConflict } from '@/components/EditorArea/externalFileChanges'
 import {
   closeWithDraftRecovery,
+  retainPendingDrafts,
   listenForDraftReload,
   type DraftDocument,
   type DraftSession,
@@ -66,6 +67,29 @@ const createCache = () => {
       .map(([, value]) => value as DraftSession)
   return { cache, data, save, sessions }
 }
+
+describe('retaining failed recovery sources', () => {
+  it('copies reload text into durable storage before the WebView session disappears', async () => {
+    const key = `${RELOAD_DOCUMENT_PREFIX}retained`
+    window.sessionStorage.setItem(key, JSON.stringify('only unsaved text'))
+    const { cache, sessions } = createCache()
+    await retainPendingDrafts(cache, 'main', '/w', [{
+      id: 'reload', name: 'reload.md', source: { kind: 'reload', key },
+    }])
+    window.sessionStorage.removeItem(key)
+    expect(sessions()).toEqual([{ version: 1, rootPath: '/w', documents: [{
+      id: 'reload', name: 'reload.md', content: 'only unsaved text',
+    }] }])
+  })
+
+  it('refuses to preserve a missing reload body as an empty draft', async () => {
+    const { cache, save } = createCache()
+    await expect(retainPendingDrafts(cache, 'main', '/w', [{
+      id: 'missing', name: 'missing.md', source: { kind: 'reload', key: `${RELOAD_DOCUMENT_PREFIX}missing` },
+    }])).rejects.toThrow('unavailable')
+    expect(save).not.toHaveBeenCalled()
+  })
+})
 
 // Exercise the production staged coordinator through both persistence sources.
 const restoreDraftSession = async (cache: DraftSessionStore, signal?: AbortSignal) =>

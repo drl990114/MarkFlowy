@@ -74,6 +74,12 @@ beforeEach(() => {
 })
 
 describe('history CLI receipts', () => {
+  it.each(['history_draft_changed', 'history_snapshot_mismatch', 'history_corrupt', 'invalid_draft_owner'])(
+    'preserves the native %s error code', async (code) => {
+      mocks.call.mockRejectedValue(new Error(code))
+      await expect(runHistoryCli(request('historyList'), 'file')).rejects.toMatchObject({ code })
+    },
+  )
   it('captures one baseline before external edits without saving the editor', async () => {
     const result = await runHistoryCli(request('historyBegin'), 'file')
     expect(result.code).toBe('history_started')

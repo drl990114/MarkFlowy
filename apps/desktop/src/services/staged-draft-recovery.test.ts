@@ -11,14 +11,16 @@ import { markExternalFileConflict } from '@/components/EditorArea/externalFileCh
 import type { FileSnapshotResult } from '@/components/EditorArea/fileSnapshot'
 import {
   closeWithDraftRecovery,
+  captureProtectedDraftSession,
   listenForDraftReload,
   RELOAD_SESSION_KEY,
   type DraftDocument,
   type DraftSession,
   type DraftSessionStore,
 } from './draft-recovery'
-import { isDraftRecoveryPending, waitForDraftRecovery, waitForAllDraftRecovery } from './draftRecoveryState'
-import { bindRecoveredDraft, flushDraftProtection, historyCall, protectLocalEdit } from './local-history'
+import { isDraftRecoveryPending, keepDraftRecoveryAndClose, waitForDraftRecovery, waitForAllDraftRecovery } from './draftRecoveryState'
+import { bindRecoveredDraft, flushDraftProtection, historyCall, protectLocalEdit, retainHistoryDraftOnClose } from './local-history'
+import { dialog } from './dialog'
 import { stageDraftRecovery } from './staged-draft-recovery'
 import { nativeRecoveryDocument, type DraftDescriptor, type DraftManifest } from './draftSessionFormat'
 import { restoreWindowDocuments, type WindowSession } from './window-session'
@@ -34,6 +36,8 @@ vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: () => true })
 vi.mock('@tauri-apps/api/window', () => ({ getCurrentWindow: () => ({ label: 'main' }) }))
 vi.mock('@/helper/logger', () => ({ logger: { error: vi.fn() } }))
 vi.mock('zens', () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
+vi.mock('./dialog', () => ({ dialog: { confirm: vi.fn() } }))
+vi.mock('@/i18n', () => ({ t: (key: string) => key }))
 vi.mock('@/components/EditorArea/externalFileChanges', () => ({ markExternalFileConflict: vi.fn() }))
 vi.mock('./local-history', () => ({
   bindRecoveredDraft: vi.fn().mockResolvedValue(undefined),
@@ -50,6 +54,7 @@ vi.mock('./local-history', () => ({
   })),
   isUntouchedRecoveredDraft: () => true,
   ownsHistoryDraft: () => false,
+  retainHistoryDraftOnClose: vi.fn().mockResolvedValue(undefined),
 }))
 
 enableMapSet()
@@ -96,6 +101,7 @@ beforeEach(() => {
   vi.mocked(historyCall).mockResolvedValue([])
   vi.mocked(flushDraftProtection).mockResolvedValue(undefined)
   vi.mocked(bindRecoveredDraft).mockResolvedValue(undefined)
+  vi.mocked(dialog.confirm).mockReset().mockResolvedValue('cancel')
   calls.length = 0
   background.deferred = false
   background.tasks.length = 0
@@ -224,6 +230,38 @@ describe('indexed draft recovery', () => {
     expect(claimed[1]).toEqual({ ...item, document: { ...item.document, generation: 2 } })
     expect(getFileObject('active').content).toBe('preserved through history clear')
   })
+  it('refreshes an advanced draft reference and claims its latest body with the same claim id', async () => {
+    const item = descriptor('active')
+    const latest = {
+      ...item, sequence: 13, hash: 'latest-hash', diskRevision: 'r2', paused: false,
+      format: { encoding: 'utf-16le' as const, bom: 'utf16le' as const },
+    }
+    open('active')
+    useEditorStore.getState().setActiveId('active')
+    const attempts: { draft: DraftDescriptor; claimId: string }[] = []
+    vi.mocked(historyCall).mockImplementation(async (op, payload) => {
+      if (op === 'recoveryDraftIndex') return (payload as { workspace: string }).workspace === '/w' ? [item] : []
+      if (op === 'document') return item.document
+      if (op === 'draftDescriptor') return latest
+      if (op !== 'claimRecoveryDraft') throw new Error(`Unexpected operation ${op}`)
+      const attempt = payload as { draft: DraftDescriptor; claimId: string }
+      attempts.push({ ...attempt })
+      if (attempt.draft.sequence === item.sequence) throw new Error('history_draft_changed')
+      return { ...latest, writer: `main:${attempt.claimId}`, content: 'newest protected body' }
+    })
+    const onError = vi.fn()
+    const recovery = await start({ onError })
+    settle('active', snapshot('disk', 'r2'))
+    await recovery.finished
+    expect(onError).not.toHaveBeenCalled()
+    expect(attempts.map((attempt) => attempt.draft)).toEqual([item, latest])
+    expect(new Set(attempts.map((attempt) => attempt.claimId)).size).toBe(1)
+    expect(historyCall).toHaveBeenCalledWith('draftDescriptor', { document: item.document, writer: item.writer })
+    expect(getFileObject('active').content).toBe('newest protected body')
+    expect(fileSaveCoordinator.getPersistedFormat('active')).toEqual(latest.format)
+    expect(bindRecoveredDraft).toHaveBeenCalledWith('active', expect.objectContaining({ sequence: 13, paused: false }))
+    expect(isDraftRecoveryPending('active')).toBe(false)
+  })
   it('releases a losing multi-window claim without leaving a dirty empty placeholder or blocking close', async () => {
     open('active', 'known clean disk content')
     useEditorStore.getState().setActiveId('active')
@@ -241,6 +279,60 @@ describe('indexed draft recovery', () => {
     const close = vi.fn(async () => {})
     await closeWithDraftRecovery(cache, 'main', close)
     expect(close).toHaveBeenCalledOnce()
+  })
+
+  it.each(['history_corrupt', 'history_snapshot_mismatch', 'history_draft_changed', 'moved'])
+  ('keeps the gate and source when recovery cannot safely refresh (%s)', async (failure) => {
+    const item = descriptor('active')
+    open('active')
+    useEditorStore.getState().setActiveId('active')
+    let claims = 0
+    vi.mocked(historyCall).mockImplementation(async (op, payload) => {
+      if (op === 'recoveryDraftIndex') return (payload as { workspace: string }).workspace === '/w' ? [item] : []
+      if (op === 'document') return failure === 'moved' ? { ...item.document, path: '/elsewhere/a.md' } : item.document
+      if (op === 'draftDescriptor') return { ...item, sequence: item.sequence + claims }
+      claims++
+      throw new Error(failure === 'moved' ? 'history_draft_changed' : failure)
+    })
+    const onError = vi.fn()
+    const recovery = await start({ onError })
+    settle('active')
+    await recovery.finished
+    expect(claims).toBe(failure === 'history_draft_changed' ? 3 : 1)
+    expect(onError).toHaveBeenCalledOnce()
+    expect(isDraftRecoveryPending('active')).toBe(true)
+    expect(getFileObject('active').content).toBeUndefined()
+    expect(bindRecoveredDraft).not.toHaveBeenCalled()
+  })
+
+  it('refreshes an already-claimed draft after a lost response without changing the claim id', async () => {
+    const item = descriptor('active')
+    open('active')
+    useEditorStore.getState().setActiveId('active')
+    let claimId = ''
+    const latest = { ...item, sequence: 15, hash: 'advanced-claim' }
+    vi.mocked(historyCall).mockImplementation(async (op, payload) => {
+      if (op === 'recoveryDraftIndex') return (payload as { workspace: string }).workspace === '/w' ? [item] : []
+      if (op === 'document') return item.document
+      if (op === 'draftDescriptor') {
+        const writer = (payload as { writer: string }).writer
+        return writer === item.writer ? null : { ...latest, writer }
+      }
+      const requested = payload as { draft: DraftDescriptor; claimId: string }
+      if (!claimId) {
+        claimId = requested.claimId
+        throw new Error('history_draft_changed')
+      }
+      expect(requested.claimId).toBe(claimId)
+      expect(requested.draft).toEqual(latest)
+      return { ...latest, writer: `main:${claimId}`, content: 'advanced claimed body' }
+    })
+    const onError = vi.fn()
+    const recovery = await start({ onError })
+    settle('active')
+    await recovery.finished
+    expect(onError).not.toHaveBeenCalled()
+    expect(getFileObject('active').content).toBe('advanced claimed body')
   })
   it('does not request hidden bodies before first paint, and promotes a selected hidden document', async () => {
     background.deferred = true
@@ -325,8 +417,12 @@ describe('indexed draft recovery', () => {
     expect(isDraftRecoveryPending('active')).toBe(true)
     expect(getFileObject('active').content).toBeUndefined()
     const close = vi.fn(async () => {})
-    await expect(closeWithDraftRecovery(cache, 'main', close)).rejects.toThrow('IPC reply lost')
+    await expect(closeWithDraftRecovery(cache, 'main', close)).resolves.toBe(false)
     expect(close).not.toHaveBeenCalled()
+    expect(dialog.confirm).toHaveBeenCalledWith(expect.objectContaining({
+      title: 'drafts.restore_failed',
+      actions: expect.arrayContaining([{ id: 'keep', label: 'drafts.keep_and_close' }]),
+    }))
     expect(data.has('draft-session:old')).toBe(true)
     fail = false
     const retry = waitForAllDraftRecovery()
@@ -356,6 +452,114 @@ describe('indexed draft recovery', () => {
     expect(fileSaveCoordinator.getDiskRevision('active')).toBe('r2')
     expect(fileSaveCoordinator.getPersistedFormat('active')).toEqual(current.format)
     expect(markExternalFileConflict).not.toHaveBeenCalled()
+  })
+
+  it('retains a failed native reference durably before closing the tab and window', async () => {
+    const item = descriptor('active')
+    open('active')
+    useEditorStore.getState().setActiveId('active')
+    vi.mocked(historyCall).mockImplementation(async (op, payload) => {
+      if (op === 'recoveryDraftIndex') return (payload as { workspace: string }).workspace === '/w' ? [item] : []
+      throw new Error('history_corrupt')
+    })
+    const { cache, data } = cacheFor([])
+    const recovery = await start({ cache, onError: vi.fn() })
+    settle('active')
+    await recovery.finished
+    const oldKeys = new Set(data.keys())
+    let persisted = false
+    vi.mocked(cache.save).mockImplementation(async () => {
+      if (isDraftRecoveryPending('active')) {
+        expect(useEditorStore.getState().opened).toContain('active')
+        persisted = true
+      }
+    })
+    vi.mocked(dialog.confirm).mockResolvedValue('keep')
+    const close = vi.fn(async () => {
+      expect(persisted).toBe(true)
+      expect(useEditorStore.getState().opened).not.toContain('active')
+      // The real window-close callback flushes this session again.
+      await expect(captureProtectedDraftSession()).resolves.toMatchObject({ documents: [] })
+    })
+    await expect(closeWithDraftRecovery(cache, 'main', close)).resolves.toBe(true)
+    const retained = [...data].filter(([key]) => !oldKeys.has(key))
+      .map(([, session]) => session as DraftManifest)
+      .find((session) => session.documents.length)
+    expect(retained?.documents[0].source).toEqual({ kind: 'native', draft: item, claimId: expect.any(String) })
+    expect(close).toHaveBeenCalledOnce()
+    expect(isDraftRecoveryPending('active')).toBe(false)
+    expect(retainHistoryDraftOnClose).toHaveBeenCalledWith('active')
+    expect(historyCall).not.toHaveBeenCalledWith('finishDraft', expect.anything())
+    expect(historyCall).not.toHaveBeenCalledWith('checkpoint', expect.anything())
+    expect(protectLocalEdit).not.toHaveBeenCalled()
+  })
+
+  it('keeps the tab gated if retaining it fails and allows another keep attempt', async () => {
+    const item = descriptor('active')
+    open('active')
+    useEditorStore.getState().setActiveId('active')
+    vi.mocked(historyCall).mockImplementation(async (op, payload) => {
+      if (op === 'recoveryDraftIndex') return (payload as { workspace: string }).workspace === '/w' ? [item] : []
+      throw new Error('history_corrupt')
+    })
+    const { cache, data } = cacheFor([])
+    const recovery = await start({ cache, onError: vi.fn() })
+    settle('active')
+    await recovery.finished
+    const originalKeys = [...data.keys()]
+    vi.mocked(cache.save).mockRejectedValueOnce(new Error('disk full'))
+    await expect(keepDraftRecoveryAndClose('active')).rejects.toThrow('disk full')
+    expect(isDraftRecoveryPending('active')).toBe(true)
+    expect(useEditorStore.getState().opened).toContain('active')
+    expect(retainHistoryDraftOnClose).not.toHaveBeenCalled()
+    expect([...data.keys()]).toEqual(originalKeys)
+    await keepDraftRecoveryAndClose('active')
+    expect(isDraftRecoveryPending('active')).toBe(false)
+    expect(useEditorStore.getState().opened).not.toContain('active')
+  })
+
+  it('rolls back a retained snapshot if the document changes before close', async () => {
+    const item = descriptor('active')
+    open('active')
+    useEditorStore.getState().setActiveId('active')
+    vi.mocked(historyCall).mockImplementation(async (op, payload) => {
+      if (op === 'recoveryDraftIndex') return (payload as { workspace: string }).workspace === '/w' ? [item] : []
+      throw new Error('history_corrupt')
+    })
+    const { cache, data } = cacheFor([])
+    const recovery = await start({ cache, onError: vi.fn() })
+    settle('active')
+    await recovery.finished
+    const originalKeys = [...data.keys()]
+    vi.mocked(cache.save).mockImplementationOnce(async () => { updateFile({ id: 'active', content: 'new content' }) })
+    await expect(keepDraftRecoveryAndClose('active')).rejects.toThrow('document changed')
+    expect(isDraftRecoveryPending('active')).toBe(true)
+    expect(useEditorStore.getState().opened).toContain('active')
+    expect(getFileObject('active').content).toBe('new content')
+    expect([...data.keys()]).toEqual(originalKeys)
+    expect(retainHistoryDraftOnClose).not.toHaveBeenCalled()
+  })
+
+  it('retains published text after a binding failure and recovers it on the next startup', async () => {
+    const item = descriptor('active')
+    open('active')
+    useEditorStore.getState().setActiveId('active')
+    installNative([item])
+    vi.mocked(bindRecoveredDraft).mockRejectedValue(new Error('binding failed'))
+    const { cache, data } = cacheFor([])
+    const recovery = await start({ cache, onError: vi.fn() })
+    settle('active')
+    await recovery.finished
+    expect(getFileObject('active').content).toBe('active.md recovered')
+    await keepDraftRecoveryAndClose('active')
+    const bodySession = [...data.values()].find((value) => (value as DraftSession).version === 1) as DraftSession
+    expect(bodySession.documents[0].content).toBe('active.md recovered')
+    vi.mocked(bindRecoveredDraft).mockResolvedValue(undefined)
+    vi.mocked(historyCall).mockImplementation(async (op) => op === 'recoveryDraftIndex' ? [] : null)
+    const restored = await start({ cache, onError: vi.fn() })
+    settle('active')
+    await restored.finished
+    expect(useEditorStore.getState().opened.map((id) => getFileObject(id).content)).toEqual(['active.md recovered'])
   })
 
   it('preserves divergent native writers as separate drafts instead of overwriting one', async () => {

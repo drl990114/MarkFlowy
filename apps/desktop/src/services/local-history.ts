@@ -546,6 +546,22 @@ export async function protectDiscard(fileIds: string[]) {
   }
 }
 
+/** A failed recovery has been durably retained elsewhere. Closing its tab must
+ * release any partially bound writer without retiring the recoverable draft. */
+export async function retainHistoryDraftOnClose(fileId: string) {
+  tasks.get(fileId)?.cancel()
+  tasks.delete(fileId)
+  await tails.get(fileId)
+  const binding = bindings.get(fileId)
+  if (!binding) return
+  const document = await binding.document
+  await historyCall('presence', { documentId: document.id, owner: binding.writer, dirty: false })
+  if (bindings.get(fileId) === binding) {
+    bindings.delete(fileId)
+    edits.delete(fileId)
+  }
+}
+
 /** Release bodies only after close, final editor publication and durable work. */
 export async function releaseClosedFileContent(fileId: string): Promise<boolean> {
   const closed = () =>

@@ -2,6 +2,11 @@
   "drafts": {
     "reload_failed": "未能暂存未保存文档，请先保存文件再刷新。",
     "restore_failed": "未能恢复未保存文档，已保留缓存中的草稿。",
+    "close_failed_description": "可以重试恢复，或保留这些草稿以便下次恢复，并关闭对应文档。",
+    "keep_and_close": "保留草稿并关闭",
+    "keep_failed": "未能为关闭文档保留草稿，文档仍保持打开。",
+    "close_failed": "未能安全关闭窗口，文档仍保持打开，请重试。",
+    "error_details": "错误详情",
     "restored": "已恢复 {{count}} 份未保存文档。"
   },
   "link_editing": {

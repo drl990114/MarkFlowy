@@ -2,7 +2,12 @@ import { startThemeLibrary } from '@/themes/library'
 import { flushEditorResumeStates } from '@/stores/editorResumeStore'
 import { closeWithDraftRecovery, listenForDraftReload } from '@/services/draft-recovery'
 import { stageDraftRecovery } from '@/services/staged-draft-recovery'
-import { waitForAllDraftRecovery } from '@/services/draftRecoveryState'
+import {
+  pendingDraftRecoveryIds,
+  subscribeDraftRecovery,
+  waitForAllDraftRecovery,
+} from '@/services/draftRecoveryState'
+import { resolveDraftRecoveryBeforeClose } from '@/services/draftRecoveryActions'
 import { commandRegistry } from '@/commands'
 import { listenForCliRequests } from '@/services/cli'
 import bus from '@/helper/eventBus'
@@ -145,6 +150,9 @@ async function performWorkspaceSwitch(path: string | undefined) {
       return false
     }
   }
+  // Session capture waits for recovery too. Resolve failed drafts before that
+  // flush so the user can retry, preserve them or cancel the workspace switch.
+  if (!await resolveDraftRecoveryBeforeClose()) return false
   const preservingDocuments = !path || !useEditorStore.getState().getRootPath()
   await windowSessionPersistence?.flush()
   const didSwitch = path ? await switchWorkspaceSession(path, persistence) : await attachWorkspaceSession(undefined, persistence)
@@ -421,19 +429,37 @@ const startDeferredAppSetup = () => {
 export const useAppRuntimeSetup = () => {
   useEffect(() => {
     let disposed = false
+    let startupReady = false
+    let connecting = false
     let stop: (() => void) | undefined
+    const connect = () => {
+      if (disposed || !startupReady || connecting || pendingDraftRecoveryIds().length) return
+      connecting = true
+      void listenForCliRequests()
+        .then((unlisten) => {
+          stop = unlisten
+          if (disposed) stop()
+        })
+        .catch((error) => logger.error('Failed to initialize CLI requests', error))
+    }
+    const unsubscribe = subscribeDraftRecovery(connect)
     // Wait for restored workspace/drafts before accepting mutations from a cold CLI launch.
     void startAppSetup()
       .then(waitForStartupInteractive)
-      .then(waitForAllDraftRecovery)
       .then(async () => {
         if (disposed) return
-        stop = await listenForCliRequests()
-        if (disposed) stop()
+        // A failed draft stays gated until the user retries or keeps and closes
+        // it. Stay subscribed without repeatedly retrying a corrupt draft.
+        await waitForAllDraftRecovery().catch((error) =>
+          logger.error('Draft recovery is blocking CLI requests', error),
+        )
+        startupReady = true
+        connect()
       })
       .catch((error) => logger.error('Failed to initialize CLI requests', error))
     return () => {
       disposed = true
+      unsubscribe()
       stop?.()
     }
   }, [])
@@ -470,7 +496,7 @@ export const useAppRuntimeSetup = () => {
         )
         .catch((error) => {
           logger.error('Failed to close window safely', error)
-          toast.error(`Failed to close window: ${error}`)
+          toast.error(t('drafts.close_failed'))
           return false
         })
       closeWindowPromise = closeAttempt

@@ -6,6 +6,7 @@ import { dialog } from '@/services/dialog'
 import { useEditorStateStore } from '@/stores'
 import { t } from '@/i18n'
 import { isDraftRecoveryPending, waitForDraftRecovery } from './draftRecoveryState'
+import { resolveDraftRecoveryBeforeClose } from './draftRecoveryActions'
 
 interface CheckUnsavedFilesParams {
   fileIds: string[]
@@ -107,8 +108,7 @@ const guardUnsavedFileIds = async (params: GuardUnsavedFilesParams, hasUnsavedFi
 }
 
 export const guardUnsavedFilesAsync = async (params: GuardUnsavedFilesParams) => {
-  if (params.fileIds.some(isDraftRecoveryPending))
-    await Promise.all(params.fileIds.map((id) => waitForDraftRecovery(id)))
+  if (!await resolveDraftRecoveryBeforeClose(params.fileIds)) return false
   return guardUnsavedFileIds(params, getUnsavedFileIds(params.fileIds))
 }
 
@@ -117,19 +117,20 @@ export const guardUnsavedFiles = (params: GuardUnsavedFilesParams) => {
 
   void guardUnsavedFilesAsync(params).catch((error) => {
     logger.error('Discard protection failed', error)
-    toast.error(String(error))
+    toast.error(t('history.failed'))
   })
 
   return hasUnsavedFiles.length
 }
 
 export const checkUnsavedFiles = (params: CheckUnsavedFilesParams) => {
-  const hasUnsavedFiles = getUnsavedFileIds(params.fileIds)
+  const hasUnsavedFiles = unique([
+    ...getUnsavedFileIds(params.fileIds), ...params.fileIds.filter(isDraftRecoveryPending),
+  ])
 
   if (hasUnsavedFiles.length > 0) {
     void (async () => {
-      if (params.fileIds.some(isDraftRecoveryPending))
-        await Promise.all(params.fileIds.map((id) => waitForDraftRecovery(id)))
+      if (!await resolveDraftRecoveryBeforeClose(params.fileIds)) return
       const remaining = getUnsavedFileIds(params.fileIds)
       if (!remaining.length) {
         await params.onUnsavedAndClose?.([])
@@ -144,7 +145,7 @@ export const checkUnsavedFiles = (params: CheckUnsavedFilesParams) => {
     })()
       .catch((error) => {
         logger.error('Discard protection failed', error)
-        toast.error(String(error))
+        toast.error(t('history.failed'))
       })
   }
 

@@ -17,7 +17,7 @@ import useEditorStateStore from '@/stores/useEditorStateStore'
 import useEditorStore, { type EditorLayoutNode } from '@/stores/useEditorStore'
 import { afterStartupInteractive } from '@/startup/interactive'
 import { markStartupStage } from '@/startup/performance'
-import { removeReloadSnapshot, type DraftSessionStore } from './draft-recovery'
+import { removeReloadSnapshot, retainPendingDrafts, type DraftSessionStore } from './draft-recovery'
 import {
   recoverySessionSchema,
   recoveryDocuments,
@@ -40,6 +40,7 @@ import {
   protectLocalEdit,
   startDraftProtection,
   ownsHistoryDraft,
+  retainHistoryDraftOnClose,
   type HistoryDocument,
   type PersistedDraft,
 } from './local-history'
@@ -67,6 +68,8 @@ interface RecoveryJob {
   settle: () => void
   succeeded: boolean
   unavailable: boolean
+  kept?: boolean
+  keeping?: Promise<void>
   original?: IFile
 }
 
@@ -311,21 +314,39 @@ export async function stageDraftRecovery({
           ownerPrefix: `${getCurrentWindow().label}:`,
           claimId: source.claimId,
         })
-      try {
-        claimed = (await claim()) ?? undefined
-      } catch (error) {
-        if (controller.signal.aborted || !String(error).includes('history_invalidated')) throw error
-        const current = await historyCall<HistoryDocument>('document', {
-          id: source.draft.document.id,
-        })
-        const previous = source.draft.document
-        if (!sameRecoveryDocument(current, previous)) throw error
-        // Clearing/disabling history advances its generation, but preserves drafts.
-        // Refresh only that handle; the native transaction still verifies the exact
-        // writer, sequence, hash, baseline, format and current liveness claim.
-        source.draft = { ...source.draft, document: current }
-        if (controller.signal.aborted) throw error
-        claimed = (await claim()) ?? undefined
+      for (let attempt = 0; ; attempt++) {
+        try {
+          claimed = (await claim()) ?? undefined
+          break
+        } catch (error) {
+          const changed = String(error).includes('history_draft_changed')
+          if (
+            controller.signal.aborted || attempt >= 2 ||
+            (!changed && !String(error).includes('history_invalidated'))
+          ) throw error
+          const current = await historyCall<HistoryDocument>('document', {
+            id: source.draft.document.id,
+          })
+          if (!sameRecoveryDocument(current, source.draft.document)) throw error
+          if (changed) {
+            // Refresh the same writer, never a different window's candidate. A lost
+            // IPC response may have already moved it to this idempotent claim id.
+            const latest = await historyCall<DraftDescriptor | null>('draftDescriptor', {
+              document: current, writer: source.draft.writer,
+            }) ?? await historyCall<DraftDescriptor | null>('draftDescriptor', {
+              document: current, writer: `${getCurrentWindow().label}:${source.claimId}`,
+            })
+            if (!latest) return { key, claimed: undefined }
+            if (!sameRecoveryDocument(latest.document, current)) throw error
+            source.draft = { ...latest, writer: source.draft.writer }
+          } else {
+            // Clearing/disabling history advances its generation but preserves drafts.
+            source.draft = { ...source.draft, document: current }
+          }
+          // Retry through the native transaction: exact version, liveness and
+          // checksum validation still apply, including if the row changes again.
+          if (controller.signal.aborted) throw error
+        }
       }
     }
     return { key, claimed }
@@ -426,6 +447,47 @@ export async function stageDraftRecovery({
       })
       bound.add(draft.writer)
     }
+  }
+
+  const keepAndClose = (job: RecoveryJob): Promise<void> => {
+    if (job.keeping) return job.keeping
+    job.keeping = (async () => {
+      // A foreground retry can finish while the confirmation is open. Never
+      // close that newly recovered editor without the normal unsaved check.
+      await job.ready?.catch(() => undefined)
+      if (job.succeeded || job.unavailable || job.kept) return
+      const file = getFileObject(job.fileId)
+      const revision = fileSaveCoordinator.getRevision(job.fileId)
+      const assertCurrent = () => {
+        if (
+          controller.signal.aborted || !file ||
+          !useEditorStore.getState().opened.includes(job.fileId) ||
+          getFileObject(job.fileId) !== file ||
+          fileSaveCoordinator.getRevision(job.fileId) !== revision
+        ) throw new Error('The document changed while its draft was being preserved.')
+      }
+      assertCurrent()
+      const documents = job.candidates.map((candidate) => candidate.document)
+      if (job.published) documents.push(snapshot(job))
+      const rollback = await retainPendingDrafts(cache, getCurrentWindow().label, rootPath, documents)
+      try {
+        assertCurrent()
+        await retainHistoryDraftOnClose(job.fileId)
+        assertCurrent()
+        job.kept = true
+        // Keep the recovery gate until the document is removed. Its placeholder
+        // must never be read or checkpointed as an empty/discarded document.
+        useEditorStore.getState().delOpenedFile(job.fileId)
+        useEditorStateStore.getState().delIdStateMap(job.fileId)
+        job.release()
+        job.settle()
+        if (![...jobs.values()].some((item) => isDraftRecoveryPending(item.fileId))) cleanup()
+      } catch (error) {
+        await rollback()
+        throw error
+      }
+    })().finally(() => { job.keeping = undefined })
+    return job.keeping
   }
 
   const reconcileRecoveredDisk = (
@@ -535,7 +597,8 @@ export async function stageDraftRecovery({
   }
   let initialFinished = false
   const start = (job: RecoveryJob, priority: OpeningReadPriority): Promise<void> => {
-    if (job.succeeded || job.unavailable) return Promise.resolve()
+    if (job.succeeded || job.unavailable || job.kept) return Promise.resolve()
+    if (job.keeping) return job.keeping
     if (priority === 'foreground' || job.priority === 'background') job.priority = priority
     queue.promote(job.fileId, scope, job.priority)
     if (job.document.path) promoteOpeningRead(job.document.path, scope, job.priority)
@@ -643,6 +706,7 @@ export async function stageDraftRecovery({
         file.id,
         (priority) => start(registered, priority),
         () => snapshot(registered),
+        () => keepAndClose(registered),
       )
       jobs.set(file.id, job)
     }

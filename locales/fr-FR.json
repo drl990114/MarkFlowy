@@ -2,6 +2,11 @@
   "drafts": {
     "reload_failed": "Impossible de conserver les documents non enregistrés. Enregistrez vos fichiers avant de recharger.",
     "restore_failed": "Impossible de restaurer les documents non enregistrés. Les brouillons en cache ont été conservés.",
+    "close_failed_description": "Réessayez la récupération, ou conservez les brouillons concernés pour les récupérer la prochaine fois et fermez leurs documents.",
+    "keep_and_close": "Conserver le brouillon et fermer",
+    "keep_failed": "Impossible de conserver le brouillon avant la fermeture. Le document reste ouvert.",
+    "close_failed": "Impossible de fermer la fenêtre en toute sécurité. Vos documents restent ouverts. Veuillez réessayer.",
+    "error_details": "Détails de l’erreur",
     "restored": "{{count}} documents non enregistrés ont été récupérés."
   },
   "link_editing": {

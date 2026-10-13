@@ -12,12 +12,20 @@ import useFileCacheStore, { getFileObject } from '@/helper/files'
 import { getFileTypeConfig, isSupportedMode, isTextfileType } from '@/helper/fileTypeHandler'
 import { logger } from '@/helper/logger'
 import { isEmptyEditor } from '@/services/editor-file'
-import { isDraftRecoveryPending, waitForDraftRecovery } from '@/services/draftRecoveryState'
+import {
+  canKeepDraftRecovery,
+  draftRecoveryCompletion,
+  isDraftRecoveryPending,
+  subscribeDraftRecovery,
+  waitForDraftRecovery,
+} from '@/services/draftRecoveryState'
+import { DraftRecoveryErrorDetails, keepFailedDraftAndClose } from '@/services/draftRecoveryActions'
+import { Button } from '@/components/ui/button'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import 'overlayscrollbars/overlayscrollbars.css'
-import { memo, useEffect, useState, type MouseEventHandler } from 'react'
+import { memo, useEffect, useState, useSyncExternalStore, type MouseEventHandler } from 'react'
 import { EmptyState } from './EmptyState'
 import { isEditorPanelBlankTarget, scheduleActiveEditorFocus } from './focusActiveEditor'
 import { PreviewContent } from './preview/PreviewContent'
@@ -38,8 +46,9 @@ function Editor(props: EditorProps) {
   const { id, active, visible = active, groupId } = props
   const [pending, setPending] = useState(true)
   const [draftReady, setDraftReady] = useState(() => !isDraftRecoveryPending(id))
-  const [draftError, setDraftError] = useState(false)
+  const [draftError, setDraftError] = useState<{ error: unknown }>()
   const [draftAttempt, setDraftAttempt] = useState(0)
+  const draftCompletion = useSyncExternalStore(subscribeDraftRecovery, () => draftRecoveryCompletion(id))
   const [shouldMountContent, setShouldMountContent] = useState(visible)
   const hasBeenVisible = visible || shouldMountContent
   const fileName = useFileCacheStore((state) => state.entries[id]?.name)
@@ -66,12 +75,13 @@ function Editor(props: EditorProps) {
       if (isDraftRecoveryPending(id)) {
         try {
           await waitForDraftRecovery(id, 'visible')
-        } catch {
-          if (!disposed) setDraftError(true)
+        } catch (error) {
+          if (!disposed) setDraftError({ error })
           return
         }
       }
       if (disposed) return
+      setDraftError(undefined)
       setDraftReady(true)
       const curFile = getFileObject(id)
       if (!curFile) return
@@ -137,7 +147,7 @@ function Editor(props: EditorProps) {
     return () => {
       disposed = true
     }
-  }, [draftAttempt, groupId, hasBeenVisible, id, setFileTypeConfig])
+  }, [draftAttempt, draftCompletion, groupId, hasBeenVisible, id, setFileTypeConfig])
 
   useEffect(() => {
     if (active && visible && draftError) markStartupInteractive('error')
@@ -176,8 +186,14 @@ function Editor(props: EditorProps) {
           state={{
             status: 'error',
             title: t('drafts.restore_failed'),
+            description: <DraftRecoveryErrorDetails error={draftError.error} />,
+            action: canKeepDraftRecovery(id) ? (
+              <Button onClick={() => { void keepFailedDraftAndClose(id) }} size='sm' variant='outline'>
+                {t('drafts.keep_and_close')}
+              </Button>
+            ) : undefined,
             retry: () => {
-              setDraftError(false)
+              setDraftError(undefined)
               setDraftAttempt((attempt) => attempt + 1)
             },
           }}

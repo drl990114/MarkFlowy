@@ -23,6 +23,7 @@ import {
 import { attachWorkspaceSession, switchWorkspaceSession } from './workspace-session'
 import { refreshWorkspaceDirectory } from './workspace-refresh'
 import { markPristineDocument } from './pristine-document'
+import { isDraftRecoveryPending, registerDraftRecovery } from './draftRecoveryState'
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn().mockResolvedValue(true) }))
 vi.mock('zens', () => ({ toast: { error: vi.fn() } }))
@@ -94,6 +95,21 @@ describe('workspace editor sessions', () => {
       .reverse()
       .forEach((cleanup) => cleanup())
     await persistence.dispose()
+  })
+
+  it.each(['cancel', 'keep'])('handles failed recovery before switching workspaces (%s)', async (action) => {
+    const failed = openDocument('/one/failed.md')
+    editDocument(failed)
+    const release = registerDraftRecovery(failed.id, async () => { throw new Error('history_corrupt') }, undefined, async () => {
+      useEditorStore.getState().delOpenedFile(failed.id)
+      useEditorStateStore.getState().delIdStateMap(failed.id)
+      release()
+    })
+    cleanups.push(release)
+    vi.mocked(dialog.confirm).mockResolvedValue(action)
+    await expect(switchWorkspaceSession('/two', persistence)).resolves.toBe(action === 'keep')
+    expect(useEditorStore.getState().getRootPath()).toBe(action === 'keep' ? '/two' : '/one')
+    expect(isDraftRecoveryPending(failed.id)).toBe(action === 'cancel')
   })
 
   it('attaches a folder and merges its history without prompting or replacing edited documents', async () => {
