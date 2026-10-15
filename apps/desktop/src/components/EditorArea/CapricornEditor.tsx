@@ -52,6 +52,7 @@ export interface CapricornRuntimeRequestIdentity {
 export interface CapricornEditorProps {
   onLoadingChange?: (pending: boolean) => void
   active: boolean
+  autoFocus?: boolean
   contentRevision?: number
   visible?: boolean
   editorId?: string
@@ -73,6 +74,7 @@ export interface CapricornEditorProps {
 export function CapricornEditor({
   onLoadingChange,
   active,
+  autoFocus = true,
   contentRevision = 0,
   visible = active,
   editorId,
@@ -110,6 +112,7 @@ export function CapricornEditor({
   const contentRevisionRef = useRef(contentRevision)
   const initialMarkdownRef = useRef(initialMarkdown)
   const activeRef = useRef(active)
+  const autoFocusRef = useRef(autoFocus)
   const visibleRef = useRef(visible)
   const startRuntimeRef = useRef<(() => void) | undefined>(undefined)
   const pendingAutoFocusRef = useRef(false)
@@ -158,6 +161,7 @@ export function CapricornEditor({
   }
   contentRevisionRef.current = contentRevision
   activeRef.current = active
+  autoFocusRef.current = autoFocus
   visibleRef.current = visible
   onChangeRef.current = onChange
   onErrorRef.current = onError
@@ -256,7 +260,7 @@ export function CapricornEditor({
         'innerHeight' in viewport ? viewport.innerHeight : viewport.clientHeight
       return {
         ...optionsRef.current,
-        autoFocus: activeRef.current && optionsRef.current.mode !== 'preview',
+        autoFocus: autoFocusRef.current && activeRef.current && optionsRef.current.mode !== 'preview',
         getScrollableContainer,
         markdown: latestMarkdownRef.current,
         mode: optionsRef.current.mode ?? 'edit',
@@ -328,7 +332,7 @@ export function CapricornEditor({
         runtimeRequestSequence: current.runtimeRequestSequence,
       }
       container.dataset.mfCapricornRuntimeRequest = String(current.runtimeRequestSequence)
-      pendingAutoFocusRef.current = current.asynchronous && optionsRef.current.mode !== 'preview'
+      pendingAutoFocusRef.current = autoFocusRef.current && current.asynchronous && optionsRef.current.mode !== 'preview'
       setInlineSurface({ editor: adapter, element: container })
       onEditorChangeRef.current?.(adapter)
       setState('ready')
@@ -516,7 +520,7 @@ export function CapricornEditor({
       containerRef.current &&
       (adapter !== previous?.adapter || !previous?.visible || (active && !previous.active))
     ) {
-      if (active && mode === 'edit' && pendingAutoFocusRef.current) {
+      if (autoFocusRef.current && active && mode === 'edit' && pendingAutoFocusRef.current) {
         pendingAutoFocusRef.current = false
         adapterRef.current?.focus()
       }
@@ -542,7 +546,7 @@ export function CapricornEditor({
       if (canceled || adapterRef.current !== adapter) return
       adapter.setMode(mode)
       pendingAutoFocusRef.current = false
-      if (mode === 'edit' && activeRef.current && visibleRef.current) adapter.focus()
+      if (autoFocusRef.current && mode === 'edit' && activeRef.current && visibleRef.current) adapter.focus()
     })
     return () => {
       canceled = true

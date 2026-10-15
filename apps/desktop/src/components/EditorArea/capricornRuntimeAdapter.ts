@@ -7,6 +7,7 @@ export type {
 } from '@/features/snippets/types'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { createCapricornResumeApi } from './capricornResume'
+import { createCapricornMarkdownSelectionApi } from './capricornMarkdownSelection'
 import { getCapricornActiveHeadingId } from './capricornHeadingViewport'
 import {
   setEmbeddedCodeMirrorViewResolver,
@@ -390,6 +391,7 @@ export function getCapricornFirstPaintBlockSize(viewportHeight: number): number 
 
 export interface CapricornRuntimeAdapter {
   readonly resume?: ReturnType<typeof createCapricornResumeApi>
+  readonly markdownSelection?: ReturnType<typeof createCapricornMarkdownSelectionApi>
   captureEmbeddedCodeFocus?: () => EmbeddedCodeFocusSnapshot | null
   validateKeybindings: (configuration: CapricornKeybindingConfiguration) => {
     ok: boolean
@@ -548,6 +550,7 @@ export function createCapricornRuntimeAdapter({
     validateKeybindings: (configuration) =>
       session.keybindings.validateConfiguration(configuration),
     resume: createCapricornResumeApi(session),
+    markdownSelection: createCapricornMarkdownSelectionApi(session),
     captureEmbeddedCodeFocus: embeddedCodeFocus.capture,
     selection: session.selection,
     requestInlineEdit,

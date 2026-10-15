@@ -16,6 +16,7 @@ import {
   releaseClosedFileContent,
 } from '@/services/local-history'
 import { bindEditorResume, bindSourceEditorResume } from './editorResume'
+import { captureEditorModeFocus } from './editorModeFocus'
 import { editorAutomationRegistry, type EditorAutomationHandle } from './editorAutomationRegistry'
 import { exportHtmlDocument } from './exportHtmlDocument'
 import { setSourceCodeEditor } from './sourceCodeEditorRegistry'
@@ -862,10 +863,22 @@ function TextEditor(props: TextEditorProps) {
   const MfEditor = rmeRuntime?.Editor
   const [preparingMode, setPreparingMode] = useState<EditorViewTypeValue | null>(null)
   const modeRequestRef = useRef(0)
+  const modeFocusRef = useRef<ReturnType<typeof captureEditorModeFocus>>(undefined)
+  const modeTargetRef = useRef<EditorViewTypeValue | undefined>(undefined)
+  const modeSelectionRef = useRef<{
+    mode: EditorViewTypeValue
+    markdown: string
+    anchor: number
+    head: number
+  } | undefined>(undefined)
   useEffect(() => {
     if (!active || !visible) setPreparingMode(null)
     return () => {
       modeRequestRef.current += 1
+      modeFocusRef.current?.cancel()
+      modeFocusRef.current = undefined
+      modeSelectionRef.current = undefined
+      modeTargetRef.current = undefined
     }
   }, [active, visible])
   const [content, setContent] = useState<string | undefined>()
@@ -1804,11 +1817,26 @@ function TextEditor(props: TextEditorProps) {
       // Selecting the current view also cancels a switch waiting on a save.
       if (currentViewType === payload) {
         modeRequestRef.current += 1
+        modeFocusRef.current?.cancel()
+        modeFocusRef.current = undefined
+        modeSelectionRef.current = undefined
+        modeTargetRef.current = undefined
         setPreparingMode(null)
         return
       }
       if (editorTypeSwitchingRef.current) return
       const request = ++modeRequestRef.current
+      modeFocusRef.current?.cancel()
+      modeSelectionRef.current = undefined
+      modeTargetRef.current = undefined
+      const focusRequest =
+        payload !== EditorViewType.PREVIEW &&
+        activeRef.current &&
+        visibleRef.current &&
+        editorWrapperRef.current
+          ? captureEditorModeFocus(editorWrapperRef.current)
+          : undefined
+      modeFocusRef.current = focusRequest
       const wasActive = activeRef.current
       const wasVisible = visibleRef.current
       const isCurrentRequest = () =>
@@ -1827,6 +1855,7 @@ function TextEditor(props: TextEditorProps) {
           if (needsCapricornRuntime) await loadCapricornRuntimeFactory()
           else preparedRuntime = await prepareRmeRuntime()
         } catch (error) {
+          focusRequest?.cancel()
           if (isCurrentRequest()) {
             setPreparingMode(null)
             logger.error('Unable to prepare editor mode', error)
@@ -1835,7 +1864,10 @@ function TextEditor(props: TextEditorProps) {
           return
         }
         // Another mode, tab or document may have been selected during the import.
-        if (!isCurrentRequest()) return
+        if (!isCurrentRequest()) {
+          focusRequest?.cancel()
+          return
+        }
       }
 
       if (isHtml) {
@@ -1845,51 +1877,89 @@ function TextEditor(props: TextEditorProps) {
       }
 
       editorTypeSwitchingRef.current = true
+      let switched = false
+      let saveSucceeded = false
+      const finishSwitch = () => {
+        editorTypeSwitchingRef.current = false
+        if (!switched) focusRequest?.cancel()
+        if (request === modeRequestRef.current) {
+          if (!switched) modeSelectionRef.current = undefined
+          setPreparingMode(null)
+        }
+      }
+      const completeSwitch = async () => {
+        if (!isCurrentRequest()) return
+        // Capture after loading and saving: the user can keep editing and moving
+        // the caret while either operation is pending.
+        if (fileTypeConfig.type === 'markdown') {
+          if (currentViewType === EditorViewType.SOURCECODE && payload === EditorViewType.WYSIWYG) {
+            const source = sourceCodeViewRegistry.get(curFile.id, instanceIdRef.current!)
+            if (source && !source.isDestroyed) {
+              const { anchor, head } = source.cm.state.selection.main
+              modeSelectionRef.current = {
+                mode: payload,
+                markdown: source.cm.state.doc.toString(),
+                anchor,
+                head,
+              }
+            }
+          } else if (currentViewType === EditorViewType.WYSIWYG && payload === EditorViewType.SOURCECODE) {
+            const selection = await capricornRuntimeAdapterRef.current?.markdownSelection?.capture()
+            if (!isCurrentRequest()) return
+            if (selection) modeSelectionRef.current = { mode: payload, ...selection }
+          }
+        }
+        if (!isCurrentRequest()) return
+        let sourceCodeDelegate: ReturnType<typeof createDelegate> | undefined
+        try {
+          if (payload === EditorViewType.SOURCECODE && preparedRuntime) {
+            sourceCodeDelegate = createDelegate(preparedRuntime, fileTypeConfig.type)
+          }
+        } catch (error) {
+          logger.error('Unable to prepare source editor', error)
+          toast.error(t('document_preview.load_failed'))
+          return
+        }
+        clearSwitchingEditorContextResource(curFile.id, instanceIdRef.current!)
+        if (payload !== EditorViewType.SOURCECODE) {
+          unregisterSourceCodeViewResource(curFile.id, instanceIdRef.current!)
+        }
+        const switchingFromCapricorn = isCapricornView(currentViewType)
+        if (isCapricornView(payload)) {
+          unregisterRmeEditorResources(curFile.id, instanceIdRef.current!)
+          editorContextRef.current = null
+          setDelegate(null)
+        } else if (sourceCodeDelegate) {
+          registerEditorDelegateResource(
+            curFile.id,
+            instanceIdRef.current!,
+            sourceCodeDelegate,
+            activeRef.current,
+          )
+          setResumeSource(null)
+          setDelegate(sourceCodeDelegate)
+        } else if (payload === EditorViewType.PREVIEW) {
+          debounceRefreshToc()
+        }
+        useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
+        modeTargetRef.current = payload === EditorViewType.PREVIEW ? undefined : payload
+        setCurrentViewType(payload)
+        switched = true
+        if (!switchingFromCapricorn && !isCapricornView(payload)) {
+          editorRef.current?.toggleType(payload)
+        }
+      }
       // Save only after preparation: the current editor remains usable while
       // loading, and any edits made during that time must reach the new mode.
       bus.emit(EVENT.app_save, undefined, {
         onSuccess: () => {
-          if (!isCurrentRequest()) return
-          let sourceCodeDelegate: ReturnType<typeof createDelegate> | undefined
-          try {
-            if (payload === EditorViewType.SOURCECODE && preparedRuntime) {
-              sourceCodeDelegate = createDelegate(preparedRuntime, fileTypeConfig.type)
-            }
-          } catch (error) {
-            logger.error('Unable to prepare source editor', error)
-            toast.error(t('document_preview.load_failed'))
-            return
-          }
-          clearSwitchingEditorContextResource(curFile.id, instanceIdRef.current!)
-          if (payload !== EditorViewType.SOURCECODE) {
-            unregisterSourceCodeViewResource(curFile.id, instanceIdRef.current!)
-          }
-          const switchingFromCapricorn = isCapricornView(currentViewType)
-          if (isCapricornView(payload)) {
-            unregisterRmeEditorResources(curFile.id, instanceIdRef.current!)
-            editorContextRef.current = null
-            setDelegate(null)
-          } else if (sourceCodeDelegate) {
-            registerEditorDelegateResource(
-              curFile.id,
-              instanceIdRef.current!,
-              sourceCodeDelegate,
-              activeRef.current,
-            )
-            setResumeSource(null)
-            setDelegate(sourceCodeDelegate)
-          } else if (payload === EditorViewType.PREVIEW) {
-            debounceRefreshToc()
-          }
-          useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
-          setCurrentViewType(payload)
-          if (!switchingFromCapricorn && !isCapricornView(payload)) {
-            editorRef.current?.toggleType(payload)
-          }
+          saveSucceeded = true
+          void completeSwitch().catch((error) => {
+            logger.error('Unable to switch editor mode', error)
+          }).finally(finishSwitch)
         },
         onFinally: () => {
-          editorTypeSwitchingRef.current = false
-          if (request === modeRequestRef.current) setPreparingMode(null)
+          if (!saveSucceeded) finishSwitch()
         },
       })
     },
@@ -2693,6 +2763,7 @@ function TextEditor(props: TextEditorProps) {
       group: groupId ?? '',
       isVisible: () => visibleRef.current,
       shouldRestore: () => {
+        if (modeSelectionRef.current?.mode === currentViewType) return false
         const navigation = useEditorSearchStore.getState().navigation
         return navigation?.fileId !== id || navigation.groupId !== groupId
       },
@@ -2741,6 +2812,59 @@ function TextEditor(props: TextEditorProps) {
     visible,
     isCapricornView,
   ])
+
+  useEffect(() => {
+    const focusRequest = modeFocusRef.current
+    const selection = modeSelectionRef.current
+    if ((!focusRequest && !selection && modeTargetRef.current !== currentViewType) || !active || !visible) return
+    let canceled = false
+    const request = modeRequestRef.current
+    const isCurrent = () => !canceled && request === modeRequestRef.current
+    const canRestoreSelection = () => {
+      const navigation = useEditorSearchStore.getState().navigation
+      return navigation?.fileId !== id || navigation.groupId !== groupId
+    }
+    const finish = (focus: () => void) => {
+      modeSelectionRef.current = undefined
+      modeFocusRef.current = undefined
+      modeTargetRef.current = undefined
+      focusRequest?.restore(focus)
+    }
+    if (currentViewType === EditorViewType.SOURCECODE && resumeSource?.cm.dom.isConnected) {
+      const initialSelection = resumeSource.cm.state.selection
+      const frame = requestAnimationFrame(() => {
+        if (!isCurrent() || resumeSource.isDestroyed) return
+        if (
+          canRestoreSelection() &&
+          resumeSource.cm.state.selection === initialSelection &&
+          selection?.mode === currentViewType && selection.markdown === resumeSource.content
+        ) {
+          resumeSource.cm.dispatch({
+            selection: {
+              anchor: resumeSource.toCodeMirrorPosition(selection.anchor),
+              head: resumeSource.toCodeMirrorPosition(selection.head),
+            },
+            scrollIntoView: true,
+          })
+        }
+        finish(() => resumeSource.cm.focus())
+      })
+      return () => cancelAnimationFrame(frame)
+    }
+    if (currentViewType !== EditorViewType.WYSIWYG || !resumeCapricorn || runtimePending) return
+    void (async () => {
+      if (canRestoreSelection() && selection?.mode === currentViewType) {
+        const mapped = await resumeCapricorn.markdownSelection?.resolve(selection.markdown, selection)
+        if (!isCurrent()) return
+        if (mapped && canRestoreSelection()) resumeCapricorn.resume?.restore(mapped)
+      }
+      if (isCurrent()) finish(() => resumeCapricorn.focus())
+    })().catch((error) => {
+      logger.error('Unable to restore editor mode selection', error)
+      if (isCurrent()) finish(() => resumeCapricorn.focus())
+    })
+    return () => { canceled = true }
+  }, [active, visible, currentViewType, resumeSource, resumeCapricorn, runtimePending, id, groupId])
 
   const getOpeningState = () => {
     const openingFailed =
@@ -3027,6 +3151,7 @@ function TextEditor(props: TextEditorProps) {
         ) : isCapricornView(currentViewType) ? (
           <CapricornEditor
             active={active}
+            autoFocus={modeTargetRef.current !== currentViewType}
             contentRevision={fileSaveCoordinator.getRevision(id)}
             visible={visible}
             editorId={id}

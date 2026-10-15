@@ -1,6 +1,8 @@
+// @vitest-environment jsdom
+import { EditorView } from '@codemirror/view'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { enableMapSet } from 'immer'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import type * as Rme from 'rme'
 import type * as Zens from 'zens'
 import { EVENT } from '@/constants'
@@ -8,10 +10,12 @@ import { EditorViewType } from '@/constants/editorViewType'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import bus from '@/helper/eventBus'
 import { getFileObject, setFileObject } from '@/helper/files'
+import { createEditorResumeStore } from '@/stores/editorResumeStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import TextEditor from './TextEditor'
 import { getCapricornEditor } from './capricornEditorRegistry'
+import { getCapricornRuntimeInput } from './capricornRuntimeDom'
 import { EXTERNAL_FILE_CONTENT_SYNC_EVENT } from './externalFileChanges'
 import { sourceCodeCodemirrorViewMap } from './sourceCodeEditorRegistry'
 import * as rmeRuntime from './rmeRuntime'
@@ -100,6 +104,13 @@ vi.mock('@/services/local-history', () => ({
 }))
 
 enableMapSet()
+beforeAll(() => {
+  Object.defineProperty(Range.prototype, 'getClientRects', { configurable: true, value: () => [] })
+  Object.defineProperty(Range.prototype, 'getBoundingClientRect', {
+    configurable: true,
+    value: () => document.createElement('div').getBoundingClientRect(),
+  })
+})
 afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
@@ -167,6 +178,10 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor opening', () => {
       expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
       const latest = '# Latest content\n\nArrived during loading.\n'
       await act(async () => bus.emit(EXTERNAL_FILE_CONTENT_SYNC_EVENT, undefined, { fileId: id, content: latest }))
+      // Remote callbacks are suppressed until the next task; resume local input
+      // after that boundary while the source runtime is still unresolved.
+      await act(async () => new Promise<void>((done) => window.setTimeout(done, 0)))
+      expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
       await act(async () => originalEditor?.commands.insertLink?.({ href: 'https://example.com', text: 'Typed while loading' }))
       const latestEdited = originalEditor!.getMarkdown()
       expect(latestEdited).toContain('Typed while loading')
@@ -212,8 +227,191 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor opening', () => {
     expect(useEditorViewTypeStore.getState().getEditorViewType(id)).toBe(EditorViewType.WYSIWYG)
   })
 
+  it('keeps focus on the same content selection across modes instead of restoring stale mode positions', async () => {
+    await rmeRuntime.loadRmeRuntime()
+    const id = 'opening-mode-focus'
+    setFileObject(id, { id, name: 'focus.md', path: '/synthetic/focus.md', kind: 'file' })
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+    createEditorResumeStore('/synthetic/focus.md', 'focus-group', 'edit').getState().save({
+      scrollTop: 0,
+      scrollLeft: 0,
+      selection: {
+        kind: 'capricorn',
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 1 },
+      },
+    })
+    const { container } = render(<TextEditor active id={id} groupId='focus-group' fileTypeConfig={{
+      type: 'markdown', defaultMode: EditorViewType.SOURCECODE,
+      supportedModes: [EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
+    }} />)
+    await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)).toBeDefined())
+    const sourceSelection = { anchor: 11, head: 4 }
+    const visualSelection = {
+      kind: 'capricorn' as const,
+      anchor: { path: [0, 0], offset: 9 },
+      focus: { path: [0, 0], offset: 2 },
+    }
+    const movedVisualSelection = {
+      kind: 'capricorn' as const,
+      anchor: { path: [1, 0], offset: 3 },
+      focus: { path: [1, 0], offset: 1 },
+    }
+    // '# Opened file\n\n' occupies 15 source characters before the body.
+    const movedSourceSelection = { anchor: 18, head: 16 }
+    await act(async () => {
+      const source = sourceCodeCodemirrorViewMap.get(id)!.cm
+      source.focus()
+      source.dispatch({ selection: sourceSelection })
+    })
+    expect(sourceCodeCodemirrorViewMap.get(id)!.cm.state.selection.main).toMatchObject(sourceSelection)
 
-  it('keeps the source editor mounted while preparing the first visual mode', async () => {
+    for (let cycle = 0; cycle < 3; cycle += 1) {
+      await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG))
+      await waitFor(() => expect(getCapricornEditor(id)).toBeDefined())
+      const visual = getCapricornEditor(id)!
+      await waitFor(() => expect(document.activeElement).toBe(getCapricornRuntimeInput(container)))
+      await waitFor(() => expect(visual.resume!.capture()).toEqual(
+        cycle === 0 ? visualSelection : movedVisualSelection,
+      ))
+      if (cycle === 0) {
+        await act(async () => expect(visual.resume!.restore(movedVisualSelection)).toBe(true))
+      }
+      await waitFor(() => expect(visual.resume!.capture()).toEqual(movedVisualSelection))
+
+      await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE))
+      await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)).toBeDefined())
+      const source = sourceCodeCodemirrorViewMap.get(id)!.cm
+      await waitFor(() => expect(source.state.selection.main).toMatchObject(movedSourceSelection))
+      await waitFor(() => expect(source.hasFocus).toBe(true))
+      expect(document.activeElement).toBe(source.contentDOM)
+      expect(source.state.selection.main).toMatchObject(movedSourceSelection)
+    }
+  })
+
+  it('does not reclaim focus from another input after deferred source preparation', async () => {
+    const runtime = await rmeRuntime.loadRmeRuntime()
+    let resolve!: (value: typeof runtime) => void
+    vi.spyOn(rmeRuntime, 'getLoadedRmeRuntime').mockReturnValue(undefined)
+    vi.spyOn(rmeRuntime, 'loadRmeRuntime').mockReturnValue(new Promise((done) => { resolve = done }))
+    const id = 'opening-source-focus-moved'
+    setFileObject(id, { id, name: 'focus-moved.md', path: '/synthetic/focus-moved.md', kind: 'file' })
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+    const { container } = render(<TextEditor active id={id} fileTypeConfig={{
+      type: 'markdown', defaultMode: EditorViewType.WYSIWYG,
+      supportedModes: [EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
+    }} />)
+    await waitFor(() => expect(getCapricornEditor(id)).toBeDefined())
+    await act(async () => getCapricornEditor(id)!.focus())
+    await waitFor(() => expect(document.activeElement).toBe(getCapricornRuntimeInput(container)))
+    await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE))
+    expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
+
+    const outsideInput = document.createElement('input')
+    document.body.append(outsideInput)
+    try {
+      outsideInput.focus()
+      await act(async () => resolve(runtime))
+      await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)).toBeDefined())
+      // Allow the selection-resume and any queued focus frames to settle.
+      await act(async () => new Promise<void>((done) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => done()))
+      }))
+      expect(document.activeElement).toBe(outsideInput)
+      expect(sourceCodeCodemirrorViewMap.get(id)!.cm.hasFocus).toBe(false)
+    } finally {
+      outsideInput.remove()
+    }
+  })
+
+  it('does not reclaim focus from another input after deferred visual preparation', async () => {
+    const factory = await capricornRuntime.loadCapricornRuntimeFactory()
+    let resolve!: (value: typeof factory) => void
+    vi.spyOn(capricornRuntime, 'getLoadedCapricornRuntimeFactory').mockReturnValue(undefined)
+    vi.spyOn(capricornRuntime, 'loadCapricornRuntimeFactory').mockReturnValue(new Promise((done) => { resolve = done }))
+    const id = 'opening-visual-focus-moved'
+    setFileObject(id, { id, name: 'visual-focus.md', path: '/synthetic/visual-focus.md', kind: 'file' })
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+    const { container } = render(<TextEditor active id={id} fileTypeConfig={{
+      type: 'markdown', defaultMode: EditorViewType.SOURCECODE,
+      supportedModes: [EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
+    }} />)
+    await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)).toBeDefined())
+    await act(async () => {
+      const source = sourceCodeCodemirrorViewMap.get(id)!.cm
+      source.focus()
+      source.dispatch({ selection: { anchor: 11, head: 4 } })
+    })
+    await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG))
+    expect(getCapricornEditor(id)).toBeUndefined()
+
+    const outsideInput = document.createElement('input')
+    document.body.append(outsideInput)
+    try {
+      outsideInput.focus()
+      await act(async () => resolve(factory))
+      await waitFor(() => expect(getCapricornEditor(id)?.resume?.capture()).toEqual({
+        kind: 'capricorn',
+        anchor: { path: [0, 0], offset: 9 },
+        focus: { path: [0, 0], offset: 2 },
+      }))
+      await act(async () => new Promise<void>((done) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => done()))
+      }))
+      expect(document.activeElement).toBe(outsideInput)
+      expect(document.activeElement).not.toBe(getCapricornRuntimeInput(container))
+    } finally {
+      outsideInput.remove()
+    }
+  })
+
+  it('transfers a directional selection into a real embedded code editor and back to source', async () => {
+    await rmeRuntime.loadRmeRuntime()
+    const id = 'opening-code-focus'
+    const prefix = 'Before\n\n```text\n'
+    const markdown = `${prefix}hello world\nsecond line\n\`\`\`\n\nAfter`
+    setFileObject(id, { id, name: 'code.md', content: markdown, kind: 'file' })
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+    const { container } = render(<TextEditor active id={id} fileTypeConfig={{
+      type: 'markdown', defaultMode: EditorViewType.SOURCECODE,
+      supportedModes: [EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
+    }} />)
+    await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)).toBeDefined())
+    await act(async () => {
+      const source = sourceCodeCodemirrorViewMap.get(id)!.cm
+      expect(source.state.doc.toString()).toBe(markdown)
+      source.focus()
+      source.dispatch({ selection: { anchor: prefix.length + 18, head: prefix.length + 2 } })
+    })
+
+    for (let cycle = 0; cycle < 2; cycle += 1) {
+      await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG))
+      await waitFor(() => expect(getCapricornEditor(id)).toBeDefined())
+      await waitFor(() => expect(container.querySelector('.cm-content')).not.toBeNull())
+      const embedded = EditorView.findFromDOM(container.querySelector<HTMLElement>('.cm-content')!)!
+      expect(embedded.state.doc.toString()).toBe('hello world\nsecond line')
+      await waitFor(() => expect(document.activeElement).toBe(embedded.contentDOM))
+      expect(embedded.state.selection.main).toMatchObject(
+        cycle === 0 ? { anchor: 18, head: 2 } : { anchor: 8, head: 3 },
+      )
+      if (cycle === 0) {
+        await act(async () => embedded.dispatch({ selection: { anchor: 8, head: 3 } }))
+      }
+
+      await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE))
+      await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)).toBeDefined())
+      const source = sourceCodeCodemirrorViewMap.get(id)!.cm
+      await waitFor(() => expect(source.hasFocus).toBe(true))
+      expect(source.state.selection.main).toMatchObject({
+        anchor: prefix.length + 8,
+        head: prefix.length + 3,
+      })
+      expect(source.state.doc.toString()).toBe(markdown)
+    }
+  })
+
+
+  it('keeps source mounted and transfers its latest selection after deferred visual preparation', async () => {
     const factory = await capricornRuntime.loadCapricornRuntimeFactory()
     let resolve!: (value: typeof factory) => void
     vi.spyOn(capricornRuntime, 'getLoadedCapricornRuntimeFactory').mockReturnValue(undefined)
@@ -221,20 +419,33 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor opening', () => {
     const id = 'opening-deferred-visual'
     setFileObject(id, { id, name: 'visual.md', path: '/synthetic/visual.md', kind: 'file' })
     useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
-    render(<TextEditor active id={id} fileTypeConfig={{
+    const { container } = render(<TextEditor active id={id} fileTypeConfig={{
       type: 'markdown', defaultMode: EditorViewType.SOURCECODE,
       supportedModes: [EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
     }} />)
     await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)).toBeDefined())
     const source = sourceCodeCodemirrorViewMap.get(id)!
+    await act(async () => {
+      source.cm.focus()
+      source.cm.dispatch({ selection: { anchor: 11, head: 4 } })
+    })
     await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG))
     expect(sourceCodeCodemirrorViewMap.get(id)).toBe(source)
     expect(source.cm.dom.isConnected).toBe(true)
     expect(getCapricornEditor(id)).toBeUndefined()
     const edited = '# Edited while preparing visual mode'
-    await act(async () => source.cm.dispatch({ changes: { from: 0, to: source.cm.state.doc.length, insert: edited } }))
+    await act(async () => source.cm.dispatch({
+      changes: { from: 0, to: source.cm.state.doc.length, insert: edited },
+      selection: { anchor: 14, head: 6 },
+    }))
     await act(async () => resolve(factory))
     await waitFor(() => expect(getCapricornEditor(id)?.getMarkdown()).toBe(edited))
+    await waitFor(() => expect(document.activeElement).toBe(getCapricornRuntimeInput(container)))
+    await waitFor(() => expect(getCapricornEditor(id)?.resume?.capture()).toEqual({
+      kind: 'capricorn',
+      anchor: { path: [0, 0], offset: 12 },
+      focus: { path: [0, 0], offset: 4 },
+    }))
     expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
   })
 
