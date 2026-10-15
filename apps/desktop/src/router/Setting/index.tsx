@@ -13,7 +13,6 @@ import useAppInfoStore from '@/stores/useAppInfoStore'
 import useLayoutStore from '@/stores/useLayoutStore'
 import useUpdaterStore from '@/stores/useUpdaterStore'
 import { invoke } from '@tauri-apps/api/core'
-import { openUrl } from '@tauri-apps/plugin-opener'
 import classNames from 'classnames'
 import { Search } from 'lucide-react'
 import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
@@ -37,6 +36,8 @@ import {
 import { Support } from './Support'
 import { ThemeSetting } from './ThemeSetting'
 import { ThemeStore } from './ThemeStore'
+import { ThemeCustomization } from './ThemeStore/ThemeCustomization'
+import type { MfTheme } from '@markflowy/theme'
 
 function isSettingGroup(
   group: Setting.SettingGroup | Setting.SettingItem,
@@ -80,6 +81,7 @@ function Setting({ navigationRequest }: SettingProps) {
   )
   const [pendingFocusTarget, setPendingFocusTarget] = useState<SettingFocusTarget>()
   const [selectedSearchEntryId, setSelectedSearchEntryId] = useState<string>()
+  const [themeSelection, setThemeSelection] = useState<{ mode?: MfTheme['mode'] }>()
   const leaveGuardRef = useRef<SettingLeaveGuard | null>(null)
   const registerLeaveGuard = useCallback((guard: SettingLeaveGuard) => {
     leaveGuardRef.current = guard
@@ -93,15 +95,14 @@ function Setting({ navigationRequest }: SettingProps) {
   const deferredSearchQuery = useDeferredValue(searchQuery)
   const normalizedSearchQuery = deferredSearchQuery.trim()
   const searchEntries = useMemo(() => createSettingSearchIndex(settingMap), [settingMap])
-  const selectedSearchEntry = selectedSearchEntryId
-    ? searchEntries.find((entry) => entry.id === selectedSearchEntryId)
-    : undefined
   const searchResults = normalizedSearchQuery
     ? filterSettingSearchEntries(searchEntries, normalizedSearchQuery, t)
     : []
 
   const curGroup = settingMap[curGroupKey] as Setting.SettingGroup
-  const curGroupKeys = Object.keys(curGroup).filter(
+  const contentGroupKey = curGroupKey === 'themeStore' ? 'display' : curGroupKey
+  const contentGroup = settingMap[contentGroupKey] as Setting.SettingGroup
+  const contentGroupKeys = Object.keys(contentGroup).filter(
     (key) => key !== 'i18nKey' && key !== 'iconName' && key !== 'desc',
   )
 
@@ -142,6 +143,7 @@ function Setting({ navigationRequest }: SettingProps) {
       setAcceptedNavigation(navigationRequest)
       setSearchQuery('')
       setSelectedSearchEntryId(undefined)
+      setThemeSelection(undefined)
       setCurGroupKey(target.category)
       setActiveChildId(target.providerId)
       setPendingFocusTarget({
@@ -200,6 +202,7 @@ function Setting({ navigationRequest }: SettingProps) {
   const handleCategorySelect = async (groupKey: SettingCategoryKey) => {
     if (groupKey !== curGroupKey && leaveGuardRef.current && !(await requestLeave())) return
     setCurGroupKey(groupKey)
+    setThemeSelection(undefined)
     setActiveChildId(undefined)
     setSelectedSearchEntryId(undefined)
   }
@@ -208,6 +211,7 @@ function Setting({ navigationRequest }: SettingProps) {
     if (entry.categoryKey !== curGroupKey && leaveGuardRef.current && !(await requestLeave()))
       return
     setCurGroupKey(entry.categoryKey)
+    setThemeSelection(undefined)
     setActiveChildId(entry.childId)
     setSelectedSearchEntryId(entry.id)
     setPendingFocusTarget({
@@ -216,6 +220,16 @@ function Setting({ navigationRequest }: SettingProps) {
       childId: entry.childId,
       settingKey: entry.settingKey,
     })
+  }
+
+  const closeThemeLibrary = () => {
+    setCurGroupKey('display')
+    setPendingFocusTarget({
+      categoryKey: 'display',
+      groupKey: 'Theme',
+      settingKey: themeSelection?.mode ? `${themeSelection.mode}_theme` : 'theme_library',
+    })
+    setThemeSelection(undefined)
   }
 
   const renderCurrentSettingData = () => {
@@ -229,45 +243,54 @@ function Setting({ navigationRequest }: SettingProps) {
       )
     if (curGroupKey === 'history') return <HistorySetting />
     if (curGroupKey === 'keyboard') return <KeyboardTable />
-    if (curGroupKey === 'themeStore') return <ThemeStore />
     if (curGroupKey === 'image') return <ImageSetting />
     if (curGroupKey === 'export') return <ExportSetting />
     if (curGroupKey === 'support') return <Support />
     if (curGroupKey === 'copilot') return <CopilotSetting />
 
-    return curGroupKeys.map((key) => {
-      const group = curGroup[key]
-      if (key === 'Theme' && curGroupKey === 'display') {
-        return <ThemeSetting key={key} revealedSettingKey={selectedSearchEntry?.settingKey} />
-      }
-      if (isSettingGroup(group)) {
-        return (
-          <SettingGroup
-            activeChildId={curGroupKey === 'ai' ? activeChildId : undefined}
-            categoryKey={curGroupKey}
-            group={group}
-            groupKey={key}
-            key={`${key}:${curGroupKey === 'ai' ? (activeChildId ?? '') : ''}`}
+    return (
+      <>
+        <div hidden={curGroupKey === 'themeStore'}>
+          {contentGroupKeys.map((key) => {
+            const group = contentGroup[key]
+            if (key === 'Theme' && contentGroupKey === 'display') {
+              return (
+                <ThemeSetting
+                  key={key}
+                  onBrowse={(mode) => {
+                    setCurGroupKey('themeStore')
+                    setThemeSelection({ mode })
+                    setPendingFocusTarget({ categoryKey: 'themeStore', groupKey: 'ThemeLibrary' })
+                  }}
+                />
+              )
+            }
+            if (isSettingGroup(group)) {
+              return (
+                <SettingGroup
+                  activeChildId={curGroupKey === 'ai' ? activeChildId : undefined}
+                  categoryKey={contentGroupKey}
+                  group={group}
+                  groupKey={key}
+                  key={`${key}:${curGroupKey === 'ai' ? (activeChildId ?? '') : ''}`}
+                />
+              )
+            }
+          })}
+          {contentGroupKey === 'display' && <ThemeCustomization />}
+        </div>
+        {curGroupKey === 'themeStore' && (
+          <ThemeStore
+            mode={themeSelection?.mode}
+            onBack={themeSelection ? closeThemeLibrary : undefined}
+            onSelected={themeSelection ? closeThemeLibrary : undefined}
           />
-        )
-      }
-    })
-  }
-
-  const handleOpenThemeStoreFile = () => {
-    openUrl('https://github.com/drl990114/MarkFlowy')
+        )}
+      </>
+    )
   }
 
   const renderAction = () => {
-    if (curGroupKey === 'themeStore') {
-      return (
-        <Button size='sm' onClick={handleOpenThemeStoreFile}>
-          <i aria-hidden className='ri-github-fill' />
-          {t('settings.themeStore.submit_theme')}
-        </Button>
-      )
-    }
-
     if (curGroupKey === 'general') {
       return (
         <Button size='sm' variant='destructive' onClick={handleResetConfiguration}>

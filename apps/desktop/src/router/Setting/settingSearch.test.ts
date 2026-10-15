@@ -21,6 +21,7 @@ const translations: Record<string, string> = {
   'settings.ai.Google.api_key.label': 'API key',
   'settings.display.theme.dark_theme.label': 'Dark theme',
   'settings.display.theme.dark_theme.desc': 'Theme used in dark mode',
+  'settings.themeStore.label': 'Theme Store',
   'settings.export.label': 'Export',
   'settings.export.pdf.label': 'PDF export',
   'settings.export.pdf.executable.label': 'PDF export browser',
@@ -66,6 +67,13 @@ describe('settings search index', () => {
 
   it('returns no results for a blank query', () => {
     expect(filterSettingSearchEntries(entries, '   ', translate)).toEqual([])
+  })
+
+  it('finds Theme Store as a separate settings category', () => {
+    expect(getSettingMap()).toHaveProperty('themeStore')
+    expect(filterSettingSearchEntries(entries, 'Theme Store', translate)).toContainEqual(
+      expect.objectContaining({ categoryKey: 'themeStore', kind: 'category' }),
+    )
   })
 
   it('finds the PDF browser setting from browser names and reveals the PDF group', () => {

@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import { open, save } from '@tauri-apps/plugin-dialog'
-import { readTextFile, writeTextFile } from '@tauri-apps/plugin-fs'
-import { fetch as nativeFetch } from '@tauri-apps/plugin-http'
+import { useQueryClient } from '@tanstack/react-query'
+import { openUrl } from '@tauri-apps/plugin-opener'
+import { builtInThemes, type MfTheme } from '@markflowy/theme'
+import { Check, ChevronDown, ArrowLeft, Download, FileJson, ExternalLink, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import {
+  DropdownMenuItemPrimitive as MenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
 import { dialog } from '@/services/dialog'
 import useThemeStore from '@/stores/useThemeStore'
-import useAppSettingStore from '@/stores/useAppSettingStore'
-import appSettingService from '@/services/app-setting'
-import { useThemeLibrary, type CssSnippet } from '@/themes/library'
+import { useThemeLibrary } from '@/themes/library'
 import { copyTheme, isSemanticTheme, themeLabel } from '@/themes/runtime'
 import {
   parseThemeDocument,
@@ -19,25 +20,33 @@ import {
 } from '@markflowy/theme/semantic'
 import themeData from '../../../../../../community-themes.json'
 import { ThemeEditor } from './ThemeEditor'
+import { ThemeListItem, ThemeMenu } from './ThemeListItem'
+import { CommunityThemeItem } from './CommunityThemeItem'
+import {
+  communityThemeQueryOptions,
+  ThemeCatalogMismatchError,
+  type ThemeItem,
+} from './communityThemes'
 import { readThemeDrafts, themeDraftKey, type ThemeDraft } from './drafts'
 import { useThemeLabels } from './labels'
-export interface ThemeItem {
-  id: string
-  name: string
-  author: string
-  url: string
-  version: string
+import { exportJson, readImport } from './files'
+import { getSettingGroupAnchorId } from '../settingSearch'
+export type { ThemeItem } from './communityThemes'
+export interface ThemeStoreProps {
+  mode?: MfTheme['mode']
+  onBack?: () => void
+  onSelected?: () => void
 }
-export function ThemeStore() {
+
+export function ThemeStore({ mode, onBack, onSelected }: ThemeStoreProps) {
   const labels = useThemeLabels()
+  const queryClient = useQueryClient()
   const library = useThemeLibrary()
-  const personalTypography = useAppSettingStore(
-    (state) => state.settingData.theme_use_personal_typography !== false,
-  )
   const themes = useThemeStore((state) => state.themes)
   const current = useThemeStore((state) => state.curTheme)
+  const lightThemeName = useThemeStore((state) => state.lightThemeName)
+  const darkThemeName = useThemeStore((state) => state.darkThemeName)
   const [editing, setEditing] = useState<ThemeDraft>()
-  const [snippet, setSnippet] = useState<CssSnippet>()
   const [drafts, setDrafts] = useState(readThemeDrafts)
   const openEditor = (document: ThemeDocument, variantId?: string) => {
     // Opening an existing theme resumes its unsaved session instead of replacing it.
@@ -94,27 +103,9 @@ export function ThemeStore() {
       await store.applyThemeSelection({
         [variant.mode === 'light' ? 'lightThemeName' : 'darkThemeName']:
           `${document.id}/${variant.id}`,
-        themeMode: variant.mode,
       })
     }
     return true
-  }
-  const exportJson = async (value: unknown, name = 'theme.json') => {
-    const path = await save({
-      defaultPath: name,
-      filters: [{ name: 'JSON', extensions: ['json'] }],
-    })
-    if (path) await writeTextFile(path, JSON.stringify(value, null, 2))
-  }
-  const readImport = async (extension: 'json' | 'css') => {
-    const path = await open({
-      multiple: false,
-      filters: [{ name: extension.toUpperCase(), extensions: [extension] }],
-      fileAccessMode: 'scoped',
-    })
-    return typeof path === 'string'
-      ? { name: path.split(/[\\/]/).pop() ?? extension, text: await readTextFile(path) }
-      : undefined
   }
   if (editing)
     return (
@@ -133,62 +124,183 @@ export function ThemeStore() {
       />
     )
   const catalog = themeData as ThemeItem[]
+  const catalogIds = new Set(catalog.map((item) => item.id))
+  const isBuiltIn = (theme: MfTheme) =>
+    !isSemanticTheme(theme) &&
+    builtInThemes.some((item) => item.name === theme.name && item.mode === theme.mode)
+  const matchesMode = (theme: MfTheme) => !mode || theme.mode === mode
+  const creationTheme = mode
+    ? (themes.find(
+        (theme) =>
+          theme.mode === mode && theme.name === (mode === 'light' ? lightThemeName : darkThemeName),
+      ) ??
+      themes.find((theme) => theme.mode === mode) ??
+      current)
+    : current
+  const builtIn = themes.filter((theme) => isBuiltIn(theme) && matchesMode(theme))
+  const local = themes.filter(
+    (theme) =>
+      matchesMode(theme) &&
+      !isBuiltIn(theme) &&
+      !(isSemanticTheme(theme) && catalogIds.has(theme.document.id)),
+  )
+  const communityThemes = new Map<string, MfTheme[]>()
+  for (const theme of themes) {
+    if (isSemanticTheme(theme) && catalogIds.has(theme.document.id)) {
+      const variants = communityThemes.get(theme.document.id) ?? []
+      variants.push(theme)
+      communityThemes.set(theme.document.id, variants)
+    }
+  }
+  const visibleCatalog = catalog.filter((item) => {
+    const installed = communityThemes.get(item.id)
+    return (!installedOnly || installed) && (!installed || installed.some(matchesMode))
+  })
+  const installTheme = (item: ThemeItem, refresh = false) =>
+    void run(async () => {
+      try {
+        const document = await queryClient.fetchQuery({
+          ...communityThemeQueryOptions(item),
+          ...(refresh && { staleTime: 0 }),
+        })
+        const variant =
+          mode && !refresh ? document.variants.find((entry) => entry.mode === mode) : undefined
+        if (mode && !refresh && !variant) {
+          throw new Error(labels[mode === 'light' ? 'noLightVariant' : 'noDarkVariant'])
+        }
+        if (await persist(document, variant?.id)) {
+          if (variant) onSelected?.()
+        }
+      } catch (cause) {
+        if (cause instanceof ThemeCatalogMismatchError) throw new Error(labels.catalogMismatch)
+        throw cause
+      }
+    })
+  const renderTheme = (theme: MfTheme, author?: string, catalogItem?: ThemeItem) => (
+    <ThemeListItem
+      key={theme.name}
+      theme={theme}
+      current={theme.name === current.name && theme.mode === current.mode}
+      selected={theme.name === (theme.mode === 'light' ? lightThemeName : darkThemeName)}
+      pending={pending}
+      author={author}
+      installed={Boolean(catalogItem)}
+      onReinstall={catalogItem ? () => installTheme(catalogItem, true) : undefined}
+      onApply={() =>
+        void run(async () => {
+          await useThemeStore.getState().applyThemeSelection({
+            [theme.mode === 'light' ? 'lightThemeName' : 'darkThemeName']: theme.name,
+          })
+          onSelected?.()
+        })
+      }
+      onCopy={() =>
+        openEditor(copyTheme(theme), isSemanticTheme(theme) ? theme.variant.id : undefined)
+      }
+      {...(isSemanticTheme(theme) && {
+        onEdit: () => openEditor(structuredClone(theme.document), theme.variant.id),
+        onExport: () => void run(() => exportJson(theme.document, `${theme.document.id}.json`)),
+        onRemove: () =>
+          void run(async () => {
+            if (
+              (await dialog.confirm({
+                title: labels.remove,
+                content: labels.deleteConfirm,
+                actions: [
+                  { id: 'cancel', label: labels.cancel },
+                  { id: 'remove', label: labels.remove, primary: true, danger: true },
+                ],
+              })) === 'remove'
+            )
+              await library.mutate({ type: 'remove', id: theme.document.id })
+          }),
+      })}
+    />
+  )
   return (
-    <div className='space-y-5 text-ui-control'>
-      <label className='flex items-center gap-2'>
-        <Checkbox
-          checked={personalTypography}
+    <div className='@container/theme-store space-y-5 text-ui-control'>
+      {onBack && (
+        <div className='space-y-2'>
+          <Button size='sm' variant='ghost' disabled={pending} onClick={onBack}>
+            <ArrowLeft aria-hidden className='size-3.5' />
+            {labels.backToAppearance}
+          </Button>
+          <h2
+            id={getSettingGroupAnchorId('themeStore', 'ThemeLibrary')}
+            tabIndex={-1}
+            className='m-0 text-ui-body font-semibold focus-visible:outline-none focus-visible:underline focus-visible:underline-offset-2'
+          >
+            {mode ? labels[mode === 'light' ? 'chooseLight' : 'chooseDark'] : labels.browseThemes}
+          </h2>
+          {mode && <p className='m-0 text-muted-foreground'>{labels.preserveMode}</p>}
+        </div>
+      )}
+      <div className='flex flex-wrap items-center justify-between gap-3'>
+        <p className='m-0 flex min-w-0 items-center gap-2 text-muted-foreground'>
+          <Check aria-hidden className='size-4 shrink-0 text-primary' />
+          <span>
+            {labels.currentTheme}:{' '}
+            <span className='font-medium text-foreground'>{themeLabel(current)}</span>
+          </span>
+        </p>
+        <ThemeMenu
+          label={labels.tools}
           disabled={pending}
-          onCheckedChange={(value) =>
-            void run(() =>
-              appSettingService.writeSettingData(
-                { key: 'theme_use_personal_typography' },
-                value === true,
-              ),
-            )
-          }
-        />
-        {labels.personalTypography}
-      </label>
-      <div className='flex flex-wrap gap-2'>
-        <Button size='sm'
-          disabled={pending}
-          onClick={() =>
-            openEditor(
-              copyTheme(current),
-              isSemanticTheme(current) ? current.variant.id : undefined,
-            )
+          trigger={
+            <>
+              {labels.tools}
+              <ChevronDown aria-hidden className='size-3.5' />
+            </>
           }
         >
-          {labels.create}
-        </Button>
-        <Button size='sm'
-          variant='outline'
-          disabled={pending}
-          onClick={() =>
-            void run(async () => {
-              const file = await readImport('json')
-              if (file) {
-                await persist(parseThemeDocument(JSON.parse(file.text)))
-              }
-            })
-          }
-        >
-          {labels.import}
-        </Button>
-        <Button size='sm'
-          variant='ghost'
-          onClick={() =>
-            void run(() => exportJson(themeDocumentSchema, 'markflowy-theme.schema.json'))
-          }
-        >
-          {labels.schema}
-        </Button>
+          <MenuItem
+            onSelect={() =>
+              openEditor(
+                copyTheme(creationTheme),
+                isSemanticTheme(creationTheme) ? creationTheme.variant.id : undefined,
+              )
+            }
+          >
+            <Plus aria-hidden className='size-3.5' />
+            {labels.create}
+          </MenuItem>
+          <MenuItem
+            onSelect={() =>
+              void run(async () => {
+                const file = await readImport('json')
+                if (file) await persist(parseThemeDocument(JSON.parse(file.text)))
+              })
+            }
+          >
+            <Download aria-hidden className='size-3.5' />
+            {labels.import}
+          </MenuItem>
+          <DropdownMenuSeparator />
+          <MenuItem
+            onSelect={() => void run(() => openUrl('https://github.com/drl990114/MarkFlowy'))}
+          >
+            <ExternalLink aria-hidden className='size-3.5' />
+            {labels.submit}
+          </MenuItem>
+          <MenuItem
+            onSelect={() =>
+              void run(() => exportJson(themeDocumentSchema, 'markflowy-theme.schema.json'))
+            }
+          >
+            <FileJson aria-hidden className='size-3.5' />
+            {labels.schema}
+          </MenuItem>
+        </ThemeMenu>
       </div>
       {(error || library.error) && (
         <div role='alert' className='text-destructive'>
           {error || library.error}
-          <Button size='sm' variant='outline' onClick={() => void run(library.reload)}>
+          <Button
+            size='sm'
+            variant='outline'
+            disabled={pending}
+            onClick={() => void run(library.reload)}
+          >
             {labels.retry}
           </Button>
         </div>
@@ -196,282 +308,105 @@ export function ThemeStore() {
       {drafts.map((draft) => (
         <div
           key={draft.key}
-          className='flex min-h-9 flex-wrap items-center gap-2 border-b border-border py-1 last:border-b-0'
+          className='flex flex-wrap items-center gap-2 rounded-md border border-border p-3'
         >
-          <span className='min-w-0 flex-1 truncate'>
+          <span className='min-w-0 flex-1 break-words'>
             {labels.draft} · {draft.session.document.name}
           </span>
           <Button size='sm' variant='outline' disabled={pending} onClick={() => setEditing(draft)}>
             {labels.resume}
           </Button>
-          <Button size='sm'
-            variant='ghost'
-            disabled={pending}
-            onClick={() => {
-              try {
-                sessionStorage.removeItem(draft.key)
-                setDrafts(readThemeDrafts())
-              } catch (cause) {
-                setError(String(cause))
-              }
-            }}
-          >
-            {labels.discard}
-          </Button>
+          <ThemeMenu label={`${labels.more}: ${draft.session.document.name}`} disabled={pending}>
+            <MenuItem
+              className='text-destructive'
+              onSelect={() => {
+                try {
+                  sessionStorage.removeItem(draft.key)
+                  setDrafts(readThemeDrafts())
+                } catch (cause) {
+                  setError(String(cause))
+                }
+              }}
+            >
+              {labels.discard}
+            </MenuItem>
+          </ThemeMenu>
         </div>
       ))}
-      <section aria-label={labels.title} className='space-y-0'>
-        <h3 className='m-0 flex min-h-8 items-center text-ui-control font-semibold'>{labels.title}</h3>
-        {themes.map((theme) => (
-          <div
-            key={theme.name}
-            className='flex min-h-9 flex-wrap items-center gap-2 border-b border-border py-1 last:border-b-0'
-          >
-            <span className='min-w-0 flex-1 truncate'>
-              {themeLabel(theme)}{' '}
-              <span className='text-muted-foreground'>· {labels[theme.mode]}</span>
-            </span>
-            <Button
-              size='sm'
-              variant='outline'
-              disabled={pending}
-              onClick={() =>
-                void run(() =>
-                  useThemeStore.getState().applyThemeSelection({
-                    [theme.mode === 'light' ? 'lightThemeName' : 'darkThemeName']: theme.name,
-                    themeMode: theme.mode,
-                  }),
+      <section aria-label={labels.builtIn} className='space-y-2'>
+        <div className='flex items-center gap-2'>
+          <h3 className='m-0 text-ui-control font-semibold'>{labels.builtIn}</h3>
+          <span className='text-ui-caption text-muted-foreground'>{builtIn.length}</span>
+        </div>
+        <p className='m-0 text-ui-caption text-muted-foreground'>{labels.builtInDescription}</p>
+        <div className='grid gap-x-4 gap-y-1 @min-[48rem]/theme-store:grid-cols-2'>
+          {builtIn.map((theme) => renderTheme(theme))}
+        </div>
+      </section>
+      <section aria-label={labels.catalog} className='space-y-2'>
+        <div className='flex flex-wrap items-center gap-2'>
+          <h3 className='m-0 text-ui-control font-semibold'>{labels.catalog}</h3>
+          <span className='text-ui-caption text-muted-foreground'>{visibleCatalog.length}</span>
+          {catalog.length > 0 && (
+            <label className='ml-auto flex items-center gap-2 text-ui-caption text-muted-foreground'>
+              <Checkbox
+                checked={installedOnly}
+                disabled={pending}
+                onCheckedChange={(value) => setInstalledOnly(value === true)}
+              />
+              {labels.installedOnly}
+            </label>
+          )}
+        </div>
+        {visibleCatalog.length === 0 && (
+          <p className='m-0 py-3 text-muted-foreground'>
+            {mode && catalog.length > 0
+              ? labels.noMatchingThemes
+              : installedOnly && catalog.length > 0
+                ? labels.noInstalled
+                : labels.emptyCatalog}
+          </p>
+        )}
+        <div className='grid gap-x-4 gap-y-1 @min-[48rem]/theme-store:grid-cols-2'>
+          {visibleCatalog.map((item) => {
+            const installed = communityThemes.get(item.id)
+            if (installed)
+              return installed
+                .filter(matchesMode)
+                .map((theme) =>
+                  renderTheme(
+                    theme,
+                    isSemanticTheme(theme) ? theme.document.author || item.author : item.author,
+                    item,
+                  ),
                 )
-              }
-            >
-              {labels.apply}
-            </Button>
-            <Button
-              size='sm'
-              variant='outline'
-              disabled={pending}
-              onClick={() =>
-                openEditor(copyTheme(theme), isSemanticTheme(theme) ? theme.variant.id : undefined)
-              }
-            >
-              {labels.copy}
-            </Button>
-            {isSemanticTheme(theme) && (
-              <>
-                <Button
-                  size='sm'
-                  variant='ghost'
-                  disabled={pending}
-                  onClick={() => openEditor(structuredClone(theme.document), theme.variant.id)}
-                >
-                  {labels.edit}
-                </Button>
-                <Button
-                  size='sm'
-                  variant='destructive'
-                  disabled={pending}
-                  onClick={() =>
-                    void run(async () => {
-                      if (
-                        (await dialog.confirm({
-                          title: labels.remove,
-                          content: labels.deleteConfirm,
-                          actions: [
-                            { id: 'cancel', label: labels.cancel },
-                            { id: 'remove', label: labels.remove, primary: true, danger: true },
-                          ],
-                        })) === 'remove'
-                      )
-                        await library.mutate({ type: 'remove', id: theme.document.id })
-                    })
-                  }
-                >
-                  {labels.remove}
-                </Button>
-              </>
+            return (
+              <CommunityThemeItem
+                key={item.id}
+                item={item}
+                mode={mode ?? current.mode}
+                selectOnInstall={Boolean(mode)}
+                pending={pending}
+                onInstall={() => installTheme(item)}
+              />
+            )
+          })}
+        </div>
+      </section>
+      {local.length > 0 && (
+        <section aria-label={labels.local} className='space-y-2'>
+          <div className='flex items-center gap-2'>
+            <h3 className='m-0 text-ui-control font-semibold'>{labels.local}</h3>
+            <span className='text-ui-caption text-muted-foreground'>{local.length}</span>
+          </div>
+          <p className='m-0 text-ui-caption text-muted-foreground'>{labels.localDescription}</p>
+          <div className='grid gap-x-4 gap-y-1 @min-[48rem]/theme-store:grid-cols-2'>
+            {local.map((theme) =>
+              renderTheme(theme, isSemanticTheme(theme) ? (theme.document.author ?? '') : ''),
             )}
           </div>
-        ))}
-      </section>
-      <section className='space-y-2' aria-label={labels.snippets}>
-        <div className='flex flex-wrap items-center gap-2'>
-          <h3 className='m-0 flex-1 text-ui-control font-semibold'>{labels.snippets}</h3>
-          <Button
-            size='sm'
-            variant='outline'
-            disabled={pending}
-            onClick={() =>
-              setSnippet({
-                id: crypto.randomUUID(),
-                name: labels.untitledCss,
-                css: '',
-                enabled: false,
-              })
-            }
-          >
-            {labels.createCss}
-          </Button>
-          <Button
-            size='sm'
-            variant='outline'
-            disabled={pending}
-            onClick={() =>
-              void run(async () => {
-                const file = await readImport('css')
-                if (file)
-                  await library.mutate({
-                    type: 'saveSnippet',
-                    snippet: {
-                      id: crypto.randomUUID(),
-                      name: file.name,
-                      css: file.text,
-                      enabled: false,
-                    },
-                  })
-              })
-            }
-          >
-            {labels.addCss}
-          </Button>
-          <Button
-            size='sm'
-            variant='outline'
-            disabled={pending}
-            onClick={() => void run(() => library.mutate({ type: 'disableSnippets' }))}
-          >
-            {labels.disableAll}
-          </Button>
-        </div>
-        {!library.snippets.length && <p className='text-muted-foreground'>{labels.noSnippets}</p>}
-        {library.snippets.map((item, index) => (
-          <div
-            key={item.id}
-            className='flex min-h-9 flex-wrap items-center gap-2 border-b border-border py-1 last:border-b-0'
-          >
-            <Checkbox
-              aria-label={`${labels.enabled}: ${item.name}`}
-              checked={item.enabled}
-              disabled={pending}
-              onCheckedChange={(enabled) =>
-                void run(() =>
-                  library.mutate({
-                    type: 'saveSnippet',
-                    snippet: { ...item, enabled: enabled === true },
-                  }),
-                )
-              }
-            />
-            <span className='min-w-0 flex-1 truncate'>{item.name}</span>
-            <Button
-              size='sm'
-              variant='ghost'
-              disabled={index === 0 || pending}
-              onClick={() =>
-                void run(() => library.mutate({ type: 'moveSnippet', id: item.id, offset: -1 }))
-              }
-            >
-              {labels.up}
-            </Button>
-            <Button
-              size='sm'
-              variant='ghost'
-              disabled={index === library.snippets.length - 1 || pending}
-              onClick={() =>
-                void run(() => library.mutate({ type: 'moveSnippet', id: item.id, offset: 1 }))
-              }
-            >
-              {labels.down}
-            </Button>
-            <Button
-              size='sm'
-              variant='outline'
-              disabled={pending}
-              onClick={() => setSnippet({ ...item })}
-            >
-              {labels.editCss}
-            </Button>
-            <Button
-              size='sm'
-              variant='destructive'
-              disabled={pending}
-              onClick={() => void run(() => library.mutate({ type: 'removeSnippet', id: item.id }))}
-            >
-              {labels.remove}
-            </Button>
-          </div>
-        ))}
-        {snippet && (
-          <fieldset
-            disabled={pending}
-            inert={pending}
-            className='m-0 min-w-0 space-y-2 border-0 border-t border-solid border-border pt-3 pr-0 pb-0 pl-0'
-          >
-            <Input inputSize='sm'
-              aria-label={labels.name}
-              value={snippet.name}
-              onChange={(event) => setSnippet({ ...snippet, name: event.target.value })}
-            />
-            <Textarea
-              aria-label={labels.css}
-              className='h-64 font-mono text-ui-control'
-              value={snippet.css}
-              onChange={(event) => setSnippet({ ...snippet, css: event.target.value })}
-            />
-            <Button size='sm'
-              disabled={pending}
-              onClick={() =>
-                void run(async () => {
-                  await library.mutate({ type: 'saveSnippet', snippet })
-                  setSnippet(undefined)
-                })
-              }
-            >
-              {labels.saveCss}
-            </Button>
-            <Button size='sm' variant='ghost' onClick={() => setSnippet(undefined)}>
-              {labels.cancel}
-            </Button>
-          </fieldset>
-        )}
-      </section>
-      <section aria-label={labels.catalog} className='space-y-0'>
-        <h3 className='m-0 flex min-h-8 items-center text-ui-control font-semibold'>{labels.catalog}</h3>
-        <label className='flex items-center gap-2'>
-          <Checkbox
-            checked={installedOnly}
-            onCheckedChange={(value) => setInstalledOnly(value === true)}
-          />
-          {labels.installedOnly}
-        </label>
-        {!catalog.length && <p className='text-muted-foreground'>{labels.emptyCatalog}</p>}
-        {catalog
-          .filter(
-            (item) =>
-              !installedOnly || library.documents.some((document) => document.id === item.id),
-          )
-          .map((item) => (
-            <div key={item.id} className='flex min-h-9 flex-wrap items-center gap-2 border-b border-border py-1 last:border-b-0'>
-              <span className='flex-1'>
-                {item.name} · {item.author} · {item.version}
-              </span>
-              <Button size='sm'
-                variant='outline'
-                disabled={pending}
-                onClick={() =>
-                  void run(async () => {
-                    const response = await nativeFetch(item.url)
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`)
-                    const document = parseThemeDocument(await response.json())
-                    if (document.id !== item.id) throw new Error(labels.catalogMismatch)
-                    await persist(document)
-                  })
-                }
-              >
-                {labels.install}
-              </Button>
-            </div>
-          ))}
-      </section>
+        </section>
+      )}
     </div>
   )
 }

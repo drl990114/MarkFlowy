@@ -13,7 +13,11 @@ import {
 } from '@/components/ui/select'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useThemeStore, { type ThemeMode } from '@/stores/useThemeStore'
-import type { ThemePreviewSelection } from '@/stores/useThemeStore'
+import type { MfTheme } from '@markflowy/theme'
+import { Check, ChevronRight, Moon, Sun } from 'lucide-react'
+import { RadioGroupRoot, RadioGroupItem } from '@/components/ui/radio-group'
+import { ThemePalette } from '../ThemeStore/ThemeListItem'
+import { useThemeLabels } from '../ThemeStore/labels'
 import {
   clearThemeAccentColorPreview,
   FOLLOW_THEME_ACCENT_COLOR,
@@ -23,7 +27,7 @@ import {
   scheduleThemeAccentColorPreview,
   THEME_ACCENT_COLOR_SETTING_KEY,
 } from '@/helper/theme'
-import { type ComponentProps, memo, useCallback, useEffect, useMemo, useRef } from 'react'
+import { memo, useCallback, useEffect, useId, useRef } from 'react'
 import { useTranslation } from '@/i18n'
 import styled, { useTheme } from 'styled-components'
 import { SettingGroupContainer } from '../component/SettingGroup/styles'
@@ -32,9 +36,6 @@ import { SettingLabel } from '../component/SettingItems/Label'
 import { getSettingGroupAnchorId } from '../settingSearch'
 
 type AccentColorMode = 'system' | 'custom'
-type ThemePreviewKind = 'mode' | 'light' | 'dark'
-
-const SELECT_WIDTH = 200
 
 const AccentColorControls = styled.div`
   display: flex;
@@ -53,10 +54,10 @@ const AccentColorControls = styled.div`
 `
 
 interface ThemeSettingProps {
-  revealedSettingKey?: string
+  onBrowse: (mode?: MfTheme['mode']) => void
 }
 
-export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => {
+export const ThemeSetting = memo(({ onBrowse }: ThemeSettingProps) => {
   const { settingData } = useAppSettingStore()
   const libraryLoaded = useThemeLibrary((state) => state.loaded)
   const {
@@ -65,31 +66,23 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
     lightThemeName,
     darkThemeName,
     setThemeMode,
-    setLightTheme,
-    setDarkTheme,
-    previewTheme,
-    restoreThemePreview,
+    curTheme,
     commitAccentColor,
   } = useThemeStore()
   const { t } = useTranslation()
   const resolvedTheme = useTheme()
 
-  const lightThemes = useMemo(
-    () => themes.filter((themeItem) => themeItem.mode === 'light'),
-    [themes],
-  )
-  const darkThemes = useMemo(
-    () => themes.filter((themeItem) => themeItem.mode === 'dark'),
-    [themes],
-  )
-
+  const labels = useThemeLabels()
+  const modeId = useId()
   const currentThemeMode = (settingData.theme_mode as ThemeMode) || themeMode
   const selectedLightTheme = String(settingData.light_theme || lightThemeName)
   const selectedDarkTheme = String(settingData.dark_theme || darkThemeName)
   const missingLightTheme =
-    libraryLoaded && !lightThemes.some((theme) => theme.name === selectedLightTheme)
+    libraryLoaded &&
+    !themes.some((theme) => theme.mode === 'light' && theme.name === selectedLightTheme)
   const missingDarkTheme =
-    libraryLoaded && !darkThemes.some((theme) => theme.name === selectedDarkTheme)
+    libraryLoaded &&
+    !themes.some((theme) => theme.mode === 'dark' && theme.name === selectedDarkTheme)
   const unavailableThemes = [
     ...(missingLightTheme ? [selectedLightTheme] : []),
     ...(missingDarkTheme ? [selectedDarkTheme] : []),
@@ -105,84 +98,6 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
   const persistQueueRef = useRef<Promise<void>>(Promise.resolve())
   const pendingPersistCountRef = useRef(0)
   const latestCommitRef = useRef<{ generation: number; value: string } | undefined>(undefined)
-  const themePreviewGenerationRef = useRef(0)
-  const themePreviewSessionRef = useRef<
-    | {
-        canPreview: boolean
-        committed: boolean
-        generation: number
-        kind: ThemePreviewKind
-        previewedValue?: string
-      }
-    | undefined
-  >(undefined)
-
-  const handleThemePreviewOpenChange = useCallback(
-    (kind: ThemePreviewKind, open: boolean) => {
-      if (open) {
-        const previousSession = themePreviewSessionRef.current
-        if (previousSession?.previewedValue && !previousSession.committed) restoreThemePreview()
-        themePreviewGenerationRef.current += 1
-        themePreviewSessionRef.current = {
-          canPreview: false,
-          committed: false,
-          generation: themePreviewGenerationRef.current,
-          kind,
-        }
-        return
-      }
-
-      const session = themePreviewSessionRef.current
-      if (!session || session.kind !== kind) return
-
-      queueMicrotask(() => {
-        const currentSession = themePreviewSessionRef.current
-        if (!currentSession || currentSession.generation !== session.generation) return
-        if (currentSession.previewedValue && !currentSession.committed) restoreThemePreview()
-        themePreviewSessionRef.current = undefined
-      })
-    },
-    [restoreThemePreview],
-  )
-
-  const enableThemePreview = useCallback((kind: ThemePreviewKind) => {
-    const session = themePreviewSessionRef.current
-    if (session?.kind === kind) session.canPreview = true
-  }, [])
-
-  const previewThemeSelection = useCallback(
-    (kind: ThemePreviewKind, selection: ThemePreviewSelection) => {
-      const session = themePreviewSessionRef.current
-      // Radix focuses the selected item on open. Only explicit navigation should preview it.
-      if (!session || session.kind !== kind || !session.canPreview || session.committed) return
-
-      const value = selection.lightThemeName ?? selection.darkThemeName ?? selection.themeMode
-      if (!value || session.previewedValue === value) return
-      session.previewedValue = value
-      previewTheme(selection)
-    },
-    [previewTheme],
-  )
-
-  const getThemePreviewItemProps = (
-    kind: ThemePreviewKind,
-    selection: ThemePreviewSelection,
-  ): Pick<ComponentProps<typeof SelectItem>, 'onFocus' | 'onPointerMove'> => ({
-    onFocus: () => previewThemeSelection(kind, selection),
-    onPointerMove: (event) => {
-      if (event.pointerType !== 'mouse') return
-      enableThemePreview(kind)
-      // The initially focused item must also preview when the pointer moves onto it.
-      previewThemeSelection(kind, selection)
-    },
-  })
-
-  const commitThemeSelection = useCallback((kind: ThemePreviewKind, commit: () => void) => {
-    const session = themePreviewSessionRef.current
-    if (session?.kind === kind) session.committed = true
-    commit()
-  }, [])
-
   const persistAccentColor = useCallback(
     (value: string, generation: number) => {
       const currentSetting = normalizeThemeAccentColor(
@@ -239,15 +154,8 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
       if (previewActiveRef.current) {
         persistAccentColor(draftAccentColorRef.current, previewGenerationRef.current)
       }
-      if (
-        themePreviewSessionRef.current?.previewedValue &&
-        !themePreviewSessionRef.current.committed
-      ) {
-        restoreThemePreview()
-      }
-      themePreviewSessionRef.current = undefined
     }
-  }, [persistAccentColor, restoreThemePreview])
+  }, [persistAccentColor])
 
   const handleAccentColorModeChange = (mode: AccentColorMode) => {
     const generation = previewGenerationRef.current + 1
@@ -311,7 +219,7 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
       )}
 
       <div className='setting-group__items'>
-        <SettingItemContainer $settingKey='theme_mode'>
+        <SettingItemContainer $settingKey='theme_mode' className='flex-wrap'>
           <SettingLabel
             item={{
               key: 'theme_mode',
@@ -319,133 +227,84 @@ export const ThemeSetting = memo(({ revealedSettingKey }: ThemeSettingProps) => 
               desc: { i18nKey: 'settings.display.theme.mode.desc' },
             }}
           />
-          <Select
-            onOpenChange={(open) => handleThemePreviewOpenChange('mode', open)}
+          <RadioGroupRoot
+            aria-label={t('settings.display.theme.mode.label')}
+            orientation='horizontal'
+            className='flex flex-wrap gap-x-4 gap-y-2'
             value={currentThemeMode}
-            onValueChange={(value) => {
-              commitThemeSelection('mode', () => setThemeMode(value as ThemeMode))
-            }}
+            onValueChange={(value) => setThemeMode(value as ThemeMode)}
           >
-            <SelectTrigger
-              size='sm'
-              aria-label={t('settings.display.theme.mode.label')}
-              style={{ width: SELECT_WIDTH }}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent onKeyDownCapture={() => enableThemePreview('mode')}>
-              <SelectItem
-                {...getThemePreviewItemProps('mode', { themeMode: 'system' })}
-                value='system'
-              >
-                {t('settings.display.theme.mode.system')}
-              </SelectItem>
-              <SelectItem
-                {...getThemePreviewItemProps('mode', { themeMode: 'light' })}
-                value='light'
-              >
-                {t('settings.display.theme.mode.light')}
-              </SelectItem>
-              <SelectItem {...getThemePreviewItemProps('mode', { themeMode: 'dark' })} value='dark'>
-                {t('settings.display.theme.mode.dark')}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+            {(['system', 'light', 'dark'] as const).map((mode) => (
+              <label key={mode} htmlFor={`${modeId}-${mode}`} className='flex items-center gap-1.5'>
+                <RadioGroupItem id={`${modeId}-${mode}`} value={mode} />
+                {t(`settings.display.theme.mode.${mode}`)}
+              </label>
+            ))}
+          </RadioGroupRoot>
         </SettingItemContainer>
 
-        {(currentThemeMode === 'light' ||
-          currentThemeMode === 'system' ||
-          revealedSettingKey === 'light_theme') && (
-          <SettingItemContainer $settingKey='light_theme'>
-            <SettingLabel
-              item={{
-                key: 'light_theme',
-                title: { i18nKey: 'settings.display.theme.light_theme.label' },
-                desc: { i18nKey: 'settings.display.theme.light_theme.desc' },
-              }}
-            />
-            <Select
-              onOpenChange={(open) => handleThemePreviewOpenChange('light', open)}
-              value={selectedLightTheme}
-              onValueChange={(value) => {
-                commitThemeSelection('light', () => setLightTheme(value))
-              }}
-            >
-              <SelectTrigger
-                size='sm'
-                aria-label={t('settings.display.theme.light_theme.label')}
-                style={{ width: SELECT_WIDTH }}
-              >
-                <SelectValue>
-                  {missingLightTheme
-                    ? t('settings.display.theme.unavailable', { name: selectedLightTheme })
-                    : undefined}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent onKeyDownCapture={() => enableThemePreview('light')}>
-                {lightThemes.map((themeItem) => (
-                  <SelectItem
-                    key={themeItem.name}
-                    {...getThemePreviewItemProps('light', {
-                      lightThemeName: themeItem.name,
-                      themeMode: 'light',
-                    })}
-                    value={themeItem.name}
-                  >
-                    {themeLabel(themeItem)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </SettingItemContainer>
-        )}
-
-        {(currentThemeMode === 'dark' ||
-          currentThemeMode === 'system' ||
-          revealedSettingKey === 'dark_theme') && (
-          <SettingItemContainer $settingKey='dark_theme'>
-            <SettingLabel
-              item={{
-                key: 'dark_theme',
-                title: { i18nKey: 'settings.display.theme.dark_theme.label' },
-                desc: { i18nKey: 'settings.display.theme.dark_theme.desc' },
-              }}
-            />
-            <Select
-              onOpenChange={(open) => handleThemePreviewOpenChange('dark', open)}
-              value={selectedDarkTheme}
-              onValueChange={(value) => {
-                commitThemeSelection('dark', () => setDarkTheme(value))
-              }}
-            >
-              <SelectTrigger
-                size='sm'
-                aria-label={t('settings.display.theme.dark_theme.label')}
-                style={{ width: SELECT_WIDTH }}
-              >
-                <SelectValue>
-                  {missingDarkTheme
-                    ? t('settings.display.theme.unavailable', { name: selectedDarkTheme })
-                    : undefined}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent onKeyDownCapture={() => enableThemePreview('dark')}>
-                {darkThemes.map((themeItem) => (
-                  <SelectItem
-                    key={themeItem.name}
-                    {...getThemePreviewItemProps('dark', {
-                      darkThemeName: themeItem.name,
-                      themeMode: 'dark',
-                    })}
-                    value={themeItem.name}
-                  >
-                    {themeLabel(themeItem)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </SettingItemContainer>
-        )}
+        <div className='@container/theme-choice py-3'>
+          <div className='grid gap-3 @min-[32rem]/theme-choice:grid-cols-2'>
+            {(['light', 'dark'] as const).map((mode) => {
+              const name = mode === 'light' ? selectedLightTheme : selectedDarkTheme
+              const theme = themes.find((item) => item.mode === mode && item.name === name)
+              const active = curTheme.mode === mode && curTheme.name === name
+              const missing = mode === 'light' ? missingLightTheme : missingDarkTheme
+              const ModeIcon = mode === 'light' ? Sun : Moon
+              return (
+                <section
+                  key={mode}
+                  aria-label={t(`settings.display.theme.${mode}_theme.label`)}
+                  data-setting-key={`${mode}_theme`}
+                  className='min-w-0 rounded-md border border-border bg-background p-3'
+                >
+                  <div className='mb-3 flex items-center gap-1.5 text-muted-foreground'>
+                    <ModeIcon aria-hidden className='size-3.5' />
+                    {t(`settings.display.theme.${mode}_theme.label`)}
+                  </div>
+                  <div className='flex flex-wrap items-center gap-3'>
+                    {theme && <ThemePalette theme={theme} />}
+                    <div className='min-w-0 flex-1 basis-24'>
+                      <p className='m-0 break-words font-medium'>
+                        {missing
+                          ? t('settings.display.theme.unavailable', { name })
+                          : theme
+                            ? themeLabel(theme)
+                            : name}
+                      </p>
+                      <p
+                        className='m-0 mt-1 flex items-center gap-1 text-ui-caption text-muted-foreground'
+                        aria-live='polite'
+                      >
+                        {active && <Check aria-hidden className='size-3 text-primary' />}
+                        {active
+                          ? labels.active
+                          : labels[mode === 'light' ? 'useInLight' : 'useInDark']}
+                      </p>
+                    </div>
+                  </div>
+                  <div className='mt-3 flex justify-end'>
+                    <Button
+                      size='sm'
+                      variant='outline'
+                      aria-label={labels[mode === 'light' ? 'changeLight' : 'changeDark']}
+                      onClick={() => onBrowse(mode)}
+                    >
+                      {labels.changeTheme}
+                      <ChevronRight aria-hidden className='size-3.5' />
+                    </Button>
+                  </div>
+                </section>
+              )
+            })}
+          </div>
+          <div className='mt-2 flex justify-end' data-setting-key='theme_library'>
+            <Button size='sm' variant='ghost' onClick={() => onBrowse()}>
+              {labels.browseThemes}
+              <ChevronRight aria-hidden className='size-3.5' />
+            </Button>
+          </div>
+        </div>
 
         <SettingItemContainer $settingKey={THEME_ACCENT_COLOR_SETTING_KEY}>
           <SettingLabel

@@ -72,8 +72,45 @@ vi.mock('./ExportSetting', () => ({ ExportSetting: () => null }))
 vi.mock('./ImageSetting', () => ({ ImageSetting: () => null }))
 vi.mock('./KeyboardTable', () => ({ KeyboardTable: () => null }))
 vi.mock('./Support', () => ({ Support: () => null }))
-vi.mock('./ThemeSetting', () => ({ ThemeSetting: () => null }))
-vi.mock('./ThemeStore', () => ({ ThemeStore: () => null }))
+vi.mock('./ThemeSetting', () => ({
+  ThemeSetting: ({ onBrowse }: { onBrowse: (mode?: 'light' | 'dark') => void }) => (
+    <>
+      <div data-setting-key='dark_theme'>
+        <Button onClick={() => onBrowse('dark')}>Change dark theme</Button>
+      </div>
+      <div data-setting-key='theme_library'>
+        <Button onClick={() => onBrowse()}>Browse themes</Button>
+      </div>
+    </>
+  ),
+}))
+vi.mock('./ThemeStore', () => ({
+  ThemeStore: ({
+    mode,
+    onBack,
+    onSelected,
+  }: {
+    mode?: string
+    onBack?: () => void
+    onSelected?: () => void
+  }) => (
+    <>
+      <h2 id='setting-group-themestore-themelibrary' tabIndex={-1}>
+        Theme library {mode}
+      </h2>
+      {onBack && <Button onClick={onBack}>Back to appearance</Button>}
+      <Button onClick={onSelected}>Select theme</Button>
+    </>
+  ),
+}))
+vi.mock('./ThemeStore/ThemeCustomization', () => ({
+  ThemeCustomization: () => (
+    <label>
+      Typography & CSS
+      <textarea aria-label='CSS draft' />
+    </label>
+  ),
+}))
 vi.mock('./SnippetSetting', () => ({
   SnippetSetting: ({
     initialKind,
@@ -89,6 +126,8 @@ vi.mock('./SnippetSetting', () => ({
 vi.mock('./settingMap', () => ({
   getSettingMap: () => ({
     general: { i18nKey: 'General', desc: { i18nKey: 'General settings' }, misc: {} },
+    display: { i18nKey: 'Appearance', desc: { i18nKey: 'Appearance settings' }, Theme: {} },
+    themeStore: { i18nKey: 'Theme Store', desc: { i18nKey: 'Browse and install themes' } },
     editor: { i18nKey: 'Editor', desc: { i18nKey: 'Editor settings' }, behavior: {} },
     ai: { i18nKey: 'AI', desc: { i18nKey: 'AI settings' }, model: {} },
     snippets: { i18nKey: 'Snippets', desc: { i18nKey: 'Snippet library' } },
@@ -214,6 +253,96 @@ function pressEscape(target: Element = document.activeElement ?? document.body) 
 }
 
 describe('Settings dialog integration', () => {
+  it('opens the separate Theme Store from appearance and restores focus and drafts on return', async () => {
+    render(
+      <MemoryRouter>
+        <AppProbe />
+      </MemoryRouter>,
+    )
+    const settings = await openSettings()
+    const themeStore = within(settings).getByRole('button', { name: 'Theme Store' })
+    const appearance = within(settings).getByRole('button', { name: 'Appearance' })
+    fireEvent.click(appearance)
+    expect(screen.getByText('Typography & CSS')).toBeTruthy()
+    fireEvent.change(screen.getByRole('textbox', { name: 'CSS draft' }), {
+      target: { value: 'body { font-size: 18px; }' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Change dark theme' }))
+    expect(screen.getByRole('heading', { name: 'Theme library dark' })).toBeTruthy()
+    expect(themeStore.getAttribute('aria-current')).toBe('page')
+    expect(appearance.getAttribute('aria-current')).toBeNull()
+    expect(screen.getByRole('heading', { level: 1, name: 'Theme Store' })).toBeTruthy()
+    await waitFor(() =>
+      expect(document.activeElement).toBe(
+        screen.getByRole('heading', { name: 'Theme library dark' }),
+      ),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Select theme' }))
+    await waitFor(() =>
+      expect(document.activeElement).toBe(
+        screen.getByRole('button', { name: 'Change dark theme' }),
+      ),
+    )
+    expect((screen.getByRole('textbox', { name: 'CSS draft' }) as HTMLTextAreaElement).value).toBe(
+      'body { font-size: 18px; }',
+    )
+    expect(appearance.getAttribute('aria-current')).toBe('page')
+    fireEvent.click(screen.getByRole('button', { name: 'Browse themes' }))
+    expect(screen.getByRole('heading', { name: 'Theme library' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Back to appearance' }))
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Browse themes' })),
+    )
+  })
+
+  it('opens all themes directly from the sidebar and clears a previous appearance filter', async () => {
+    render(
+      <MemoryRouter>
+        <AppProbe />
+      </MemoryRouter>,
+    )
+    const settings = await openSettings()
+    const themeStore = within(settings).getByRole('button', { name: 'Theme Store' })
+    fireEvent.click(themeStore)
+    expect(screen.getByRole('heading', { name: 'Theme library' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Back to appearance' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Select theme' }))
+    expect(themeStore.getAttribute('aria-current')).toBe('page')
+
+    fireEvent.click(within(settings).getByRole('button', { name: 'Appearance' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Change dark theme' }))
+    expect(screen.getByRole('heading', { name: 'Theme library dark' })).toBeTruthy()
+    fireEvent.click(themeStore)
+    expect(screen.getByRole('heading', { name: 'Theme library' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Back to appearance' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Select theme' }))
+    expect(themeStore.getAttribute('aria-current')).toBe('page')
+  })
+
+  it('returns from the theme library when search reveals an appearance setting', async () => {
+    render(
+      <MemoryRouter>
+        <AppProbe />
+      </MemoryRouter>,
+    )
+    const settings = await openSettings()
+    fireEvent.click(within(settings).getByRole('button', { name: 'Appearance' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Browse themes' }))
+    fireEvent.change(screen.getByRole('searchbox'), {
+      target: { value: 'settings.display.theme.dark_theme.label' },
+    })
+    const result = await screen.findByRole('button', {
+      name: /settings.display.theme.dark_theme.label/,
+    })
+    fireEvent.click(result)
+    expect(screen.queryByRole('heading', { name: 'Theme library' })).toBeNull()
+    await waitFor(() =>
+      expect(document.activeElement).toBe(
+        screen.getByRole('button', { name: 'Change dark theme' }),
+      ),
+    )
+  })
+
   it('shares update availability and installation state with the title bar', async () => {
     const update = { version: '1.2.3' } as Update
     useUpdaterStore.setState({ update })
