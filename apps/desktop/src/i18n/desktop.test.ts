@@ -96,3 +96,24 @@ it.each([
     }
   },
 )
+
+it.each([
+  ['en', 'Collapse section', 'Expand section'],
+  ['cn', '折叠章节', '展开章节'],
+  ['frFR', 'Replier la section', 'Déplier la section'],
+  ['es', 'Contraer sección', 'Expandir sección'],
+  ['ja', 'セクションを折りたたむ', 'セクションを展開'],
+] as const)(
+  'loads heading-folding labels for %s without a fallback',
+  async (language, collapse, expand) => {
+    await i18nInit({ lng: language })
+    for (const [key, label] of [
+      ['collapseSection', collapse],
+      ['expandSection', expand],
+    ]) {
+      const translationKey = `capricorn.heading.${key}`
+      expect(i18n.getResource(language, 'translation', translationKey)).toBe(label)
+      expect(i18n.t(translationKey, { defaultValue: 'Missing translation' })).toBe(label)
+    }
+  },
+)

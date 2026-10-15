@@ -1203,6 +1203,10 @@
     "export_empty": "当前没有可导出的对话"
   },
   "capricorn": {
+    "heading": {
+      "collapseSection": "折叠章节",
+      "expandSection": "展开章节"
+    },
     "blockTypeMenu": {
       "title": "转换为",
       "multiple": "转换 {{count}} 个块",

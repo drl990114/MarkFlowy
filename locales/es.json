@@ -1203,6 +1203,10 @@
     "shortcutFallback": "Cmd/Ctrl+Mayús+F"
   },
   "capricorn": {
+    "heading": {
+      "collapseSection": "Contraer sección",
+      "expandSection": "Expandir sección"
+    },
     "blockTypeMenu": {
       "title": "Convertir en",
       "multiple": "Convertir {{count}} bloques",

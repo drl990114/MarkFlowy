@@ -1203,6 +1203,10 @@
     "shortcutFallback": "Cmd/Ctrl+Shift+F"
   },
   "capricorn": {
+    "heading": {
+      "collapseSection": "セクションを折りたたむ",
+      "expandSection": "セクションを展開"
+    },
     "blockTypeMenu": {
       "title": "変換先",
       "multiple": "{{count}} 個のブロックを変換",

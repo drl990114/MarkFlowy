@@ -1203,6 +1203,10 @@
     "export_empty": "There is no conversation to export"
   },
   "capricorn": {
+    "heading": {
+      "collapseSection": "Collapse section",
+      "expandSection": "Expand section"
+    },
     "blockTypeMenu": {
       "title": "Convert to",
       "multiple": "Convert {{count}} blocks",
