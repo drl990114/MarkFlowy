@@ -35,29 +35,34 @@ function renderEditorWrapper({
 }
 
 describe('EditorWrapper reading layout', () => {
-  it('sets the Desktop reading column and visual tokens for Markdown', () => {
-    const css = renderEditorWrapper()
+  it.each([EditorViewType.WYSIWYG, EditorViewType.PREVIEW])(
+    'sets the Desktop reading column and visual tokens for Markdown %s',
+    ($editorViewType) => {
+      const css = renderEditorWrapper({ $editorViewType })
 
-    expect(css).toContain('--mf-reader-content-width:var(--mf-theme-editor-content-width,760px)')
-    expect(css).toContain('--rme-editor-content-width:var(--mf-reader-content-width)')
-    expect(renderEditorWrapper({ $fullWidth: true })).toContain('--mf-reader-content-width:100%')
-    expect(css).toContain('--rme-editor-inline-padding:clamp(20px,5vw,48px)')
-    expect(css).toContain('--rme-editor-line-height:1.7')
-    expect(css).toContain('--rme-editor-blockquote-color:var(--mf-theme-editor-muted)')
-    expect(css).toContain('--rme-editor-inline-code-bg:var(--mf-theme-editor-code-background)')
-    expect(css).toContain(
-      '--rme-editor-selection-foreground:var(--mf-theme-editor-selection-foreground)',
-    )
-    expect(css).toContain('--rme-editor-heading-1-size:1.75em')
-    expect(css).toContain('--rme-editor-heading-2-size:1.5em')
-    expect(css).toContain('--rme-editor-heading-3-size:1.3em')
-    expect(css).toContain('--rme-editor-heading-4-size:1.15em')
-    expect(css).toContain('--rme-editor-heading-5-size:1.05em')
-    expect(css).toContain('--rme-editor-heading-6-size:1em')
-    expect(css).toContain(
-      'max-width:calc(var(--rme-editor-content-width)+var(--rme-editor-inline-padding)+var(--rme-editor-inline-padding))',
-    )
-  })
+      expect(css).toContain('--mf-reader-content-width:var(--mf-theme-editor-content-width,760px)')
+      expect(css).toContain('--rme-editor-content-width:var(--mf-reader-content-width)')
+      expect(renderEditorWrapper({ $fullWidth: true })).toContain('--mf-reader-content-width:100%')
+      expect(css).toContain('--rme-editor-inline-padding:clamp(20px,5vw,48px)')
+      expect(css).toContain('--mf-capricorn-inline-padding:68px')
+      expect(css).toContain('--cap-editor-inline-padding:var(--mf-capricorn-inline-padding)')
+      expect(css).toContain('--rme-editor-line-height:1.7')
+      expect(css).toContain('--rme-editor-blockquote-color:var(--mf-theme-editor-muted)')
+      expect(css).toContain('--rme-editor-inline-code-bg:var(--mf-theme-editor-code-background)')
+      expect(css).toContain(
+        '--rme-editor-selection-foreground:var(--mf-theme-editor-selection-foreground)',
+      )
+      expect(css).toContain('--rme-editor-heading-1-size:1.75em')
+      expect(css).toContain('--rme-editor-heading-2-size:1.5em')
+      expect(css).toContain('--rme-editor-heading-3-size:1.3em')
+      expect(css).toContain('--rme-editor-heading-4-size:1.15em')
+      expect(css).toContain('--rme-editor-heading-5-size:1.05em')
+      expect(css).toContain('--rme-editor-heading-6-size:1em')
+      expect(css).toContain(
+        'max-width:calc(var(--rme-editor-content-width)+var(--mf-capricorn-inline-padding)+var(--mf-capricorn-inline-padding))',
+      )
+    },
+  )
 
   it.each([
     { $editorViewType: EditorViewType.SOURCECODE },

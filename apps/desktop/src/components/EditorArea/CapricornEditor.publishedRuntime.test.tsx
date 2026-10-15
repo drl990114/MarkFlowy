@@ -107,7 +107,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     expect(onError).not.toHaveBeenCalled()
   })
 
-  it('keeps the padded host handle pinned until its block menu closes', async () => {
+  it('fits the heading fold control and pinned block handle inside a narrow host pane', async () => {
     const onChange = vi.fn()
     const onError = vi.fn()
     const { container } = render(
@@ -121,7 +121,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
         >
           <CapricornEditor
             active
-            initialMarkdown={'first\n\nsecond\n\nthird'}
+            initialMarkdown={'# first\n\nsecond\n\nthird'}
             onChange={onChange}
             onError={onError}
             onUnavailable={onError}
@@ -134,10 +134,19 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     const surface = container.querySelector<HTMLElement>('[data-cap-content]')!
     const root = container.querySelector<HTMLElement>('[data-cap-editable]')!
     const blocks = [...root.querySelectorAll<HTMLElement>('[data-cap-leaf-block][data-cap-key]')]
-    surface.getBoundingClientRect = () => new DOMRect(100, 80, 700, 440)
-    root.getBoundingClientRect = () => new DOMRect(150, 100, 600, 350)
+    const inlinePadding = Number.parseFloat(
+      getComputedStyle(surface).getPropertyValue('--cap-editor-inline-padding'),
+    )
+    const foldControl = blocks[0].querySelector<HTMLElement>('[data-cap-block-gutter]')!
+    expect(foldControl).not.toBeNull()
+    const foldGutter = Number(foldControl.dataset.capBlockGutter)
+    // Happy DOM has no layout; feed the real host padding into the runtime's
+    // positioning path for a 320px pane offset from the window's left edge.
+    surface.getBoundingClientRect = () => new DOMRect(100, 80, 320, 440)
+    root.getBoundingClientRect = () => new DOMRect(100, 100, 320, 350)
     blocks.forEach((block, index) => {
-      block.getBoundingClientRect = () => new DOMRect(200, 140 + index * 80, 500, 32)
+      block.getBoundingClientRect = () =>
+        new DOMRect(100 + inlinePadding, 140 + index * 80, 320 - 2 * inlinePadding, 32)
     })
     onChange.mockClear()
     fireEvent.pointerMove(surface, { clientX: 110, clientY: 150 })
@@ -146,13 +155,19 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
       expect(button?.getAttribute('data-cap-block-handle')).toBe(blocks[0].dataset.capKey)
       return button!
     })
+    const handleLeft = Number.parseFloat(control.style.left)
+    const handleWidth = Number.parseFloat(getComputedStyle(control).width)
+    expect(handleLeft - 4).toBeGreaterThanOrEqual(surface.getBoundingClientRect().left)
+    expect(handleLeft + handleWidth + 6).toBeLessThanOrEqual(
+      blocks[0].getBoundingClientRect().left - foldGutter,
+    )
     const openingPosition = control.getAttribute('style')
     fireEvent.click(control)
     const search = await within(document.body).findByRole('combobox', {
       name: 'Search block types…',
     })
     await act(async () => {
-      fireEvent.pointerMove(surface, { clientX: 780, clientY: 310 })
+      fireEvent.pointerMove(surface, { clientX: 410, clientY: 310 })
       fireEvent.pointerLeave(surface, { relatedTarget: search })
       await new Promise((resolve) => setTimeout(resolve, 220))
     })

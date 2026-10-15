@@ -1,5 +1,9 @@
 import styled, { css } from 'styled-components'
-import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
+import {
+  EditorViewType,
+  isCapricornView,
+  type EditorViewTypeValue,
+} from '@/constants/editorViewType'
 import type { FileType } from '@/helper/fileTypeHandler'
 
 interface EditorWrapperProps {
@@ -25,6 +29,8 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
     props.$fullWidth ? '100%' : 'var(--mf-theme-editor-content-width, 760px)'};
   --rme-editor-content-width: var(--mf-reader-content-width);
   --rme-editor-inline-padding: clamp(20px, 5vw, 48px);
+  /* 36px block handle + 6px gap + 22px heading fold control + 4px outer hit area. */
+  --mf-capricorn-inline-padding: 68px;
   --rme-editor-line-height: ${(props) => props.$rootLineHeight};
   ${(props) => props.$codeFontSize && css`--rme-code-font-size: ${props.$codeFontSize};`}
   ${(props) => props.$codeLineHeight && css`--rme-code-line-height: ${props.$codeLineHeight};`}
@@ -61,8 +67,7 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
   /* Keep the runtime's inner reading column in sync with the host layout. */
   [data-cap-content] {
     --cap-editor-content-width: var(--rme-editor-content-width);
-    /* Fit the 36px block handle, 6px content gap and 4px outer hit area in narrow panes. */
-    --cap-editor-inline-padding: 48px;
+    --cap-editor-inline-padding: var(--mf-capricorn-inline-padding);
   }
 
   > * {
@@ -79,12 +84,15 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
     const shouldKeepLegacyBottomPadding =
       props.$editorViewType === EditorViewType.SOURCECODE ||
       (props.$fileType != null && props.$fileType !== 'markdown')
+    const inlinePadding = isCapricornView(props.$editorViewType)
+      ? 'var(--mf-capricorn-inline-padding)'
+      : 'var(--rme-editor-inline-padding)'
 
     return props.$visible
       ? css({
           maxWidth: shouldFullWidth
             ? 'none'
-            : 'calc(var(--rme-editor-content-width) + var(--rme-editor-inline-padding) + var(--rme-editor-inline-padding))',
+            : `calc(var(--rme-editor-content-width) + ${inlinePadding} + ${inlinePadding})`,
           margin: '0 auto',
           paddingBottom: shouldKeepLegacyBottomPadding ? '3rem' : 0,
           marginInlineStart: 'auto',
