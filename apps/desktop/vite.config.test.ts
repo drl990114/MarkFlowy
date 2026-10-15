@@ -1,9 +1,14 @@
 // @vitest-environment node
 
 import { fileURLToPath } from 'node:url'
-import { createServer, normalizePath, type ConfigEnv } from 'vite'
-import { describe, expect, it } from 'vitest'
+import { createHash } from 'node:crypto'
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { createServer, normalizePath, type ConfigEnv, type Plugin } from 'vite'
+import { describe, expect, it, vi } from 'vitest'
 
+import * as runtimeResolver from './capricornRuntimeResolver'
 import desktopConfig from './vite.config'
 
 const desktopRoot = fileURLToPath(new URL('.', import.meta.url))
@@ -14,6 +19,55 @@ async function getConfig(command: ConfigEnv['command'], mode: string) {
 }
 
 describe('Desktop workspace development resolution', () => {
+  it('changes the private runtime URL when its bytes change at the same package path', async () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), 'markflowy-runtime-cache-'))
+    const packageRoot = join(fixtureRoot, 'node_modules', 'runtime-cache-fixture')
+    mkdirSync(packageRoot, { recursive: true })
+    const runtimeEntry = normalizePath(join(packageRoot, 'index.js'))
+    const resolveRuntime = vi
+      .spyOn(runtimeResolver, 'resolvePrivateCapricornRuntime')
+      .mockReturnValue(runtimeEntry)
+    const servedModules: string[] = []
+
+    try {
+      for (const revision of ['old', 'new']) {
+        const source = `export const revision = ${JSON.stringify(revision)};`
+        writeFileSync(runtimeEntry, source)
+        const expectedHash = createHash('sha256').update(source).digest('hex')
+        const config = await getConfig('serve', 'development')
+        const runtimePlugin = config.plugins?.find(
+          (plugin) => (plugin as Plugin)?.name === 'markflowy-optional-capricorn-runtime',
+        ) as Plugin
+        const server = await createServer({
+          configFile: false,
+          root: desktopRoot,
+          plugins: [runtimePlugin],
+          optimizeDeps: { noDiscovery: true, include: [] },
+          server: {
+            middlewareMode: true,
+            watch: null,
+            ws: false,
+            fs: { allow: [fixtureRoot] },
+          },
+        })
+        try {
+          const result = await server.transformRequest('virtual:markflowy-capricorn-runtime')
+          expect(result?.code).toContain(`${runtimeEntry}?v=${expectedHash}`)
+          expect(config.define?.__MARKFLOWY_CAPRICORN_RUNTIME_ENTRY_SHA256__).toBe(
+            JSON.stringify(expectedHash),
+          )
+          servedModules.push(result!.code)
+        } finally {
+          await server.close()
+        }
+      }
+      expect(servedModules[0]).not.toBe(servedModules[1])
+    } finally {
+      resolveRuntime.mockRestore()
+      rmSync(fixtureRoot, { recursive: true, force: true })
+    }
+  })
+
   it.each(['development', 'test'])(
     'resolves shared components, theme context and CSS to source in %s mode',
     async (mode) => {

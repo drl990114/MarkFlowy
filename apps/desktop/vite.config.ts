@@ -67,6 +67,9 @@ export default defineConfig(async ({ command, mode }) => {
       ),
     ),
   )
+  const capricornRuntimeEntrySha256 = capricornRuntimeEntry
+    ? createHash('sha256').update(readFileSync(capricornRuntimeEntry)).digest('hex')
+    : null
   const analyzePlugin =
     mode === 'analyze'
       ? (await import('rollup-plugin-visualizer')).visualizer({
@@ -96,7 +99,14 @@ export default defineConfig(async ({ command, mode }) => {
     },
     plugins: [
       pdfPreviewAssets(),
-      optionalCapricornRuntimePlugin(capricornRuntimeEntry),
+      // Vite caches node_modules URLs immutably using its lockfile-based hash.
+      // The private installer can replace this entry without changing that lockfile.
+      // Version the dev entry by its bytes; published chunks already have hashed names.
+      optionalCapricornRuntimePlugin(
+        command === 'serve' && capricornRuntimeEntry
+          ? `${capricornRuntimeEntry}?v=${capricornRuntimeEntrySha256}`
+          : capricornRuntimeEntry,
+      ),
       // Shared and Desktop styles import theme + utilities explicitly without
       // Tailwind's global preflight layer.
       tailwindcss(),
@@ -141,9 +151,7 @@ export default defineConfig(async ({ command, mode }) => {
         capricornRuntimeEntry ? CAPRICORN_VERSION : null,
       ),
       __MARKFLOWY_CAPRICORN_RUNTIME_ENTRY_SHA256__: JSON.stringify(
-        capricornRuntimeEntry
-          ? createHash('sha256').update(readFileSync(capricornRuntimeEntry)).digest('hex')
-          : null,
+        capricornRuntimeEntrySha256,
       ),
     },
     resolve: {
