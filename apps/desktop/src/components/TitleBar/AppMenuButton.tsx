@@ -5,7 +5,7 @@ import { currentWindow } from '@/services/windows'
 import useContextMenuStore, { type DesktopMenuItemData } from '@/stores/useContextMenuStore'
 import useThemeStore from '@/stores/useThemeStore'
 import { emitTo } from '@tauri-apps/api/event'
-import { ChevronDownIcon, SettingsIcon } from 'lucide-react'
+import { ChevronDownIcon, CommandIcon, InfoIcon, PaletteIcon, SettingsIcon } from 'lucide-react'
 import { memo, useMemo, useRef, useState } from 'react'
 import { StatusBarButton } from '../StatusBar/StatusBarButton'
 import { showContextMenu } from '../ui-v2/ContextMenu/ContextMenu'
@@ -60,11 +60,13 @@ export const AppMenuButton = memo(({ location = 'titlebar' }: AppMenuButtonProps
       {
         label: t('command_palette.title'),
         value: 'command-palette',
+        icon: CommandIcon,
         commandId: EVENT.app_commandPalette,
       },
       {
         label: t('about.label'),
         value: 'about',
+        icon: InfoIcon,
         handler: () => {
           emitTo(currentWindow.label, EVENT.app_about)
         },
@@ -72,11 +74,13 @@ export const AppMenuButton = memo(({ location = 'titlebar' }: AppMenuButtonProps
       {
         label: t('view.theme.label'),
         value: 'theme',
+        icon: PaletteIcon,
         children: themeMenu,
       },
       {
         label: t('settings.label'),
         value: 'settings',
+        icon: SettingsIcon,
         commandId: EVENT.app_openSetting,
       },
     ]
