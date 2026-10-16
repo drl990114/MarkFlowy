@@ -149,6 +149,15 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor opening', () => {
     expect(useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges).toBe(true)
   })
 
+})
+
+describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor source mode transitions', () => {
+  // Keep the opening suite cold, then prepare the real source-editor fixture
+  // outside the behavior tests' 5s deadline. CI module transforms can be slow.
+  beforeAll(async () => {
+    await rmeRuntime.loadRmeRuntime()
+  }, 30_000)
+
   it('loads source on demand with the latest Markdown and saves real source edits before preview', async () => {
     const runtime = await rmeRuntime.loadRmeRuntime()
     let resolve!: (value: typeof runtime) => void
