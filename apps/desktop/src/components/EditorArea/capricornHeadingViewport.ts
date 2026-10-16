@@ -4,6 +4,43 @@ interface ViewportController {
   view: { getPath: (key: string) => readonly number[] | null | undefined }
 }
 
+interface SelectionController {
+  value: {
+    selection: { focus: { key: string } } | null
+    document: { getPath: (key: string) => readonly number[] | null | undefined }
+  }
+}
+
+export function getCapricornSelectionHeadingId(
+  session: CapricornRuntimeSession,
+  headings: readonly CapricornHeading[],
+): string | null {
+  if (!headings.length || !session.query) return null
+  // Use the current model, including nested text and atomic block edge points.
+  // Reading its path index avoids mounting offscreen blocks or exporting text.
+  const query = session.query as unknown as <Result>(
+    read: (controller: SelectionController) => Result,
+  ) => Result
+  return query.call(session, ({ value }) => {
+    const focus = value.selection?.focus
+    if (!focus) return null
+    const focusIndex = value.document.getPath(focus.key)?.[0]
+    if (focusIndex === undefined) return null
+    let start = 0
+    let end = headings.length
+    while (start < end) {
+      const middle = (start + end) >>> 1
+      const index = value.document.getPath(headings[middle].id)?.[0]
+      // Heading snapshots can lag behind a structural edit. Let their next
+      // notification resolve the active section instead of using a removed key.
+      if (index === undefined) return null
+      if (index <= focusIndex) start = middle + 1
+      else end = middle
+    }
+    return headings[start - 1]?.id ?? null
+  }) as string | null
+}
+
 export function getCapricornActiveHeadingId(
   session: CapricornRuntimeSession,
   container: HTMLElement,

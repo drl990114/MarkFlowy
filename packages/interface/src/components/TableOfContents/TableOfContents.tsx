@@ -87,6 +87,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
   const [container, setContainer] = useState<HTMLElement>();
   const [scroll, setScroll] = useState<HTMLElement | undefined>(scrollEl);
   const navRef = useRef<HTMLElement>(null);
+  const revealedHeadingIdRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {
     setHeadings(headingsData);
@@ -113,6 +114,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     estimateSize: () => (variant === 'editor' ? 18 : 28),
     overscan: 10,
   });
+  const viewportHeight = rowVirtualizer.scrollRect?.height
 
   const refreshContainerHeadings = useCallback((targetContainer: HTMLElement) => {
     if (!targetContainer) return;
@@ -267,6 +269,54 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
       scroll?.removeEventListener('scroll', scrollHandler);
     };
   }, [headingTree, scroll, parseHeadings, scrollHandler]);
+
+  useEffect(() => {
+    if (!flattenedHeadings.length) {
+      revealedHeadingIdRef.current = undefined
+      return
+    }
+    const nav = navRef.current
+    if (!nav || nav.clientHeight <= 0) return
+    // The controlled node and its expanded parents settle together. A sibling
+    // can move when the previously active branch collapses in the next render.
+    if (autoExpand && activeId && activeNodeState?.id !== activeId) return
+    const index = flattenedHeadings.findIndex((h) =>
+      isTableOfContentsHeadingActive({
+        activeId,
+        activeNodeKey: activeNodeState?.key,
+        firstHeadingKey: flattenedHeadings[0]?.key,
+        headingId: h.id,
+        headingKey: h.key,
+      }),
+    )
+    // A controlled id may arrive before its headings or expanded parents.
+    if (index < 0) return
+    const headingId = flattenedHeadings[index].id
+    if (revealedHeadingIdRef.current === headingId) return
+
+    if (flattenedHeadings.length > 50) {
+      const offset = rowVirtualizer.getOffsetForIndex(index, 'auto')?.[0]
+      if (offset === undefined) return
+      revealedHeadingIdRef.current = headingId
+      // Rows have fixed heights, so one offset is enough. scrollToIndex retries
+      // across frames and can undo a user's immediate manual outline scroll.
+      if (offset !== nav.scrollTop) rowVirtualizer.scrollToOffset(offset)
+      return
+    }
+
+    const row = nav.querySelector<HTMLElement>(`li[aria-posinset="${index + 1}"]`)
+    if (!row) return
+    revealedHeadingIdRef.current = headingId
+    // Compact and expanded nonvirtual rows have different actual heights.
+    // Scroll this nav only; scrollIntoView would also move ancestor panels.
+    const rowRect = row.getBoundingClientRect()
+    const top = nav.getBoundingClientRect().top + nav.clientTop
+    const bottom = top + nav.clientHeight
+    const delta = rowRect.top < top ? rowRect.top - top : Math.max(0, rowRect.bottom - bottom)
+    if (delta) nav.scrollTo({ top: nav.scrollTop + delta, behavior: 'auto' })
+    // Remember the semantic id across tree refreshes. Reading elsewhere in the
+    // outline must not be pulled back by a scroll render or a title update.
+  }, [activeId, activeNodeState?.id, activeNodeState?.key, autoExpand, flattenedHeadings, rowVirtualizer, viewportHeight])
 
   useImperativeHandle(ref, () => ({
     refresh: ({ newContainer, newScroll }) => {

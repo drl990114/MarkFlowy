@@ -10,6 +10,8 @@ import { t } from '@/i18n'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { ListIcon } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import type { ChangeDesc } from '@codemirror/state'
+import type { MfCodemirrorView } from 'rme'
 import { getLoadedRmeRuntime, type RmeRuntime } from '../EditorArea/rmeRuntime'
 import {
   getCapricornEditor,
@@ -19,11 +21,16 @@ import type {
   CapricornHeading,
   CapricornRuntimeAdapter,
 } from '../EditorArea/capricornRuntimeAdapter'
-import { sourceCodeCodemirrorViewMap } from '../EditorArea/sourceCodeEditorRegistry'
+import {
+  sourceCodeCodemirrorViewMap,
+  subscribeSourceCodeEditors,
+} from '../EditorArea/sourceCodeEditorRegistry'
+import { getCapricornRuntimeInput } from '../EditorArea/capricornRuntimeDom'
 import SideBarHeader from '../SideBar/SideBarHeader'
 import { CapricornHeadingNumberingButton } from './HeadingNumberingButton'
 import { TocViewContainer } from './styles'
 import { scheduleOutlineAfterPaint } from './scheduleOutlineAfterPaint'
+import { subscribeOutlineScrollIntent, subscribeSourceOutline } from './outlineTracking'
 
 type SourceHeadingInfo = {
   pos: number
@@ -152,6 +159,14 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     editor: CapricornRuntimeAdapter
   } | null>(null)
   const sourceHeadingsRef = useRef<SourceHeadingInfo[]>([])
+  const sourceOutlineRef = useRef<{
+    id: string
+    editor: MfCodemirrorView
+    changes: ChangeDesc | null
+  } | null>(null)
+  const [sourceOutlineEditor, setSourceOutlineEditor] = useState<MfCodemirrorView | null>(null)
+  const activeHeadingSourceRef = useRef<'viewport' | 'selection'>('viewport')
+  const headingIntentRef = useRef(0)
   const capricornOutlineRef = useRef<{
     id: string
     editor: CapricornRuntimeAdapter
@@ -181,6 +196,20 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     getCapricornSnapshot,
     getCapricornSnapshot,
   )
+  const getSourceSnapshot = useCallback(
+    () => (activeId && activeIsMarkdown ? sourceCodeCodemirrorViewMap.get(activeId) : undefined),
+    [activeId, activeIsMarkdown],
+  )
+  const sourceEditor = useSyncExternalStore(
+    subscribeSourceCodeEditors,
+    getSourceSnapshot,
+    getSourceSnapshot,
+  )
+
+  useEffect(() => {
+    activeHeadingSourceRef.current = 'viewport'
+    headingIntentRef.current++
+  }, [activeId, activeViewType, capricornEditor, sourceEditor])
 
   const clearOutline = useCallback(() => {
     if (sourceRefreshTimerRef.current !== null) {
@@ -200,6 +229,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     wysiwygScrollElRef.current = null
     setWysiwygScrollEl(null)
     sourceHeadingsRef.current = []
+    sourceOutlineRef.current = null
+    setSourceOutlineEditor(null)
+    activeHeadingSourceRef.current = 'viewport'
+    headingIntentRef.current++
     sourceScrollElRef.current = null
     setSourceScrollEl(null)
   }, [])
@@ -234,13 +267,29 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         getCapricornEditor(currentActiveId) !== outline.editor
       )
         return null
-      return outline.editor.getActiveHeadingId?.(outline.headings, scrollEl) ?? null
+      return activeHeadingSourceRef.current === 'selection' && viewType === EditorViewType.WYSIWYG
+        ? (outline.editor.getSelectionHeadingId?.(outline.headings) ?? null)
+        : (outline.editor.getActiveHeadingId?.(outline.headings, scrollEl) ?? null)
     }
 
     if (viewType === EditorViewType.SOURCECODE) {
       const codemirrorView = sourceCodeCodemirrorViewMap.get(currentActiveId)
-      if (!codemirrorView) {
+      const outline = sourceOutlineRef.current
+      if (!codemirrorView || outline?.id !== currentActiveId || outline.editor !== codemirrorView) {
         return null
+      }
+      const position = (pos: number) => outline.changes?.mapPos(pos, 1) ?? pos
+      if (activeHeadingSourceRef.current === 'selection') {
+        const head = codemirrorView.cm.state.selection.main.head
+        const headings = sourceHeadingsRef.current
+        let start = 0
+        let end = headings.length
+        while (start < end) {
+          const middle = (start + end) >>> 1
+          if (position(headings[middle].pos) <= head) start = middle + 1
+          else end = middle
+        }
+        return headings[start - 1]?.id ?? null
       }
 
       return resolveActiveHeadingId({
@@ -252,7 +301,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             return null
           }
 
-          const lineBlock = codemirrorView.cm.lineBlockAt(pos)
+          const lineBlock = codemirrorView.cm.lineBlockAt(position(pos))
           const viewportEl = sourceScrollElRef.current
           const baseRect =
             viewportEl === codemirrorView.cm.scrollDOM
@@ -334,6 +383,8 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         setEditorPanelEl(currentEditorPanelEl)
 
         sourceHeadingsRef.current = []
+        sourceOutlineRef.current = null
+        setSourceOutlineEditor(null)
         sourceScrollElRef.current = null
         setSourceScrollEl(null)
 
@@ -347,6 +398,8 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             id: heading.id,
             htmlNode: null,
             onClick: () => {
+              activeHeadingSourceRef.current = 'viewport'
+              headingIntentRef.current++
               void editor.headings.jumpTo(heading.id, { offset: 100 }).then(() => {
                 scheduleActiveHeadingUpdateRef.current()
               })
@@ -431,6 +484,12 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             })
 
             sourceHeadingsRef.current = sourceHeadings
+            sourceOutlineRef.current = {
+              id: currentActiveId,
+              editor: codemirrorView,
+              changes: null,
+            }
+            setSourceOutlineEditor(codemirrorView)
             const chapterData = getHeadingChapterData(sourceHeadings, runtime)
             const nextScrollEl = resolveSourceScrollEl(currentActiveId, codemirrorView.cm.scrollDOM)
             sourceScrollElRef.current = nextScrollEl
@@ -446,14 +505,21 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
                 id: heading.id,
                 htmlNode: null,
                 onClick: () => {
+                  const outline = sourceOutlineRef.current
+                  const pos =
+                    outline?.editor === codemirrorView
+                      ? (outline.changes?.mapPos(heading.pos, 1) ?? heading.pos)
+                      : heading.pos
                   codemirrorView.cm.dispatch({
                     selection: {
-                      anchor: heading.pos,
-                      head: heading.pos,
+                      anchor: pos,
+                      head: pos,
                     },
                     scrollIntoView: true,
                   })
                   codemirrorView.cm.focus()
+                  activeHeadingSourceRef.current = 'selection'
+                  headingIntentRef.current++
                   scheduleActiveHeadingUpdateRef.current()
                 },
               }
@@ -500,6 +566,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   useEffect(() => {
     if (!wysiwygScrollEl) return
     const handleScroll = () => scheduleActiveHeadingUpdate()
+    const unsubscribeIntent = subscribeOutlineScrollIntent(wysiwygScrollEl, () => {
+      activeHeadingSourceRef.current = 'viewport'
+      headingIntentRef.current++
+    })
     wysiwygScrollEl.addEventListener('scroll', handleScroll, { passive: true })
     // Virtualized blocks may mount after the scroll frame. Re-evaluate the
     // visible anchor then, using the same cached outline.
@@ -512,6 +582,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
 
     return () => {
       wysiwygScrollEl.removeEventListener('scroll', handleScroll)
+      unsubscribeIntent()
       observer.disconnect()
       resizeObserver.disconnect()
     }
@@ -530,14 +601,164 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     scrollTargets.forEach((scrollTarget) => {
       scrollTarget.addEventListener('scroll', handleScroll, { passive: true })
     })
+    const unsubscribeIntents = scrollTargets.map((target) =>
+      subscribeOutlineScrollIntent(target, () => {
+        activeHeadingSourceRef.current = 'viewport'
+        headingIntentRef.current++
+      }),
+    )
     handleScroll()
 
     return () => {
+      unsubscribeIntents.forEach((unsubscribe) => unsubscribe())
       scrollTargets.forEach((scrollTarget) => {
         scrollTarget.removeEventListener('scroll', handleScroll)
       })
     }
-  }, [sourceScrollEl, scheduleActiveHeadingUpdate])
+  }, [sourceScrollEl, sourceEditor, scheduleActiveHeadingUpdate])
+
+  useEffect(() => {
+    if (
+      !activeId ||
+      !activeIsMarkdown ||
+      activeViewType !== EditorViewType.WYSIWYG ||
+      !capricornEditor?.resume
+    )
+      return
+    let disposed = false
+    let selectionFrame: number | null = null
+    let pendingSelectionIntent: number | null = null
+    let previous = JSON.stringify(capricornEditor.resume.capture())
+    const isCurrentEditor = () =>
+      !disposed &&
+      useEditorStore.getState().activeId === activeId &&
+      isMarkdownFile(activeId) &&
+      useEditorViewTypeStore.getState().editorViewTypeMap.get(activeId) ===
+        EditorViewType.WYSIWYG &&
+      getCapricornEditor(activeId) === capricornEditor
+    const ownsEditorTarget = (target: EventTarget | null) => {
+      if (!(target instanceof Element)) return false
+      const pane = getActiveEditorScrollEl(activeId)
+      if (!pane) return false
+      if (target === getCapricornRuntimeInput(pane)) return true
+      const content = pane.querySelector('[data-cap-content]')
+      if (!content || target.closest('[data-cap-content]') !== content) return false
+      // Embedded code editors live inside a non-editable block; their actual
+      // input still belongs to this document. Block tools and nested runtimes do not.
+      if (target.closest('.cm-content[contenteditable="true"]')) return true
+      return !target.closest(
+        '[data-cap-not-editable], [data-cap-avoid-click-focus], [data-cap-selection-ignore], button, input, select, textarea, [role="button"], [role="combobox"]',
+      )
+    }
+    const cancelPendingSelection = () => {
+      pendingSelectionIntent = null
+      if (selectionFrame !== null) cancelAnimationFrame(selectionFrame)
+      selectionFrame = null
+    }
+    const scheduleSelection = (intent: number) => {
+      if (selectionFrame !== null) cancelAnimationFrame(selectionFrame)
+      selectionFrame = requestAnimationFrame(() => {
+        selectionFrame = null
+        if (
+          !isCurrentEditor() ||
+          pendingSelectionIntent !== intent ||
+          headingIntentRef.current !== intent
+        ) {
+          pendingSelectionIntent = null
+          return
+        }
+        // WebKit can transfer focus after this frame. Keep the same intent for
+        // focusin to retry, so a newer wheel/scrollbar gesture can still cancel it.
+        if (!ownsEditorTarget(document.activeElement)) return
+        pendingSelectionIntent = null
+        if (!capricornEditor.resume?.capture()) return
+        activeHeadingSourceRef.current = 'selection'
+        updateActiveHeadingId()
+      })
+    }
+    const followSelection = () => {
+      if (!isCurrentEditor()) return
+      pendingSelectionIntent = ++headingIntentRef.current
+      scheduleSelection(pendingSelectionIntent)
+    }
+    const unsubscribe = capricornEditor.resume.subscribe(() => {
+      if (!isCurrentEditor()) return
+      const next = JSON.stringify(capricornEditor.resume?.capture())
+      if (previous === next) return
+      previous = next
+      followSelection()
+    })
+    const onFocusIn = (event: FocusEvent) => {
+      if (!isCurrentEditor() || !ownsEditorTarget(event.target)) {
+        cancelPendingSelection()
+        return
+      }
+      // Runtime selection repair also blurs/refocuses its input. Focus alone
+      // must not switch a manually scrolled document back to caret following.
+      if (pendingSelectionIntent !== null) scheduleSelection(pendingSelectionIntent)
+    }
+    const onClick = (event: MouseEvent) => {
+      if (ownsEditorTarget(event.target)) followSelection()
+      else cancelPendingSelection()
+    }
+    // Capture also sees events stopped by embedded editors. Read selection in
+    // the next frame, after the runtime's click handler has finished updating it.
+    document.addEventListener('focusin', onFocusIn, true)
+    document.addEventListener('click', onClick, true)
+    return () => {
+      disposed = true
+      cancelPendingSelection()
+      unsubscribe()
+      document.removeEventListener('focusin', onFocusIn, true)
+      document.removeEventListener('click', onClick, true)
+    }
+  }, [activeId, activeIsMarkdown, activeViewType, capricornEditor, updateActiveHeadingId])
+
+  useEffect(() => {
+    if (
+      !activeId ||
+      !activeIsMarkdown ||
+      activeViewType !== EditorViewType.SOURCECODE ||
+      !sourceEditor ||
+      sourceOutlineEditor !== sourceEditor
+    )
+      return
+    let disposed = false
+    const unsubscribe = subscribeSourceOutline(sourceEditor, (update) => {
+      if (
+        disposed ||
+        useEditorStore.getState().activeId !== activeId ||
+        !isMarkdownFile(activeId) ||
+        useEditorViewTypeStore.getState().editorViewTypeMap.get(activeId) !==
+          EditorViewType.SOURCECODE ||
+        sourceCodeCodemirrorViewMap.get(activeId) !== sourceEditor
+      )
+        return
+      const outline = sourceOutlineRef.current
+      if (update.docChanged && outline?.editor === sourceEditor) {
+        outline.changes = outline.changes?.composeDesc(update.changes.desc) ?? update.changes.desc
+      }
+      if (
+        update.view.hasFocus &&
+        (update.docChanged || !update.startState.selection.eq(update.state.selection))
+      ) {
+        activeHeadingSourceRef.current = 'selection'
+        headingIntentRef.current++
+        scheduleActiveHeadingUpdate()
+      }
+    })
+    return () => {
+      disposed = true
+      unsubscribe()
+    }
+  }, [
+    activeId,
+    activeIsMarkdown,
+    activeViewType,
+    sourceEditor,
+    sourceOutlineEditor,
+    scheduleActiveHeadingUpdate,
+  ])
 
   useEffect(() => {
     return () => {
@@ -563,10 +784,11 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       commandRegistry.execute('app:toc_refresh')
     }, 300)
     return () => clearTimeout(timer)
-  }, [activeId, activeViewType, activeIsMarkdown, clearOutline])
+  }, [activeId, activeViewType, activeIsMarkdown, sourceEditor, clearOutline])
 
   useEffect(() => {
-    if (!activeId || !activeIsMarkdown || !capricornEditor || !isCapricornView(activeViewType)) return
+    if (!activeId || !activeIsMarkdown || !capricornEditor || !isCapricornView(activeViewType))
+      return
 
     scheduleCapricornHeadingRefresh(activeId, capricornEditor)
     const unsubscribe = capricornEditor.headings.subscribe((headings) => {

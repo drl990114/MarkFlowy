@@ -8,7 +8,10 @@ export type {
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { createCapricornResumeApi } from './capricornResume'
 import { createCapricornMarkdownSelectionApi } from './capricornMarkdownSelection'
-import { getCapricornActiveHeadingId } from './capricornHeadingViewport'
+import {
+  getCapricornActiveHeadingId,
+  getCapricornSelectionHeadingId,
+} from './capricornHeadingViewport'
 import {
   setEmbeddedCodeMirrorViewResolver,
   trackEmbeddedCodeMirrorFocus,
@@ -401,6 +404,7 @@ export interface CapricornRuntimeAdapter {
     headings: readonly CapricornHeading[],
     scrollEl: HTMLElement,
   ) => string | null
+  getSelectionHeadingId?: (headings: readonly CapricornHeading[]) => string | null
   readonly selection?: CapricornSelectionApi
   requestInlineEdit?: (kind: 'link' | 'image', key?: string, focus?: boolean) => boolean
   subscribeInlineEdit?: (
@@ -565,6 +569,9 @@ export function createCapricornRuntimeAdapter({
     headings: session.headings,
     getActiveHeadingId(headings, scrollEl) {
       return destroyed ? null : getCapricornActiveHeadingId(session, container, headings, scrollEl)
+    },
+    getSelectionHeadingId(headings) {
+      return destroyed ? null : getCapricornSelectionHeadingId(session, headings)
     },
     destroy: destroySession,
     export(format) {

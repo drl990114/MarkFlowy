@@ -17,6 +17,7 @@ import {
 import { getCapricornRuntimeInput } from './capricornRuntimeDom'
 import { recordKey } from '@/router/Setting/KeyboardTable/record-key'
 import { shortcutString } from '@/commands/keybindingKeys'
+import type { ResumePoint } from '@/stores/editorResumeStore'
 
 const createRuntime = createCapricornRuntime as CapricornRuntimeFactory
 const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
@@ -261,4 +262,53 @@ describe.skipIf(!isCapricornRuntimeAvailable)('published runtime host compatibil
     // Restore the React-owned DOM before destroying the runtime.
     documentNode.replaceChildren(...blocks)
   })
+
+  it.each([
+    { name: 'nested list text', body: '- Parent\n  - Nested target', word: 'target' },
+    { name: 'table cell text', body: '| Header |\n| --- |\n| Cell target |', word: 'target' },
+    { name: 'embedded code text', body: '```js\nconst target = 1\n```', word: 'target' },
+    { name: 'inline image before edge', body: 'Before ![alt](image.png) after', point: { path: [2, 1], edge: 'before' } },
+    { name: 'inline image after edge', body: 'Before ![alt](image.png) after', point: { path: [2, 1], edge: 'after' } },
+    { name: 'code block edge', body: '```js\nconst target = 1\n```', point: { path: [2], edge: 'after' } },
+    { name: 'table edge', body: '| Header |\n| --- |\n| Cell target |', point: { path: [2], edge: 'before' } },
+  ] satisfies { name: string; body: string; word?: string; point?: ResumePoint }[])(
+    'locates the selection section for $name in the pinned runtime',
+    async ({ body, word, point }) => {
+      const markdown = `Intro\n\n# First\n\n${body}\n\n# Last\n\nLast paragraph`
+      await act(async () => {
+        adapter = createCapricornRuntimeAdapter({
+          container: container(),
+          createRuntime,
+          onChange: vi.fn(),
+          options: { markdown, autoFocus: false },
+        })
+      })
+      const runtime = adapter!
+      const headings = runtime.headings.getAll()
+      let focus: ResumePoint | undefined = point
+      if (word) {
+        const offset = markdown.indexOf(word)
+        const mapped = await runtime.markdownSelection!.resolve(markdown, { anchor: offset, head: offset })
+        expect(mapped?.kind).toBe('capricorn')
+        if (mapped?.kind === 'capricorn') focus = mapped.focus
+      }
+      expect(focus).toBeDefined()
+      if (!focus) return
+      await act(async () => expect(runtime.resume!.restore({
+        kind: 'capricorn', anchor: { path: [1, 0], offset: 0 }, focus,
+      })).toBe(true))
+      const readHeadings = vi.spyOn(runtime.headings, 'getAll')
+      const exportMarkdown = vi.spyOn(runtime, 'getMarkdown')
+      expect(runtime.getSelectionHeadingId!(headings)).toBe(headings[0].id)
+      expect(readHeadings).not.toHaveBeenCalled()
+      expect(exportMarkdown).not.toHaveBeenCalled()
+      // Follow the moving end of a backward selection rather than its anchor.
+      await act(async () => expect(runtime.resume!.restore({
+        kind: 'capricorn', anchor: focus!, focus: { path: [0, 0], offset: 1 },
+      })).toBe(true))
+      expect(runtime.getSelectionHeadingId!(headings)).toBeNull()
+      await act(async () => runtime.destroy())
+      expect(runtime.getSelectionHeadingId!(headings)).toBeNull()
+    },
+  )
 })
