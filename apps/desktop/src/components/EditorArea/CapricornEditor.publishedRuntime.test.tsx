@@ -138,7 +138,8 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
       getComputedStyle(surface).getPropertyValue('--cap-editor-inline-padding'),
     )
     const inlinePaddingEnd = Number.parseFloat(getComputedStyle(root).paddingRight)
-    expect(inlinePaddingEnd).toBe(24)
+    expect(inlinePaddingEnd).toBe(68)
+    expect(Number.parseFloat(getComputedStyle(root).paddingLeft)).toBe(inlinePaddingEnd)
     expect(getComputedStyle(root).paddingTop).toBe('24px')
     const foldControl = blocks[0].querySelector<HTMLElement>('[data-cap-block-gutter]')!
     expect(foldControl).not.toBeNull()

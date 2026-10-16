@@ -29,9 +29,8 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
     props.$fullWidth ? '100%' : 'var(--mf-theme-editor-content-width, 760px)'};
   --rme-editor-content-width: var(--mf-reader-content-width);
   --rme-editor-inline-padding: clamp(20px, 5vw, 48px);
-  /* 36px block handle + 6px gap + 22px heading fold control + 4px outer hit area. */
+  /* Match both sides to the block controls: 36px handle + 6px gap + 22px fold + 4px hit area. */
   --mf-capricorn-inline-padding: 68px;
-  --mf-capricorn-inline-padding-end: 24px;
   --rme-editor-line-height: ${(props) => props.$rootLineHeight};
   ${(props) => props.$codeFontSize && css`--rme-code-font-size: ${props.$codeFontSize};`}
   ${(props) => props.$codeLineHeight && css`--rme-code-line-height: ${props.$codeLineHeight};`}
@@ -72,16 +71,6 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
     --cap-editor-block-padding-start: 24px;
 
     > [data-cap-editable] {
-      width: min(
-        100%,
-        calc(
-          var(--cap-editor-content-width) + var(--mf-capricorn-inline-padding) +
-            var(--mf-capricorn-inline-padding-end)
-        )
-      );
-      /* The runtime positions block handles on the physical left, including in RTL. */
-      padding-right: var(--mf-capricorn-inline-padding-end);
-
       /* Virtual windows always start with a spacer. Only a zero-height leading
          spacer marks the document top; later windows keep their heading margins. */
       > :is(h1, h2, h3, h4, h5, h6):first-child,
@@ -109,15 +98,11 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
     const inlinePadding = isCapricornView(props.$editorViewType)
       ? 'var(--mf-capricorn-inline-padding)'
       : 'var(--rme-editor-inline-padding)'
-    const inlineEndPadding = isCapricornView(props.$editorViewType)
-      ? 'var(--mf-capricorn-inline-padding-end)'
-      : inlinePadding
-
     return props.$visible
       ? css({
           maxWidth: shouldFullWidth
             ? 'none'
-            : `calc(var(--rme-editor-content-width) + ${inlinePadding} + ${inlineEndPadding})`,
+            : `calc(var(--rme-editor-content-width) + ${inlinePadding} + ${inlinePadding})`,
           margin: '0 auto',
           paddingBottom: shouldKeepLegacyBottomPadding ? '3rem' : 0,
           marginInlineStart: 'auto',
