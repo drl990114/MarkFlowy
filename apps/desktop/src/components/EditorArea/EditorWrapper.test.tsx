@@ -45,7 +45,9 @@ describe('EditorWrapper reading layout', () => {
       expect(renderEditorWrapper({ $fullWidth: true })).toContain('--mf-reader-content-width:100%')
       expect(css).toContain('--rme-editor-inline-padding:clamp(20px,5vw,48px)')
       expect(css).toContain('--mf-capricorn-inline-padding:68px')
+      expect(css).toContain('--mf-capricorn-inline-padding-end:24px')
       expect(css).toContain('--cap-editor-inline-padding:var(--mf-capricorn-inline-padding)')
+      expect(css).toContain('--cap-editor-block-padding-start:24px')
       expect(css).toContain('--rme-editor-line-height:1.7')
       expect(css).toContain('--rme-editor-blockquote-color:var(--mf-theme-editor-muted)')
       expect(css).toContain('--rme-editor-inline-code-bg:var(--mf-theme-editor-code-background)')
@@ -59,7 +61,7 @@ describe('EditorWrapper reading layout', () => {
       expect(css).toContain('--rme-editor-heading-5-size:1.05em')
       expect(css).toContain('--rme-editor-heading-6-size:1em')
       expect(css).toContain(
-        'max-width:calc(var(--rme-editor-content-width)+var(--mf-capricorn-inline-padding)+var(--mf-capricorn-inline-padding))',
+        'max-width:calc(var(--rme-editor-content-width)+var(--mf-capricorn-inline-padding)+var(--mf-capricorn-inline-padding-end))',
       )
     },
   )

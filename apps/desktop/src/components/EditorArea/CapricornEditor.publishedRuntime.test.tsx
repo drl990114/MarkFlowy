@@ -137,6 +137,9 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     const inlinePadding = Number.parseFloat(
       getComputedStyle(surface).getPropertyValue('--cap-editor-inline-padding'),
     )
+    const inlinePaddingEnd = Number.parseFloat(getComputedStyle(root).paddingRight)
+    expect(inlinePaddingEnd).toBe(24)
+    expect(getComputedStyle(root).paddingTop).toBe('24px')
     const foldControl = blocks[0].querySelector<HTMLElement>('[data-cap-block-gutter]')!
     expect(foldControl).not.toBeNull()
     const foldGutter = Number(foldControl.dataset.capBlockGutter)
@@ -146,7 +149,12 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     root.getBoundingClientRect = () => new DOMRect(100, 100, 320, 350)
     blocks.forEach((block, index) => {
       block.getBoundingClientRect = () =>
-        new DOMRect(100 + inlinePadding, 140 + index * 80, 320 - 2 * inlinePadding, 32)
+        new DOMRect(
+          100 + inlinePadding,
+          140 + index * 80,
+          320 - inlinePadding - inlinePaddingEnd,
+          32,
+        )
     })
     onChange.mockClear()
     fireEvent.pointerMove(surface, { clientX: 110, clientY: 150 })
@@ -184,6 +192,86 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
       ).toBe(blocks[2].dataset.capKey)
     })
     expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    expect(onError).not.toHaveBeenCalled()
+  })
+
+  it.each([false, true])('restores section spacing when text is inserted before the leading heading and undone (virtualize=%s)', async (virtualize) => {
+    const onEditorChange = vi.fn()
+    const onError = vi.fn()
+    const { container } = render(
+      <ThemeProvider theme={desktopLightTheme}>
+        <EditorWrapper
+          $editorViewType={EditorViewType.WYSIWYG}
+          $fileType='markdown'
+          $fullWidth={false}
+          $rootLineHeight='1.7'
+          $visible
+        >
+          <CapricornEditor
+            active
+            initialMarkdown={'## Heading\n\nBody\n\n## Later'}
+            onEditorChange={onEditorChange}
+            onChange={vi.fn()}
+            onError={onError}
+            onUnavailable={onError}
+            options={{
+              virtualize: { ...CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS, enable: virtualize },
+            }}
+          />
+        </EditorWrapper>
+      </ThemeProvider>,
+    )
+    await waitFor(() => expect(container.querySelector('h2')).not.toBeNull())
+    const adapter = onEditorChange.mock.calls.find(
+      ([value]) => value,
+    )?.[0] as CapricornRuntimeAdapter
+    const heading = container.querySelector<HTMLElement>('h2')!
+    const laterHeading = container.querySelectorAll<HTMLElement>('h2')[1]
+    const sectionMargin = getComputedStyle(laterHeading).marginTop
+    expect(heading.dataset.markdownIndex).toBe('0')
+    expect(laterHeading.dataset.markdownIndex).toBe('2')
+    expect(getComputedStyle(heading).marginTop).toBe('0px')
+    expect(Number.parseFloat(sectionMargin)).toBeGreaterThan(0)
+    if (virtualize) {
+      const root = container.querySelector<HTMLElement>('[data-cap-editable]')!
+      const placeholder = root.firstElementChild as HTMLElement
+      expect(placeholder.hasAttribute('data-cap-virtualize-placeholder')).toBe(true)
+      expect(placeholder.style.height).toBe('0px')
+      const originalChildren = [...root.childNodes]
+      const originalStyle = placeholder.getAttribute('style')!
+      // Happy DOM has no scroll layout. Reuse real package-rendered nodes to
+      // model a later window, then restore them before React updates/unmounts.
+      try {
+        root.replaceChildren(placeholder, laterHeading)
+        placeholder.style.height = '240px'
+        expect(getComputedStyle(laterHeading).marginTop).toBe(sectionMargin)
+      } finally {
+        placeholder.setAttribute('style', originalStyle)
+        root.replaceChildren(...originalChildren)
+      }
+      expect(getComputedStyle(heading).marginTop).toBe('0px')
+    }
+    await act(async () => {
+      adapter.focus()
+      expect(adapter.resume!.restore({
+        kind: 'capricorn',
+        anchor: { path: [0], edge: 'before' },
+        focus: { path: [0], edge: 'before' },
+      })).toBe(true)
+      fireEvent.input(getCapricornRuntimeInput(container)!, {
+        target: { value: 'Intro' },
+        inputType: 'insertText',
+        data: 'Intro',
+      })
+    })
+    await waitFor(() => {
+      expect(adapter.getMarkdown()).toBe('Intro\n\n## Heading\n\nBody\n\n## Later')
+      expect(getComputedStyle(heading).marginTop).toBe(sectionMargin)
+    })
+    await act(async () => adapter.commands.undo())
+    await waitFor(() => expect(getComputedStyle(heading).marginTop).toBe('0px'))
+    expect(adapter.getMarkdown()).toBe('## Heading\n\nBody\n\n## Later')
+    expect(container.querySelector('h2')).toBe(heading)
     expect(onError).not.toHaveBeenCalled()
   })
 
