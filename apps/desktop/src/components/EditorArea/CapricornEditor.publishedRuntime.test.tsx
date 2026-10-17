@@ -656,11 +656,16 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
         options={{ mode: 'edit', handleLinkClick, virtualize: { enable: false } }}
       />,
     )
-    const badge = await waitFor(() => {
-      const image = container.querySelector('a[href="https://github.com/drl990114/MarkFlowy"] img')
-      expect(image).not.toBeNull()
-      return image!
-    })
+    // HTML live preview debounces rendering and lazily loads DOMPurify. Its
+    // first render can exceed waitFor's default 1s deadline on a busy CI runner.
+    const badge = await waitFor(
+      () => {
+        const image = container.querySelector('a[href="https://github.com/drl990114/MarkFlowy"] img')
+        expect(image).not.toBeNull()
+        return image!
+      },
+      { container, timeout: 3000 },
+    )
     const plainClick = new MouseEvent('click', { bubbles: true, cancelable: true })
     await act(async () => fireEvent(badge, plainClick))
     expect(plainClick.defaultPrevented).toBe(true)
