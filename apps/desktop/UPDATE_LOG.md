@@ -1,5 +1,45 @@
 # UPDATE LOG
 
+## v1.2.0
+
+Features:
+
+- **Fold document sections.** In WYSIWYG mode, use the control beside a heading to collapse or expand its section. Folded headings remain in the outline, and jumping to a heading, anchor, or search result automatically reveals the containing section. Folding leaves the Markdown content and undo history unchanged.
+
+- **Find and choose themes more easily.** **Settings → Theme Store** now has its own entry. Browse previews of built-in, community, and local themes in separate groups. Choose light and dark themes separately while keeping your current display mode, including following the system. Added the **TheBlue** community theme by **太极**.
+
+- **Optional smooth cursor.** Added **Settings → Editor → Behavior → Smooth cursor** for the body text cursor in WYSIWYG mode. It is off by default, applies to open editors immediately, and follows the system's reduced-motion preference.
+
+Improvements and Fixes:
+
+- Improved outline tracking in WYSIWYG, Preview, and Source Code modes. The active heading follows the caret while editing and the visible section while scrolling to read. Long outlines reveal the active heading without interrupting manual outline browsing.
+
+- Fixed caret and selection restoration when switching between Source Code and WYSIWYG modes, including selections inside code blocks. Mode switching keeps the latest content position and no longer takes focus back from another input while an editor is loading.
+
+- Improved draft recovery during startup and when closing a tab, window, or workspace. Documents waiting for recovery stay protected from editing and saving. If recovery fails, retry it or, when the draft can be retained safely, choose **Keep draft and close** to recover it later.
+
+- Fixed local images inside Markdown HTML blocks, including relative paths in `<img>` tags. Images resolve against the current document's folder, cached previews keep each document's paths separate, and surrounding HTML remains visible while images are being resolved.
+
+---
+
+新功能：
+
+- **按标题折叠章节。** 所见即所得模式下，通过标题旁的按钮收起或展开对应章节。折叠后的标题仍保留在目录中，通过目录、锚点或搜索结果跳转时会自动展开目标所在章节。折叠不修改 Markdown 内容，也不影响撤销记录。
+
+- **更方便地查找和选择主题。** **设置 → 主题商店**现在有了独立入口，按内置、社区和本地主题分组展示，并提供预览。可分别选择浅色与深色主题，同时保留当前显示模式，包括跟随系统。社区主题新增由**太极**制作的 **TheBlue**。
+
+- **可选的丝滑光标。** 新增**设置 → 编辑器 → 行为 → 丝滑光标**，为所见即所得模式的正文光标启用平滑动画。默认关闭，修改后即时应用到已打开的编辑器，并遵循系统的减少动态效果设置。
+
+改进与修复：
+
+- 改进所见即所得、预览和源码模式下的目录跟随。编辑时随光标更新当前标题，滚动阅读时随可见章节更新；目录较长时自动显示当前标题，同时避免打断手动浏览目录。
+
+- 修复源码与所见即所得模式切换时的光标、选区恢复，包括代码块内的选区。切换后保留当前内容位置；编辑器加载期间若已转到其他输入框，不再抢回焦点。
+
+- 改进启动及关闭标签页、窗口或工作区时的草稿恢复。等待恢复的文档会保持编辑和保存保护；恢复失败时可重试，或在草稿能够安全保留时选择**保留草稿并关闭**，稍后再恢复。
+
+- 修复 Markdown 内嵌 HTML 中的本地图片显示，包括 `<img>` 标签中的相对路径。图片按当前文档所在目录解析，缓存预览不会混用不同文档的路径；图片解析期间，周围的 HTML 内容仍可正常显示。
+
 ## v1.1.0
 
 Features:
