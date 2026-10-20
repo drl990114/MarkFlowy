@@ -1623,12 +1623,13 @@ fn install_cli_in_background(app: &tauri::App) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     app::startup_timing::record_native_entry();
-    // 在 Linux 上禁用 DMA-BUF 渲染器
-    // 否则无法在 Linux 上运行
+    // 默认禁用 DMA-BUF，以兼容部分 Linux 图形驱动；保留用户预设值以便使用默认渲染路径。
     // 相同的bug: https://github.com/tauri-apps/tauri/issues/10702
     // 解决方案来源: https://github.com/clash-verge-rev/clash-verge-rev/blob/ae5b2cfb79423c7e76a281725209b812774367fa/src-tauri/src/lib.rs#L27-L28
     #[cfg(target_os = "linux")]
-    std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    if std::env::var_os("WEBKIT_DISABLE_DMABUF_RENDERER").is_none() {
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    }
 
     tracing_subscriber::fmt::init();
     dotenv::dotenv().ok();

@@ -4832,18 +4832,18 @@ __metadata:
     "@tailwindcss/vite": "npm:4.3.2"
     "@tanstack/react-query": "npm:^5.79.2"
     "@tanstack/react-virtual": "npm:^3.13.18"
-    "@tauri-apps/api": "npm:2.11.1"
-    "@tauri-apps/cli": "npm:2.11.4"
-    "@tauri-apps/plugin-cli": "npm:^2.4.1"
-    "@tauri-apps/plugin-clipboard-manager": "npm:^2.3.2"
-    "@tauri-apps/plugin-dialog": "npm:2.7.2"
-    "@tauri-apps/plugin-fs": "npm:2.5.1"
-    "@tauri-apps/plugin-http": "npm:2.5.9"
-    "@tauri-apps/plugin-opener": "npm:^2.5.4"
-    "@tauri-apps/plugin-os": "npm:2.3.2"
-    "@tauri-apps/plugin-shell": "npm:2.3.5"
-    "@tauri-apps/plugin-store": "npm:2.4.4"
-    "@tauri-apps/plugin-updater": "npm:2.10.1"
+    "@tauri-apps/api": "npm:2.12.4"
+    "@tauri-apps/cli": "npm:2.12.3"
+    "@tauri-apps/plugin-cli": "npm:^2.5.0"
+    "@tauri-apps/plugin-clipboard-manager": "npm:^2.5.0"
+    "@tauri-apps/plugin-dialog": "npm:2.8.3"
+    "@tauri-apps/plugin-fs": "npm:2.7.1"
+    "@tauri-apps/plugin-http": "npm:2.8.3"
+    "@tauri-apps/plugin-opener": "npm:^2.7.2"
+    "@tauri-apps/plugin-os": "npm:2.4.0"
+    "@tauri-apps/plugin-shell": "npm:2.5.0"
+    "@tauri-apps/plugin-store": "npm:2.5.0"
+    "@tauri-apps/plugin-updater": "npm:2.14.0"
     "@tauri-release/cli": "npm:^0.2.5"
     "@types/color": "npm:^4.2.0"
     "@types/lodash": "npm:^4.17.13"
@@ -4859,7 +4859,7 @@ __metadata:
     "@wdio/logger": "npm:9.29.1"
     "@wdio/mocha-framework": "npm:9.32.0"
     "@wdio/spec-reporter": "npm:9.32.0"
-    "@wdio/tauri-service": "npm:1.4.0"
+    "@wdio/tauri-service": "npm:1.5.0"
     ai: "npm:^5.0.93"
     babel-plugin-react-compiler: "npm:^1.0.0"
     class-variance-authority: "npm:^0.7.1"
@@ -8782,105 +8782,105 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tauri-apps/api@npm:2.11.1, @tauri-apps/api@npm:^2.10.1, @tauri-apps/api@npm:^2.11.0, @tauri-apps/api@npm:^2.8.0":
-  version: 2.11.1
-  resolution: "@tauri-apps/api@npm:2.11.1"
-  checksum: 10/95ff573095f03fee3cef9a6a52dbb4e27fd25de8793a2f5d7f2f9850ba85b56777f8fa697e6e863927345432a0c6af0649e55dafbc0de4f84a34f0c08637a662
+"@tauri-apps/api@npm:2.12.4, @tauri-apps/api@npm:^2.12.0":
+  version: 2.12.4
+  resolution: "@tauri-apps/api@npm:2.12.4"
+  checksum: 10/f7206aa2baa1ea7af2f8fa39f36f014b4a93f169dd28177236d0b4caa3e39a0179712e890e07f9dd6be076d650958582b704193d63fcd304feb18bb3e648a3e5
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-darwin-arm64@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli-darwin-arm64@npm:2.11.4"
+"@tauri-apps/cli-darwin-arm64@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli-darwin-arm64@npm:2.12.3"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-darwin-x64@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli-darwin-x64@npm:2.11.4"
+"@tauri-apps/cli-darwin-x64@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli-darwin-x64@npm:2.12.3"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-linux-arm-gnueabihf@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli-linux-arm-gnueabihf@npm:2.11.4"
+"@tauri-apps/cli-linux-arm-gnueabihf@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli-linux-arm-gnueabihf@npm:2.12.3"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-linux-arm64-gnu@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli-linux-arm64-gnu@npm:2.11.4"
+"@tauri-apps/cli-linux-arm64-gnu@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli-linux-arm64-gnu@npm:2.12.3"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-linux-arm64-musl@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli-linux-arm64-musl@npm:2.11.4"
+"@tauri-apps/cli-linux-arm64-musl@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli-linux-arm64-musl@npm:2.12.3"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-linux-riscv64-gnu@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli-linux-riscv64-gnu@npm:2.11.4"
+"@tauri-apps/cli-linux-riscv64-gnu@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli-linux-riscv64-gnu@npm:2.12.3"
   conditions: os=linux & cpu=riscv64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-linux-x64-gnu@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli-linux-x64-gnu@npm:2.11.4"
+"@tauri-apps/cli-linux-x64-gnu@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli-linux-x64-gnu@npm:2.12.3"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-linux-x64-musl@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli-linux-x64-musl@npm:2.11.4"
+"@tauri-apps/cli-linux-x64-musl@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli-linux-x64-musl@npm:2.12.3"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-win32-arm64-msvc@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli-win32-arm64-msvc@npm:2.11.4"
+"@tauri-apps/cli-win32-arm64-msvc@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli-win32-arm64-msvc@npm:2.12.3"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-win32-ia32-msvc@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli-win32-ia32-msvc@npm:2.11.4"
+"@tauri-apps/cli-win32-ia32-msvc@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli-win32-ia32-msvc@npm:2.12.3"
   conditions: os=win32 & cpu=ia32
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli-win32-x64-msvc@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli-win32-x64-msvc@npm:2.11.4"
+"@tauri-apps/cli-win32-x64-msvc@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli-win32-x64-msvc@npm:2.12.3"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@tauri-apps/cli@npm:2.11.4":
-  version: 2.11.4
-  resolution: "@tauri-apps/cli@npm:2.11.4"
+"@tauri-apps/cli@npm:2.12.3":
+  version: 2.12.3
+  resolution: "@tauri-apps/cli@npm:2.12.3"
   dependencies:
-    "@tauri-apps/cli-darwin-arm64": "npm:2.11.4"
-    "@tauri-apps/cli-darwin-x64": "npm:2.11.4"
-    "@tauri-apps/cli-linux-arm-gnueabihf": "npm:2.11.4"
-    "@tauri-apps/cli-linux-arm64-gnu": "npm:2.11.4"
-    "@tauri-apps/cli-linux-arm64-musl": "npm:2.11.4"
-    "@tauri-apps/cli-linux-riscv64-gnu": "npm:2.11.4"
-    "@tauri-apps/cli-linux-x64-gnu": "npm:2.11.4"
-    "@tauri-apps/cli-linux-x64-musl": "npm:2.11.4"
-    "@tauri-apps/cli-win32-arm64-msvc": "npm:2.11.4"
-    "@tauri-apps/cli-win32-ia32-msvc": "npm:2.11.4"
-    "@tauri-apps/cli-win32-x64-msvc": "npm:2.11.4"
+    "@tauri-apps/cli-darwin-arm64": "npm:2.12.3"
+    "@tauri-apps/cli-darwin-x64": "npm:2.12.3"
+    "@tauri-apps/cli-linux-arm-gnueabihf": "npm:2.12.3"
+    "@tauri-apps/cli-linux-arm64-gnu": "npm:2.12.3"
+    "@tauri-apps/cli-linux-arm64-musl": "npm:2.12.3"
+    "@tauri-apps/cli-linux-riscv64-gnu": "npm:2.12.3"
+    "@tauri-apps/cli-linux-x64-gnu": "npm:2.12.3"
+    "@tauri-apps/cli-linux-x64-musl": "npm:2.12.3"
+    "@tauri-apps/cli-win32-arm64-msvc": "npm:2.12.3"
+    "@tauri-apps/cli-win32-ia32-msvc": "npm:2.12.3"
+    "@tauri-apps/cli-win32-x64-msvc": "npm:2.12.3"
   dependenciesMeta:
     "@tauri-apps/cli-darwin-arm64":
       optional: true
@@ -8906,97 +8906,97 @@ __metadata:
       optional: true
   bin:
     tauri: tauri.js
-  checksum: 10/581c5c6ee0ba3a609dcea7504774737b80da3a2e47aa54462c2694bdc9ca304d0ecaf5e94200e928ce53ff58d0acbf0c30799714877d98eb2d1ef8d9e11ad2a1
+  checksum: 10/50d50f2b64a09594f46362c345e2103954b31b6bd8d8bdc8fb7b79c997af2e8a5419b3218f7a965647a4de128136175fa569afefe27f40338addd23b28614549
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-cli@npm:^2.4.1":
-  version: 2.4.1
-  resolution: "@tauri-apps/plugin-cli@npm:2.4.1"
+"@tauri-apps/plugin-cli@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "@tauri-apps/plugin-cli@npm:2.5.0"
   dependencies:
-    "@tauri-apps/api": "npm:^2.8.0"
-  checksum: 10/f3403fd75c302e191c2bfec4551e443030b034dbb1b31bca43a01c2a4745eb88b9842e3c4f03b16661f436e0b3001622b739af3e07c9cd8a9ddc7710458d6c08
+    "@tauri-apps/api": "npm:^2.12.0"
+  checksum: 10/6300c3b4b217e518ec38d9254ab636c8cf5c837528377d9c262de34c6010e37f03626b6456d9c04b834d3599712e3af36fb1997f2bf9605ac43bcd0b74421ff1
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-clipboard-manager@npm:^2.3.2":
-  version: 2.3.2
-  resolution: "@tauri-apps/plugin-clipboard-manager@npm:2.3.2"
+"@tauri-apps/plugin-clipboard-manager@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "@tauri-apps/plugin-clipboard-manager@npm:2.5.0"
   dependencies:
-    "@tauri-apps/api": "npm:^2.8.0"
-  checksum: 10/c346f60f0190ee4a9dcff19d8965f3f4ba4cda1964c46eaf07f052fb4cf2acb2a1e861796556f570f16603888d80d66f02b78a421cefe36ab7486ab4595f9767
+    "@tauri-apps/api": "npm:^2.12.0"
+  checksum: 10/90a65542b5744369281876d60878f5890ab31a81f8541594fd33ad0ac6c78e094bf99b8d6c1f449d68e8fbf1d7ba670cc5ef8cb0ababa40bcfb41393edda6b25
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-dialog@npm:2.7.2":
+"@tauri-apps/plugin-dialog@npm:2.8.3":
+  version: 2.8.3
+  resolution: "@tauri-apps/plugin-dialog@npm:2.8.3"
+  dependencies:
+    "@tauri-apps/api": "npm:^2.12.0"
+  checksum: 10/bc8f949e76640a55c1ea33a851dd31d7655f7dcfa76ca998bf2baac1d86a07af597d15349f0bb24a295949d3dc78d487b91d2f559f5f6215a49628afe3e74666
+  languageName: node
+  linkType: hard
+
+"@tauri-apps/plugin-fs@npm:2.7.1":
+  version: 2.7.1
+  resolution: "@tauri-apps/plugin-fs@npm:2.7.1"
+  dependencies:
+    "@tauri-apps/api": "npm:^2.12.0"
+  checksum: 10/f5249d4e8abfde8fdd71676b398d58465ec906d65a29a25738a644b40e9a75f36046606e07da61e029c63c176db927caa314842ba4c5d246b97b8b3ebb33563c
+  languageName: node
+  linkType: hard
+
+"@tauri-apps/plugin-http@npm:2.8.3":
+  version: 2.8.3
+  resolution: "@tauri-apps/plugin-http@npm:2.8.3"
+  dependencies:
+    "@tauri-apps/api": "npm:^2.12.0"
+  checksum: 10/4b5a08982093825d72aa20a3d20ff0ebb1d1e4069d0638a21e18b4e565bb6707b7bd5c1ebbd58b79d0b6dcfc5c4653cf1f50d6a120bf5a69fbd2c2e8b797a112
+  languageName: node
+  linkType: hard
+
+"@tauri-apps/plugin-opener@npm:^2.7.2":
   version: 2.7.2
-  resolution: "@tauri-apps/plugin-dialog@npm:2.7.2"
+  resolution: "@tauri-apps/plugin-opener@npm:2.7.2"
   dependencies:
-    "@tauri-apps/api": "npm:^2.11.0"
-  checksum: 10/145b19c3d269ba33a1cfe4362ab288ccf82f10e7e1901b8bf4026103e08c377fec710ef80a1d640907095c3b90e9fd91f82ea01be9d826cf4806a1db006ddd64
+    "@tauri-apps/api": "npm:^2.12.0"
+  checksum: 10/4fc5be2b3acdf228967c128b99e4065629d92c1c06a5aec0654696dcc71a9eada4968031a7452e605b3d978d8f6b53816032a888c22f85221d0ce548e700c806
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-fs@npm:2.5.1":
-  version: 2.5.1
-  resolution: "@tauri-apps/plugin-fs@npm:2.5.1"
+"@tauri-apps/plugin-os@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@tauri-apps/plugin-os@npm:2.4.0"
   dependencies:
-    "@tauri-apps/api": "npm:^2.11.0"
-  checksum: 10/e833aaa0c166b40a4f4abee1e114d473e3af4519be5e8138ded99e90fb85a491f6f215e8f739291451e53596f6e123be8cde8d737e1d9775899b84e7509d1f83
+    "@tauri-apps/api": "npm:^2.12.0"
+  checksum: 10/2bb6efd42f2b64adc8401969aa10e41ba5463201a76d5db98fe1089c98b8017a4745eb2feec21de16291025d2f9d0ffe75b776ff870504425ec9494e1579f630
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-http@npm:2.5.9":
-  version: 2.5.9
-  resolution: "@tauri-apps/plugin-http@npm:2.5.9"
+"@tauri-apps/plugin-shell@npm:2.5.0":
+  version: 2.5.0
+  resolution: "@tauri-apps/plugin-shell@npm:2.5.0"
   dependencies:
-    "@tauri-apps/api": "npm:^2.11.0"
-  checksum: 10/1df0df8aa570a16873f28d24b2df80e4de5f9d302f798b9862fc7e8f0727b0e78aad740506ea6d979e4ec96c6a5a8e6d797e3a17efc1d919ba38268e8b55ad5a
+    "@tauri-apps/api": "npm:^2.12.0"
+  checksum: 10/2c19801547e3d12dc0c683ca9118bf9e8f4e54347334ade82bd4cc6cc4220974bca19f25bd52b206ddd51d6d6dcc510200562e2ffc6d654ccd9b4174560b6889
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-opener@npm:^2.5.4":
-  version: 2.5.4
-  resolution: "@tauri-apps/plugin-opener@npm:2.5.4"
+"@tauri-apps/plugin-store@npm:2.5.0":
+  version: 2.5.0
+  resolution: "@tauri-apps/plugin-store@npm:2.5.0"
   dependencies:
-    "@tauri-apps/api": "npm:^2.11.0"
-  checksum: 10/cbb2adc1a0ffe04de2b9b4407932d27fa0eb3ea9202687be8c839db0cf8301aba813bd8267f6dba4235b2fdea5a6d114772f628143e5cdfcddd9a19668953119
+    "@tauri-apps/api": "npm:^2.12.0"
+  checksum: 10/a9b2a068b2dc9c17d0df9d48afbd425b33e4ca58bff11922cb17dca0ebae023b09dec8bf94ebbc6e0e1e99edca7a8035519f4ef1f42e8771e2459a1db59ab22b
   languageName: node
   linkType: hard
 
-"@tauri-apps/plugin-os@npm:2.3.2":
-  version: 2.3.2
-  resolution: "@tauri-apps/plugin-os@npm:2.3.2"
+"@tauri-apps/plugin-updater@npm:2.14.0":
+  version: 2.14.0
+  resolution: "@tauri-apps/plugin-updater@npm:2.14.0"
   dependencies:
-    "@tauri-apps/api": "npm:^2.8.0"
-  checksum: 10/7240503fb708879d69d6b3e5b8a1e342f745be63a3d433f5c33af6cf3c7ae7db1f24ca49f60eac7e621f49a6cff8ca04fa0f4002bf7e7ed8265e4210282d3750
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/plugin-shell@npm:2.3.5":
-  version: 2.3.5
-  resolution: "@tauri-apps/plugin-shell@npm:2.3.5"
-  dependencies:
-    "@tauri-apps/api": "npm:^2.10.1"
-  checksum: 10/761123075a00e999416d78837e88de7d2c9e7786c1c2d516cf21110d428abe142aa705cd68a1bfe75d7262037b9ab3f685317e21909f6c5a8e4a44ca6ca1d3df
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/plugin-store@npm:2.4.4":
-  version: 2.4.4
-  resolution: "@tauri-apps/plugin-store@npm:2.4.4"
-  dependencies:
-    "@tauri-apps/api": "npm:^2.11.0"
-  checksum: 10/30dcc1103a741a8efbfdcd93dc6ca166f52728cee2cae3708926183141eacc9ca9d5a5c68e2dabe14ed0ee490f9cca09cd221c9d13ed6f23c13fba4c259b1e27
-  languageName: node
-  linkType: hard
-
-"@tauri-apps/plugin-updater@npm:2.10.1":
-  version: 2.10.1
-  resolution: "@tauri-apps/plugin-updater@npm:2.10.1"
-  dependencies:
-    "@tauri-apps/api": "npm:^2.10.1"
-  checksum: 10/5006ef18826e3bed0b4a967dcee937ffc5f7e33fd3dc128b0a60a4dc7c5cd4cb9f2e8a57ee55fc28ed8b2750e805cc43c4172b52b0dcde2a15dec7bb82343e70
+    "@tauri-apps/api": "npm:^2.12.0"
+  checksum: 10/6830e6b6f585928c3175f0ae858f007dbf02c7a86813d4a4dca90e6c8b0f3da315675958ef775b41b7c95ccf6a1bb96e7c2d83e40459d2dfe28ecc6445c5f928
   languageName: node
   linkType: hard
 
@@ -10840,18 +10840,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/config@npm:9.30.1":
-  version: 9.30.1
-  resolution: "@wdio/config@npm:9.30.1"
+"@wdio/config@npm:9.31.9":
+  version: 9.31.9
+  resolution: "@wdio/config@npm:9.31.9"
   dependencies:
     "@wdio/logger": "npm:9.29.1"
-    "@wdio/types": "npm:9.30.1"
-    "@wdio/utils": "npm:9.30.1"
-    deepmerge-ts: "npm:^7.0.3"
+    "@wdio/types": "npm:9.31.2"
+    "@wdio/utils": "npm:9.31.9"
+    deepmerge-ts: "npm:^8.0.0"
     glob: "npm:^10.2.2"
     import-meta-resolve: "npm:^4.0.0"
     jiti: "npm:^2.6.1"
-  checksum: 10/6fe25d20f1e6897f599b884b6f8e15cb8f06914b7e850aef033588ad41576e3d50678a91ce6dc75dde98c413bc7d50f2e5c5a3afea6febbbee71f93f7ec47428
+  checksum: 10/6db1f394d67041b9a8d76e7b5a236c910f2626b8cbf087831d170058a7ff11731ced12507165007adfa4a017bc89754d0876ce5229a153640f0428cb427831c0
   languageName: node
   linkType: hard
 
@@ -10878,21 +10878,6 @@ __metadata:
     "@wdio/types": "npm:9.32.0"
     chalk: "npm:^5.0.1"
   checksum: 10/905a2383cab85445f43e89dbc0dbc29a3c37804ecaf65fb611f6ccf7976757ef84cb7265cbef6e7e5d0d749bb56f7c036757f1be7b670e539a4106b179b2c893
-  languageName: node
-  linkType: hard
-
-"@wdio/globals@npm:9.29.1":
-  version: 9.29.1
-  resolution: "@wdio/globals@npm:9.29.1"
-  peerDependencies:
-    expect-webdriverio: ^5.6.5
-    webdriverio: ^9.0.0
-  peerDependenciesMeta:
-    expect-webdriverio:
-      optional: false
-    webdriverio:
-      optional: false
-  checksum: 10/81cb91221bff1f63c9125ff5ef2ab24157fec111d4ac955c4ccafe9e7e78696dc088412fd57ec1e521cb814688fee173d851eba1bc3b50c13ddece6e2ad069b5
   languageName: node
   linkType: hard
 
@@ -10956,58 +10941,51 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/native-core@npm:1.2.0":
-  version: 1.2.0
-  resolution: "@wdio/native-core@npm:1.2.0"
+"@wdio/native-core@npm:1.3.0":
+  version: 1.3.0
+  resolution: "@wdio/native-core@npm:1.3.0"
   dependencies:
     "@wdio/logger": "npm:9.29.1"
-    "@wdio/native-types": "npm:2.5.0"
-    "@wdio/native-utils": "npm:2.7.0"
+    "@wdio/native-types": "npm:2.6.0"
+    "@wdio/native-utils": "npm:2.8.0"
     debug: "npm:^4.4.3"
     get-port: "npm:^7.1.0"
     tslib: "npm:^2.8.1"
-  checksum: 10/521077bb3c709e8bf64a51e051b80932d79def1e2b9661992e71bea68e1388147240715716e1b974552e5417416270df8476339cf09ad21d716d8fc81def7485
+  checksum: 10/3724542e79a3a5e69ab7a481b9b26db0a7d3a3ba8481ea808087d7acf4a8ab2833827000437fdd1c22c95c7ca4fdc6e99e2ba735539a8116136091b1521b932e
   languageName: node
   linkType: hard
 
-"@wdio/native-spy@npm:1.3.0":
-  version: 1.3.0
-  resolution: "@wdio/native-spy@npm:1.3.0"
-  checksum: 10/e632e424fe27a7249fac15949026681b469166d598655b65d48b0d78a2189176517feb5d2649516f47d06f85cd3c04cb682b235c4de154641c14736fb14061da
+"@wdio/native-spy@npm:1.4.0":
+  version: 1.4.0
+  resolution: "@wdio/native-spy@npm:1.4.0"
+  checksum: 10/1e661177830ffcbf4fbccb4ad99ff757a44e32eefe56317c0b6598143e7a15e34dfa6877560f4a1168ce0795aa4b240be1e5bab5270c5d42394ad1dadbb3286f
   languageName: node
   linkType: hard
 
-"@wdio/native-types@npm:2.5.0":
-  version: 2.5.0
-  resolution: "@wdio/native-types@npm:2.5.0"
-  checksum: 10/183474f39936658f319efeaa7c51a3bb6559784505d789c6ae901885244520767711ceab2332ca88655dd88f612ae017d8162d048b6898aba23734b1d2851a9f
+"@wdio/native-types@npm:2.6.0":
+  version: 2.6.0
+  resolution: "@wdio/native-types@npm:2.6.0"
+  checksum: 10/98592531357a705521c18b66b79b40c96e1e345510c349d8d5e3b7377ff753eb3019cd9f9f0409d80f32391bb37edb8c49fa14ebdaf5cf4ec972d54104e39935
   languageName: node
   linkType: hard
 
-"@wdio/native-utils@npm:2.7.0":
-  version: 2.7.0
-  resolution: "@wdio/native-utils@npm:2.7.0"
+"@wdio/native-utils@npm:2.8.0":
+  version: 2.8.0
+  resolution: "@wdio/native-utils@npm:2.8.0"
   dependencies:
     "@wdio/logger": "npm:9.29.1"
     debug: "npm:^4.4.3"
     esbuild: "npm:^0.28.2"
     find-up-simple: "npm:^1.0.1"
     json5: "npm:^2.2.3"
-    smol-toml: "npm:^1.8.0"
-    yaml: "npm:^2.9.0"
+    smol-toml: "npm:^1.9.0"
+    yaml: "npm:^2.9.1"
   peerDependencies:
     tsx: ^4.22.4
   peerDependenciesMeta:
     tsx:
       optional: true
-  checksum: 10/2bfb6f8516778bf98d16f9ca016a8a2ec090342dac62932be7a04ddf482b4ddb028333081da250c8facbd4e070aea4c69b47f225986e9e5b4a11b3d8e3358424
-  languageName: node
-  linkType: hard
-
-"@wdio/protocols@npm:9.30.1":
-  version: 9.30.1
-  resolution: "@wdio/protocols@npm:9.30.1"
-  checksum: 10/e2d85291c5417ec8a7c8d4120824b86f42ae8e5e7440988af868c881fb6c52776089501dcd46546c4548e3e47f86cadf8ea119c725d079d61bd023710fb7282b
+  checksum: 10/ef5becc6819acf11e065970fd1b5c02b821ae24a67beec3e6fc00f3c2dc95bbd1d37eb2ee79da7cf072fa22025453ef4ca73328113fbe89625f6d267867e1ecb
   languageName: node
   linkType: hard
 
@@ -11027,16 +11005,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/reporter@npm:9.30.1":
-  version: 9.30.1
-  resolution: "@wdio/reporter@npm:9.30.1"
+"@wdio/reporter@npm:9.31.2":
+  version: 9.31.2
+  resolution: "@wdio/reporter@npm:9.31.2"
   dependencies:
     "@types/node": "npm:^20.1.0"
     "@wdio/logger": "npm:9.29.1"
-    "@wdio/types": "npm:9.30.1"
+    "@wdio/types": "npm:9.31.2"
     diff: "npm:^8.0.2"
     object-inspect: "npm:^1.12.0"
-  checksum: 10/379c69936e0d890f9ab05564a2b2f2eeaaa41fc47f0a3f2f516d910bb881511d7b081d5ff04c52679f294d1de21dd45b910853c96c1ff2e7a7545d76ed52bb2c
+  checksum: 10/3e0d87b552728e2aa01e29331a0cfbfbe03b31bfe0b3135b4fb219635018930c5472c8780c7d0594af3bed115be4fb5daa60180191e805cbeb3a2da8f9a9ffef
   languageName: node
   linkType: hard
 
@@ -11079,16 +11057,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/spec-reporter@npm:9.30.1":
-  version: 9.30.1
-  resolution: "@wdio/spec-reporter@npm:9.30.1"
+"@wdio/spec-reporter@npm:9.31.2":
+  version: 9.31.2
+  resolution: "@wdio/spec-reporter@npm:9.31.2"
   dependencies:
-    "@wdio/reporter": "npm:9.30.1"
-    "@wdio/types": "npm:9.30.1"
+    "@wdio/reporter": "npm:9.31.2"
+    "@wdio/types": "npm:9.31.2"
     chalk: "npm:^5.1.2"
     easy-table: "npm:^1.2.0"
     pretty-ms: "npm:^9.0.0"
-  checksum: 10/e8e9c9c7351bfd073dd5a14b8f8e48ce250feb74556ea4686f486b4e64a3c1285f4f485f0bd4a16604c459cb961180acb39437131af98bfe80f6bf804da84bcf
+  checksum: 10/016b4d2fb99ef7de629568f965aa2ddc83c8ba465513e76866301dcbcee9d387bf904871c6353d8611538ed0846e0ee60314ce4e9c3384d0567620c6bb04044c
   languageName: node
   linkType: hard
 
@@ -11105,37 +11083,37 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/tauri-service@npm:1.4.0":
-  version: 1.4.0
-  resolution: "@wdio/tauri-service@npm:1.4.0"
+"@wdio/tauri-service@npm:1.5.0":
+  version: 1.5.0
+  resolution: "@wdio/tauri-service@npm:1.5.0"
   dependencies:
-    "@wdio/globals": "npm:9.29.1"
+    "@wdio/globals": "npm:9.31.3"
     "@wdio/logger": "npm:9.29.1"
-    "@wdio/native-core": "npm:1.2.0"
-    "@wdio/native-spy": "npm:1.3.0"
-    "@wdio/native-types": "npm:2.5.0"
-    "@wdio/native-utils": "npm:2.7.0"
-    "@wdio/spec-reporter": "npm:9.30.1"
-    "@wdio/types": "npm:9.30.1"
+    "@wdio/native-core": "npm:1.3.0"
+    "@wdio/native-spy": "npm:1.4.0"
+    "@wdio/native-types": "npm:2.6.0"
+    "@wdio/native-utils": "npm:2.8.0"
+    "@wdio/spec-reporter": "npm:9.31.2"
+    "@wdio/types": "npm:9.31.2"
     debug: "npm:^4.4.3"
     get-port: "npm:^7.1.0"
     tslib: "npm:^2.8.1"
-    webdriverio: "npm:9.30.1"
+    webdriverio: "npm:9.31.9"
   peerDependencies:
     webdriverio: ^9.0.0
   peerDependenciesMeta:
     webdriverio:
       optional: false
-  checksum: 10/f5841e8af3f4d66602a9023262e35888640224f1182ea40a03f422496c181eb0345ee21cf4fb6c746f9524353ce234ed626e72ea5252c98cda35f5cd55e925fb
+  checksum: 10/f7cde9f8f088acf769e538ff5c4b1dfd37138774bec91b0da43fcf7ad4bec12a0be05ab3942b9ecbfc8c606e330fe172b910a2de2d785aad451fe59f8c7201fd
   languageName: node
   linkType: hard
 
-"@wdio/types@npm:9.30.1":
-  version: 9.30.1
-  resolution: "@wdio/types@npm:9.30.1"
+"@wdio/types@npm:9.31.2":
+  version: 9.31.2
+  resolution: "@wdio/types@npm:9.31.2"
   dependencies:
     "@types/node": "npm:^20.1.0"
-  checksum: 10/3e31dda45b659f37872c9d5b74b7cc3a4397d5f3dc4da8fd1bec59535803f8a79c28f730bfc8898b59871cf50a89d921447d092bfd334818b3421d2a02b2811a
+  checksum: 10/22fe99242f5d5022534ef07c5b5abe4f962f84f5bbba98d7fa5b2a70c49b4462d9397699b13367365fbd17e3944803823f374cd89c229171d91a9f50441d8658
   languageName: node
   linkType: hard
 
@@ -11148,16 +11126,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wdio/utils@npm:9.30.1":
-  version: 9.30.1
-  resolution: "@wdio/utils@npm:9.30.1"
+"@wdio/utils@npm:9.31.9":
+  version: 9.31.9
+  resolution: "@wdio/utils@npm:9.31.9"
   dependencies:
     "@puppeteer/browsers": "npm:^2.2.0"
     "@wdio/logger": "npm:9.29.1"
-    "@wdio/types": "npm:9.30.1"
+    "@wdio/types": "npm:9.31.2"
     decamelize: "npm:^6.0.0"
-    deepmerge-ts: "npm:^7.0.3"
-    edgedriver: "npm:^6.1.2"
+    deepmerge-ts: "npm:^8.0.0"
+    edgedriver: "npm:^6.3.1"
     geckodriver: "npm:^6.1.1"
     get-port: "npm:^7.0.0"
     import-meta-resolve: "npm:^4.0.0"
@@ -11166,7 +11144,7 @@ __metadata:
     safaridriver: "npm:^1.0.0"
     split2: "npm:^4.2.0"
     wait-port: "npm:^1.1.0"
-  checksum: 10/71c117499aa72381f3064388e3a2a01a7522e0b0ffe5872759f48541ccae6b990c5a3df824a278c1318cb60b1ec1bd8105d82a8dac6713a26bde02db6e91576d
+  checksum: 10/77d52d4b520ee7436a9eff9e67586e2effe34a3ff62d28967da6d2bd8286f498518ddd7b5a9c63f5ccd1a6cc491c49021876d43db9b7f88472c6536f40bc098f
   languageName: node
   linkType: hard
 
@@ -14507,13 +14485,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deepmerge-ts@npm:^7.0.3":
-  version: 7.1.6
-  resolution: "deepmerge-ts@npm:7.1.6"
-  checksum: 10/0024e69c628768fb20577f740a98cd539aec6e09eb6df11ac3c2ce5674a7c2024504d35ffc409d0873a0be4d329660beef0d90f09228390be98ee60f82e3d858
-  languageName: node
-  linkType: hard
-
 "deepmerge-ts@npm:^8.0.0":
   version: 8.0.2
   resolution: "deepmerge-ts@npm:8.0.2"
@@ -14986,7 +14957,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"edgedriver@npm:^6.1.2, edgedriver@npm:^6.3.1":
+"edgedriver@npm:^6.3.1":
   version: 6.3.1
   resolution: "edgedriver@npm:6.3.1"
   dependencies:
@@ -27636,10 +27607,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"smol-toml@npm:^1.8.0":
-  version: 1.9.0
-  resolution: "smol-toml@npm:1.9.0"
-  checksum: 10/b9953e9b6470eed13c368e0e6674b21fd7a3917c1cdb492570d8dfa568b36e9705b5d072a64052e4375895bc6daef4e76528016c9f13045e81c0d3e092d53e3b
+"smol-toml@npm:^1.9.0":
+  version: 1.9.1
+  resolution: "smol-toml@npm:1.9.1"
+  checksum: 10/0bdcd39bbaa2bdca88f9418cbf0b0b9dd220d9e39b6d298916a4ce1e49a8c8dc84d30f0e49910355203bff3a64da7b06771037dc0d2f8007df406f14dc768c10
   languageName: node
   linkType: hard
 
@@ -30321,22 +30292,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webdriver@npm:9.30.1":
-  version: 9.30.1
-  resolution: "webdriver@npm:9.30.1"
+"webdriver@npm:9.31.9":
+  version: 9.31.9
+  resolution: "webdriver@npm:9.31.9"
   dependencies:
     "@types/node": "npm:^20.1.0"
     "@types/ws": "npm:^8.5.3"
-    "@wdio/config": "npm:9.30.1"
+    "@wdio/config": "npm:9.31.9"
     "@wdio/logger": "npm:9.29.1"
-    "@wdio/protocols": "npm:9.30.1"
-    "@wdio/types": "npm:9.30.1"
-    "@wdio/utils": "npm:9.30.1"
-    deepmerge-ts: "npm:^7.0.3"
+    "@wdio/protocols": "npm:9.31.5"
+    "@wdio/types": "npm:9.31.2"
+    "@wdio/utils": "npm:9.31.9"
+    deepmerge-ts: "npm:^8.0.0"
     https-proxy-agent: "npm:^7.0.6"
     undici: "npm:^6.27.0"
     ws: "npm:^8.21.0"
-  checksum: 10/0b3572b19c472e1f98ce116760d32556cbe7b697d201268a0b88b9ff20a44a194463c5feb6573ac2595133f95c5e2b2e509f76b0bdd33752419a44a4941a4191
+  checksum: 10/1e9632dc39ccdbfd433e9c947303635e812f88515caf1b176e3a71a6e41beb8e789f055e04f8d5f26e649cf0e97b92e31b41fc73176023604fd5bf7b469ee5dc
   languageName: node
   linkType: hard
 
@@ -30359,18 +30330,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webdriverio@npm:9.30.1":
-  version: 9.30.1
-  resolution: "webdriverio@npm:9.30.1"
+"webdriverio@npm:9.31.9":
+  version: 9.31.9
+  resolution: "webdriverio@npm:9.31.9"
   dependencies:
     "@types/node": "npm:^20.11.30"
     "@types/sinonjs__fake-timers": "npm:^8.1.5"
-    "@wdio/config": "npm:9.30.1"
+    "@wdio/config": "npm:9.31.9"
     "@wdio/logger": "npm:9.29.1"
-    "@wdio/protocols": "npm:9.30.1"
+    "@wdio/protocols": "npm:9.31.5"
     "@wdio/repl": "npm:9.16.2"
-    "@wdio/types": "npm:9.30.1"
-    "@wdio/utils": "npm:9.30.1"
+    "@wdio/types": "npm:9.31.2"
+    "@wdio/utils": "npm:9.31.9"
     archiver: "npm:^7.0.1"
     aria-query: "npm:^5.3.0"
     cheerio: "npm:^1.0.0-rc.12"
@@ -30387,13 +30358,13 @@ __metadata:
     rgb2hex: "npm:0.2.5"
     serialize-error: "npm:^12.0.0"
     urlpattern-polyfill: "npm:^10.0.0"
-    webdriver: "npm:9.30.1"
+    webdriver: "npm:9.31.9"
   peerDependencies:
-    puppeteer-core: ">=22.x || <=24.x"
+    puppeteer-core: ">=22.x <=24.x"
   peerDependenciesMeta:
     puppeteer-core:
       optional: true
-  checksum: 10/2fe4f990a02dc3a605fd08851e0c061f2bcfd05f7a60df9b91d8a8effce5c385f516aa27c264da8928b40ad0a37e758d8a5c9476531f7ce937be638fd8796520
+  checksum: 10/dfe290c2b57fe461c08e8f4a70d91f7ba16d3550d4f1e994a0d79acf213e48c37f4f9016bb0421856bd4de448179171678ccb335b396aac25c2668998fda2a9d
   languageName: node
   linkType: hard
 
@@ -30927,7 +30898,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yaml@npm:^2.0.0, yaml@npm:^2.2.2, yaml@npm:^2.3.1, yaml@npm:^2.4.2, yaml@npm:^2.9.0":
+"yaml@npm:^2.0.0, yaml@npm:^2.2.2, yaml@npm:^2.3.1, yaml@npm:^2.4.2, yaml@npm:^2.9.1":
   version: 2.9.1
   resolution: "yaml@npm:2.9.1"
   bin:
