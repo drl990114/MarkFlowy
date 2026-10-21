@@ -132,7 +132,9 @@ jobs:
             ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage.*
             ./target/${{ matrix.target }}/release/bundle/appimage/**.AppImage
             ./target/${{ matrix.target }}/release/bundle/deb/**.deb
+            ./target/${{ matrix.target }}/release/bundle/deb/**.deb.sig
             ./target/${{ matrix.target }}/release/bundle/rpm/**.rpm
+            ./target/${{ matrix.target }}/release/bundle/rpm/**.rpm.sig
 
       - uses: actions/upload-artifact@v4
         if: matrix.os == 'macos-latest' && matrix.arch == 'aarch64'
@@ -279,6 +281,7 @@ jobs:
           mv "artifacts/x86_64/macos/MarkFlowy.app.tar.gz.sig" "artifacts/MarkFlowy_x64.app.tar.gz.sig"
 
           mv "artifacts/x86_64/deb/MarkFlowy_${{ env.version }}_amd64.deb" "artifacts/MarkFlowy_v${{ env.version }}_amd64.deb"
+          mv "artifacts/x86_64/deb/MarkFlowy_${{ env.version }}_amd64.deb.sig" "artifacts/MarkFlowy_v${{ env.version }}_amd64.deb.sig"
           mv "artifacts/x86_64/appimage/MarkFlowy_${{ env.version }}_amd64.AppImage" "artifacts/MarkFlowy_v${{ env.version }}_amd64.AppImage"
           mv "artifacts/x86_64/appimage/MarkFlowy_${{ env.version }}_amd64.AppImage.sig" "artifacts/MarkFlowy_v${{ env.version }}_amd64.AppImage.sig"
           mv artifacts/x86_64/rpm/* artifacts/
@@ -310,7 +313,7 @@ jobs:
 
           ### Windows users
           - We provide an Offline Installer with built-in ​​WebView2 Runtime​​ for devices that cannot automatically install WebView2 online or are in a no-network environment. Please note that this installer is relatively large in size and is recommended to be used only when necessary.
-          - The Portable ZIP can be extracted and run without installation. It uses the system WebView2 Runtime and keeps MarkFlowy's existing user-level data location.
+          - The Portable ZIP can be extracted and run without installation. It uses the system WebView2 Runtime and keeps MarkFlowy's existing user-level data location. In-app updates currently launch an installer; to remain portable, download and extract the new ZIP manually.
 
           ### macOS users
           - ​​macOS x86_64 version​​: When you launch the app for the first time, you may see a prompt saying "Cannot open the application" because the app is from an unidentified developer. Please go to "System Preferences" > "Security & Privacy", and click "Open Anyway" in the "General" tab.
@@ -321,7 +324,7 @@ jobs:
 
           ### Windows 用户
           - 我们提供了内置 ​​WebView2 运行时​​的离线安装包（Offline Installer），适用于无法自动在线安装 WebView2 或处于无网络环境的设备。请注意，此安装包体积较大，建议仅在必要时使用.
-          - Portable ZIP 解压后即可运行，无需安装；它使用系统 WebView2 Runtime，并继续使用 MarkFlowy 现有的用户级数据目录。
+          - Portable ZIP 解压后即可运行，无需安装；它使用系统 WebView2 Runtime，并继续使用 MarkFlowy 现有的用户级数据目录。应用内更新目前会启动安装器；如需继续使用便携版，请手动下载并解压新版 ZIP。
 
           ### macOS 用户
           - ​​macOS x86_64 版本​​：首次启动应用时，系统可能会提示“无法打开应用程序”，这是因为应用来自未识别的开发者。请前往“系统偏好设置” > “安全性与隐私”，在“通用”标签页中点击“仍要打开”即可.

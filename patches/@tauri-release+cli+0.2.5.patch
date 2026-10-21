@@ -1,67 +1,213 @@
 diff --git a/node_modules/@tauri-release/cli/dist/updater.cjs b/node_modules/@tauri-release/cli/dist/updater.cjs
-index 8bc9ce9..0c4f79c 100644
+index 8bc9ce9..7be94da 100644
 --- a/node_modules/@tauri-release/cli/dist/updater.cjs
 +++ b/node_modules/@tauri-release/cli/dist/updater.cjs
-@@ -90,14 +90,16 @@ async function updater() {
-       }
-     });
+@@ -63,43 +63,38 @@
+       "darwin-aarch64": { signature: "", url: "" },
+       "darwin-x86_64": { signature: "", url: "" },
+       "linux-x86_64": { signature: "", url: "" },
+-      "windows-x86_64": { signature: "", url: "" }
++      "linux-x86_64-appimage": { signature: "", url: "" },
++      "linux-x86_64-deb": { signature: "", url: "" },
++      "linux-x86_64-rpm": { signature: "", url: "" },
++      "windows-x86_64": { signature: "", url: "" },
++      "windows-x86_64-msi": { signature: "", url: "" },
++      "windows-x86_64-nsis": { signature: "", url: "" }
+     }
+   };
+   const setAsset = async (asset, reg, platforms) => {
+-    let sig = "";
+-    if (/.sig$/.test(asset.name)) {
+-      sig = await getSignature(asset.browser_download_url);
++    if (!reg.test(asset.name)) return;
++    const isSignature = asset.name.endsWith(".sig");
++    const value = isSignature ? await getSignature(asset.browser_download_url) : asset.browser_download_url;
++    for (const platform of platforms) {
++      updateData.platforms[platform][isSignature ? "signature" : "url"] = value;
+     }
+-    platforms.forEach((platform) => {
+-      if (/aarch64/.test(asset.name)) {
+-        if (/.app.tar.gz/.test(asset.name)) {
+-          if (sig) {
+-            updateData.platforms["darwin-aarch64"].signature = sig;
+-            return;
+-          }
+-          updateData.platforms["darwin-aarch64"].url = asset.browser_download_url;
+-          return;
+-        }
+-      } else if (reg.test(asset.name)) {
+-        if (sig) {
+-          updateData.platforms[platform].signature = sig;
+-          return;
+-        }
+-        updateData.platforms[platform].url = asset.browser_download_url;
+-      }
+-    });
    };
 -  const promises = latestRelease.assets.map(async (asset) => {
 -    await setAsset(asset, /.msi.zip/, ["win64", "windows-x86_64"]);
-+
-+  const assets = latestRelease.assets.filter(a => !a.name.includes('offline_installer'));
-+
-+  const promises = assets.map(async (asset) => {
-+    await setAsset(asset, /.msi/, ["win64", "windows-x86_64"]);
-     await setAsset(asset, /.app.tar.gz/, [
-       "darwin",
+-    await setAsset(asset, /.app.tar.gz/, [
+-      "darwin",
 -      "darwin-x86_64",
 -      "darwin-aarch64"
-+      "darwin-x86_64"
-     ]);
+-    ]);
 -    await setAsset(asset, /.AppImage.tar.gz/, ["linux", "linux-x86_64"]);
-+    await setAsset(asset, /.AppImage/, ["linux", "linux-x86_64"]);
++  const assets = latestRelease.assets.filter(a => !a.name.includes('offline_installer'));
++  const promises = assets.map(async (asset) => {
++    await setAsset(asset, /_x64\.msi(?:\.sig)?$/, ["win64", "windows-x86_64", "windows-x86_64-msi"]);
++    await setAsset(asset, /_x64-setup\.exe(?:\.sig)?$/, ["windows-x86_64-nsis"]);
++    await setAsset(asset, /_x64\.app\.tar\.gz(?:\.sig)?$/, ["darwin", "darwin-x86_64"]);
++    await setAsset(asset, /_aarch64\.app\.tar\.gz(?:\.sig)?$/, ["darwin-aarch64"]);
++    await setAsset(asset, /_amd64\.AppImage(?:\.sig)?$/, ["linux", "linux-x86_64", "linux-x86_64-appimage"]);
++    await setAsset(asset, /_amd64\.deb(?:\.sig)?$/, ["linux-x86_64-deb"]);
++    await setAsset(asset, /\.x86_64\.rpm(?:\.sig)?$/, ["linux-x86_64-rpm"]);
    });
-   await Promise.allSettled(promises);
+-  await Promise.allSettled(promises);
++  await Promise.all(promises);
++  for (const [target, { url, signature }] of Object.entries(updateData.platforms)) {
++    if (!url || !signature.trim()) {
++      throw new Error(`Missing updater asset or signature for ${target}`);
++    }
++  }
    fs.writeFileSync(filename, JSON.stringify(updateData, null, 2));
+   console.log(utils.$.green("[\u2728 updater]"), utils.$.green(utils.relativePath(filename)), "\n");
+   console.log(utils.$.yellow("*".repeat(20)));
+@@ -110,13 +105,16 @@
+   console.log(utils.$.yellow("*".repeat(20)));
+ }
+ async function getSignature(url) {
+-  try {
+-    const response = await fetch(url, {
+-      method: "GET",
+-      headers: { "Content-Type": "application/octet-stream" }
+-    });
+-    return response.text();
+-  } catch (_) {
+-    return "";
++  const response = await fetch(url, {
++    method: "GET",
++    headers: { "Content-Type": "application/octet-stream" }
++  });
++  if (!response.ok) {
++    throw new Error(`Failed to download updater signature: ${url}`);
+   }
++  const signature = (await response.text()).trim();
++  if (!signature) {
++    throw new Error(`Empty updater signature: ${url}`);
++  }
++  return signature;
+ }
 diff --git a/node_modules/@tauri-release/cli/dist/updater.mjs b/node_modules/@tauri-release/cli/dist/updater.mjs
-index 883f7fa..3bc42e3 100644
+index 883f7fa..f7ad46b 100644
 --- a/node_modules/@tauri-release/cli/dist/updater.mjs
 +++ b/node_modules/@tauri-release/cli/dist/updater.mjs
 @@ -1,10 +1,10 @@
 +import { context, getOctokit } from '@actions/github';
  import fs from 'fs';
--import path from 'path';
 +import 'module';
- import fetch from 'node-fetch';
++import fetch from 'node-fetch';
+ import path from 'path';
+-import fetch from 'node-fetch';
 -import { context, getOctokit } from '@actions/github';
 -import { $ as $argv, a as $, R as ROOT_PATH, r as relativePath, d as UPDATER_JSON_PATH } from './shared/cli.8f57657e.mjs';
-+import path from 'path';
 +import { a as $, $ as $argv, r as relativePath, R as ROOT_PATH, d as UPDATER_JSON_PATH } from './shared/cli.8f57657e.mjs';
  import updatelog from './updatelog.mjs';
 -import 'module';
  
  async function updater() {
    const argv = $argv();
-@@ -88,14 +88,16 @@ async function updater() {
-       }
-     });
+@@ -61,43 +61,38 @@
+       "darwin-aarch64": { signature: "", url: "" },
+       "darwin-x86_64": { signature: "", url: "" },
+       "linux-x86_64": { signature: "", url: "" },
+-      "windows-x86_64": { signature: "", url: "" }
++      "linux-x86_64-appimage": { signature: "", url: "" },
++      "linux-x86_64-deb": { signature: "", url: "" },
++      "linux-x86_64-rpm": { signature: "", url: "" },
++      "windows-x86_64": { signature: "", url: "" },
++      "windows-x86_64-msi": { signature: "", url: "" },
++      "windows-x86_64-nsis": { signature: "", url: "" }
+     }
+   };
+   const setAsset = async (asset, reg, platforms) => {
+-    let sig = "";
+-    if (/.sig$/.test(asset.name)) {
+-      sig = await getSignature(asset.browser_download_url);
++    if (!reg.test(asset.name)) return;
++    const isSignature = asset.name.endsWith(".sig");
++    const value = isSignature ? await getSignature(asset.browser_download_url) : asset.browser_download_url;
++    for (const platform of platforms) {
++      updateData.platforms[platform][isSignature ? "signature" : "url"] = value;
+     }
+-    platforms.forEach((platform) => {
+-      if (/aarch64/.test(asset.name)) {
+-        if (/.app.tar.gz/.test(asset.name)) {
+-          if (sig) {
+-            updateData.platforms["darwin-aarch64"].signature = sig;
+-            return;
+-          }
+-          updateData.platforms["darwin-aarch64"].url = asset.browser_download_url;
+-          return;
+-        }
+-      } else if (reg.test(asset.name)) {
+-        if (sig) {
+-          updateData.platforms[platform].signature = sig;
+-          return;
+-        }
+-        updateData.platforms[platform].url = asset.browser_download_url;
+-      }
+-    });
    };
 -  const promises = latestRelease.assets.map(async (asset) => {
 -    await setAsset(asset, /.msi.zip/, ["win64", "windows-x86_64"]);
-+
-+  const assets = latestRelease.assets.filter(a => !a.name.includes('offline_installer'));
-+
-+  const promises = assets.map(async (asset) => {
-+    await setAsset(asset, /.msi/, ["win64", "windows-x86_64"]);
-     await setAsset(asset, /.app.tar.gz/, [
-       "darwin",
+-    await setAsset(asset, /.app.tar.gz/, [
+-      "darwin",
 -      "darwin-x86_64",
 -      "darwin-aarch64"
-+      "darwin-x86_64"
-     ]);
+-    ]);
 -    await setAsset(asset, /.AppImage.tar.gz/, ["linux", "linux-x86_64"]);
-+    await setAsset(asset, /.AppImage/, ["linux", "linux-x86_64"]);
++  const assets = latestRelease.assets.filter(a => !a.name.includes('offline_installer'));
++  const promises = assets.map(async (asset) => {
++    await setAsset(asset, /_x64\.msi(?:\.sig)?$/, ["win64", "windows-x86_64", "windows-x86_64-msi"]);
++    await setAsset(asset, /_x64-setup\.exe(?:\.sig)?$/, ["windows-x86_64-nsis"]);
++    await setAsset(asset, /_x64\.app\.tar\.gz(?:\.sig)?$/, ["darwin", "darwin-x86_64"]);
++    await setAsset(asset, /_aarch64\.app\.tar\.gz(?:\.sig)?$/, ["darwin-aarch64"]);
++    await setAsset(asset, /_amd64\.AppImage(?:\.sig)?$/, ["linux", "linux-x86_64", "linux-x86_64-appimage"]);
++    await setAsset(asset, /_amd64\.deb(?:\.sig)?$/, ["linux-x86_64-deb"]);
++    await setAsset(asset, /\.x86_64\.rpm(?:\.sig)?$/, ["linux-x86_64-rpm"]);
    });
-   await Promise.allSettled(promises);
+-  await Promise.allSettled(promises);
++  await Promise.all(promises);
++  for (const [target, { url, signature }] of Object.entries(updateData.platforms)) {
++    if (!url || !signature.trim()) {
++      throw new Error(`Missing updater asset or signature for ${target}`);
++    }
++  }
    fs.writeFileSync(filename, JSON.stringify(updateData, null, 2));
+   console.log($.green("[\u2728 updater]"), $.green(relativePath(filename)), "\n");
+   console.log($.yellow("*".repeat(20)));
+@@ -108,13 +103,16 @@
+   console.log($.yellow("*".repeat(20)));
+ }
+ async function getSignature(url) {
+-  try {
+-    const response = await fetch(url, {
+-      method: "GET",
+-      headers: { "Content-Type": "application/octet-stream" }
+-    });
+-    return response.text();
+-  } catch (_) {
+-    return "";
++  const response = await fetch(url, {
++    method: "GET",
++    headers: { "Content-Type": "application/octet-stream" }
++  });
++  if (!response.ok) {
++    throw new Error(`Failed to download updater signature: ${url}`);
+   }
++  const signature = (await response.text()).trim();
++  if (!signature) {
++    throw new Error(`Empty updater signature: ${url}`);
++  }
++  return signature;
+ }
