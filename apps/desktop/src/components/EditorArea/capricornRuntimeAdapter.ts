@@ -465,6 +465,12 @@ export function createCapricornRuntimeAdapter({
   let applyingHostMarkdown = false
   let currentMarkdown = options.markdown ?? ''
   let markdownSnapshotDirty = false
+  const getMarkdown = () => {
+    if (destroyed || !markdownSnapshotDirty) return currentMarkdown
+    currentMarkdown = session.getMarkdown()
+    markdownSnapshotDirty = false
+    return currentMarkdown
+  }
   // The runtime starts at revision zero. A composition boundary can be the
   // first notification without changing the committed document.
   let documentRevision = 0
@@ -554,7 +560,7 @@ export function createCapricornRuntimeAdapter({
     validateKeybindings: (configuration) =>
       session.keybindings.validateConfiguration(configuration),
     resume: createCapricornResumeApi(session),
-    markdownSelection: createCapricornMarkdownSelectionApi(session),
+    markdownSelection: createCapricornMarkdownSelectionApi(session, getMarkdown),
     captureEmbeddedCodeFocus: embeddedCodeFocus.capture,
     selection: session.selection,
     requestInlineEdit,
@@ -580,12 +586,7 @@ export function createCapricornRuntimeAdapter({
     focus() {
       if (!destroyed) session.focus()
     },
-    getMarkdown() {
-      if (destroyed || !markdownSnapshotDirty) return currentMarkdown
-      currentMarkdown = session.getMarkdown()
-      markdownSnapshotDirty = false
-      return currentMarkdown
-    },
+    getMarkdown,
     ...(getStatistics
       ? {
           getStatistics(requestOptions?: { signal?: AbortSignal }) {

@@ -1,3 +1,4 @@
+import type { ChangeDesc } from '@codemirror/state'
 import type { ResumePoint, ResumeSelection } from '@/stores/editorResumeStore'
 import type { CapricornRuntimeSession } from './capricornRuntimeAdapter'
 
@@ -198,7 +199,10 @@ function candidateOffsets(markdown: string, offset: number) {
 }
 
 /** Map through isolated snapshots with the installed runtime's exact Markdown codec. */
-export function createCapricornMarkdownSelectionApi(session: CapricornRuntimeSession) {
+export function createCapricornMarkdownSelectionApi(
+  session: CapricornRuntimeSession,
+  getMarkdown: () => string = () => session.getMarkdown(),
+) {
   const snapshot = () => query(session, (controller) => ({
     document: controller.value.document,
     selection: controller.value.selection,
@@ -214,20 +218,78 @@ export function createCapricornMarkdownSelectionApi(session: CapricornRuntimeSes
       try {
         const saved = snapshot()
         if (!saved?.selection) return undefined
-        const markdown = session.getMarkdown()
+        // The host preserves original formatting until an edit. The codec may
+        // serialize equivalent Markdown differently (for example list indentation).
+        const markdown = getMarkdown()
+        const serialized = session.getMarkdown()
+        const isCurrentSource = () => isCurrent(saved) && getMarkdown() === markdown
+        let sourceOffsets: ((offset: number) => Iterable<number>) | undefined
+        let signature: string | undefined
+        if (markdown !== serialized) {
+          const [{ diff }, { ChangeSet, Text }] = await Promise.all([
+            import('@codemirror/merge'), import('@codemirror/state'),
+          ])
+          if (!isCurrentSource()) return undefined
+          const describeChanges = (before: string, after: string) => ChangeSet.of(
+            diff(before, after, { scanLimit: 2000, timeout: 100 }).map((change) => ({
+              from: change.fromA, to: change.toA, insert: after.slice(change.fromB, change.toB),
+            })),
+            before.length,
+            // Offsets refer to raw UTF-16 strings, including both CRLF characters.
+            '\n',
+          ).desc
+          const serializedLines = Text.of(serialized.split('\n'))
+          const sourceLines = Text.of(markdown.split('\n'))
+          let changes: ChangeDesc | undefined
+          sourceOffsets = function* (offset) {
+            // Indentation changes keep line numbers stable. Try the local diff
+            // first so thousands of list items do not exhaust the global budget.
+            // These are only candidates; the codec below still validates them.
+            if (serializedLines.lines === sourceLines.lines) {
+              const line = serializedLines.lineAt(offset)
+              const sourceLine = sourceLines.line(line.number)
+              const local = describeChanges(line.text, sourceLine.text)
+              yield sourceLine.from + local.mapPos(offset - line.from, -1)
+              yield sourceLine.from + local.mapPos(offset - line.from, 1)
+            }
+            if (!isCurrentSource()) return
+            changes ??= describeChanges(serialized, markdown)
+            yield changes.mapPos(offset, -1)
+            yield changes.mapPos(offset, 1)
+          }
+          signature = normalizeDocument(saved.json).signature
+        }
         const capturePoint = async (point: ModelPoint) => {
+          if (!isCurrentSource()) return undefined
           const path = saved.document.getPath(point.key)
           if (!path) return undefined
-          const marker = markerFor(markdown)
+          const marker = markerFor(markdown + serialized)
           const clone = markedDocument(saved.json, { path, offset: point.offset, edge: point.edge }, marker)
-          return clone ? markerOffset(await saved.serialize(clone), marker, markdown) : undefined
+          if (!clone) return undefined
+          const marked = await saved.serialize(clone)
+          const offset = markerOffset(marked, marker, serialized)
+          if (offset === undefined || !sourceOffsets) return offset
+
+          // A diff only proposes positions. Reparse each candidate to verify the
+          // same document and exact marked serialization, including repeated text
+          // and inline atom boundaries, without mutating the live session.
+          const tried = new Set<number>()
+          for (const candidate of sourceOffsets(offset)) {
+            if (!isCurrentSource()) return undefined
+            if (tried.has(candidate)) continue
+            tried.add(candidate)
+            const value = await saved.parse(markdown.slice(0, candidate) + marker + markdown.slice(candidate))
+            if (normalizeDocument(value.document.toJSON(), marker).signature === signature &&
+              (await saved.serialize(value)).replace(/\r\n/g, '\n') === marked.replace(/\r\n/g, '\n')) return candidate
+          }
+          return undefined
         }
         const anchor = await capturePoint(saved.selection.anchor)
         const samePoint = saved.selection.anchor.key === saved.selection.focus.key &&
           saved.selection.anchor.offset === saved.selection.focus.offset &&
           saved.selection.anchor.edge === saved.selection.focus.edge
         const head = samePoint ? anchor : await capturePoint(saved.selection.focus)
-        return isCurrent(saved) && anchor !== undefined && head !== undefined ? { markdown, anchor, head } : undefined
+        return isCurrentSource() && anchor !== undefined && head !== undefined ? { markdown, anchor, head } : undefined
       } catch {
         return undefined
       }

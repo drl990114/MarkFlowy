@@ -298,6 +298,67 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor source mode transition
     }
   })
 
+  it.each([
+    { name: 'ordered-bullet', markdown: '1. one\n2. two\n   - nested\n', word: 'nested', path: [2, 0] },
+    { name: 'bullet-bullet', markdown: '- one\n  - nested\n', word: 'nested', path: [1, 0] },
+    { name: 'ordered-ordered', markdown: '1. one\n   1. nested\n', word: 'nested', path: [1, 0] },
+    { name: 'before-list', markdown: 'Before paragraph\n\n- one\n  - nested\n', word: 'Before', path: [0, 0] },
+    { name: 'after-list', markdown: '- one\n  - nested\n\nAfter paragraph\n', word: 'After', path: [2, 0] },
+    { name: 'CRLF-Unicode', markdown: '- one😀\r\n  - nested🦊\r\n', word: 'nested', path: [1, 0] },
+  ])('preserves original Markdown and live caret/selection through nested-list mode switches: $name', async ({ name, markdown, word, path }) => {
+    const id = `opening-nested-${name}`
+    setFileObject(id, { id, name: `${name}.md`, content: markdown, kind: 'file' })
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+    const { container } = render(<TextEditor active id={id} fileTypeConfig={{
+      type: 'markdown', defaultMode: EditorViewType.SOURCECODE,
+      supportedModes: [EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
+    }} />)
+    await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)).toBeDefined())
+    const sourceMarkdown = markdown.replace(/\r\n/g, '\n')
+    const start = sourceMarkdown.indexOf(word)
+    await act(async () => {
+      const source = sourceCodeCodemirrorViewMap.get(id)!.cm
+      source.focus()
+      source.dispatch({ selection: { anchor: start + 2, head: start + 2 } })
+    })
+
+    for (let cycle = 0; cycle < 3; cycle += 1) {
+      const incoming = cycle === 0 ? { anchor: 2, head: 2 }
+        : cycle === 1 ? { anchor: 3, head: 3 } : { anchor: 5, head: 1 }
+      await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG))
+      await waitFor(() => expect(getCapricornEditor(id)).toBeDefined())
+      const visual = getCapricornEditor(id)!
+      await waitFor(() => expect(document.activeElement).toBe(getCapricornRuntimeInput(container)))
+      await waitFor(() => expect(visual.resume!.capture()).toEqual({
+        kind: 'capricorn',
+        anchor: { path, offset: incoming.anchor },
+        focus: { path, offset: incoming.head },
+      }))
+      expect(visual.getMarkdown()).toBe(markdown)
+      // Move in WYSIWYG so restoring an old source-mode selection cannot pass.
+      // Cover a collapsed caret, then a backward selection and its next round trip.
+      const expected = cycle === 0 ? { anchor: 3, head: 3 } : { anchor: 5, head: 1 }
+      await act(async () => expect(visual.resume!.restore({
+        kind: 'capricorn',
+        anchor: { path, offset: expected.anchor },
+        focus: { path, offset: expected.head },
+      })).toBe(true))
+
+      await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE))
+      await waitFor(() => expect(sourceCodeCodemirrorViewMap.get(id)).toBeDefined())
+      const source = sourceCodeCodemirrorViewMap.get(id)!
+      await waitFor(() => expect(source.cm.state.selection.main).toMatchObject({
+        anchor: start + expected.anchor,
+        head: start + expected.head,
+      }))
+      await waitFor(() => expect(source.cm.hasFocus).toBe(true))
+      expect(source.content).toBe(markdown)
+      expect(source.cm.state.doc.toString()).toBe(sourceMarkdown)
+      expect(getFileObject(id)?.content).toBe(markdown)
+      expect(useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges).toBe(false)
+    }
+  })
+
   it('does not reclaim focus from another input after deferred source preparation', async () => {
     const runtime = await rmeRuntime.loadRmeRuntime()
     let resolve!: (value: typeof runtime) => void

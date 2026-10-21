@@ -21,7 +21,7 @@ afterEach(async () => {
   document.body.replaceChildren()
 })
 
-async function mount(markdown: string) {
+async function mount(markdown: string, getMarkdown?: () => string) {
   const container = document.createElement('div')
   document.body.append(container)
   let session!: CapricornRuntimeSession
@@ -29,7 +29,7 @@ async function mount(markdown: string) {
     session = (createCapricornRuntime as CapricornRuntimeFactory)(container, { markdown, autoFocus: false })
   })
   sessions.push(session)
-  return { session, api: createCapricornMarkdownSelectionApi(session), resume: createCapricornResumeApi(session) }
+  return { session, api: createCapricornMarkdownSelectionApi(session, getMarkdown), resume: createCapricornResumeApi(session) }
 }
 async function select(resume: ReturnType<typeof createCapricornResumeApi>, selection: ResumeSelection) {
   await act(async () => expect(resume.restore(selection)).toBe(true))
@@ -75,6 +75,60 @@ describe.skipIf(!isCapricornRuntimeAvailable)('Markdown caret mapping with the i
     expect(mapped).toMatchObject({ kind: 'capricorn', anchor: { path: [0, 0], offset: 0 }, focus: { path: [0, 0], offset: 0 } })
     await select(resume, mapped!)
     expect(await api.capture()).toEqual({ markdown: session.getMarkdown(), anchor: 2, head: 2 })
+  })
+
+  it.each([
+    { name: 'two-space bullets', markdown: '- one\n  - nested\n', word: 'nested' },
+    { name: 'three-space mixed list', markdown: '1. one\n2. two\n   - nested\n', word: 'nested' },
+    { name: 'three-space ordered list', markdown: '1. one\n   1. nested\n', word: 'nested' },
+    { name: 'repeated list text', markdown: '- nested\n  - nested\n  - nested\n', word: 'nested' },
+    { name: 'deep nesting with Unicode and CRLF', markdown: '- 一级😀\r\n  - 二级\r\n    - 三级🦊\r\n', word: '三级🦊' },
+    { name: 'paragraph before a list', markdown: 'Target\n\n- one\n  - nested\n', word: 'Target' },
+    { name: 'paragraph after a list', markdown: '- one\n  - nested\n\nTarget\n', word: 'Target' },
+  ])('captures a backward selection in original $name without reformatting', async ({ markdown, word }) => {
+    const { session, api, resume } = await mount(markdown, () => markdown)
+    const serialized = session.getMarkdown()
+    const start = markdown.lastIndexOf(word)
+    const expected = { anchor: start + word.length, head: start }
+    const mapped = await api.resolve(markdown, expected)
+    expect(mapped).toBeDefined()
+    await select(resume, mapped!)
+    const before = { selection: resume.capture(), undo: session.getUiState().canUndo }
+
+    expect(await api.capture()).toEqual({ markdown, ...expected })
+    expect(resume.capture()).toEqual(before.selection)
+    expect(session.getMarkdown()).toBe(serialized)
+    expect(session.getUiState().canUndo).toBe(before.undo)
+  })
+
+  it('captures inline atom boundaries against original list indentation', async () => {
+    const markdown = '- one\n  - Before ![alt](image.png) after\n'
+    const { session, api, resume } = await mount(markdown, () => markdown)
+    const serialized = session.getMarkdown()
+    await select(resume, {
+      kind: 'capricorn', anchor: { path: [1, 1], edge: 'before' }, focus: { path: [1, 1], edge: 'after' },
+    })
+    expect(await api.capture()).toEqual({ markdown, anchor: markdown.indexOf('!['), head: markdown.indexOf(')') + 1 })
+    expect(session.getMarkdown()).toBe(serialized)
+  })
+
+  it('rejects capture against source with different document semantics', async () => {
+    const { api, resume } = await mount('- one\n  - nested', () => '- one\n- nested')
+    await select(resume, {
+      kind: 'capricorn', anchor: { path: [1, 0], offset: 3 }, focus: { path: [1, 0], offset: 3 },
+    })
+    expect(await api.capture()).toBeUndefined()
+  })
+
+  it('rejects a capture when the original source snapshot changes while mapping', async () => {
+    let markdown = '- one\n  - nested'
+    const { api, resume } = await mount(markdown, () => markdown)
+    await select(resume, {
+      kind: 'capricorn', anchor: { path: [1, 0], offset: 3 }, focus: { path: [1, 0], offset: 3 },
+    })
+    const pending = api.capture()
+    markdown = '- one\n    - nested'
+    expect(await pending).toBeUndefined()
   })
 
   it('resolves normalized CodeMirror offsets into a document retaining CRLF source', async () => {
