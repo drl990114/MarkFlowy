@@ -58,6 +58,19 @@ const initialSearchState = useSearchStore.getState()
 const escapedListLine =
   '- [tauri](https://tauri.app/) \\- Build smaller\\, faster\\, and more secure desktop apps with a web frontend\\.'
 
+function mockVirtualizedBlockGeometry() {
+  // happy-dom otherwise measures every warmed block as zero height,
+  // making the whole document fit into the virtual viewport.
+  const getRect = HTMLElement.prototype.getBoundingClientRect
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+    this: HTMLElement,
+  ) {
+    return this.hasAttribute('data-cap-leaf-block')
+      ? new DOMRect(0, 0, 1000, 40)
+      : getRect.call(this)
+  })
+}
+
 async function create(markdown: string, fileId = 'first', virtualize = false) {
   const container = document.createElement('div')
   if (virtualize) {
@@ -290,6 +303,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)(
     ])(
       'highlights a partial word after a link in file B (virtualize: $virtualize, escaped: $escaped)',
       async ({ virtualize, escaped }) => {
+        if (virtualize) mockVirtualizedBlockGeometry()
         const first = await create('- Desktop', 'first', virtualize)
         mountFind()
         const firstTarget = {
@@ -362,16 +376,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)(
     it.each([false, true])(
       'retains the visible match after real global-result clicks A → B → A → B (B already open: %s)',
       async (alreadyOpen) => {
-        // happy-dom otherwise measures every warmed block as zero height,
-        // making the whole document fit into the virtual viewport.
-        const getRect = HTMLElement.prototype.getBoundingClientRect
-        vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
-          this: HTMLElement,
-        ) {
-          return this.hasAttribute('data-cap-leaf-block')
-            ? new DOMRect(0, 0, 1000, 40)
-            : getRect.call(this)
-        })
+        mockVirtualizedBlockGeometry()
         createFile({ id: 'first', path: '/workspace/a.md', name: 'a.md', content: '- Desktop' })
         const markdown = `${'Paragraph\n\n'.repeat(68)}## Special Thanks\n${escapedListLine}`
         createFile({ id: 'second', path: '/workspace/b.md', name: 'b.md', content: markdown })
