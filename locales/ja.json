@@ -1038,7 +1038,10 @@
     "install_success": "アップデートをインストールしました。",
     "restart": "再起動",
     "install_failed": "アップデートをインストールできませんでした : {{error}}",
-    "check_failed": "アップデートを確認できませんでした : {{error}}"
+    "check_failed": "アップデートを確認できませんでした : {{error}}",
+    "interrupted_title": "アップデートが完了していません",
+    "interrupted_description": "前回の {{version}} へのアップデートが完了していないため、自動インストールを一時停止しました。再試行するか、自動更新を無効にするか、キャンセルして MarkFlowy を引き続き使用できます。",
+    "disable_auto_update": "自動更新を無効にする"
   },
   "workspace": {
     "info": "ワークスペース情報",

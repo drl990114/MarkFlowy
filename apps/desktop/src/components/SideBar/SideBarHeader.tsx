@@ -47,7 +47,7 @@ export default function SideBarHeader(props: SideBarHeaderProps) {
   return (
     <Container aria-label={name} data-slot='dock-toolbar' role='toolbar'>
       {title ? (
-        <span className='min-w-0 flex-1 truncate px-1 text-ui-control font-medium text-content-secondary'>
+        <span className='min-w-0 flex-1 select-none truncate px-1 text-ui-control font-medium text-content-secondary'>
           {title}
         </span>
       ) : null}

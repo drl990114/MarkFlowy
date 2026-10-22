@@ -14,6 +14,11 @@ const mocks = vi.hoisted(() => ({
   listenCli: vi.fn(),
   stopCli: vi.fn(),
   interactive: vi.fn(),
+  afterInteractive: vi.fn<(task: () => void) => () => void>(),
+  checkUpdate: vi.fn(),
+  syncSystemTheme: vi.fn(),
+  windowLabel: 'main',
+  settingData: { auto_update: false },
   error: vi.fn(),
   getRootPath: vi.fn(() => '/one'),
   cache: { flush: vi.fn(), dispose: vi.fn() },
@@ -25,12 +30,16 @@ vi.mock('@tauri-apps/plugin-store', () => ({
   LazyStore: class { init = async () => {}; get = async () => undefined },
 }))
 vi.mock('@/services/windows', () => ({
-  currentWindow: { label: 'main', emitTo: mocks.emitTo, listen: async () => vi.fn() },
+  currentWindow: {
+    get label() { return mocks.windowLabel },
+    emitTo: mocks.emitTo,
+    listen: async () => vi.fn(),
+  },
 }))
 vi.mock('@/helper/logger', () => ({ logger: { debug: vi.fn(), error: mocks.error } }))
 vi.mock('@/helper/files', () => ({ getFileObject: (id: string) => ({ id, name: `${id}.md` }) }))
 vi.mock('@/helper/filesys', () => ({ getFileNameFromPath: vi.fn(), releaseSecurityScope: vi.fn() }))
-vi.mock('@/helper/updater', () => ({ checkUpdate: vi.fn() }))
+vi.mock('@/helper/updater', () => ({ checkUpdate: mocks.checkUpdate }))
 vi.mock('@/i18n', () => ({ i18nInit: vi.fn(), t: (key: string) => key }))
 vi.mock('zens', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock('@/commands', () => ({
@@ -41,7 +50,9 @@ vi.mock('@/stores/editorResumeStore', () => ({ flushEditorResumeStates: vi.fn() 
 vi.mock('@/stores', () => ({
   useEditorStore: { getState: () => ({ getRootPath: mocks.getRootPath }), subscribe: () => vi.fn() },
 }))
-vi.mock('@/stores/useAppSettingStore', () => ({ default: { getState: () => ({ settingData: {} }) } }))
+vi.mock('@/stores/useAppSettingStore', () => ({
+  default: { getState: () => ({ settingData: mocks.settingData }) },
+}))
 vi.mock('@/stores/useOpenedCacheStore', () => ({
   default: { getState: () => ({ setRecentWorkspaces: vi.fn() }) },
 }))
@@ -49,7 +60,13 @@ vi.mock('@/stores/useLayoutStore', () => ({
   default: { getState: () => ({ setWorkspaceContext: vi.fn(), openExplorer: vi.fn() }) },
 }))
 vi.mock('@/stores/useThemeStore', () => ({
-  default: { getState: () => ({ initFromSettings: vi.fn(), fallbackStaleStartupTheme: vi.fn() }) },
+  default: {
+    getState: () => ({
+      initFromSettings: vi.fn(),
+      fallbackStaleStartupTheme: vi.fn(),
+      syncSystemTheme: mocks.syncSystemTheme,
+    }),
+  },
 }))
 vi.mock('@/services/app-setting', () => ({ appSettingStoreSetup: async () => ({ theme_mode: 'system' }) }))
 vi.mock('@/services/draft-recovery', () => ({
@@ -77,7 +94,7 @@ vi.mock('@/startup/prepareEditor', () => ({
   prepareStartupEditorModules: async () => {}, prepareStartupDocumentRead: vi.fn(),
 }))
 vi.mock('@/startup/interactive', () => ({
-  waitForStartupInteractive: mocks.interactive, afterStartupInteractive: () => vi.fn(),
+  waitForStartupInteractive: mocks.interactive, afterStartupInteractive: mocks.afterInteractive,
 }))
 vi.mock('./useKeyboard', () => ({ default: vi.fn() }))
 vi.mock('./useOSInfo', () => ({ default: vi.fn() }))
@@ -92,6 +109,11 @@ beforeEach(async () => {
   vi.resetModules()
   vi.resetAllMocks()
   window.openedUrls = []
+  mocks.windowLabel = 'main'
+  mocks.settingData.auto_update = false
+  mocks.afterInteractive.mockReturnValue(vi.fn())
+  mocks.checkUpdate.mockResolvedValue(undefined)
+  mocks.syncSystemTheme.mockResolvedValue(undefined)
   mocks.getRootPath.mockReturnValue('/one')
   mocks.invoke.mockImplementation(async (command) => command === 'get_opened_cache'
     ? { recent_workspaces: [] } : undefined)
@@ -127,6 +149,32 @@ async function startRuntime() {
   await act(async () => {})
   return hook
 }
+
+describe('deferred startup updates', () => {
+  it.each([false, true])('checks once in the main window after startup is interactive (automatic: %s)', async (automatic) => {
+    mocks.settingData.auto_update = automatic
+    const first = await startRuntime()
+    expect(mocks.checkUpdate).not.toHaveBeenCalled()
+    await act(async () => { mocks.afterInteractive.mock.calls[0][0]() })
+    expect(mocks.checkUpdate).toHaveBeenCalledExactlyOnceWith({ install: automatic })
+    first.unmount()
+
+    await startRuntime()
+    await act(async () => { mocks.afterInteractive.mock.calls[1][0]() })
+    expect(mocks.checkUpdate).toHaveBeenCalledOnce()
+  })
+
+  it('keeps secondary-window setup active without repeating updater recovery or installation', async () => {
+    mocks.windowLabel = 'main_second'
+    mocks.settingData.auto_update = true
+    await startRuntime()
+    await act(async () => { mocks.afterInteractive.mock.calls[0][0]() })
+
+    expect(mocks.syncSystemTheme).toHaveBeenCalledOnce()
+    expect(mocks.listenCli).toHaveBeenCalledOnce()
+    expect(mocks.checkUpdate).not.toHaveBeenCalled()
+  })
+})
 
 describe('workspace switching with failed recovery', () => {
   it.each(['/two', undefined])('allows cancellation before flushing the current session (%s)', async (path) => {

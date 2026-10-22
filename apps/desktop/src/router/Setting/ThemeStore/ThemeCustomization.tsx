@@ -55,13 +55,13 @@ export function ThemeCustomization() {
         </div>
       )}
       <details className='group border-t border-border pt-3'>
-        <summary className='flex cursor-pointer list-none items-center gap-2 rounded-sm py-1 text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden'>
+        <summary className='flex cursor-default select-none list-none items-center gap-2 rounded-sm py-1 text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden'>
           <ChevronRight aria-hidden className='size-3.5 group-open:rotate-90' />
           <span className='font-medium'>{labels.customization}</span>
           {library.snippets.length > 0 && <Badge size='sm'>{library.snippets.length}</Badge>}
         </summary>
         <div className='space-y-4 pt-3'>
-          <label className='flex items-center gap-2'>
+          <label className='flex cursor-default select-none items-center gap-2'>
             <Checkbox
               checked={personalTypography}
               disabled={pending}

@@ -7,6 +7,7 @@ export const Container = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  -webkit-user-select: none;
   user-select: none;
   overflow: hidden;
   font-size: var(--mf-ui-font-control);

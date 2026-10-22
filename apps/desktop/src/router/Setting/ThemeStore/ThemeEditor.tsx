@@ -279,7 +279,7 @@ export function ThemeEditor({
                 className='m-0 min-w-0 space-y-3 border-0 p-0'
               >
                 <label className='flex min-w-0 flex-col gap-1 text-ui-caption text-muted-foreground'>
-                  {labels.author}
+                  <span className='cursor-default select-none'>{labels.author}</span>
                   <Input
                     inputSize='sm'
                     value={document.author ?? ''}
@@ -288,7 +288,7 @@ export function ThemeEditor({
                 </label>
                 <div className='flex items-end gap-2'>
                   <label className='flex min-w-0 flex-1 flex-col gap-1 text-ui-caption text-muted-foreground'>
-                    {labels.variant}
+                    <span className='cursor-default select-none'>{labels.variant}</span>
                     <Input
                       inputSize='sm'
                       value={variant.name}
@@ -405,7 +405,7 @@ export function ThemeEditor({
       <div className='grid gap-3 @min-[36rem]/theme-editor:grid-cols-2'>
         <div>
           <label className='flex min-w-0 flex-col gap-1'>
-            {labels.json}
+            <span className='cursor-default select-none'>{labels.json}</span>
             <Textarea
               className='h-96 font-mono text-ui-control'
               aria-label={labels.json}
@@ -448,7 +448,7 @@ export function ThemeEditor({
           )}
         </div>
         <label className='flex min-w-0 flex-col gap-1'>
-          {labels.css}
+          <span className='cursor-default select-none'>{labels.css}</span>
           <Textarea
             disabled={jsonDirty}
             className='h-96 font-mono text-ui-control'
@@ -493,7 +493,7 @@ export function ThemeEditor({
         )}
         {groups.map((group) => (
           <details key={group} open={group === selected.split('.')[0] || Boolean(search)}>
-            <summary className='cursor-default px-1 py-1 text-ui-caption font-medium text-muted-foreground'>
+            <summary className='cursor-default select-none px-1 py-1 text-ui-caption font-medium text-muted-foreground'>
               {group}
             </summary>
             {names
@@ -649,7 +649,7 @@ export function ThemeEditor({
                     aria-label={labels.previewOptions}
                     className='w-64 max-w-[calc(100vw-2rem)] space-y-3 p-3'
                   >
-                    <label className='flex items-center gap-2 text-ui-control'>
+                    <label className='flex cursor-default select-none items-center gap-2 text-ui-control'>
                       <Checkbox
                         checked={includeCss}
                         disabled={pending}

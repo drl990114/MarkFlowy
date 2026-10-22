@@ -14,6 +14,7 @@ export const Container = styled.div`
   box-sizing: border-box;
   background: var(--mf-surface-statusbar);
   border-top: 1px solid var(--mf-ui-border-subtle);
+  -webkit-user-select: none;
   user-select: none;
   font-size: var(--mf-ui-font-caption);
   line-height: var(--mf-ui-line-height-caption);

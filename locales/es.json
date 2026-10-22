@@ -1033,7 +1033,10 @@
     "install_success": "La actualización se instaló correctamente.",
     "restart": "Reiniciar",
     "install_failed": "No se pudo instalar la actualización: {{error}}",
-    "check_failed": "No se pudieron buscar actualizaciones: {{error}}"
+    "check_failed": "No se pudieron buscar actualizaciones: {{error}}",
+    "interrupted_title": "Actualización incompleta",
+    "interrupted_description": "La actualización anterior a {{version}} no se completó. La instalación automática está en pausa. Puedes reintentar, desactivar las actualizaciones automáticas o cancelar para seguir usando MarkFlowy.",
+    "disable_auto_update": "Desactivar actualizaciones automáticas"
   },
   "explorer": {
     "collapse_folders": "Contraer carpetas",

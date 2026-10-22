@@ -61,7 +61,7 @@ function CompactEmptyState({ mode }: { mode: EmptyStateMode }) {
       data-slot={mode}
     >
       <div className='w-full max-w-60'>
-        <p className='m-0 mb-1.5 px-2 text-ui-caption text-content-muted' role='status'>
+        <p className='m-0 mb-1.5 select-none px-2 text-ui-caption text-content-muted' role='status'>
           {statusLabel}
         </p>
         <div aria-label={t('welcome.getStarted')} className='flex flex-col' role='group'>

@@ -180,7 +180,7 @@ export const TabItem = styled.div<TabItemProps>`
     border: 0;
     color: inherit;
     background: transparent;
-    cursor: pointer;
+    cursor: default;
     font: inherit;
     white-space: inherit;
   }

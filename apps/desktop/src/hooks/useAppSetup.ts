@@ -419,7 +419,10 @@ const startDeferredAppSetup = () => {
     const { settingData } = useAppSettingStore.getState()
     deferredAppSetupPromise = Promise.all([
       useThemeStore.getState().syncSystemTheme(),
-      window.__MARKFLOWY_E2E__ ? undefined : checkUpdate({ install: settingData.auto_update }),
+      // Secondary windows must not repeat installation or recover an in-flight update.
+      window.__MARKFLOWY_E2E__ || currentWindow.label !== 'main'
+        ? undefined
+        : checkUpdate({ install: settingData.auto_update }),
     ]).then(() => undefined)
   }
 

@@ -382,6 +382,16 @@ export const TocViewContainer = styled.div<ContainerProps>`
   color: ${(props) => props.theme.primaryFontColor};
   overflow: hidden;
 
+  > [data-slot='dock-toolbar'],
+  .toc-list {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .toc-list a {
+    cursor: default;
+  }
+
   ${(props) =>
     props.variant !== 'editor' &&
     css`

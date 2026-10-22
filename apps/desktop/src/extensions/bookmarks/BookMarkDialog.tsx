@@ -187,7 +187,10 @@ export const BookMarkDialog: React.FC = () => {
               {draft.path}
             </span>
 
-            <label className='text-right text-ui-control text-foreground-secondary' htmlFor='bookmark-name'>
+            <label
+              className='cursor-default select-none text-right text-ui-control text-foreground-secondary'
+              htmlFor='bookmark-name'
+            >
               {t('bookmarks.name')}
             </label>
             <Input
@@ -199,7 +202,10 @@ export const BookMarkDialog: React.FC = () => {
               onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))}
             />
 
-            <span className='text-right text-ui-control text-foreground-secondary' id='bookmark-tags-label'>
+            <span
+              className='cursor-default select-none text-right text-ui-control text-foreground-secondary'
+              id='bookmark-tags-label'
+            >
               {t('bookmarks.tags')}
             </span>
             <div className='min-w-0'>

@@ -29,6 +29,9 @@ const Container = styled.div`
   min-width: 0;
 
   .setting-item__title {
+    cursor: default;
+    -webkit-user-select: none;
+    user-select: none;
     margin-bottom: 2px;
     font-size: var(--mf-ui-font-control);
     font-weight: 500;

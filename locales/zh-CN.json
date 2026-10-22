@@ -1089,7 +1089,10 @@
     "install_success": "更新安装成功。",
     "restart": "重新启动",
     "install_failed": "无法安装更新：{{error}}",
-    "check_failed": "无法检查更新：{{error}}"
+    "check_failed": "无法检查更新：{{error}}",
+    "interrupted_title": "更新未完成",
+    "interrupted_description": "上次更新至 {{version}} 未完成，自动安装已暂停。你可以重试、关闭自动更新，或取消以继续使用 MarkFlowy。",
+    "disable_auto_update": "关闭自动更新"
   },
   "explorer": {
     "refresh_folder_data": "刷新文件夹数据",

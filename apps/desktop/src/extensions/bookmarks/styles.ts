@@ -49,13 +49,14 @@ export const Container = styled.div`
       width: 100%;
       min-height: 26px;
       padding: 4px 6px;
-      cursor: pointer;
+      cursor: default;
       border: 0;
       border-radius: 0;
       color: var(--mf-text-primary, ${(props) => props.theme.primaryFontColor});
       background: transparent;
       font: inherit;
       text-align: left;
+      -webkit-user-select: none;
       user-select: none;
       box-sizing: border-box;
       transition: background-color var(--mf-motion-duration-fast, 120ms)

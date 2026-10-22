@@ -1033,7 +1033,10 @@
     "install_success": "Mise à jour installée.",
     "restart": "Redémarrer",
     "install_failed": "Impossible d’installer la mise à jour : {{error}}",
-    "check_failed": "Impossible de rechercher les mises à jour : {{error}}"
+    "check_failed": "Impossible de rechercher les mises à jour : {{error}}",
+    "interrupted_title": "Mise à jour inachevée",
+    "interrupted_description": "La mise à jour précédente vers {{version}} n’a pas abouti. L’installation automatique est en pause. Vous pouvez réessayer, désactiver les mises à jour automatiques ou annuler pour continuer à utiliser MarkFlowy.",
+    "disable_auto_update": "Désactiver les mises à jour automatiques"
   },
   "explorer": {
     "collapse_folders": "Dossiers d'effondrement",

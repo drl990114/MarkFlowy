@@ -290,7 +290,9 @@ export function InlineInsertPopover({
               </Button>
             </div>
             <div className='flex flex-col gap-1.5'>
-              <label htmlFor={`${id}-address`}>{t('inline_insert.address')}</label>
+              <label className='cursor-default select-none' htmlFor={`${id}-address`}>
+                {t('inline_insert.address')}
+              </label>
               {localPath ? (
                 <div className='flex items-center gap-2'>
                   <span className='min-w-0 flex-1 truncate' title={localPath}>
@@ -338,7 +340,7 @@ export function InlineInsertPopover({
             </div>
             {image || (bookmark.isCollapsed && !bookmark.link) ? (
               <div className='flex flex-col gap-1.5'>
-                <label htmlFor={`${id}-text`}>
+                <label className='cursor-default select-none' htmlFor={`${id}-text`}>
                   {t(image ? 'inline_insert.alt' : 'inline_insert.text')}
                 </label>
                 <Input

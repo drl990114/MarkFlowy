@@ -15,7 +15,7 @@ type ContainerProps = {
 
 const Container = styled(Button)<ContainerProps>`
   padding: 4px;
-  cursor: pointer;
+  cursor: default;
   color: ${(props) =>
     props.$checking ? props.theme.successColor : props.theme.primaryFontColor};
 `

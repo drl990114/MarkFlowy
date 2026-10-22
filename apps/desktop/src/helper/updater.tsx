@@ -1,6 +1,13 @@
 import { dialog } from '@/services/dialog'
+import { writeSettingPatch } from '@/services/app-setting'
+import {
+  clearUpdateAttempt,
+  getInterruptedUpdate,
+  recordUpdateAttempt,
+} from '@/services/update-recovery'
 import useUpdaterStore from '@/stores/useUpdaterStore'
 import { invoke } from '@tauri-apps/api/core'
+import { type } from '@tauri-apps/plugin-os'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { check } from '@tauri-apps/plugin-updater'
 import { i18n } from '@/i18n'
@@ -33,7 +40,13 @@ export const installUpdate = (update: Update): Promise<void> => {
       const id = toast.loading(i18n.t('updater.downloading'))
 
       try {
-        await currentUpdate.downloadAndInstall()
+        if (type() === 'windows') {
+          await currentUpdate.download()
+          await recordUpdateAttempt(currentUpdate)
+          await currentUpdate.install()
+        } else {
+          await currentUpdate.downloadAndInstall()
+        }
         useUpdaterStore.setState({ update: null, installedVersion: currentUpdate.version })
         await closeUpdate(currentUpdate)
         toast.dismiss(id)
@@ -109,10 +122,28 @@ export const fetchUpdate = (): Promise<Update | null> => {
 
 export const checkUpdate = async (opt: { install: boolean } = { install: false }) => {
   try {
+    // Recover before the network check, so even an offline user can disable updates.
+    const interrupted = type() === 'windows' ? await getInterruptedUpdate() : null
+    if (interrupted) {
+      const action = await dialog.confirm({
+        title: i18n.t('updater.interrupted_title'),
+        content: i18n.t('updater.interrupted_description', { version: interrupted.targetVersion }),
+        actions: [
+          { id: 'cancel', label: i18n.t('common.cancel') },
+          { id: 'disable', label: i18n.t('updater.disable_auto_update') },
+          { id: 'retry', label: i18n.t('common.retry'), primary: true },
+        ],
+      })
+      if (action === 'disable') {
+        await writeSettingPatch({ auto_update: false })
+        await clearUpdateAttempt()
+      }
+      if (action !== 'retry') return
+    }
     const update = await fetchUpdate()
 
     if (update !== null) {
-      if (opt.install) {
+      if (opt.install || interrupted) {
         await installUpdate(update)
       } else {
         const { UpdateDialogContent } = await import('@/components/UpdateDialogContent')

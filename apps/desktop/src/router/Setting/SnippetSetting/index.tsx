@@ -321,7 +321,7 @@ export function SnippetSetting({
   const renderSnippetMetadata = () => (
     <div className='grid min-w-0 gap-2 @min-[24rem]/snippet-form:grid-cols-[minmax(0,1fr)_10rem]'>
       <label className='flex min-w-0 flex-col gap-1 text-ui-control' htmlFor={`${fieldsId}-title`}>
-        {t('snippets.name')}
+        <span className='cursor-default select-none'>{t('snippets.name')}</span>
         <Input
           id={`${fieldsId}-title`}
           inputSize='sm'
@@ -333,7 +333,9 @@ export function SnippetSetting({
         />
       </label>
       <div className='flex min-w-0 flex-col gap-1 text-ui-control'>
-        <label htmlFor={`${fieldsId}-kind`}>{t('snippets.kind')}</label>
+        <label className='cursor-default select-none' htmlFor={`${fieldsId}-kind`}>
+          {t('snippets.kind')}
+        </label>
         <Select.Root
           value={draft.item.kind}
           disabled={builtin || busy}
@@ -367,7 +369,7 @@ export function SnippetSetting({
         className='flex w-full max-w-80 flex-col gap-1 text-ui-control'
         htmlFor={`${fieldsId}-language`}
       >
-        {t('snippets.language')}
+        <span className='cursor-default select-none'>{t('snippets.language')}</span>
         <Input
           id={`${fieldsId}-language`}
           inputSize='sm'
@@ -473,7 +475,9 @@ export function SnippetSetting({
           {renderSnippetMetadata()}
           {renderSnippetLanguage()}
           <div className='flex flex-col gap-1 text-ui-control'>
-            <label htmlFor={`${fieldsId}-source`}>{t('snippets.source')}</label>
+            <label className='cursor-default select-none' htmlFor={`${fieldsId}-source`}>
+              {t('snippets.source')}
+            </label>
             <Textarea
               id={`${fieldsId}-source`}
               value={draft.item.source}

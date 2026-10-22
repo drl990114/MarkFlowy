@@ -132,7 +132,10 @@ export function ImageInsertModal() {
 
         <Dialog.Body className='flex flex-col gap-3'>
           <div className='flex flex-col gap-2'>
-            <label className='font-medium text-foreground' htmlFor={inputId}>
+            <label
+              className='cursor-default select-none font-medium text-foreground'
+              htmlFor={inputId}
+            >
               {t('image_insert.url_label')}
             </label>
             <div className='flex gap-2'>

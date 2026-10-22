@@ -300,6 +300,24 @@
 }
 
 @layer components {
+  /* Only control text is non-selectable; content and portal bodies keep their
+   * normal selection behavior. Include slotted link-buttons and shortcut hints. */
+  button[data-slot],
+  [data-slot='button'],
+  [data-slot='kbd-group'] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* WebKit needs an explicit override for fields inside non-selectable chrome,
+   * such as title-bar and file-tree rename controls. Readonly fields still copy. */
+  input[data-slot],
+  textarea[data-slot],
+  .mf-file-tree-name-input {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
   [data-slot],
   [data-slot] *,
   [data-slot]::before,
@@ -349,6 +367,11 @@
     display: block;
     vertical-align: middle;
   }
+}
+
+/* Legacy icon adapters share .icon with other hosts; keep this cursor local. */
+button[data-mf-component].icon:not(:disabled) {
+  cursor: default;
 }
 
 [data-mf-portal] {

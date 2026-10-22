@@ -12,6 +12,8 @@ const PopoverContent = styled.div`
   flex-direction: column;
   gap: 8px;
   min-width: 120px;
+  -webkit-user-select: none;
+  user-select: none;
 `
 
 const PopoverTitle = styled.div`
@@ -29,7 +31,7 @@ const RadioOption = styled.label`
   min-height: 28px;
   font-size: var(--mf-ui-font-control);
   line-height: var(--mf-ui-line-height-control);
-  cursor: pointer;
+  cursor: default;
 `
 
 type DisplayMode = 'words' | 'chars' | 'pureChars'

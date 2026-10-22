@@ -348,7 +348,7 @@ export function ThemeStore({ mode, onBack, onSelected }: ThemeStoreProps) {
           <h3 className='m-0 text-ui-control font-semibold'>{labels.catalog}</h3>
           <span className='text-ui-caption text-muted-foreground'>{visibleCatalog.length}</span>
           {catalog.length > 0 && (
-            <label className='ml-auto flex items-center gap-2 text-ui-caption text-muted-foreground'>
+            <label className='ml-auto flex cursor-default select-none items-center gap-2 text-ui-caption text-muted-foreground'>
               <Checkbox
                 checked={installedOnly}
                 disabled={pending}

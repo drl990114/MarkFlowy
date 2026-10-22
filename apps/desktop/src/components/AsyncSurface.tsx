@@ -57,8 +57,10 @@ export function AsyncSurface<T>({ children, retryLabel = 'Retry', state }: Async
             <AlertCircleIcon aria-hidden='true' size={16} />
           </EmptyMedia>
         ) : null}
-        <EmptyTitle>{state.title}</EmptyTitle>
-        {state.description ? <EmptyDescription>{state.description}</EmptyDescription> : null}
+        <EmptyTitle className={isError ? 'select-text' : undefined}>{state.title}</EmptyTitle>
+        {state.description ? (
+          <EmptyDescription className='select-text'>{state.description}</EmptyDescription>
+        ) : null}
       </EmptyHeader>
       {retry || action ? (
         <EmptyContent>

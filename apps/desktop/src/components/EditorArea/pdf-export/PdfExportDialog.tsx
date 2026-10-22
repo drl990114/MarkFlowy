@@ -57,7 +57,10 @@ export function PdfExportDialog({
         <Dialog.Body className='flex flex-col gap-4'>
           <div className='grid grid-cols-2 gap-3'>
             <div className='flex min-w-0 flex-col gap-1.5'>
-              <label htmlFor={`${id}-paper`} className='text-ui-control text-foreground'>
+              <label
+                htmlFor={`${id}-paper`}
+                className='cursor-default select-none text-ui-control text-foreground'
+              >
                 {t('pdf_export.paper_size')}
               </label>
               <Select
@@ -77,7 +80,10 @@ export function PdfExportDialog({
               </Select>
             </div>
             <div className='flex min-w-0 flex-col gap-1.5'>
-              <label htmlFor={`${id}-orientation`} className='text-ui-control text-foreground'>
+              <label
+                htmlFor={`${id}-orientation`}
+                className='cursor-default select-none text-ui-control text-foreground'
+              >
                 {t('pdf_export.orientation')}
               </label>
               <Select
@@ -105,7 +111,10 @@ export function PdfExportDialog({
               className='mt-0.5'
             />
             <div className='flex min-w-0 flex-col gap-1'>
-              <label htmlFor={`${id}-outline`} className='text-ui-control text-foreground'>
+              <label
+                htmlFor={`${id}-outline`}
+                className='cursor-default select-none text-ui-control text-foreground'
+              >
                 {t('pdf_export.include_outline')}
               </label>
               <p id={`${id}-outline-hint`} className='m-0 text-ui-caption text-muted-foreground'>

@@ -235,7 +235,11 @@ export const ThemeSetting = memo(({ onBrowse }: ThemeSettingProps) => {
             onValueChange={(value) => setThemeMode(value as ThemeMode)}
           >
             {(['system', 'light', 'dark'] as const).map((mode) => (
-              <label key={mode} htmlFor={`${modeId}-${mode}`} className='flex items-center gap-1.5'>
+              <label
+                key={mode}
+                htmlFor={`${modeId}-${mode}`}
+                className='flex cursor-default select-none items-center gap-1.5'
+              >
                 <RadioGroupItem id={`${modeId}-${mode}`} value={mode} />
                 {t(`settings.display.theme.mode.${mode}`)}
               </label>

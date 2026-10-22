@@ -1099,7 +1099,10 @@
     "install_success": "Update installed successfully.",
     "restart": "Restart",
     "install_failed": "Unable to install the update: {{error}}",
-    "check_failed": "Unable to check for updates: {{error}}"
+    "check_failed": "Unable to check for updates: {{error}}",
+    "interrupted_title": "Update not completed",
+    "interrupted_description": "The previous update to {{version}} did not complete. Automatic installation is paused. You can retry, disable automatic updates, or cancel to continue using MarkFlowy.",
+    "disable_auto_update": "Disable automatic updates"
   },
   "workspace": {
     "info": "Workspace Information",

@@ -73,7 +73,7 @@ export function SettingNavigation({
         return (
           <div data-slot='setting-navigation-group' key={section.id}>
             <h3
-              className='m-0 mb-1 px-2 text-ui-caption font-medium text-muted-foreground'
+              className='m-0 mb-1 select-none px-2 text-ui-caption font-medium text-muted-foreground'
               id={headingId}
             >
               {t(section.i18nKey)}
