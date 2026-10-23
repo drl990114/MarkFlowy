@@ -790,6 +790,111 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     },
   )
 
+  it('reflows content-based table columns with the host width without changing the document or session', async () => {
+    const markdown =
+      '| Name | Description |\n| --- | --- |\n| A | A much longer description for this entry |\n| B | Short |'
+    const onChange = vi.fn()
+    const onError = vi.fn()
+    const onEditorChange = vi.fn<(editor: CapricornRuntimeAdapter | null) => void>()
+    const editor = (
+      <CapricornEditor
+        active={false}
+        visible
+        initialMarkdown={markdown}
+        onChange={onChange}
+        onError={onError}
+        onUnavailable={onError}
+        onEditorChange={onEditorChange}
+        options={{ virtualize: { enable: false } }}
+      />
+    )
+    const withLayout = (fullWidth: boolean) => (
+      <ThemeProvider theme={desktopLightTheme}>
+        <EditorWrapper
+          $editorViewType={EditorViewType.WYSIWYG}
+          $fileType='markdown'
+          $fullWidth={fullWidth}
+          $rootLineHeight='1.7'
+          $visible
+        >
+          {editor}
+        </EditorWrapper>
+      </ThemeProvider>
+    )
+    const { container, rerender, unmount } = render(withLayout(false))
+    await waitFor(() =>
+      expect(container.querySelectorAll('[role="row"][data-markdown-table]')).toHaveLength(3),
+    )
+    const runtime = onEditorChange.mock.calls.find(([adapter]) => adapter)![0]!
+    const content = container.querySelector<HTMLElement>('[data-cap-content]')!
+    const root = container.querySelector<HTMLElement>('[data-cap-editable]')!
+    const rows = [...root.querySelectorAll<HTMLElement>('[role="row"][data-markdown-table]')]
+    let hostWidth = 640
+    // Happy DOM has no layout or Canvas text metrics. Exercise the real
+    // runtime observer with local geometry, retaining the host's actual CSS.
+    const geometry = [
+      vi.spyOn(root, 'clientWidth', 'get').mockImplementation(() => hostWidth),
+      ...rows.map((row) =>
+        vi.spyOn(row, 'getClientRects').mockImplementation(() => {
+          const rect = new DOMRect(0, 0, hostWidth, 40)
+          return Object.assign([rect], { item: (index: number) => (index === 0 ? rect : null) })
+        }),
+      ),
+      vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+        font: '16px sans-serif',
+        measureText: (text: string) => ({ width: [...text].length * 8 }),
+      } as CanvasRenderingContext2D),
+    ]
+    const columns = () => rows[0].style.getPropertyValue('--cap-table-columns')
+    const widths = () => columns().trim().split(/\s+/).map(Number.parseFloat)
+    try {
+      act(() => window.dispatchEvent(new Event('resize')))
+      await waitFor(() => {
+        expect(widths()).toHaveLength(2)
+        expect(widths()[0]).toBeGreaterThan(0)
+        expect(widths()[1]).toBeGreaterThan(widths()[0])
+      })
+      const initialColumns = columns()
+      expect(getComputedStyle(rows[0]).gridTemplateColumns).toBe(initialColumns)
+      expect(
+        rows.every((row) => row.style.getPropertyValue('--cap-table-columns') === initialColumns),
+      ).toBe(true)
+      const padding =
+        Number.parseFloat(getComputedStyle(root).paddingLeft) +
+        Number.parseFloat(getComputedStyle(root).paddingRight)
+      expect(padding).toBe(136)
+      expect(Number.parseFloat(rows[0].style.getPropertyValue('--cap-table-width'))).toBeCloseTo(
+        hostWidth - padding,
+      )
+      expect(runtime.getUiState().canUndo).toBe(false)
+
+      hostWidth = 1000
+      rerender(withLayout(true))
+      act(() => window.dispatchEvent(new Event('resize')))
+      await waitFor(() => {
+        expect(columns()).not.toBe(initialColumns)
+        expect(Number.parseFloat(rows[0].style.getPropertyValue('--cap-table-width'))).toBeCloseTo(
+          hostWidth - padding,
+        )
+      })
+      expect(widths()[1]).toBeGreaterThan(widths()[0])
+      expect(getComputedStyle(rows[0]).gridTemplateColumns).toBe(columns())
+      expect(
+        rows.every((row) => row.style.getPropertyValue('--cap-table-columns') === columns()),
+      ).toBe(true)
+      expect(container.querySelector('[data-cap-content]')).toBe(content)
+      expect(container.querySelector('[data-cap-editable]')).toBe(root)
+      expect(onEditorChange.mock.calls.filter(([adapter]) => adapter !== null)).toHaveLength(1)
+      expect(runtime.getMarkdown()).toBe(markdown)
+      expect(runtime.getUiState()).toMatchObject({ canUndo: false, canRedo: false })
+      expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+      expect(onError).not.toHaveBeenCalled()
+    } finally {
+      await act(async () => unmount())
+      geometry.forEach((mock) => mock.mockRestore())
+    }
+  })
+
   it.each([false, true])('updates full width without remounting (strict=%s)', async (strict) => {
     await loadCapricornRuntimeFactory()
     const onError = vi.fn()
