@@ -121,9 +121,7 @@ export const handleInsertLocalImage = async (
           getFileNameWithoutExt(fileObject?.name),
         )
         const fullPath = await moveImageToLocalFolder(filePath, targetPath)
-        const src = workspaceRoot
-          ? await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot)
-          : fullPath
+        const src = await getMdRelativePath(fullPath, basePath)
         return createImageAttributes(src, fileName)
       }
     }
@@ -257,16 +255,9 @@ export const handleUploadImage = (files: any[], fileId?: string) => {
           const fullPath = await moveImageToLocalFolder(base64, targetPath)
           completed += 1
           progress(completed / files.length)
-          if (workspaceRoot) {
-            return {
-              src: await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot || ''),
-              'data-file-name': file.name,
-            }
-          } else {
-            return {
-              src: fullPath,
-              'data-file-name': file.name,
-            }
+          return {
+            src: await getMdRelativePath(fullPath, basePath),
+            'data-file-name': file.name,
           }
         }
 
@@ -382,11 +373,7 @@ export const handleImagePaste = async (src: string, fileId?: string): Promise<st
       )
       const fullPath = await moveImageToLocalFolder(src, targetPath)
 
-      if (workspaceRoot) {
-        return await getMdRelativePath(fullPath, fileFolderPath || workspaceRoot || '')
-      } else {
-        return fullPath
-      }
+      return await getMdRelativePath(fullPath, basePath)
     }
   } catch (error) {
     logger.error('Image conversion failed:', error)
