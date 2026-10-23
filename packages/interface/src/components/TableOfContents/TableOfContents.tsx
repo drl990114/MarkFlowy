@@ -12,11 +12,13 @@ import type { IHeadingData } from './HeadingTree';
 import { HeadingTree, TraverseResult } from './HeadingTree';
 import type HeadingNode from './HeadingTreeNode';
 import { isTableOfContentsHeadingActive } from './activeHeading';
-import { TocDiv, TocLink, TocListItem } from './styles';
+import { TocDisclosure, TocDisclosureSlot, TocDiv, TocLink, TocListItem } from './styles'
 
 export type TableOfContentsRef = {
   refresh: (args: { newContainer: HTMLElement; newScroll: HTMLElement }) => void;
   refreshByHeadings: (args: { newHeadings: IHeadingData[] }) => void;
+  collapseAll: () => void
+  expandAll: () => void
 };
 
 export interface TableOfContentsProps {
@@ -63,6 +65,12 @@ export interface TableOfContentsProps {
    * @default true
    */
   showChapter?: boolean;
+  /** Opt-in manual folding. Existing automatic expansion remains the default. */
+  collapsible?: boolean
+  collapsedHeadingIds?: ReadonlySet<string>
+  onCollapsedHeadingIdsChange?: (ids: ReadonlySet<string>) => void
+  collapseLabel?: string
+  expandLabel?: string
 }
 
 const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((props, ref) => {
@@ -78,6 +86,11 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     toolbarFixed = false,
     activeId,
     showChapter = true,
+    collapsible = false,
+    collapsedHeadingIds,
+    onCollapsedHeadingIdsChange,
+    collapseLabel = 'Collapse',
+    expandLabel = 'Expand',
     Empty = null,
   } = props;
   const [headings, setHeadings] = useState(headingsData);
@@ -88,6 +101,12 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
   const [scroll, setScroll] = useState<HTMLElement | undefined>(scrollEl);
   const navRef = useRef<HTMLElement>(null);
   const revealedHeadingIdRef = useRef<string | undefined>(undefined)
+  const [localCollapsedIds, setLocalCollapsedIds] = useState<ReadonlySet<string>>(() => new Set())
+  const collapsedIds = collapsedHeadingIds ?? localCollapsedIds
+  const changeCollapsedIds = (ids: ReadonlySet<string>) => {
+    if (collapsedHeadingIds === undefined) setLocalCollapsedIds(ids)
+    onCollapsedHeadingIdsChange?.(ids)
+  }
 
   useEffect(() => {
     setHeadings(headingsData);
@@ -101,12 +120,31 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     const items: HeadingNode[] = [];
     headingTree.traverseInPreorder((h) => {
       items.push(h);
+      if (collapsible) return collapsedIds.has(h.id) ? TraverseResult.NoChildren : TraverseResult.Continue
       return !autoExpand || activeParentsState?.[h.key] || h.parent?.key === -1
         ? TraverseResult.Continue
         : TraverseResult.NoChildren;
     });
     return items;
-  }, [headingTree, autoExpand, activeParentsState]);
+  }, [headingTree, autoExpand, activeParentsState, collapsible, collapsedIds])
+
+  const visibleActiveId = useMemo(() => {
+    if (!collapsible || !headingTree) return activeId
+    const selectedId = activeId ?? activeNodeState?.id
+    if (!selectedId) return undefined
+    let selected: HeadingNode | undefined
+    headingTree.traverseInPreorder((node) => {
+      if (node.id !== selectedId) return TraverseResult.Continue
+      selected = node
+      return TraverseResult.Stop
+    })
+    let visible = selected
+    while (selected?.parent && selected.parent.key !== -1) {
+      selected = selected.parent
+      if (collapsedIds.has(selected.id)) visible = selected
+    }
+    return visible?.id ?? activeId
+  }, [activeId, activeNodeState?.id, headingTree, collapsible, collapsedIds])
 
   const rowVirtualizer = useVirtualizer({
     count: flattenedHeadings.length,
@@ -279,10 +317,10 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     if (!nav || nav.clientHeight <= 0) return
     // The controlled node and its expanded parents settle together. A sibling
     // can move when the previously active branch collapses in the next render.
-    if (autoExpand && activeId && activeNodeState?.id !== activeId) return
+    if (!collapsible && autoExpand && activeId && activeNodeState?.id !== activeId) return
     const index = flattenedHeadings.findIndex((h) =>
       isTableOfContentsHeadingActive({
-        activeId,
+        activeId: visibleActiveId,
         activeNodeKey: activeNodeState?.key,
         firstHeadingKey: flattenedHeadings[0]?.key,
         headingId: h.id,
@@ -291,7 +329,9 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     )
     // A controlled id may arrive before its headings or expanded parents.
     if (index < 0) return
-    const headingId = flattenedHeadings[index].id
+    // Folding is a manual view operation, not a new document navigation intent.
+    // Keep the semantic active id so folding its ancestors never steals scrolling.
+    const headingId = activeId ?? activeNodeState?.id ?? flattenedHeadings[index].id
     if (revealedHeadingIdRef.current === headingId) return
 
     if (flattenedHeadings.length > 50) {
@@ -316,7 +356,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     if (delta) nav.scrollTo({ top: nav.scrollTop + delta, behavior: 'auto' })
     // Remember the semantic id across tree refreshes. Reading elsewhere in the
     // outline must not be pulled back by a scroll render or a title update.
-  }, [activeId, activeNodeState?.id, activeNodeState?.key, autoExpand, flattenedHeadings, rowVirtualizer, viewportHeight])
+  }, [activeId, activeNodeState?.id, activeNodeState?.key, autoExpand, collapsible, visibleActiveId, flattenedHeadings, rowVirtualizer, viewportHeight])
 
   useImperativeHandle(ref, () => ({
     refresh: ({ newContainer, newScroll }) => {
@@ -330,6 +370,18 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
       setScroll(undefined)
       setContainer(undefined)
     },
+    collapseAll: () => {
+      if (!collapsible) return
+      const ids = new Set<string>()
+      headingTree?.traverseInPreorder((node) => {
+        if (node.children.length) ids.add(node.id)
+        return TraverseResult.Continue
+      })
+      changeCollapsedIds(ids)
+    },
+    expandAll: () => {
+      if (collapsible) changeCollapsedIds(new Set())
+    },
   }));
 
   const renderHeadings = () => {
@@ -339,7 +391,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
 
     const renderItem = (h: HeadingNode, index: number, style?: React.CSSProperties) => {
       const isActive = isTableOfContentsHeadingActive({
-        activeId,
+        activeId: visibleActiveId,
         activeNodeKey: activeNodeState?.key,
         firstHeadingKey: flattenedHeadings[0]?.key,
         headingId: h.id,
@@ -359,8 +411,33 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
           key={h.key}
           aria-posinset={index + 1}
           aria-setsize={flattenedHeadings.length}
+          data-mf-toc-collapsible={collapsible || undefined}
+          data-collapsed={collapsible && collapsedIds.has(h.id) || undefined}
           style={style}
         >
+          {collapsible ? (
+            <TocDisclosureSlot style={{ marginInlineStart: `calc(7px + ${h.depth}em)` }}>
+              {h.children.length ? (
+                <TocDisclosure
+                  data-slot='toc-disclosure'
+                  aria-label={`${collapsedIds.has(h.id) ? expandLabel : collapseLabel} ${h.title}`}
+                  aria-expanded={!collapsedIds.has(h.id)}
+                  size='icon-chrome'
+                  variant='ghost'
+                  onClick={() => {
+                    const next = new Set(collapsedIds)
+                    if (next.has(h.id)) next.delete(h.id)
+                    else next.add(h.id)
+                    changeCollapsedIds(next)
+                  }}
+                >
+                  <svg aria-hidden='true' viewBox='0 0 16 16' fill='none' stroke='currentColor' strokeWidth='1.5'>
+                    <path d={collapsedIds.has(h.id) ? 'm6 4 4 4-4 4' : 'm4 6 4 4 4-4'} />
+                  </svg>
+                </TocDisclosure>
+              ) : null}
+            </TocDisclosureSlot>
+          ) : null}
           <TocLink
             aria-current={isActive ? 'location' : undefined}
             href={`#${h.id}`}

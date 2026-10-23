@@ -1,6 +1,8 @@
 import styled from 'styled-components'
 
 export const Container = styled.div<{ $side: 'left' | 'right' }>`
+  --mf-dock-surface: ${(props) => props.$side === 'left' ? 'var(--mf-surface-panel-left)' : 'var(--mf-surface-panel-right)'};
+  --mf-dock-header-background: var(--mf-dock-surface);
   flex-grow: 0;
   flex-shrink: 0;
   height: 100%;

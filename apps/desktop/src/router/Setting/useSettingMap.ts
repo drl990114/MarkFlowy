@@ -1,11 +1,13 @@
 import { useTranslation } from '@/i18n'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import useLayoutStore from '@/stores/useLayoutStore'
 import { SemanticThemeContext } from '@/themes/context'
 import { useContext, useMemo } from 'react'
 import { getSettingMap } from './settingMap'
 
 export function useSettingMap() {
   const { t } = useTranslation()
+  const panelOrder = useLayoutStore((state) => state.panelOrder)
   const theme = useContext(SemanticThemeContext)
   const rootFontSize = useAppSettingStore((state) => state.settingData.editor_root_font_size)
   const legacyWrapping = useAppSettingStore(
@@ -23,5 +25,5 @@ export function useSettingMap() {
     bodyFontSize,
     codeBlockLineWrapping: legacyWrapping !== false,
     personalTypography,
-  }, t), [bodyFontSize, legacyWrapping, personalTypography, t])
+  }, t, panelOrder), [bodyFontSize, legacyWrapping, personalTypography, t, panelOrder])
 }

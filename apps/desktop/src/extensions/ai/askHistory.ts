@@ -7,18 +7,17 @@ import type {
 } from '@assistant-ui/react'
 import { ExportedMessageRepository as MessageRepository } from '@assistant-ui/react'
 import { LazyStore } from '@tauri-apps/plugin-store'
+export { getAskWorkspaceKey } from './askWorkspaceKey'
 
 export const ASK_HISTORY_STORE_FILE = '.markflowy_ai_ask.dat'
 export const ASK_HISTORY_MAX_MESSAGES = 100
 export const ASK_HISTORY_MAX_BYTES = 5 * 1024 * 1024
 export const LEGACY_AI_STORAGE_KEY = 'ai-storage-v2'
 
-const TEMPORARY_WORKSPACE_KEY = '__temporary_workspace__'
-
 export interface AskHistoryStore {
-  get<T>(key: string): Promise<T | undefined>
-  set(key: string, value: unknown): Promise<void>
-  save(): Promise<void>
+  get: <T>(key: string) => Promise<T | undefined>
+  set: (key: string, value: unknown) => Promise<void>
+  save: () => Promise<void>
 }
 
 let sharedStore: LazyStore | undefined
@@ -26,13 +25,6 @@ let sharedStore: LazyStore | undefined
 function getSharedStore(): LazyStore {
   sharedStore ??= new LazyStore(ASK_HISTORY_STORE_FILE, { defaults: {}, autoSave: false })
   return sharedStore
-}
-
-export function getAskWorkspaceKey(rootPath?: string | null): string {
-  if (!rootPath?.trim()) return TEMPORARY_WORKSPACE_KEY
-
-  const normalized = rootPath.trim().replace(/\\/g, '/').replace(/\/+$/, '') || '/'
-  return /^[A-Za-z]:\//.test(normalized) ? normalized.toLowerCase() : normalized
 }
 
 function getStoreKey(workspaceKey: string): string {

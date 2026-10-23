@@ -201,6 +201,20 @@
     "unsupported_file_format": "Formato de archivo no admitido"
   },
   "sidebar": {
+    "move_left": "Mover a la izquierda",
+    "move_right": "Mover a la derecha",
+    "panel_actions": "Acciones del panel",
+    "reset_layout": "Restaurar la disposición de los paneles",
+    "drag_hint": "Arrastra para mover · Clic derecho para ver opciones",
+    "move_explorer_command": "Archivos: mover al otro lado",
+    "move_search_command": "Búsqueda: mover al otro lado",
+    "move_bookmarks_command": "Marcadores: mover al otro lado",
+    "move_toc_command": "Esquema: mover al otro lado",
+    "move_ai_command": "IA: mover al otro lado",
+    "outline_collapse": "Contraer",
+    "outline_expand": "Expandir",
+    "outline_collapse_all": "Contraer todos los títulos",
+    "outline_expand_all": "Expandir todos los títulos",
     "explorer": "explorador",
     "search": "buscar",
     "bookmarks": "Marcadores",
@@ -1068,6 +1082,8 @@
   },
   "command": {
     "id_descriptions": {
+      "app_outlineCollapseAll": "Contraer todos los títulos",
+      "app_outlineExpandAll": "Expandir todos los títulos",
       "app_commandPalette": "Paleta de comandos",
       "app_quickOpen": "Apertura rápida",
       "app_openFolder": "Abrir una carpeta",

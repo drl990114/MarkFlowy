@@ -6,6 +6,8 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { commandRegistry } from '@/commands'
+import useLayoutStore from '@/stores/useLayoutStore'
+import { registerOutlineCommands } from '@/components/TableOfContent/outlineCommands'
 import useGlobalKeyboard, { type KeyboardInfo, useEditorKeybindingStore } from './useKeyboard'
 
 const actEnvironment = globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -83,6 +85,27 @@ describe('application shortcut scope and persistence', () => {
     input.dispatchEvent(event)
     return event
   }
+  it('leaves unavailable outline shortcuts unconsumed and uses physical brackets when available', async () => {
+    const initialLayout = useLayoutStore.getState()
+    const collapseAll = vi.fn()
+    let current = false
+    const dispose = registerOutlineCommands({ isCurrent: () => current, collapseAll, expandAll: vi.fn() })
+    try {
+      useLayoutStore.setState({ zenModeActive: false, rightBar: { ...initialLayout.rightBar, visible: true, activePanelId: 'toc' } })
+      stored.push(getDefaultKeybindings('linux').find((rule) => rule.command === 'app_outlineCollapseAll')!)
+      await act(async () => state.reload())
+      expect(press('å', { altKey: true, code: 'BracketLeft' }).defaultPrevented).toBe(false)
+      current = true
+      expect(press('å', { altKey: true, code: 'BracketLeft' }).defaultPrevented).toBe(true)
+      expect(collapseAll).toHaveBeenCalledOnce()
+      useLayoutStore.setState({ zenModeActive: true })
+      expect(press('[', { altKey: true, code: 'BracketLeft' }).defaultPrevented).toBe(false)
+      expect(collapseAll).toHaveBeenCalledOnce()
+    } finally {
+      dispose()
+      useLayoutStore.setState(initialLayout)
+    }
+  })
   it('consumes a handled app command once and ignores repeat, IME and consumed events', () => {
     expect(press('s').defaultPrevented).toBe(true)
     press('s', { repeat: true })

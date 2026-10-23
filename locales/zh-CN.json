@@ -207,6 +207,20 @@
     "unsupported_file_format": "不支持的文件格式"
   },
   "sidebar": {
+    "move_left": "移到左侧",
+    "move_right": "移到右侧",
+    "panel_actions": "面板操作",
+    "reset_layout": "恢复默认侧栏布局",
+    "drag_hint": "拖拽移动 · 右键查看更多操作",
+    "move_explorer_command": "文件：移到另一侧",
+    "move_search_command": "搜索：移到另一侧",
+    "move_bookmarks_command": "书签：移到另一侧",
+    "move_toc_command": "大纲：移到另一侧",
+    "move_ai_command": "AI：移到另一侧",
+    "outline_collapse": "折叠",
+    "outline_expand": "展开",
+    "outline_collapse_all": "折叠全部标题",
+    "outline_expand_all": "展开全部标题",
     "explorer": "探索",
     "search": "搜索",
     "bookmarks": "书签",
@@ -1101,6 +1115,8 @@
   },
   "command": {
     "id_descriptions": {
+      "app_outlineCollapseAll": "折叠全部标题",
+      "app_outlineExpandAll": "展开全部标题",
       "app_commandPalette": "命令面板",
       "app_quickOpen": "快速打开",
       "app_openFolder": "打开文件夹",

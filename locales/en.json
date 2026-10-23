@@ -201,6 +201,20 @@
     "unsupported_file_format": "Unsupported file format"
   },
   "sidebar": {
+    "move_left": "Move to left",
+    "move_right": "Move to right",
+    "panel_actions": "Panel actions",
+    "reset_layout": "Restore default sidebar layout",
+    "drag_hint": "Drag to move · Right-click for options",
+    "move_explorer_command": "Files: Move to the other side",
+    "move_search_command": "Search: Move to the other side",
+    "move_bookmarks_command": "Bookmarks: Move to the other side",
+    "move_toc_command": "Outline: Move to the other side",
+    "move_ai_command": "AI: Move to the other side",
+    "outline_collapse": "Collapse",
+    "outline_expand": "Expand",
+    "outline_collapse_all": "Collapse all headings",
+    "outline_expand_all": "Expand all headings",
     "explorer": "explorer",
     "search": "search",
     "bookmarks": "Bookmarks",
@@ -406,6 +420,8 @@
   },
   "command": {
     "id_descriptions": {
+      "app_outlineCollapseAll": "Collapse all headings",
+      "app_outlineExpandAll": "Expand all headings",
       "app_commandPalette": "Command Palette",
       "app_quickOpen": "Quick Open",
       "app_openFolder": "Open a folder",

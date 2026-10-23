@@ -1,5 +1,5 @@
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
-import { createRef } from 'react'
+import { createRef, useState } from 'react'
 import { TableOfContents as BuiltTableOfContents } from '@markflowy/interface'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import TableOfContents, {
@@ -282,6 +282,68 @@ describe('TableOfContents active heading visibility', () => {
     expect(active?.getAttribute('href')).toBe('#heading-19')
     expect(active.closest('li')!.getBoundingClientRect().bottom).toBeLessThanOrEqual(viewportHeight)
     expect(nav.scrollTop).toBeGreaterThan(0)
+  })
+})
+
+describe('TableOfContents manual folding', () => {
+  it('keeps disclosure separate from navigation and restores nested folds', () => {
+    const navigate = vi.fn()
+    const headings = [heading(1, 0), heading(2, 1), heading(4, 2), heading(1, 3)]
+      .map((item) => ({ ...item, onClick: navigate }))
+    const view = render(<TableOfContents headingsData={headings} collapsible compact={false} />)
+    expect(view.getAllByRole('button')).toHaveLength(2)
+    expect(view.container.querySelector('a button')).toBeNull()
+    fireEvent.click(view.getByRole('button', { name: 'Collapse Heading 1' }))
+    expect(view.queryByRole('link', { name: /Heading 2/ })).toBeNull()
+    fireEvent.click(view.getByRole('button', { name: 'Collapse Heading 0' }))
+    expect(view.queryByRole('link', { name: /Heading 1/ })).toBeNull()
+    expect(navigate).not.toHaveBeenCalled()
+    fireEvent.click(view.getByRole('button', { name: 'Expand Heading 0' }))
+    expect(view.getByRole('button', { name: 'Expand Heading 1' }).getAttribute('aria-expanded')).toBe('false')
+    expect(view.queryByRole('link', { name: /Heading 2/ })).toBeNull()
+    fireEvent.click(view.getByRole('link', { name: /Heading 1/ }))
+    expect(navigate).toHaveBeenCalledOnce()
+  })
+
+  it('leaves manual folds closed while marking the nearest visible active ancestor', () => {
+    const { scrollTo } = mockOutlineLayout()
+    const headings = [heading(1, 0), heading(2, 1), heading(3, 2), heading(3, 3), heading(1, 4)]
+    const view = render(<TableOfContents headingsData={headings} activeId='heading-2' collapsible compact={false} />)
+    scrollTo.mockClear()
+    fireEvent.click(view.getByRole('button', { name: 'Collapse Heading 1' }))
+    expect(view.container.querySelector('[aria-current]')?.getAttribute('href')).toBe('#heading-1')
+    expect(scrollTo).not.toHaveBeenCalled()
+    view.rerender(<TableOfContents headingsData={headings} activeId='heading-3' collapsible compact={false} />)
+    expect(view.queryByRole('link', { name: /Heading 3/ })).toBeNull()
+    expect(view.container.querySelector('[aria-current]')?.getAttribute('href')).toBe('#heading-1')
+  })
+
+  it.each([50, 51, 19824])('folds all and expands all without losing virtualization at %i headings', (count) => {
+    mockOutlineLayout()
+    const headings = [heading(1, 0), ...Array.from({ length: count - 1 }, (_, index) => heading(2, index + 1))]
+    const ref = createRef<TableOfContentsRef>()
+    function Host() {
+      const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(() => new Set())
+      return <TableOfContents ref={ref} headingsData={headings} collapsible compact={false}
+        collapsedHeadingIds={collapsed} onCollapsedHeadingIdsChange={setCollapsed} />
+    }
+    const view = render(<Host />)
+    act(() => ref.current!.collapseAll())
+    expect(view.container.querySelectorAll('li')).toHaveLength(1)
+    expect(view.getByRole('button', { name: 'Expand Heading 0' })).toBeDefined()
+    act(() => ref.current!.expandAll())
+    const rows = view.container.querySelectorAll('li')
+    expect(rows.length).toBeGreaterThan(1)
+    expect(rows.length).toBeLessThanOrEqual(50)
+    expect(rows[0].getAttribute('aria-setsize')).toBe(String(count))
+  })
+
+  it('keeps folding opt-in for existing hosts', () => {
+    const ref = createRef<TableOfContentsRef>()
+    const view = render(<TableOfContents ref={ref} headingsData={[heading(1, 0), heading(2, 1)]} />)
+    expect(view.queryAllByRole('button')).toHaveLength(0)
+    act(() => ref.current!.collapseAll())
+    expect(view.container.querySelectorAll('li')).toHaveLength(2)
   })
 })
 

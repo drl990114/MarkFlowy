@@ -1,0 +1,40 @@
+.mf-dock-panel-menu {
+  opacity: 0;
+}
+[data-slot='dock-toolbar']:hover .mf-dock-panel-menu,
+[data-slot='dock-toolbar']:focus-within .mf-dock-panel-menu,
+.mf-dock-panel-menu[data-state='open'] {
+  opacity: 1;
+}
+@media (hover: none) {
+  .mf-dock-panel-menu {
+    opacity: 1;
+  }
+}
+.mf-dock-switcher__item {
+  position: relative;
+  display: flex;
+}
+.mf-dock-switcher__button[draggable='true'] {
+  cursor: grab;
+}
+.mf-dock-switcher__button[data-drag-source] {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+.mf-dock-switcher__item[data-drop-edge]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--mf-primary);
+  pointer-events: none;
+}
+.mf-dock-switcher__item[data-drop-edge='before']::after {
+  left: -3px;
+}
+.mf-dock-switcher__item[data-drop-edge='after']::after {
+  right: -3px;
+}

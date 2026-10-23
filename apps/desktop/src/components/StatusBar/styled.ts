@@ -42,6 +42,54 @@ export const Container = styled.div`
     color: var(--mf-primary);
   }
 
+  /* Expand the existing bottom regions only while moving a panel. Keep every
+     control's place so the source and destination icons do not jump. */
+  &[data-mf-dock-dragging] {
+    padding-block: 0;
+
+    & [data-mf-dock-drop-side] {
+      position: relative;
+      flex: 1 1 0;
+      min-width: max-content;
+      height: 100%;
+      border-radius: var(--mf-radius-sm);
+      background: var(--mf-control-selected);
+      outline: 1px dashed var(--mf-primary);
+      outline-offset: -1px;
+    }
+
+    & [data-mf-dock-drop-side][data-drop-over],
+    & [data-mf-dock-drop-side]:has(.mf-dock-drop-active, [data-drop-edge]) {
+      outline: 2px solid var(--mf-primary);
+      background: var(--mf-control-hover);
+    }
+
+    & [data-mf-dock-drop-side] > :not(.mf-dock-switcher, .mf-dock-drop-hint) {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    & .mf-dock-drop-hint {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: calc(100% - 190px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--mf-text-secondary);
+      pointer-events: none;
+    }
+
+    & [data-mf-dock-drop-side='left'] .mf-dock-drop-hint {
+      right: 12px;
+    }
+
+    & [data-mf-dock-drop-side='right'] .mf-dock-drop-hint {
+      left: 12px;
+    }
+  }
+
   @media (max-width: 719px) {
     padding: 3px 6px 4px;
 
@@ -53,6 +101,10 @@ export const Container = styled.div`
     & [data-mf-status-bar-format='icon'] {
       width: 24px;
       padding-inline: 0;
+    }
+
+    & .mf-dock-drop-hint {
+      display: none;
     }
   }
 

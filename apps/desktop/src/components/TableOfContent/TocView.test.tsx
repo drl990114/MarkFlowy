@@ -68,6 +68,7 @@ vi.mock('../EditorArea/sourceCodeEditorRegistry', () => ({
 vi.mock('../SideBar/SideBarHeader', () => ({
   default: ({ actions }: { actions?: React.ReactNode }) => <>{actions}</>,
 }))
+vi.mock('../SideBar/DockPanelMenu', () => ({ DockPanelMenu: () => null }))
 vi.mock('./HeadingNumberingButton', () => ({
   CapricornHeadingNumberingButton: () => {
     harness.numberingMount()

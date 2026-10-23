@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   canonicalKeyMap,
+  formatKeyMap,
   keyMapsOverlap,
   normalizeKeyMap,
   sameKeyMap,
@@ -17,6 +18,20 @@ const press = (init: KeyboardEventInit) =>
   new KeyboardEvent('keydown', { cancelable: true, ...init })
 
 describe('shortcut recording and dispatch contract', () => {
+  it.each(['mac', 'windows', 'linux'] as const)('displays outline keys without changing physical identity on %s', (platform) => {
+    const bindings = getDefaultKeybindings(platform)
+    for (const [command, code, label] of [
+      ['app_outlineCollapseAll', 'BracketLeft', '['],
+      ['app_outlineExpandAll', 'BracketRight', ']'],
+    ]) {
+      const binding = bindings.find((item) => item.command === command)!
+      expect(binding.keys).toEqual(['CommandOrCtrl', 'Alt', `[${code}]`])
+      expect(formatKeyMap(binding.keys, platform)).toBe(platform === 'mac' ? `⌘⌥${label}` : `Ctrl+Alt+${label}`)
+      expect(keybindingProblem(bindings, binding.id, binding.keys)).toBeUndefined()
+      expect(shortcutString(binding.keys)).toBe(`mod-Alt-[${code}]`)
+    }
+  })
+
   it.each(['MacIntel', 'Win32', 'Linux x86_64'])(
     'round trips recorded letters, symbols and numpad on %s',
     (platform) => {

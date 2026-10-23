@@ -1,6 +1,16 @@
 {
   "commands": [
     {
+      "id": "app_outlineCollapseAll",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_outlineExpandAll",
+      "configurable": true,
+      "target": "app"
+    },
+    {
       "id": "app_commandPalette",
       "configurable": true,
       "target": "app"
@@ -207,6 +217,18 @@
     }
   ],
   "rules": [
+    {
+      "id": "app_outlineCollapseAll.default",
+      "command": "app_outlineCollapseAll",
+      "keys": ["CommandOrCtrl", "Alt", "[BracketLeft]"],
+      "when": "always"
+    },
+    {
+      "id": "app_outlineExpandAll.default",
+      "command": "app_outlineExpandAll",
+      "keys": ["CommandOrCtrl", "Alt", "[BracketRight]"],
+      "when": "always"
+    },
     {
       "id": "app_commandPalette.default",
       "command": "app_commandPalette",

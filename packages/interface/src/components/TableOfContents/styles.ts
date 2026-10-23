@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components'
+import { Button } from 'zens/esm/components/button'
 
 const scrollbarHidden = css`
   &::-webkit-scrollbar {
@@ -408,4 +409,31 @@ export const TocListItem = styled.li<TocListProps & { theme?: any }>`
   display: flex;
   align-items: center;
   padding-left: 0;
+
+  &[data-mf-toc-collapsible] > a {
+    padding-inline-start: 2px;
+    min-width: 0;
+  }
+
+  &:hover [data-slot='toc-disclosure'],
+  &:focus-within [data-slot='toc-disclosure'],
+  &[data-collapsed] [data-slot='toc-disclosure'] {
+    opacity: 1;
+  }
+`
+
+export const TocDisclosureSlot = styled.span`
+  display: inline-flex;
+  flex: 0 0 22px;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+`
+
+export const TocDisclosure = styled(Button)`
+  opacity: 0;
+
+  @media (hover: none) {
+    opacity: 1;
+  }
 `

@@ -63,6 +63,7 @@ vi.mock('../EditorArea/capricornEditorRegistry', () => ({
   subscribeCapricornEditors: () => () => {},
 }))
 vi.mock('../SideBar/SideBarHeader', () => ({ default: () => null }))
+vi.mock('../SideBar/DockPanelMenu', () => ({ DockPanelMenu: () => null }))
 vi.mock('./HeadingNumberingButton', () => ({ CapricornHeadingNumberingButton: () => null }))
 vi.mock('./styles', () => ({ TocViewContainer: ({ children }: { children: ReactNode }) => <div>{children}</div> }))
 vi.mock('@/i18n', () => ({ t: (key: string) => key }))
@@ -255,15 +256,23 @@ describe('Source Code outline selection tracking', () => {
     expect(first.getByTestId('active-heading').textContent).toBe(`heading-${beta}`)
 
     expect(first.native.state.facet(EditorView.updateListener)).toHaveLength(0)
-    expect(replacement.native.state.facet(EditorView.updateListener)).toHaveLength(1)
+    expect(replacement.native.state.facet(EditorView.updateListener)).toHaveLength(2)
     first.unmount()
-    expect(replacement.native.state.facet(EditorView.updateListener)).toHaveLength(0)
-    expect(harness.sourceListeners.size).toBe(0)
+    // Only the session's position mapping survives panel visibility changes.
+    // Selection following is detached, and no outline extraction runs hidden.
+    expect(replacement.native.state.facet(EditorView.updateListener)).toHaveLength(1)
+    expect(harness.sourceListeners.size).toBe(1)
     act(() => {
       replacement.native.focus()
       replacement.native.dispatch({ selection: { anchor: gamma + 10 } })
     })
     flushFrame()
     expect(harness.extractMatches).not.toHaveBeenCalled()
+    act(() => {
+      harness.sourceViews.delete('file')
+      harness.sourceListeners.forEach((listener) => listener())
+    })
+    expect(harness.sourceListeners.size).toBe(0)
+    expect(replacement.native.state.facet(EditorView.updateListener)).toHaveLength(0)
   })
 })

@@ -8,6 +8,9 @@ import { TableOfContents } from '@markflowy/interface'
 import type { IHeadingData, TableOfContentsRef } from '@markflowy/interface'
 import { t } from '@/i18n'
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { DropdownMenuItemPrimitive } from '@/components/ui/dropdown-menu'
+import { useCommandShortcut } from '@/commands/useCommandShortcut'
+import { DockPanelMenu } from '@/components/SideBar/DockPanelMenu'
 import { ListIcon } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { ChangeDesc } from '@codemirror/state'
@@ -31,6 +34,22 @@ import { CapricornHeadingNumberingButton } from './HeadingNumberingButton'
 import { TocViewContainer } from './styles'
 import { scheduleOutlineAfterPaint } from './scheduleOutlineAfterPaint'
 import { subscribeOutlineScrollIntent, subscribeSourceOutline } from './outlineTracking'
+import { getOutlineSession, releaseOutlineSession, type OutlineSession, type OutlineSnapshot } from './outlineSession'
+import { OUTLINE_COLLAPSE_ALL, OUTLINE_EXPAND_ALL, registerOutlineCommands } from './outlineCommands'
+
+const emptyOutlineSnapshot: OutlineSnapshot = { collapsedIds: new Set(), headingCount: 0 }
+
+function acquireOutlineSession(owner: object, fileId: string, mode: string, source?: MfCodemirrorView) {
+  const session = getOutlineSession(owner, fileId, mode, source)
+  session.watchLifetime((listener) => {
+    const unsubscribeEditor = source ? subscribeSourceCodeEditors(listener) : subscribeCapricornEditors(listener)
+    const unsubscribeMode = useEditorViewTypeStore.subscribe?.(listener)
+    return () => { unsubscribeEditor(); unsubscribeMode?.() }
+  }, () => useEditorViewTypeStore.getState().editorViewTypeMap.get(fileId) === mode &&
+    (source ? sourceCodeCodemirrorViewMap.get(fileId) : getCapricornEditor(fileId)) === owner,
+  () => releaseOutlineSession(owner))
+  return session
+}
 
 type SourceHeadingInfo = {
   pos: number
@@ -152,6 +171,14 @@ type TocViewProps = {
 
 export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   const tocRef = useRef<TableOfContentsRef>(null)
+  const [outlineSession, setOutlineSession] = useState<OutlineSession | null>(null)
+  const outlineSessionRef = useRef<OutlineSession | null>(null)
+  const outlineSnapshot = useSyncExternalStore(
+    useCallback((listener) => outlineSession?.subscribe(listener) ?? (() => {}), [outlineSession]),
+    useCallback(() => outlineSession?.getSnapshot() ?? emptyOutlineSnapshot, [outlineSession]),
+  )
+  const collapseShortcut = useCommandShortcut(OUTLINE_COLLAPSE_ALL)
+  const expandShortcut = useCommandShortcut(OUTLINE_EXPAND_ALL)
   const [activeHeadingId, setActiveHeadingId] = useState<string | null>(null)
   const [editorPanelEl, setEditorPanelEl] = useState<HTMLElement | null>(null)
   const [outlineSource, setOutlineSource] = useState<{
@@ -211,6 +238,17 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     headingIntentRef.current++
   }, [activeId, activeViewType, capricornEditor, sourceEditor])
 
+  useEffect(() => () => {
+    if (!activeId) return
+    const mode = useEditorViewTypeStore.getState().editorViewTypeMap.get(activeId)
+    if (sourceEditor && (mode !== activeViewType || sourceCodeCodemirrorViewMap.get(activeId) !== sourceEditor)) {
+      releaseOutlineSession(sourceEditor)
+    }
+    if (capricornEditor && (mode !== activeViewType || getCapricornEditor(activeId) !== capricornEditor)) {
+      releaseOutlineSession(capricornEditor)
+    }
+  }, [activeId, activeViewType, sourceEditor, capricornEditor])
+
   const clearOutline = useCallback(() => {
     if (sourceRefreshTimerRef.current !== null) {
       clearTimeout(sourceRefreshTimerRef.current)
@@ -223,6 +261,8 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       rafRef.current = null
     }
     tocRef.current?.refreshByHeadings({ newHeadings: [] })
+    outlineSessionRef.current = null
+    setOutlineSession(null)
     setActiveHeadingId(null)
     capricornOutlineRef.current = null
     setOutlineSource(null)
@@ -236,6 +276,24 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     sourceScrollElRef.current = null
     setSourceScrollEl(null)
   }, [])
+
+  useEffect(() => registerOutlineCommands({
+    isCurrent: () => {
+      const id = useEditorStore.getState().activeId
+      if (!id || !isMarkdownFile(id)) return false
+      const mode = useEditorViewTypeStore.getState().editorViewTypeMap.get(id)
+      const session = outlineSessionRef.current
+      if (!session || session.fileId !== id || session.mode !== mode || !session.getSnapshot().headingCount) return false
+      if (mode === EditorViewType.SOURCECODE) {
+        const outline = sourceOutlineRef.current
+        return outline?.id === id && outline.editor === sourceCodeCodemirrorViewMap.get(id)
+      }
+      const outline = capricornOutlineRef.current
+      return isCapricornView(mode) && outline?.id === id && outline.editor === getCapricornEditor(id)
+    },
+    collapseAll: () => tocRef.current?.collapseAll(),
+    expandAll: () => tocRef.current?.expandAll(),
+  }), [])
 
   useEffect(() => {
     const outline = capricornOutlineRef.current
@@ -407,6 +465,11 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
           } as IHeadingData
         })
 
+        const mode = useEditorViewTypeStore.getState().editorViewTypeMap.get(currentActiveId)!
+        const session = acquireOutlineSession(editor, currentActiveId, mode)
+        session.refresh(headings)
+        outlineSessionRef.current = session
+        setOutlineSession(session)
         tocRef.current?.refreshByHeadings({ newHeadings: headings })
         setOutlineSource((current) =>
           current?.id === currentActiveId && current.editor === editor
@@ -524,6 +587,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
                 },
               }
             })
+            const session = acquireOutlineSession(codemirrorView, currentActiveId, EditorViewType.SOURCECODE, codemirrorView)
+            session.refresh(headings, new Map(sourceHeadings.map((heading) => [heading.id, heading.pos])))
+            outlineSessionRef.current = session
+            setOutlineSession(session)
             tocRef.current?.refreshByHeadings({ newHeadings: headings })
             scheduleActiveHeadingUpdateRef.current()
           }, 0)
@@ -810,10 +877,25 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       <CapricornHeadingNumberingButton editor={capricornEditor} />
     ) : null
 
+  const canFold = Boolean(activeIsMarkdown && outlineSession && outlineSession.fileId === activeId &&
+    outlineSession.mode === activeViewType && outlineSnapshot.headingCount > 0)
+
   return (
     <TocViewContainer variant={variant}>
       <SideBarHeader
-        actions={headingNumberingAction}
+        actions={<>
+          {headingNumberingAction}
+          <DockPanelMenu panelId='toc'>
+            <DropdownMenuItemPrimitive disabled={!canFold} onSelect={() => { void commandRegistry.execute(OUTLINE_COLLAPSE_ALL) }}>
+              {t('sidebar.outline_collapse_all')}
+              <span className='ml-auto pl-4 text-ui-caption text-muted-foreground'>{collapseShortcut}</span>
+            </DropdownMenuItemPrimitive>
+            <DropdownMenuItemPrimitive disabled={!canFold} onSelect={() => { void commandRegistry.execute(OUTLINE_EXPAND_ALL) }}>
+              {t('sidebar.outline_expand_all')}
+              <span className='ml-auto pl-4 text-ui-caption text-muted-foreground'>{expandShortcut}</span>
+            </DropdownMenuItemPrimitive>
+          </DockPanelMenu>
+        </>}
         name={t('sidebar.table_of_contents')}
         title={t('sidebar.table_of_contents')}
       />
@@ -832,6 +914,11 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
           pinned
           activeId={activeHeadingId ?? undefined}
           toolbarFixed
+          collapsible
+          collapsedHeadingIds={outlineSnapshot.collapsedIds}
+          onCollapsedHeadingIdsChange={outlineSession?.setCollapsedIds}
+          collapseLabel={t('sidebar.outline_collapse')}
+          expandLabel={t('sidebar.outline_expand')}
           Empty={
             activeId ? (
               <Empty role='status'>

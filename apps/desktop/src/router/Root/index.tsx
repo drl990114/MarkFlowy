@@ -5,6 +5,10 @@ import EditorArea from '@/components/EditorArea'
 import { isSingleDocumentLayout } from '@/components/EditorArea/documentLayout'
 import { scheduleDockFocus } from '@/components/SideBar/DockSwitcher'
 import RightBar from '@/components/SideBar/RightBar'
+import { DockDragLifecycle } from '@/components/SideBar/DockDragLifecycle'
+import { useDockDragStore } from '@/components/SideBar/dockDragData'
+import { getDockPanelDefinition } from '@/components/SideBar/dockPanels'
+import { AskRuntimeHost } from '@/extensions/ai/AskRuntimeHost'
 import StatusBar from '@/components/StatusBar'
 import { BookMarkDialog } from '@/extensions/bookmarks/BookMarkDialog'
 import { subscribeBookmarkLibrary } from '@/extensions/bookmarks/store'
@@ -32,16 +36,6 @@ import {
   requestZenModeToggle,
 } from './zenMode'
 
-const LEFT_DOCK_LABEL_KEYS = {
-  explorer: 'sidebar.explorer',
-  search: 'sidebar.search',
-  bookmarks: 'sidebar.bookmarks',
-} as const
-const RIGHT_DOCK_LABEL_KEYS = {
-  toc: 'sidebar.table_of_contents',
-  ai: 'ai.assistant',
-} as const
-
 function Root() {
   const rootPath = useEditorStore((state) => state.folderData?.[0]?.path)
   const singleDocument = useEditorStore((state) =>
@@ -57,6 +51,7 @@ function Root() {
   const leftDockVisible = useLayoutStore((state) => state.leftBar.visible)
   const rightDockVisible = useLayoutStore((state) => state.rightBar.visible)
   const zenModeActive = useLayoutStore((state) => state.zenModeActive)
+  const draggingDock = useDockDragStore((state) => state.panelId !== null)
   const statusBarRef = useStatusBarReveal(singleDocument && !zenModeActive)
   const leftPanelRef = useRef<PanelImperativeHandle>(null)
   const rightPanelRef = useRef<PanelImperativeHandle>(null)
@@ -67,8 +62,8 @@ function Root() {
     right: useLayoutStore.getState().rightBar.visible ? useLayoutStore.getState().rightBar.size : 0,
   })
   const lastEscapeAtRef = useRef<number | null>(null)
-  const leftDockLabel = t(LEFT_DOCK_LABEL_KEYS[leftActivePanelId])
-  const rightDockLabel = t(RIGHT_DOCK_LABEL_KEYS[rightActivePanelId])
+  const leftDockLabel = t(leftActivePanelId ? getDockPanelDefinition(leftActivePanelId).labelKey : 'sidebar.leftDock')
+  const rightDockLabel = t(rightActivePanelId ? getDockPanelDefinition(rightActivePanelId).labelKey : 'sidebar.rightDock')
 
   const toggleLeftPanelVisible = useCallback(() => {
     const state = useLayoutStore.getState()
@@ -295,10 +290,11 @@ function Root() {
           <RightBar />
         </Panel>
       </Group>
-      <div className='app-status-bar' ref={statusBarRef}>
+      <div className='app-status-bar' ref={statusBarRef} data-mf-dock-dragging={draggingDock ? '' : undefined}>
         <StatusBar />
       </div>
       <ZenModeHint active={zenModeActive} />
+      <DockDragLifecycle />
       <BookMarkDialog />
       <QuickOpenDialog />
       <CommandPaletteDialog />
@@ -306,4 +302,6 @@ function Root() {
   )
 }
 
-export default memo(Root)
+export default memo(function RootWithRuntime() {
+  return <AskRuntimeHost><Root /></AskRuntimeHost>
+})

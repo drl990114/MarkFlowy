@@ -31,7 +31,7 @@ function renderStatusBarStyles() {
 }
 
 describe('StatusBar responsive density', () => {
-  it('matches the existing 32px top chrome while only clipping at the outer page boundary', () => {
+  it('matches the existing 32px top chrome and keeps controls unclipped', () => {
     const css = renderStatusBarStyles().replaceAll(/\s/g, '')
 
     expect(desktopUiStyles).toContain('--mf-ui-status-bar-height: 32px')
@@ -41,7 +41,8 @@ describe('StatusBar responsive density', () => {
     expect(css).toContain('background:var(--mf-surface-statusbar)')
     expect(css).toContain('padding:4px6px5px')
     expect(css).toContain('height:22px')
-    expect(css.match(/overflow:hidden/g)).toHaveLength(1)
+    // Only the outer status bar and the temporary, ellipsized drop hint clip.
+    expect(css.match(/overflow:hidden/g)).toHaveLength(2)
     expect(css).toContain('flex:11auto')
   })
 
@@ -79,5 +80,16 @@ describe('StatusBar responsive density', () => {
 
     expect(css).toContain('@media(max-width:229px)')
     expect(css).toMatch(/@media\(max-width:229px\)\{\.[\w-]+\{display:none;\}\}/)
+  })
+
+  it('expands both bottom targets only during dragging and preserves hidden control geometry', () => {
+    const css = renderStatusBarStyles().replaceAll(/\s/g, '')
+
+    expect(css).toContain('[data-mf-dock-dragging]{padding-block:0;}')
+    expect(css).toContain('[data-mf-dock-dragging][data-mf-dock-drop-side]{position:relative;flex:110;min-width:max-content;height:100%;')
+    expect(css).toContain('outline:1pxdashedvar(--mf-primary)')
+    expect(css).toContain('outline:2pxsolidvar(--mf-primary)')
+    expect(css).toContain(':has(.mf-dock-drop-active,[data-drop-edge])')
+    expect(css).toContain('>:not(.mf-dock-switcher,.mf-dock-drop-hint){visibility:hidden;pointer-events:none;}')
   })
 })

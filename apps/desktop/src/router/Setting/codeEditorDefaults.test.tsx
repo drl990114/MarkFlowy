@@ -1,9 +1,10 @@
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, renderHook, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { resolveThemeTokens } from '@markflowy/theme/semantic'
 import { i18n } from '@/i18n'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
+import useLayoutStore from '@/stores/useLayoutStore'
 import { SemanticThemeContext } from '@/themes/context'
 import SelectSettingItem from './component/SettingItems/Select'
 import SliderSettingItem from './component/SettingItems/Slider'
@@ -152,5 +153,21 @@ describe('code editor defaults shown in settings', () => {
     }))
     expect(control.textContent).not.toBe('随正文（14 px）')
     expect(appSettingService.writeSettingData).not.toHaveBeenCalled()
+  })
+})
+
+
+describe('dynamic Dock startup settings', () => {
+  it('refreshes options after a layout change while settings remain mounted', () => {
+    const before = useLayoutStore.getState()
+    const { result, unmount } = renderHook(() => useSettingMap())
+    try {
+      act(() => useLayoutStore.getState().moveDockPanel('toc', 'left'))
+      expect(result.current.general.Startup.leftStartup.options.map(({ value }) => value)).toContain('toc')
+      expect(result.current.general.Startup.rightStartup.options.map(({ value }) => value)).not.toContain('toc')
+    } finally {
+      unmount()
+      useLayoutStore.setState(before, true)
+    }
   })
 })

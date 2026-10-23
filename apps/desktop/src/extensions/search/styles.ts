@@ -7,7 +7,7 @@ export const SearchContainer = styled.div`
   min-height: 0;
   width: 100%;
   overflow: hidden;
-  background: ${({ theme }) => theme.sideBarBgColor};
+  background: var(--mf-dock-surface, ${({ theme }) => theme.sideBarBgColor});
 `
 
 export const SearchList = styled.div`
@@ -16,7 +16,7 @@ export const SearchList = styled.div`
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  background: var(--mf-surface-panel, ${({ theme }) => theme.sideBarBgColor});
+  background: var(--mf-dock-surface, var(--mf-surface-panel, ${({ theme }) => theme.sideBarBgColor}));
 `
 
 export const SearchInput = styled.div`
@@ -34,7 +34,7 @@ export const SearchInput = styled.div`
   flex-shrink: 0;
   gap: 2px;
   border-bottom: 1px solid var(--mf-ui-border-subtle);
-  background: var(--mf-surface-panel, ${({ theme }) => theme.sideBarBgColor});
+  background: var(--mf-dock-surface, var(--mf-surface-panel, ${({ theme }) => theme.sideBarBgColor}));
 
   .search-input {
     flex: 1;
@@ -123,7 +123,7 @@ export const SearchMeta = styled.div`
   font-size: var(--mf-ui-font-caption);
   line-height: var(--mf-ui-line-height-caption);
   letter-spacing: var(--mf-ui-tracking-caption);
-  background: var(--mf-surface-panel, ${({ theme }) => theme.sideBarBgColor});
+  background: var(--mf-dock-surface, var(--mf-surface-panel, ${({ theme }) => theme.sideBarBgColor}));
 
   .search-meta__content {
     min-width: 0;

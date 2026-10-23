@@ -6,62 +6,65 @@ import {
   SparklesIcon,
   TableOfContentsIcon,
 } from 'lucide-react'
-import type {
-  DockPanelId,
-  DockSide,
-  LeftDockPanelId,
-  RightDockPanelId,
+import {
+  DEFAULT_DOCK_PANEL_ORDER,
+  getAvailableDockPanelIds,
+  type DockPanelId,
+  type DockPanelOrder,
+  type DockSide,
 } from '@/stores/useLayoutStore'
 
-export type DockPanelDefinition<TPanelId extends DockPanelId = DockPanelId> = {
-  id: TPanelId
-  dock: DockSide
+export type DockPanelDefinition = {
+  id: DockPanelId
   labelKey: string
   fallbackLabel: string
   icon: LucideIcon
 }
 
-export const leftDockPanels: readonly DockPanelDefinition<LeftDockPanelId>[] = [
+export const dockPanels: readonly DockPanelDefinition[] = [
   {
     id: 'explorer',
-    dock: 'left',
     labelKey: 'sidebar.explorer',
     fallbackLabel: 'Files',
     icon: FilesIcon,
   },
   {
     id: 'search',
-    dock: 'left',
     labelKey: 'sidebar.search',
     fallbackLabel: 'Search',
     icon: SearchIcon,
   },
   {
     id: 'bookmarks',
-    dock: 'left',
     labelKey: 'sidebar.bookmarks',
     fallbackLabel: 'Bookmarks',
     icon: BookmarkIcon,
   },
-]
-
-export const rightDockPanels: readonly DockPanelDefinition<RightDockPanelId>[] = [
   {
     id: 'toc',
-    dock: 'right',
     labelKey: 'sidebar.table_of_contents',
     fallbackLabel: 'Table of Contents',
     icon: TableOfContentsIcon,
   },
   {
     id: 'ai',
-    dock: 'right',
     labelKey: 'ai.assistant',
     fallbackLabel: 'AI',
     icon: SparklesIcon,
   },
 ]
 
-export function getDockPanels(side: DockSide) {
-  return side === 'left' ? leftDockPanels : rightDockPanels
+export function getDockPanelDefinition(panelId: DockPanelId): DockPanelDefinition {
+  return dockPanels.find((panel) => panel.id === panelId)!
 }
+
+export function getDockPanels(
+  side: DockSide,
+  panelOrder: DockPanelOrder = DEFAULT_DOCK_PANEL_ORDER,
+  hasWorkspace = true,
+): DockPanelDefinition[] {
+  return getAvailableDockPanelIds(panelOrder, side, hasWorkspace).map(getDockPanelDefinition)
+}
+
+export const leftDockPanels = getDockPanels('left')
+export const rightDockPanels = getDockPanels('right')

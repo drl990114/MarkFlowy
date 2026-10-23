@@ -102,3 +102,21 @@ describe('Export setting map', () => {
     })
   })
 })
+
+
+describe('Dock startup settings', () => {
+  it('offers each side assigned panels in their saved order', () => {
+    const { Startup } = getSettingMap({}, undefined, {
+      left: ['toc', 'explorer', 'search'], right: ['bookmarks', 'ai'],
+    }).general
+    expect(Startup.leftStartup.options.map(({ value }) => value)).toEqual(['restore', 'toc', 'explorer', 'search'])
+    expect(Startup.rightStartup.options.map(({ value }) => value)).toEqual(['restore', 'bookmarks', 'ai'])
+  })
+
+  it('only offers restore for a side with no assigned panels', () => {
+    const { Startup } = getSettingMap({}, undefined, {
+      left: ['explorer', 'search', 'bookmarks', 'toc', 'ai'], right: [],
+    }).general
+    expect(Startup.rightStartup.options.map(({ value }) => value)).toEqual(['restore'])
+  })
+})

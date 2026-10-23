@@ -2,6 +2,8 @@ import { EditorViewType } from '@/constants/editorViewType'
 import { DEFAULT_CURRENT_DATE_FORMAT } from '@/helper/date'
 import { changeLng, i18n, locales, type Langs } from '@/i18n'
 import { currentWebview } from '@/services/windows'
+import { getDockPanels } from '@/components/SideBar/dockPanels'
+import { DEFAULT_DOCK_PANEL_ORDER, type DockPanelOrder } from '@/stores/useLayoutStore'
 
 /** Defaults shown by Desktop: Markdown uses Capricorn, full source uses RME. */
 export interface CodeEditorSettingDefaults {
@@ -70,6 +72,7 @@ const getCodeDisplaySettings = (
 export const getSettingMap = (
   defaults: CodeEditorSettingDefaults = {},
   translate: typeof i18n.t = i18n.t,
+  panelOrder: DockPanelOrder = DEFAULT_DOCK_PANEL_ORDER,
 ) => {
   const bodyFontSize = defaults.bodyFontSize ?? '16px'
   const pixels = /^\s*(\d+(?:\.\d+)?)px\s*$/.exec(bodyFontSize)
@@ -126,9 +129,9 @@ export const getSettingMap = (
           desc: { i18nKey: 'settings.general.startup.description' },
           options: [
             { value: 'restore', title: translate('settings.general.startup.restore') },
-            { value: 'explorer', title: translate('sidebar.explorer') },
-            { value: 'search', title: translate('sidebar.search') },
-            { value: 'bookmarks', title: translate('sidebar.bookmarks') },
+            ...getDockPanels('left', panelOrder).map((panel) => ({
+              value: panel.id, title: translate(panel.labelKey),
+            })),
           ],
         },
         rightStartup: {
@@ -139,8 +142,9 @@ export const getSettingMap = (
           desc: { i18nKey: 'settings.general.startup.description' },
           options: [
             { value: 'restore', title: translate('settings.general.startup.restore') },
-            { value: 'toc', title: translate('sidebar.table_of_contents') },
-            { value: 'ai', title: translate('ai.assistant') },
+            ...getDockPanels('right', panelOrder).map((panel) => ({
+              value: panel.id, title: translate(panel.labelKey),
+            })),
           ],
         },
       },

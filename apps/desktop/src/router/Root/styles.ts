@@ -40,6 +40,7 @@ export const RootPageLayout = styled(PageLayout)`
           }
 
           &[data-mf-status-bar-hover] > [role='toolbar'],
+          &[data-mf-dock-dragging] > [role='toolbar'],
           &:focus-within > [role='toolbar'],
           &:has([aria-expanded='true']) > [role='toolbar'] {
             opacity: 1;
@@ -57,6 +58,7 @@ export const RootPageLayout = styled(PageLayout)`
             }
 
             &[data-mf-status-bar-hover] > [role='toolbar'],
+            &[data-mf-dock-dragging] > [role='toolbar'],
             &:focus-within > [role='toolbar'],
             &:has([aria-expanded='true']) > [role='toolbar'] {
               transform: translateY(0);
@@ -65,6 +67,7 @@ export const RootPageLayout = styled(PageLayout)`
             }
 
             /* Focus and open menus need their final position immediately. */
+            &[data-mf-dock-dragging] > [role='toolbar'],
             &:focus-within > [role='toolbar'],
             &:has([aria-expanded='true']) > [role='toolbar'] {
               transition: none;

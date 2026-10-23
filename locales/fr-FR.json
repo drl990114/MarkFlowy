@@ -201,6 +201,20 @@
     "unsupported_file_format": "format de fichier non reconnu"
   },
   "sidebar": {
+    "move_left": "Déplacer à gauche",
+    "move_right": "Déplacer à droite",
+    "panel_actions": "Actions du panneau",
+    "reset_layout": "Rétablir la disposition des panneaux",
+    "drag_hint": "Glisser pour déplacer · Clic droit pour les options",
+    "move_explorer_command": "Fichiers : déplacer de l’autre côté",
+    "move_search_command": "Recherche : déplacer de l’autre côté",
+    "move_bookmarks_command": "Signets : déplacer de l’autre côté",
+    "move_toc_command": "Plan : déplacer de l’autre côté",
+    "move_ai_command": "IA : déplacer de l’autre côté",
+    "outline_collapse": "Replier",
+    "outline_expand": "Déplier",
+    "outline_collapse_all": "Replier tous les titres",
+    "outline_expand_all": "Déplier tous les titres",
     "explorer": "explorer",
     "search": "chercher",
     "bookmarks": "Favoris",
@@ -1068,6 +1082,8 @@
   },
   "command": {
     "id_descriptions": {
+      "app_outlineCollapseAll": "Replier tous les titres",
+      "app_outlineExpandAll": "Déplier tous les titres",
       "app_commandPalette": "Palette de commandes",
       "app_quickOpen": "Ouverture rapide",
       "app_openFolder": "Ouvrir un dossier",

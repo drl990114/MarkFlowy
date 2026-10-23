@@ -19,6 +19,7 @@ import { createGlobalStore } from 'hox'
 import { t } from '@/i18n'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { create } from 'zustand'
+import { isOutlineCommand, isOutlineCommandAvailable } from '@/components/TableOfContent/outlineCommands'
 
 export type KeyBindingMap = Record<string, (event: KeyboardEvent) => void>
 
@@ -122,6 +123,7 @@ function useKeyboard() {
         createAppShortcutHandler(keybindingRegistry.getKeyBindingString(binding.keys), (event) => {
           if (composing() || event.repeat || !commandRegistry.hasCommand(binding.command))
             return false
+          if (isOutlineCommand(binding.command) && !isOutlineCommandAvailable(binding.command)) return false
           if (binding.when === 'editor_focus' && !isEditorTarget(event.target)) return false
           void commandRegistry
             .execute(binding.command)

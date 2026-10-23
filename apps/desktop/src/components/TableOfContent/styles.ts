@@ -378,7 +378,7 @@ export const TocViewContainer = styled.div<ContainerProps>`
   display: flex;
   flex-direction: column;
   flex: 1;
-  background: ${(props) => props.theme.rightBarBgColor};
+  background: var(--mf-dock-surface, ${(props) => props.theme.rightBarBgColor});
   color: ${(props) => props.theme.primaryFontColor};
   overflow: hidden;
 

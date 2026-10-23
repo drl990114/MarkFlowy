@@ -201,6 +201,20 @@
     "unsupported_file_format": "サポート外のファイル形式です"
   },
   "sidebar": {
+    "move_left": "左側に移動",
+    "move_right": "右側に移動",
+    "panel_actions": "パネルの操作",
+    "reset_layout": "サイドバーの配置を初期状態に戻す",
+    "drag_hint": "ドラッグで移動 · 右クリックで操作を表示",
+    "move_explorer_command": "ファイル：反対側に移動",
+    "move_search_command": "検索：反対側に移動",
+    "move_bookmarks_command": "ブックマーク：反対側に移動",
+    "move_toc_command": "アウトライン：反対側に移動",
+    "move_ai_command": "AI：反対側に移動",
+    "outline_collapse": "折りたたむ",
+    "outline_expand": "展開する",
+    "outline_collapse_all": "すべての見出しを折りたたむ",
+    "outline_expand_all": "すべての見出しを展開する",
     "explorer": "エクスプローラー",
     "search": "検索",
     "bookmarks": "ブックマーク",
@@ -1068,6 +1082,8 @@
   },
   "command": {
     "id_descriptions": {
+      "app_outlineCollapseAll": "すべての見出しを折りたたむ",
+      "app_outlineExpandAll": "すべての見出しを展開する",
       "app_commandPalette": "コマンドパレット",
       "app_quickOpen": "クイックオープン",
       "app_openFolder": "フォルダーを開く",

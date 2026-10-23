@@ -6,6 +6,10 @@ import { EditorViewType } from '@/constants/editorViewType'
 import useEditorStore from '@/stores/useEditorStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import useLayoutStore from '@/stores/useLayoutStore'
+import { isDockPanelAvailable } from '@/stores/useLayoutStore'
+import { dockPanels } from '@/components/SideBar/dockPanels'
+import { moveDockPanelToOtherSide, resetDockLayout } from '@/components/SideBar/dockActions'
+import { isOutlineCommandAvailable } from '@/components/TableOfContent/outlineCommands'
 import {
   EDITOR_COMMANDS,
   editorCommandUnavailable,
@@ -42,6 +46,8 @@ const APPLICATION_COMMANDS = [
   ['app_toggleEditorType', 'view', 'markdown source wysiwyg'],
   ['app_splitEditorRight', 'view', 'split right horizontal'],
   ['app_splitEditorDown', 'view', 'split down vertical'],
+  ['app_outlineCollapseAll', 'view', 'outline headings collapse 大纲 折叠'],
+  ['app_outlineExpandAll', 'view', 'outline headings expand 大纲 展开'],
   ['app_openSetting', 'app', 'settings preferences configure'],
   ['app_hide', 'app', 'hide window'],
 ] as const
@@ -104,6 +110,11 @@ function applicationUnavailable(
 ): CommandUnavailableReason | undefined {
   const layout = useLayoutStore.getState()
   if (id === 'app_hide' && platform !== 'mac') return 'unavailable'
+  if (id === 'app_outlineCollapseAll' || id === 'app_outlineExpandAll') {
+    if (!target) return 'no_document'
+    if (!isCurrentCommandTarget(target)) return 'stale_target'
+    return isOutlineCommandAvailable(id) ? undefined : 'unavailable'
+  }
   const targetReason = applicationTargetUnavailable(id, target, layout.zenModeActive)
   if (targetReason) return targetReason
   if (target && id === 'app_findReplaceEditor') return searchUnavailable(target)
@@ -120,6 +131,32 @@ function applicationUnavailable(
 }
 
 export const paletteCommands: readonly PaletteCommand[] = [
+  ...dockPanels.map((panel): PaletteCommand => ({
+    id: `app_moveDockPanel_${panel.id}`,
+    category: 'view',
+    labelKey: `sidebar.move_${panel.id}_command`,
+    keywords: ['sidebar', 'move', 'left', 'right', '侧栏', '移动', panel.fallbackLabel],
+    getUnavailableReason: () => {
+      const state = useLayoutStore.getState()
+      return state.zenModeActive ? 'zen_mode' : isDockPanelAvailable(panel.id, state.hasWorkspace) ? undefined : 'unavailable'
+    },
+    execute: () => {
+      const state = useLayoutStore.getState()
+      if (state.zenModeActive || !isDockPanelAvailable(panel.id, state.hasWorkspace)) return false
+      moveDockPanelToOtherSide(panel.id)
+      return true
+    },
+  })),
+  {
+    id: 'app_resetDockLayout', category: 'view', labelKey: 'sidebar.reset_layout',
+    keywords: ['sidebar', 'layout', 'reset', '侧栏', '布局', '恢复'],
+    getUnavailableReason: () => useLayoutStore.getState().zenModeActive ? 'zen_mode' : undefined,
+    execute: () => {
+      if (useLayoutStore.getState().zenModeActive) return false
+      resetDockLayout()
+      return true
+    },
+  },
   {
     id: 'app_localHistory',
     category: 'file',

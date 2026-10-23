@@ -86,7 +86,7 @@ export const Container = styled.div`
     letter-spacing: inherit;
     border-radius: var(--mf-radius-sm, ${(props) => props.theme.smallBorderRadius});
     border-color: var(--mf-ui-border-subtle, ${(props) => props.theme.borderColor});
-    background: var(--mf-surface-panel-left, ${(props) => props.theme.sideBarBgColor});
+    background: var(--mf-dock-surface, var(--mf-surface-panel-left, ${(props) => props.theme.sideBarBgColor}));
     box-shadow: none;
     transition: none;
   }

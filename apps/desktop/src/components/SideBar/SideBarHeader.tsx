@@ -30,7 +30,7 @@ const Container = styled.div`
   padding: 0 4px;
   border-bottom: 1px solid var(--mf-ui-border-subtle);
   color: ${(props) => props.theme.primaryFontColor};
-  background-color: var(--mf-surface-panel-right, ${(props) => props.theme.rightBarHeaderBgColor});
+  background-color: var(--mf-dock-header-background, var(--mf-surface-panel-right, ${(props) => props.theme.rightBarHeaderBgColor}));
   box-sizing: border-box;
 
   .mf-sidebar-header__actions {

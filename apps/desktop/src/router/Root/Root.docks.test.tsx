@@ -1,13 +1,26 @@
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { desktopLightTheme } from '@markflowy/theme'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { ThemeProvider } from 'styled-components'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import useLayoutStore, { DOCK_PREFERENCES_STORAGE_KEY } from '@/stores/useLayoutStore'
+import useLayoutStore, { DEFAULT_DOCK_PANEL_ORDER, DOCK_PREFERENCES_STORAGE_KEY, type DockPanelId } from '@/stores/useLayoutStore'
+import { getDockPanelDefinition } from '@/components/SideBar/dockPanels'
+import { clearDockDrag, useDockDragStore } from '@/components/SideBar/dockDragData'
 import Root from '.'
 
 const commands = vi.hoisted(() => new Map<string, () => void>())
 const context = vi.hoisted(() => ({ rootPath: '/workspace' as string | undefined }))
+
+it('keeps the single-document status bar available for the duration of a panel drag', async () => {
+  context.rootPath = undefined
+  await renderLayout()
+  const status = document.querySelector('.app-status-bar')!
+  expect(status.hasAttribute('data-mf-dock-dragging')).toBe(false)
+  act(() => useDockDragStore.setState({ panelId: 'bookmarks' }))
+  expect(status.hasAttribute('data-mf-dock-dragging')).toBe(true)
+  act(clearDockDrag)
+  expect(status.hasAttribute('data-mf-dock-dragging')).toBe(false)
+})
 
 vi.mock('@/commands', () => ({
   commandRegistry: {
@@ -22,6 +35,9 @@ vi.mock('@/components/SideBar/RightBar', () => ({
   default: () => <input aria-label='TOC state' />,
 }))
 vi.mock('@/components/SideBar/DockSwitcher', () => ({ scheduleDockFocus: vi.fn() }))
+vi.mock('@/extensions/ai/AskRuntimeHost', () => ({
+  AskRuntimeHost: ({ children }: { children: ReactNode }) => <>{children}</>,
+}))
 vi.mock('@/components/EditorArea', () => ({ default: () => <div>Editor</div> }))
 vi.mock('@/components/EditorArea/focusActiveEditor', () => ({
   scheduleActiveEditorFocus: vi.fn(),
@@ -153,6 +169,13 @@ beforeEach(() => {
   context.rootPath = '/workspace'
   localStorage.removeItem(DOCK_PREFERENCES_STORAGE_KEY)
   useLayoutStore.setState({
+    panelOrder: { left: [...DEFAULT_DOCK_PANEL_ORDER.left], right: [...DEFAULT_DOCK_PANEL_ORDER.right] },
+    leftStartup: 'restore',
+    rightStartup: 'restore',
+    documentDocks: {
+      leftBar: { activePanelId: 'bookmarks', size: 240, visible: false },
+      rightBar: { activePanelId: 'toc', size: 280, visible: false },
+    },
     hasWorkspace: true,
     workspaceDocks: undefined,
     leftBar: { activePanelId: 'explorer', size: 240, visible: true },
@@ -359,7 +382,9 @@ describe('Root dock resizing', () => {
     expect(panel('right').offsetWidth).toBeGreaterThan(0)
   })
 
-  it('restores saved dock widths and visibility after Zen Mode', async () => {
+  it('restores custom panel placement, widths and visibility after Zen Mode', async () => {
+    useLayoutStore.getState().moveDockPanel('toc', 'left')
+    useLayoutStore.getState().moveDockPanel('bookmarks', 'right')
     useLayoutStore.getState().setDockSize('left', 304)
     useLayoutStore.getState().setDockSize('right', 336)
     await renderLayout()
@@ -370,5 +395,78 @@ describe('Root dock resizing', () => {
     notifyResize()
     expect(panel('left').offsetWidth).toBeCloseTo(304, 0)
     expect(panel('right').offsetWidth).toBeCloseTo(336, 0)
+    expect(panel('left').getAttribute('aria-label')).toBe('sidebar.table_of_contents')
+    expect(panel('right').getAttribute('aria-label')).toBe('sidebar.bookmarks')
+  })
+})
+
+
+describe('Root custom Dock placement', () => {
+  it.each(['explorer', 'search', 'bookmarks', 'toc', 'ai'] satisfies DockPanelId[])(
+    'updates the destination landmark and separator labels when moving %s', async (panelId) => {
+      await renderLayout()
+      const targetSide = DEFAULT_DOCK_PANEL_ORDER.left.includes(panelId) ? 'right' : 'left'
+      act(() => useLayoutStore.getState().moveDockPanel(panelId, targetSide))
+      notifyResize()
+      const expectedLabel = getDockPanelDefinition(panelId).labelKey
+      expect(panel(targetSide).getAttribute('aria-label')).toBe(expectedLabel)
+      expect(separator(targetSide).getAttribute('aria-label')).toBe(expectedLabel)
+      expect(panel(targetSide).offsetWidth).toBeGreaterThan(0)
+      await toggle(targetSide)
+      expect(panel(targetSide).offsetWidth).toBe(0)
+      await toggle(targetSide)
+      expect(panel(targetSide).getAttribute('aria-label')).toBe(expectedLabel)
+      expect(panel(targetSide).offsetWidth).toBeGreaterThan(0)
+    },
+  )
+
+  it('removes the separator and resize target when the last panel leaves a side', async () => {
+    await renderLayout()
+    act(() => {
+      useLayoutStore.getState().moveDockPanel('toc', 'left')
+      useLayoutStore.getState().moveDockPanel('ai', 'left')
+    })
+    notifyResize()
+    expect(useLayoutStore.getState().rightBar).toMatchObject({ activePanelId: null, visible: false })
+    expect(panel('right').offsetWidth).toBe(0)
+    expect(panel('right').hasAttribute('inert')).toBe(true)
+    expect(getComputedStyle(separator('right')).display).toBe('none')
+    expect(screen.getAllByRole('separator')).toHaveLength(1)
+    await toggle('right')
+    expect(panel('right').offsetWidth).toBe(0)
+    expect(screen.getAllByRole('separator')).toHaveLength(1)
+    act(() => useLayoutStore.getState().moveDockPanel('bookmarks', 'right'))
+    notifyResize()
+    expect(panel('right').offsetWidth).toBeCloseTo(280, 0)
+    expect(panel('right').hasAttribute('inert')).toBe(false)
+    expect(screen.getAllByRole('separator')).toHaveLength(2)
+  })
+
+  it('keeps global placement while document mode hides unavailable workspace panels', async () => {
+    await renderLayout()
+    act(() => useLayoutStore.getState().moveDockPanel('bookmarks', 'right'))
+    const order = useLayoutStore.getState().panelOrder
+    act(() => {
+      context.rootPath = undefined
+      useLayoutStore.getState().setWorkspaceContext(false)
+    })
+    notifyResize()
+    expect(useLayoutStore.getState().leftBar).toMatchObject({ activePanelId: null, visible: false })
+    expect(panel('left').offsetWidth).toBe(0)
+    await toggle('left')
+    expect(panel('left').offsetWidth).toBe(0)
+    act(() => useLayoutStore.getState().openDockPanel('bookmarks'))
+    notifyResize()
+    expect(panel('right').getAttribute('aria-label')).toBe('sidebar.bookmarks')
+    expect(panel('right').offsetWidth).toBeGreaterThan(0)
+    act(() => {
+      context.rootPath = '/workspace'
+      useLayoutStore.getState().setWorkspaceContext(true)
+    })
+    notifyResize()
+    expect(useLayoutStore.getState().panelOrder).toBe(order)
+    expect(panel('left').getAttribute('aria-label')).toBe('sidebar.explorer')
+    expect(panel('left').offsetWidth).toBeCloseTo(240, 0)
+    expect(panel('right').getAttribute('aria-label')).toBe('sidebar.bookmarks')
   })
 })
