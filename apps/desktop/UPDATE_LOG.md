@@ -1,5 +1,53 @@
 # UPDATE LOG
 
+## v1.2.1
+
+Features:
+
+- **Arrange sidebar panels your way.** Move Files, Search, Bookmarks, Outline, and AI between the left and right sidebars, and reorder their icons by dragging them in the bottom status bar. Panel menus and the command palette also provide move and reset actions. The layout is remembered; moving or hiding the AI panel preserves your draft, attachments, and ongoing response.
+
+- **Collapse branches in the outline.** Expand or collapse heading branches in WYSIWYG, Preview, and Source Code modes. With the outline panel open, use **Cmd/Ctrl + Alt + [** to collapse all branches and **Cmd/Ctrl + Alt + ]** to expand them, or choose the actions from the panel menu. This only changes the outline view and leaves document content unchanged.
+
+Improvements and Fixes:
+
+- Restore all open editor windows after quitting the app, including workspaces and standalone documents, with their tabs, split layouts, and drafts. Windows closed individually stay closed. Draft recovery now respects workspace boundaries.
+
+- Improved editor table layout: column widths adapt to visible content and the available editor width. Widths stay stable while typing and adjust when the window or editor layout changes.
+
+- Improved editor scrolling in long documents, reducing position jumps when revisiting content or navigating to search results. Refined **PageUp / PageDown** navigation and focus transitions between body text and code blocks.
+
+- Fixed caret and selection positioning when switching from WYSIWYG to Source Code mode in documents with nested lists or different Markdown indentation, including large documents. Switching modes preserves the original Markdown formatting until you edit it.
+
+- Fixed image links when working with a saved file outside a workspace. With **Save to a path relative to the current file** selected, inserting, dropping, or pasting images now creates links relative to the document's folder, making the document and its images easier to move together.
+
+- Improved Windows update recovery. If an installation was interrupted, the next launch pauses automatic installation and lets you retry, turn off automatic updates, or continue using the app. Also fixed update package and signature matching across platforms.
+
+- Refined text selection in desktop controls to avoid accidentally selecting labels in toolbars, sidebars, and settings while keeping document text, input fields, paths, and error details selectable.
+
+---
+
+新功能：
+
+- **自由安排侧栏面板。** 文件、搜索、书签、大纲和 AI 面板可在左右侧栏之间移动，也可拖动底部状态栏中的图标调整顺序。面板菜单和命令面板同样提供移动与恢复默认布局操作，布局会自动记住；移动或隐藏 AI 面板时，保留输入草稿、附件和正在生成的回复。
+
+- **折叠大纲中的标题层级。** 所见即所得、预览和源码模式下均可展开或收起大纲分支。打开大纲面板后，按 **Cmd/Ctrl + Alt + [** 折叠全部标题，按 **Cmd/Ctrl + Alt + ]** 展开全部标题，也可通过面板菜单操作。折叠仅影响大纲显示，不修改文档内容。
+
+改进与修复：
+
+- 退出应用后再次启动，恢复退出前打开的工作区和单文件窗口，以及各自的标签页、分栏布局和草稿。主动单独关闭的窗口不再重新打开，草稿恢复也会遵循对应的工作区边界。
+
+- 改进编辑器的表格布局，根据可见内容和编辑区域宽度分配列宽。输入时保持列宽稳定，窗口或编辑器布局变化后自动调整。
+
+- 改进编辑器的长文档滚动，减少返回已浏览内容或跳转搜索结果时的位置跳动，并优化 **PageUp / PageDown** 翻页及正文与代码块之间的焦点切换。
+
+- 修复包含嵌套列表或不同 Markdown 缩进的文档从所见即所得切换到源码模式时，光标与选区定位不准确的问题，覆盖长文档场景。未编辑内容前，切换模式保留原有 Markdown 格式。
+
+- 修复未打开工作区、单独编辑已保存文件时的图片链接。选择**保存到相对当前文件的路径**后，插入、拖放或粘贴图片会生成相对于文档所在目录的链接，方便将文档与图片一起移动。
+
+- 改进 Windows 更新中断后的恢复。上次安装未完成时，下次启动会暂停自动安装，可选择重试、关闭自动更新或继续使用应用。同时修复不同平台更新包与签名的匹配问题。
+
+- 优化桌面操作区域的文本选择，减少工具栏、侧栏和设置中的标签被误选，同时保留正文、输入框、路径和错误详情的文本选择能力。
+
 ## v1.2.0
 
 Features:
