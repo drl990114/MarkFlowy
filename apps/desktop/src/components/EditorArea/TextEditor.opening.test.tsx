@@ -146,7 +146,13 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor opening', () => {
+describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor document lifecycle', () => {
+  // These regressions exercise mounted documents. Prepare the real runtime
+  // outside their 5s behavior deadline so cold CI module loading has its own budget.
+  beforeAll(async () => {
+    await capricornRuntime.loadCapricornRuntimeFactory()
+  }, 30_000)
+
   it('keeps a hidden dirty document through its first split and saves its original draft', async () => {
     const previous = useEditorStore.getState()
     const previousRelease = vi.mocked(releaseClosedFileContent).getMockImplementation()
@@ -354,6 +360,9 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor opening', () => {
     }
   })
 
+})
+
+describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor opening', () => {
   it('retains the selected preview mode when a document gains another editor instance', async () => {
     const id = 'opening-preview'
     setFileObject(id, { id, name: 'preview.md', path: '/synthetic/preview.md', kind: 'file' })
@@ -389,7 +398,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor opening', () => {
 })
 
 describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor source mode transitions', () => {
-  // Keep the opening suite cold, then prepare the real source-editor fixture
+  // Keep RME cold in the opening suite, then prepare the real source-editor fixture
   // outside the behavior tests' 5s deadline. CI module transforms can be slow.
   beforeAll(async () => {
     await rmeRuntime.loadRmeRuntime()
