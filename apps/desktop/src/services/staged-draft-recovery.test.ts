@@ -1,13 +1,15 @@
 import { enableMapSet } from 'immer'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { invoke } from '@tauri-apps/api/core'
+import bus from '@/helper/eventBus'
 import useFileCacheStore, { getFileObject, getFileObjectByPath } from '@/helper/files'
 import { createFile, updateFile } from '@/helper/filesys'
 import useEditorStore from '@/stores/useEditorStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
 import { fileSaveCoordinator } from '@/components/EditorArea/fileSaveCoordinator'
+import { editorSnapshotRegistry } from '@/components/EditorArea/editorSnapshotRegistry'
 import { DEFAULT_TEXT_METADATA } from '@/components/EditorArea/textFileFormat'
-import { markExternalFileConflict } from '@/components/EditorArea/externalFileChanges'
+import { EXTERNAL_FILE_CONTENT_SYNC_EVENT, markExternalFileConflict } from '@/components/EditorArea/externalFileChanges'
 import type { FileSnapshotResult } from '@/components/EditorArea/fileSnapshot'
 import {
   closeWithDraftRecovery,
@@ -19,13 +21,14 @@ import {
   type DraftSessionStore,
 } from './draft-recovery'
 import { isDraftRecoveryPending, keepDraftRecoveryAndClose, waitForDraftRecovery, waitForAllDraftRecovery } from './draftRecoveryState'
-import { bindRecoveredDraft, flushDraftProtection, historyCall, protectLocalEdit, retainHistoryDraftOnClose } from './local-history'
+import { bindRecoveredDraft, flushDraftProtection, historyCall, historyWorkspace, protectLocalEdit, retainHistoryDraftOnClose } from './local-history'
 import { dialog } from './dialog'
 import { stageDraftRecovery } from './staged-draft-recovery'
 import { nativeRecoveryDocument, type DraftDescriptor, type DraftManifest } from './draftSessionFormat'
 import { restoreWindowDocuments, type WindowSession } from './window-session'
 
 const background = vi.hoisted(() => ({ deferred: false, tasks: [] as (() => void)[] }))
+const recoveryWindow = vi.hoisted(() => ({ label: 'main' }))
 vi.mock('@/startup/interactive', () => ({ afterStartupInteractive: (run: () => void) => {
   if (background.deferred) background.tasks.push(run)
   else run()
@@ -33,18 +36,21 @@ vi.mock('@/startup/interactive', () => ({ afterStartupInteractive: (run: () => v
 } }))
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: () => true }))
-vi.mock('@tauri-apps/api/window', () => ({ getCurrentWindow: () => ({ label: 'main' }) }))
+vi.mock('@tauri-apps/api/window', () => ({ getCurrentWindow: () => recoveryWindow }))
 vi.mock('@/helper/logger', () => ({ logger: { error: vi.fn() } }))
 vi.mock('zens', () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
 vi.mock('./dialog', () => ({ dialog: { confirm: vi.fn() } }))
 vi.mock('@/i18n', () => ({ t: (key: string) => key }))
-vi.mock('@/components/EditorArea/externalFileChanges', () => ({ markExternalFileConflict: vi.fn() }))
+vi.mock('@/components/EditorArea/externalFileChanges', () => ({
+  EXTERNAL_FILE_CONTENT_SYNC_EVENT: 'external_file_content_sync',
+  markExternalFileConflict: vi.fn(),
+}))
 vi.mock('./local-history', () => ({
   bindRecoveredDraft: vi.fn().mockResolvedValue(undefined),
   draftProtectionStarted: () => true,
   flushDraftProtection: vi.fn().mockResolvedValue(undefined),
   historyCall: vi.fn().mockResolvedValue([]),
-  historyWorkspace: () => '/w',
+  historyWorkspace: vi.fn(() => '/w'),
   protectLocalEdit: vi.fn(),
   observeHistoryFile: vi.fn().mockResolvedValue(undefined),
   startDraftProtection: vi.fn().mockResolvedValue(undefined),
@@ -98,7 +104,9 @@ const settle = (id: string, result = snapshot()) => {
 }
 beforeEach(() => {
   vi.clearAllMocks()
+  recoveryWindow.label = 'main'
   vi.mocked(historyCall).mockResolvedValue([])
+  vi.mocked(historyWorkspace).mockReturnValue('/w')
   vi.mocked(flushDraftProtection).mockResolvedValue(undefined)
   vi.mocked(bindRecoveredDraft).mockResolvedValue(undefined)
   vi.mocked(dialog.confirm).mockReset().mockResolvedValue('cancel')
@@ -128,18 +136,368 @@ const descriptor = (id: string): DraftDescriptor => ({
 const installNative = (drafts: DraftDescriptor[]) => {
   const claimed: string[] = []
   vi.mocked(historyCall).mockImplementation(async (op, payload) => {
-    if (op === 'recoveryDraftIndex') return (payload as { workspace: string }).workspace === '/w' ? drafts : []
+    if (op === 'recoveryDraftIndex') return drafts.filter((item) => item.document.workspace === (payload as { workspace: string }).workspace)
     if (op === 'claimRecoveryDraft') {
       const { draft: item, claimId } = payload as { draft: DraftDescriptor; claimId: string }
       claimed.push(item.document.name)
-      return { ...item, writer: `main:${claimId}`, content: `${item.document.name} recovered` }
+      return { ...item, writer: `${recoveryWindow.label}:${claimId}`, content: `${item.document.name} recovered` }
     }
     throw new Error(`Unexpected operation ${op}`)
   })
   return claimed
 }
+const setWorkspace = (rootPath?: string) => {
+  useEditorStore.setState({ folderData: rootPath ? [createFile({ path: rootPath, kind: 'dir' })] : [] })
+  vi.mocked(historyWorkspace).mockReturnValue(rootPath ?? '')
+}
+const sessionFor = (windowLabel: string, item: DraftDescriptor): WindowSession => ({
+  version: 1, windowLabel,
+  files: [{ id: 'saved-tab', name: item.document.name, path: item.document.path ?? undefined }],
+  editorLayout: { type: 'leaf', id: 'group', opened: ['saved-tab'], activeId: 'saved-tab' },
+  activeGroupId: 'group',
+  drafts: { version: 2, activeId: 'saved-tab', documents: [{
+    ...nativeRecoveryDocument(item), id: 'saved-tab', source: { kind: 'native', draft: item },
+  }] },
+})
 
 describe('indexed draft recovery', () => {
+  it.each(['pending', 'composing'] as const)(
+    'keeps %s input while a native draft body is being validated', async (input) => {
+      setWorkspace('/w')
+      open('typing', 'disk')
+      fileSaveCoordinator.recordContent('typing', 'disk')
+      fileSaveCoordinator.setDiskRevision('typing', 'r1')
+      installNative([descriptor('typing')])
+      const onError = vi.fn()
+      const synced = vi.fn()
+      bus.on(EXTERNAL_FILE_CONTENT_SYNC_EVENT, synced)
+      cleanups.push(() => bus.detach(EXTERNAL_FILE_CONTENT_SYNC_EVENT, synced))
+      const recovery = await start({ onError })
+      let pending = true
+      const flush = vi.fn(() => {
+        updateFile({ id: 'typing', content: 'new local input' })
+        fileSaveCoordinator.recordContent('typing', 'new local input')
+        pending = false
+        return true
+      })
+      cleanups.push(editorSnapshotRegistry.register('typing', 'live-editor', {
+        canRead: () => input !== 'composing',
+        hasPending: () => pending,
+        flush,
+        isVisible: () => true,
+        onSyncDemandChanged: () => {},
+      }))
+      settle('typing')
+      expect(await recovery.finished).toBe(0)
+      expect(onError).toHaveBeenCalled()
+      expect(bindRecoveredDraft).not.toHaveBeenCalled()
+      expect(synced).not.toHaveBeenCalled()
+      expect(isDraftRecoveryPending('typing')).toBe(true)
+      if (input === 'pending') {
+        expect(flush).toHaveBeenCalledOnce()
+        expect(getFileObject('typing').content).toBe('new local input')
+      } else {
+        expect(flush).not.toHaveBeenCalled()
+        expect(getFileObject('typing').content).toBe('disk')
+      }
+    },
+  )
+
+  it.each([1, 2])('keeps an explicitly empty main session empty despite old native and v%s exit drafts', async (version) => {
+    setWorkspace()
+    const previous = descriptor('previous')
+    previous.document.workspace = ''
+    previous.document.path = undefined
+    previous.writer = 'main:previous'
+    const session = sessionFor('main', previous)
+    session.files = []
+    session.editorLayout = { type: 'leaf', id: 'group', opened: [] }
+    session.drafts = { version: 2, documents: [] }
+    restoreWindowDocuments(session)
+    const claimed = installNative([previous])
+    const { cache, data } = cacheFor([])
+    data.clear()
+    const oldExit = { version, documents: version === 1
+      ? [{ ...draft('previous'), path: undefined }]
+      : [nativeRecoveryDocument(previous)] }
+    data.set('draft-session:main:old', oldExit)
+    const recovery = await start({ session, cache, onError: vi.fn() })
+    expect(await recovery.finished).toBe(0)
+    expect(claimed).toEqual([])
+    expect(useEditorStore.getState().opened).toEqual([])
+    expect(data.get('draft-session:main:old')).toBe(oldExit)
+  })
+
+  it('keeps the source writer when a child becomes main and the closed old main has a divergent draft', async () => {
+    setWorkspace()
+    const saved = descriptor('active')
+    saved.document.workspace = ''
+    saved.writer = 'main_child:active'
+    const closedMain = { ...saved, writer: 'main:previous', hash: 'closed-main-body' }
+    const session = sessionFor('main_child', saved)
+    restoreWindowDocuments(session)
+    const claims: string[] = []
+    vi.mocked(historyCall).mockImplementation(async (operation, payload) => {
+      if (operation === 'recoveryDraftIndex') return [saved, closedMain]
+      const { draft: requested, claimId } = payload as { draft: DraftDescriptor; claimId: string }
+      claims.push(requested.writer)
+      return { ...requested, writer: `main:${claimId}`, content: requested.writer }
+    })
+    const recovery = await start({ session, onError: vi.fn() })
+    settle('active')
+    expect(await recovery.finished).toBe(1)
+    expect(claims).toEqual(['main_child:active'])
+    expect(useEditorStore.getState().opened).toEqual(['saved-tab'])
+    expect(getFileObject('saved-tab').content).toBe('main_child:active')
+  })
+
+  it('does not claim ambiguous current-label drafts when the remapped source writer is gone', async () => {
+    setWorkspace()
+    const saved = descriptor('active')
+    saved.document.workspace = ''
+    saved.writer = 'main_child:active'
+    const first = { ...saved, writer: 'main:first', hash: 'first' }
+    const second = { ...saved, writer: 'main:second', hash: 'second' }
+    const session = sessionFor('main_child', saved)
+    restoreWindowDocuments(session)
+    const claims: string[] = []
+    vi.mocked(historyCall).mockImplementation(async (operation, payload) => {
+      if (operation === 'recoveryDraftIndex') return [first, second]
+      const requested = (payload as { draft: DraftDescriptor }).draft
+      claims.push(requested.writer)
+      return requested.writer === saved.writer ? null : { ...requested, content: requested.writer }
+    })
+    const recovery = await start({ session, onError: vi.fn() })
+    settle('active')
+    expect(await recovery.finished).toBe(0)
+    expect(claims).toEqual(['main_child:active'])
+    expect(useEditorStore.getState().opened).toEqual(['saved-tab'])
+    expect(bindRecoveredDraft).not.toHaveBeenCalled()
+  })
+
+  it('recovers a newer draft for a listed session path without collecting other same-owner documents', async () => {
+    setWorkspace('/w')
+    const listed = descriptor('active')
+    const unlisted = descriptor('unlisted')
+    unlisted.document.path = undefined
+    const session = sessionFor('old', listed)
+    session.drafts = { version: 2, documents: [] }
+    restoreWindowDocuments(session)
+    const claimed = installNative([listed, unlisted])
+    const recovery = await start({ session, onError: vi.fn() })
+    settle('active')
+    expect(await recovery.finished).toBe(1)
+    expect(claimed).toEqual(['active.md'])
+    expect(useEditorStore.getState().opened).toEqual(['saved-tab'])
+  })
+
+  it.each([1, 2])('retains unselected documents in a mixed v%s exit snapshot after session recovery', async (version) => {
+    setWorkspace('/w')
+    const selected = descriptor('selected')
+    const session = sessionFor('old', selected)
+    session.drafts = { version: 2, documents: [] }
+    restoreWindowDocuments(session)
+    installNative([])
+    const { cache, data } = cacheFor([])
+    data.clear()
+    const documents = version === 1
+      ? [draft('selected'), draft('foreign')]
+      : [nativeRecoveryDocument(selected), nativeRecoveryDocument(descriptor('foreign'))]
+    const oldExit = { version, rootPath: '/w', activeId: documents[1].id, documents }
+    data.set('draft-session:old:mixed', oldExit)
+    const recovery = await start({ session, cache, onError: vi.fn() })
+    expect(calls).toEqual(['/w/selected.md'])
+    settle('selected')
+    expect(await recovery.finished).toBe(1)
+    expect(useEditorStore.getState().opened).toEqual(['saved-tab'])
+    expect(getFileObject('saved-tab').content).toBe(version === 1 ? 'selected draft' : 'selected.md recovered')
+    expect(data.get('draft-session:old:mixed')).toEqual({ ...oldExit, documents: [documents[1]] })
+    expect(cache.save).toHaveBeenCalled()
+  })
+
+  it.each(['/w', ''])('recovers closed drafts only in the current workspace scope (%s)', async (workspace) => {
+    setWorkspace(workspace || undefined)
+    const own = descriptor('own')
+    own.document.workspace = workspace
+    own.document.path = undefined
+    const foreign = descriptor('foreign')
+    foreign.document.workspace = workspace ? '' : '/w'
+    foreign.document.path = undefined
+    const other = descriptor('other')
+    other.document.workspace = '/other'
+    const claimed = installNative([own, foreign, other])
+    const recovery = await start({ onError: vi.fn() })
+    expect(await recovery.finished).toBe(1)
+    expect(claimed).toEqual(['own.md'])
+    expect(vi.mocked(historyCall).mock.calls.filter(([operation]) => operation === 'recoveryDraftIndex')).toEqual([
+      ['recoveryDraftIndex', { workspace, ownerPrefix: 'main:' }],
+    ])
+    expect(useEditorStore.getState().opened.map((id) => getFileObject(id).content)).toEqual(['own.md recovered'])
+  })
+
+  it('restores only the explicit session document from an old scope after attaching a workspace', async () => {
+    setWorkspace('/w')
+    const saved = descriptor('saved')
+    saved.document.workspace = ''
+    saved.document.path = undefined
+    const unreferenced = descriptor('unreferenced')
+    unreferenced.document.workspace = ''
+    unreferenced.document.path = undefined
+    const session = sessionFor('old', saved)
+    restoreWindowDocuments(session)
+    const claimed = installNative([saved, unreferenced])
+    const recovery = await start({ session, onError: vi.fn() })
+    expect(await recovery.finished).toBe(1)
+    expect(claimed).toEqual(['saved.md'])
+    expect(useEditorStore.getState().opened).toEqual(['saved-tab'])
+    expect(useEditorStore.getState().activeId).toBe('saved-tab')
+    expect(getFileObject('saved-tab').content).toBe('saved.md recovered')
+  })
+
+  it.each(['first', 'second'])('keeps independent standalone window sessions isolated (%s)', async (owner) => {
+    setWorkspace()
+    recoveryWindow.label = `new-${owner}`
+    const drafts = ['first', 'second'].map((id) => {
+      const item = descriptor(id)
+      item.document.workspace = ''
+      item.writer = `${id}:writer`
+      return item
+    })
+    const item = drafts.find((entry) => entry.writer.startsWith(`${owner}:`))!
+    const session = sessionFor(owner, item)
+    restoreWindowDocuments(session)
+    const claimed = installNative(drafts)
+    const recovery = await start({ session, isolatedWindow: recoveryWindow.label, freshWindow: true, onError: vi.fn() })
+    expect(calls).toEqual([`/w/${owner}.md`])
+    settle(owner)
+    expect(await recovery.finished).toBe(1)
+    expect(claimed).toEqual([`${owner}.md`])
+    expect(useEditorStore.getState().opened).toEqual(['saved-tab'])
+    expect(getFileObject('saved-tab').content).toBe(`${owner}.md recovered`)
+  })
+
+  it('does not scan or consume old native and exit drafts for a fresh window with a reused label', async () => {
+    setWorkspace()
+    const previous = descriptor('previous')
+    previous.document.workspace = ''
+    previous.document.path = undefined
+    previous.writer = 'main:previous'
+    const claimed = installNative([previous])
+    const { cache, data } = cacheFor([])
+    data.clear()
+    data.set('draft-session:main:old', { version: 1, documents: [{ ...draft('previous'), path: undefined }] })
+    const entries = vi.spyOn(cache, 'entries')
+    const recovery = await start({ cache, isolatedWindow: 'main', freshWindow: true, onError: vi.fn() })
+    expect(await recovery.finished).toBe(0)
+    expect(claimed).toEqual([])
+    expect(historyCall).not.toHaveBeenCalled()
+    expect(entries).not.toHaveBeenCalled()
+    expect(data.has('draft-session:main:old')).toBe(true)
+    expect(useEditorStore.getState().opened).toEqual([])
+  })
+
+  it('allows the current page reload snapshot in a fresh window without reviving exit drafts', async () => {
+    setWorkspace()
+    const { cache, data } = cacheFor([{ ...draft('old-exit'), path: undefined }])
+    window.sessionStorage.setItem(RELOAD_SESSION_KEY, JSON.stringify({
+      version: 1, documents: [{ ...draft('current-page'), path: undefined }],
+    }))
+    const recovery = await start({ cache, reload: true, freshWindow: true, onError: vi.fn() })
+    expect(await recovery.finished).toBe(1)
+    expect(useEditorStore.getState().opened.map((id) => getFileObject(id).content)).toEqual(['current-page draft'])
+    expect(window.sessionStorage.getItem(RELOAD_SESSION_KEY)).toBeNull()
+    expect(data.has('draft-session:old')).toBe(true)
+    expect(historyCall).not.toHaveBeenCalled()
+  })
+
+  it('recovers only an explicitly reopened standalone path from a closed owner', async () => {
+    recoveryWindow.label = 'main_reopened'
+    vi.mocked(historyWorkspace).mockReturnValue('')
+    const item = descriptor('active')
+    item.document.workspace = ''
+    const unrelated = descriptor('other')
+    unrelated.document.workspace = ''
+    open('active', 'disk baseline')
+    useEditorStore.getState().setActiveId('active')
+    const claimed = installNative([item, unrelated, descriptor('active')])
+    const { cache, data } = cacheFor([draft('active', 'stale exit body'), draft('other')])
+    const onError = vi.fn()
+    const recovery = await start({
+      cache, onError, isolatedWindow: recoveryWindow.label,
+      reopenPaths: ['/w/active.md'], preserveOpenDocuments: true,
+    })
+    expect(claimed).toEqual(['active.md'])
+    expect(calls).toEqual(['/w/active.md'])
+    settle('active', snapshot('disk baseline'))
+    expect(await recovery.finished).toBe(1)
+    expect(getFileObject('active').content).toBe('active.md recovered')
+    expect(useEditorStore.getState().opened).toEqual(['active'])
+    expect(useEditorStore.getState().activeId).toBe('active')
+    expect(useEditorStateStore.getState().idStateMap.get('active')?.hasUnsavedChanges).toBe(true)
+    expect(historyCall).toHaveBeenCalledWith('recoveryDraftIndex', { workspace: '', ownerPrefix: 'main_reopened:' })
+    expect(historyCall).not.toHaveBeenCalledWith('recoveryDraftIndex', expect.objectContaining({ workspace: '/w' }))
+    expect(historyCall).toHaveBeenCalledWith('claimRecoveryDraft', {
+      draft: item, ownerPrefix: 'main_reopened:', claimId: expect.any(String),
+    })
+    expect(bindRecoveredDraft).toHaveBeenCalledWith('active', expect.objectContaining({
+      document: item.document, writer: expect.stringMatching(/^main_reopened:/),
+      content: 'active.md recovered',
+    }))
+    expect(data.has('draft-session:old')).toBe(true)
+    expect(onError).not.toHaveBeenCalled()
+  })
+
+  it('does not restore another owner when an isolated window has no explicitly reopened path', async () => {
+    recoveryWindow.label = 'main_reopened'
+    open('active', 'disk baseline')
+    const claimed = installNative([descriptor('active')])
+    const recovery = await start({ isolatedWindow: recoveryWindow.label, onError: vi.fn() })
+    expect(await recovery.finished).toBe(0)
+    expect(claimed).toEqual([])
+    expect(calls).toEqual([])
+    expect(getFileObject('active').content).toBe('disk baseline')
+  })
+
+  it('keeps same-path drafts from other workspace scopes outside explicit reopen recovery', async () => {
+    recoveryWindow.label = 'main_reopened'
+    const foreign = descriptor('active')
+    foreign.document.workspace = ''
+    open('active', 'disk baseline')
+    const claimed = installNative([foreign])
+    const recovery = await start({
+      isolatedWindow: recoveryWindow.label, reopenPaths: ['/w/active.md'], onError: vi.fn(),
+    })
+    expect(await recovery.finished).toBe(0)
+    expect(claimed).toEqual([])
+    expect(calls).toEqual([])
+    expect(getFileObject('active').content).toBe('disk baseline')
+  })
+
+  it('leaves the reopened file clean when the native claim rejects a now-live or already claimed owner', async () => {
+    recoveryWindow.label = 'main_reopened'
+    vi.mocked(historyWorkspace).mockReturnValue('')
+    const item = descriptor('active')
+    item.document.workspace = ''
+    open('active', 'disk baseline')
+    useEditorStore.getState().setActiveId('active')
+    vi.mocked(historyCall).mockImplementation(async (op) => op === 'recoveryDraftIndex' ? [item] : null)
+    const onError = vi.fn()
+    const recovery = await start({
+      isolatedWindow: recoveryWindow.label, reopenPaths: ['/w/active.md'],
+      preserveOpenDocuments: true, onError,
+    })
+    settle('active', snapshot('disk baseline'))
+    expect(await recovery.finished).toBe(0)
+    expect(historyCall).toHaveBeenCalledWith('claimRecoveryDraft', expect.objectContaining({ draft: item }))
+    expect(getFileObject('active').content).toBe('disk baseline')
+    expect(useEditorStore.getState().opened).toEqual(['active'])
+    expect(useEditorStateStore.getState().idStateMap.get('active')?.hasUnsavedChanges).toBe(false)
+    expect(isDraftRecoveryPending('active')).toBe(false)
+    expect(bindRecoveredDraft).not.toHaveBeenCalled()
+    expect(protectLocalEdit).not.toHaveBeenCalled()
+    expect(onError).not.toHaveBeenCalled()
+  })
+
   it.each([savedDiskRevision, diskFingerprint])('recovers a saved-then-edited native draft after write counters reset (%s)', async (diskRevision) => {
     const item = { ...descriptor('active'), diskRevision }
     open('active')
@@ -181,6 +539,7 @@ describe('indexed draft recovery', () => {
   })
 
   it('restores the latest owned draft after closing its folder, retaining its tab id and excluding other windows', async () => {
+    setWorkspace()
     const previous = descriptor('untitled')
     previous.document.path = undefined
     const latest = { ...previous, writer: 'main:reclaimed', sequence: 13, hash: 'latest' }
@@ -593,6 +952,107 @@ afterEach(async () => {
 })
 
 describe('staged draft recovery', () => {
+  it.each(['exit', 'session'] as const)(
+    'preserves pending live input when an inline %s draft still matches the stale cache', async (source) => {
+      const id = 'inline-pending'
+      open(id, 'old')
+      fileSaveCoordinator.recordContent(id, 'old')
+      useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: true })
+      let live = 'old plus new input'
+      let pending = true
+      cleanups.push(editorSnapshotRegistry.register(id, 'live-editor', {
+        canRead: () => true,
+        hasPending: () => pending,
+        flush: () => {
+          updateFile({ id, content: live })
+          fileSaveCoordinator.recordContent(id, live)
+          pending = false
+          return true
+        },
+        isVisible: () => true,
+        onSyncDemandChanged: () => {},
+      }))
+      const sync = ({ fileId, content }: { fileId: string; content: string }) => {
+        if (fileId !== id) return
+        live = content
+        pending = false
+      }
+      bus.on(EXTERNAL_FILE_CONTENT_SYNC_EVENT, sync)
+      cleanups.push(() => bus.detach(EXTERNAL_FILE_CONTENT_SYNC_EVENT, sync))
+      const { cache } = cacheFor([draft(id, 'old')])
+      const session: WindowSession | undefined = source === 'session' ? {
+        version: 1, windowLabel: 'old', files: [{ id, name: `${id}.md`, path: `/w/${id}.md` }],
+        editorLayout: { type: 'leaf', id: 'group', opened: [id], activeId: id },
+        activeGroupId: 'group', drafts: { version: 1, documents: [draft(id, 'old')] },
+      } : undefined
+      const recovery = await start({ cache: source === 'exit' ? cache : undefined, session, onError: vi.fn() })
+      if (reads.has(`/w/${id}.md`)) settle(id, snapshot('old'))
+      expect(await recovery.finished).toBe(1)
+      expect(live).toBe('old plus new input')
+      expect(getFileObject(id).content).toBe(live)
+      expect(useEditorStore.getState().opened.map(getFileObject)).toEqual(expect.arrayContaining([
+        expect.objectContaining({ id, path: `/w/${id}.md`, content: live }),
+        expect.objectContaining({ path: undefined, content: 'old' }),
+      ]))
+    },
+  )
+
+  it('restores other inline drafts without reading or replacing an active composition', async () => {
+    const id = 'inline-composing'
+    open(id, 'old')
+    open('other-inline')
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: true })
+    const flush = vi.fn(() => false)
+    cleanups.push(editorSnapshotRegistry.register(id, 'live-editor', {
+      canRead: () => false,
+      hasPending: () => true,
+      flush,
+      isVisible: () => true,
+      onSyncDemandChanged: () => {},
+    }))
+    const synced = vi.fn()
+    bus.on(EXTERNAL_FILE_CONTENT_SYNC_EVENT, synced)
+    cleanups.push(() => bus.detach(EXTERNAL_FILE_CONTENT_SYNC_EVENT, synced))
+    const { cache, data } = cacheFor([draft(id, 'old'), draft('other-inline', 'other draft')])
+    const onError = vi.fn()
+    const recovery = await start({ cache, onError })
+    settle('other-inline')
+    expect(await recovery.finished).toBe(2)
+    expect(onError).not.toHaveBeenCalled()
+    expect(flush).not.toHaveBeenCalled()
+    expect(synced).not.toHaveBeenCalledWith(expect.objectContaining({ fileId: id }))
+    expect(data.has('draft-session:old')).toBe(false)
+    expect(getFileObject(id).content).toBe('old')
+    expect(getFileObject('other-inline').content).toBe('other draft')
+    expect(editorSnapshotRegistry.hasPending(id)).toBe(true)
+    expect(useEditorStore.getState().opened.map(getFileObject)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id, path: `/w/${id}.md`, content: 'old' }),
+      expect.objectContaining({ path: undefined, content: 'old' }),
+    ]))
+  })
+
+  it.each([
+    ['exit', '/w', undefined], ['reload', '/w', undefined],
+    ['exit', undefined, '/w'], ['reload', undefined, '/w'],
+    ['exit', '/w', '/other'], ['reload', '/w', '/other'],
+  ] as const)('retains a %s snapshot from another scope (%s versus %s)', async (source, currentRoot, savedRoot) => {
+    setWorkspace(currentRoot)
+    const original: DraftSession = {
+      version: 1, rootPath: savedRoot, documents: [{ ...draft('foreign'), path: undefined }],
+    }
+    const { cache, data } = cacheFor([])
+    data.set('draft-session:old', original)
+    const raw = JSON.stringify(original)
+    if (source === 'reload') window.sessionStorage.setItem(RELOAD_SESSION_KEY, raw)
+    const recovery = await start({ cache: source === 'exit' ? cache : undefined, reload: source === 'reload', onError: vi.fn() })
+    expect(await recovery.finished).toBe(0)
+    expect(useEditorStore.getState().opened).toEqual([])
+    expect(calls).toEqual([])
+    if (source === 'reload') expect(window.sessionStorage.getItem(RELOAD_SESSION_KEY)).toBe(raw)
+    else expect(data.get('draft-session:old')).toBe(original)
+    expect(protectLocalEdit).not.toHaveBeenCalled()
+  })
+
   it('makes the active draft ready without waiting for hidden reads and caps background concurrency', async () => {
     for (const id of ['active', 'one', 'two', 'three']) open(id)
     useEditorStore.getState().setActiveId('active')

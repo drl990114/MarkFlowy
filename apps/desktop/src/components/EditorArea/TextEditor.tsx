@@ -15,6 +15,7 @@ import {
   isHistoryAutosavePaused,
   releaseClosedFileContent,
 } from '@/services/local-history'
+import { isDraftRecoveryPending } from '@/services/draftRecoveryState'
 import { bindEditorResume, bindSourceEditorResume } from './editorResume'
 import { captureEditorModeFocus } from './editorModeFocus'
 import { editorAutomationRegistry, type EditorAutomationHandle } from './editorAutomationRegistry'
@@ -1052,11 +1053,15 @@ function TextEditor(props: TextEditorProps) {
       editorInstanceLifecycle.unmount(id, () => {
         void releaseClosedFileContent(id)
           .then((released) => {
-            // Retain an unacknowledged closed draft, including its encoding state.
-            if (!released && !useEditorStore.getState().opened.includes(id)) return
+            // Layout changes can unmount hidden tabs that are still open.
+            // Retain their state, as well as unacknowledged closed drafts.
+            if (!released) return
             return fileSaveCoordinator.releaseWhenIdle(
               id,
-              () => !editorInstanceLifecycle.hasInstances(id),
+              () =>
+                !useEditorStore.getState().opened.includes(id) &&
+                !isDraftRecoveryPending(id) &&
+                !editorInstanceLifecycle.hasInstances(id),
               () => {
                 useEditorCounterStore.getState().deleteEditorCounter({ id })
                 useEditorStateStore.getState().delIdStateMap(id)

@@ -25,6 +25,7 @@ vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn().mockResolvedValue(undef
 vi.mock('zens', () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
 vi.mock('@/helper/logger', () => ({ logger: { error: vi.fn() } }))
 vi.mock('@/components/EditorArea/externalFileChanges', () => ({
+  EXTERNAL_FILE_CONTENT_SYNC_EVENT: 'external_file_content_sync',
   markExternalFileConflict: vi.fn(),
 }))
 vi.mock('@/components/EditorArea/fileSnapshot', () => ({ readStableFileSnapshot: vi.fn(), promoteOpeningRead: vi.fn() }))

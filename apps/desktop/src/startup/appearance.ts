@@ -27,6 +27,8 @@ export type WindowBootstrap = {
   appearance: StartupAppearance
   openedUrls: string[]
   sessionId: string
+  /** Missing: legacy startup. Null: new window. String: exact saved session. */
+  restoreSessionLabel?: string | null
 }
 
 export type LegacyWindowBootstrap = Omit<WindowBootstrap, 'openedUrls'> & {
@@ -263,6 +265,10 @@ export const readWindowBootstrap = (
   const openedUrls = normalizeOpenedUrls(rawOpenedUrls)
 
   targetWindow.__MARKFLOWY_BOOTSTRAP__ = {
+    ...(isRecord(bootstrap) &&
+    (typeof bootstrap.restoreSessionLabel === 'string' || bootstrap.restoreSessionLabel === null)
+      ? { restoreSessionLabel: bootstrap.restoreSessionLabel }
+      : {}),
     appearance,
     openedUrls,
     sessionId:
@@ -354,6 +360,10 @@ export const cacheStartupAppearance = (
 
   const bootstrap = targetWindow.__MARKFLOWY_BOOTSTRAP__
   targetWindow.__MARKFLOWY_BOOTSTRAP__ = {
+    ...(isRecord(bootstrap) &&
+    (typeof bootstrap.restoreSessionLabel === 'string' || bootstrap.restoreSessionLabel === null)
+      ? { restoreSessionLabel: bootstrap.restoreSessionLabel }
+      : {}),
     appearance,
     openedUrls: normalizeOpenedUrls(
       isRecord(bootstrap) ? bootstrap.openedUrls : targetWindow.openedUrls,

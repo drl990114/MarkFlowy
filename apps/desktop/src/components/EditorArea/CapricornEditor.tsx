@@ -662,6 +662,8 @@ export function CapricornEditor({
           gridColumn: 1,
           gridRow: 1,
           minHeight: '100%',
+          // Let the pane shrink before table columns remeasure their available width.
+          minWidth: 0,
           visibility: state === 'ready' ? 'visible' : 'hidden',
           width: '100%',
         }}

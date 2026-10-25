@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
   runtimeAvailable: true,
   rmeEditor: vi.fn(() => null),
   editorStore: {
+    opened: [] as string[],
     clearEditorResources: vi.fn(),
     clearEditorDelegate: vi.fn(),
     clearEditorCtx: vi.fn(),

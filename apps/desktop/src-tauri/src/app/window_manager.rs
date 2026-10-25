@@ -31,6 +31,10 @@ struct WindowBootstrap {
     session_id: String,
     opened_urls: Vec<String>,
     appearance: StartupAppearance,
+    // Missing supports a legacy first launch; null starts an explicit fresh
+    // session; a string selects exactly that persisted window snapshot.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    restore_session_label: Option<Option<String>>,
 }
 
 pub(crate) fn app_session_id() -> &'static str {
@@ -80,12 +84,14 @@ pub(crate) fn serialize_javascript_string(value: &str) -> Result<String, serde_j
 pub(crate) fn window_initialization_script(
     app: &AppHandle,
     opened_urls: Vec<String>,
+    restore_session_label: Option<Option<String>>,
 ) -> Result<(String, StartupAppearance), serde_json::Error> {
     let appearance = AppConf::startup_appearance(app);
     let bootstrap = WindowBootstrap {
         session_id: app_session_id().to_string(),
         opened_urls,
         appearance: appearance.clone(),
+        restore_session_label,
     };
     let serialized_bootstrap = serialize_javascript_value(&bootstrap)?;
 
@@ -102,11 +108,23 @@ pub(crate) fn build_main_window(
     window_label: String,
     url: WebviewUrl,
     opened_urls: Vec<String>,
+    restore_session_label: Option<Option<String>>,
 ) -> Result<WebviewWindow, String> {
+    if super::application_session::is_quitting() {
+        return Err("Cannot create a window while MarkFlowy is quitting".into());
+    }
+    // Quit may arrive before the renderer installs its close listener. Ensure
+    // the target snapshot already represents this restored or fresh window.
+    super::application_session::prepare_window_session(
+        app,
+        &window_label,
+        &restore_session_label,
+    )?;
     let started_at = Instant::now();
     super::startup_timing::record_stage("window-start", Some(&window_label));
     let (initialization_script, appearance) =
-        window_initialization_script(app, opened_urls).map_err(|error| error.to_string())?;
+        window_initialization_script(app, opened_urls, restore_session_label)
+            .map_err(|error| error.to_string())?;
     super::startup_timing::record_stage("window-bootstrap-ready", Some(&window_label));
     let native_theme = appearance.preference.native_window_theme();
     let background_color = appearance.palette.surface_color();
@@ -145,6 +163,11 @@ pub(crate) fn build_main_window(
 
     super::startup_timing::record_stage("webview-build-start", Some(&window_label));
     let window = window_builder.build().map_err(|error| error.to_string())?;
+    // A window build dispatched to the UI thread may overlap a Quit request.
+    // Keep this new window alive rather than finish an exit that did not capture it.
+    if super::application_session::is_quitting() {
+        super::application_session::cancel_app_quit();
+    }
     super::startup_timing::record_stage("window-built", Some(window.label()));
     mark_window_recent(window.label());
     tracing::info!(
@@ -237,6 +260,7 @@ pub async fn create_new_window(_app: AppHandle, path: Option<String>) -> Result<
         window_label.clone(),
         get_webview_url("index.html"),
         opened_urls,
+        Some(None),
     )?;
 
     // Only publish the window after the native/webview build succeeded.
@@ -526,6 +550,7 @@ mod tests {
                 "file:///tmp/</script>.md".to_string(),
             ],
             appearance: test_appearance(),
+            restore_session_label: None,
         };
 
         let serialized = serialize_javascript_value(&bootstrap).unwrap();
@@ -539,6 +564,27 @@ mod tests {
         assert_eq!(value["appearance"]["schemaVersion"], 1);
         assert_eq!(value["appearance"]["resolvedMode"], "dark");
         assert_eq!(value["appearance"]["palette"]["surfaceApp"], "#131313");
+        assert!(value.get("restoreSessionLabel").is_none());
+    }
+
+    #[test]
+    fn bootstrap_distinguishes_an_empty_session_from_an_exact_window_restore() {
+        let mut bootstrap = WindowBootstrap {
+            session_id: "session-1".to_string(),
+            opened_urls: vec![],
+            appearance: test_appearance(),
+            restore_session_label: Some(None),
+        };
+        let empty = serde_json::to_value(&bootstrap).unwrap();
+        assert_eq!(
+            empty.get("restoreSessionLabel"),
+            Some(&serde_json::Value::Null)
+        );
+        bootstrap.restore_session_label = Some(Some("main_file".into()));
+        assert_eq!(
+            serde_json::to_value(&bootstrap).unwrap()["restoreSessionLabel"],
+            "main_file"
+        );
     }
 
     #[test]

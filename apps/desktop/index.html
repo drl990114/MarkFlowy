@@ -149,6 +149,10 @@
         }
 
         window.__MARKFLOWY_BOOTSTRAP__ = {
+          ...(typeof bootstrap.restoreSessionLabel === 'string' ||
+          bootstrap.restoreSessionLabel === null
+            ? { restoreSessionLabel: bootstrap.restoreSessionLabel }
+            : {}),
           sessionId:
             typeof bootstrap.sessionId === 'string' ? bootstrap.sessionId : 'browser-preview',
           openedUrls,

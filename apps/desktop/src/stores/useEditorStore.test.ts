@@ -160,6 +160,31 @@ describe('useEditorStore.moveFileToGroup', () => {
   })
 })
 
+describe('useEditorStore split proportions', () => {
+  it('normalizes surviving panes when closing the last tab removes an empty pane', () => {
+    useEditorStore.getState().setEditorLayout({
+      type: 'branch', id: 'three-panes', direction: 'horizontal', sizes: [20, 30, 50],
+      children: [
+        { type: 'leaf', id: 'left', opened: ['left-file'], activeId: 'left-file' },
+        { type: 'leaf', id: 'middle', opened: ['middle-file'], activeId: 'middle-file' },
+        { type: 'leaf', id: 'right', opened: ['right-file'], activeId: 'right-file' },
+      ],
+    }, 'middle')
+
+    useEditorStore.getState().closeFileInGroup('middle', 'middle-file')
+
+    expect(useEditorStore.getState().editorLayout).toEqual({
+      type: 'branch', id: 'three-panes', direction: 'horizontal', sizes: [50, 50],
+      children: [
+        { type: 'leaf', id: 'left', opened: ['left-file'], activeId: 'left-file' },
+        { type: 'leaf', id: 'right', opened: ['right-file'], activeId: 'right-file' },
+      ],
+    })
+    expect(useEditorStore.getState().opened).toEqual(['left-file', 'right-file'])
+    expect(useEditorStore.getState().getGroup('middle')).toBeUndefined()
+  })
+})
+
 describe('useEditorStore layout remount snapshots', () => {
   const unregisterReaders: (() => void)[] = []
   const registerReader = (fileId: string, options: { composing?: boolean; failed?: boolean } = {}) => {

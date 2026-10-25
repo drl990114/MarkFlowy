@@ -2,25 +2,36 @@
 import { EditorView } from '@codemirror/view'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { enableMapSet } from 'immer'
+import type { PropsWithChildren } from 'react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import type * as Rme from 'rme'
 import type * as Zens from 'zens'
+import type * as LocalHistory from '@/services/local-history'
 import { EVENT } from '@/constants'
 import { EditorViewType } from '@/constants/editorViewType'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import bus from '@/helper/eventBus'
-import { getFileObject, setFileObject } from '@/helper/files'
+import { getFileObject, getSaveOpenedEditorEntries, setFileObject } from '@/helper/files'
+import { createFile } from '@/helper/filesys'
+import useEditorStore from '@/stores/useEditorStore'
 import { createEditorResumeStore } from '@/stores/editorResumeStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import TextEditor from './TextEditor'
+import EditorLayoutView from './EditorLayoutView'
+import { fileSaveCoordinator } from './fileSaveCoordinator'
+import { editorSnapshotRegistry } from './editorSnapshotRegistry'
 import { getCapricornEditor } from './capricornEditorRegistry'
+import { editorAutomationRegistry } from './editorAutomationRegistry'
 import { getCapricornRuntimeInput } from './capricornRuntimeDom'
 import { EXTERNAL_FILE_CONTENT_SYNC_EVENT } from './externalFileChanges'
 import { sourceCodeCodemirrorViewMap } from './sourceCodeEditorRegistry'
 import * as rmeRuntime from './rmeRuntime'
 import * as capricornRuntime from './capricornRuntimeAdapter'
-import { endHistoryBatch } from '@/services/local-history'
+import { bindRecoveredDraft, endHistoryBatch, historyCall, releaseClosedFileContent } from '@/services/local-history'
+import { stageDraftRecovery } from '@/services/staged-draft-recovery'
+import { registerDraftRecovery } from '@/services/draftRecoveryState'
+import type { DraftDescriptor } from '@/services/draftSessionFormat'
 
 const mocks = vi.hoisted(() => ({
   t: (key: string) => key,
@@ -31,15 +42,6 @@ const mocks = vi.hoisted(() => ({
       ? { version: 1, revision: 0, items: [], hiddenBuiltinIds: [] }
       : { status: 'success', revision: 'disk:saved' },
   ),
-  editorStore: {
-    clearEditorResources: vi.fn(),
-    clearEditorDelegate: vi.fn(),
-    clearEditorCtx: vi.fn(),
-    setEditorDelegate: vi.fn(),
-    setEditorCtx: vi.fn(),
-    getEditorCtx: () => undefined,
-    insertNodeToFolderData: vi.fn(),
-  },
 }))
 
 vi.mock('@/commands', () => ({ commandRegistry: {
@@ -48,7 +50,7 @@ vi.mock('@/commands', () => ({ commandRegistry: {
 } }))
 vi.mock('@/AppThemeProvider', () => ({ AppEditorThemeProvider: ({ children }: { children: React.ReactNode }) => children }))
 vi.mock('@/helper/clipboard', () => ({ clipboardRead: vi.fn() }))
-vi.mock('@/helper/logger', () => ({ logger: { error: mocks.error } }))
+vi.mock('@/helper/logger', () => ({ logger: { error: mocks.error, info: vi.fn(), warn: vi.fn() } }))
 vi.mock('@/helper/image', () => ({ getExportableImageSrc: vi.fn() }))
 vi.mock('@/hooks/useKeyboard', () => {
   const state = { editorKeybingMap: {}, editorKeybindingsLoaded: false }
@@ -61,15 +63,30 @@ vi.mock('@/hooks/useKeyboard', () => {
 })
 vi.mock('@/i18n', () => ({
   i18n: { dir: () => 'ltr', language: 'en', t: mocks.t, on: vi.fn(), off: vi.fn() },
+  t: mocks.t,
   useTranslation: () => ({ t: mocks.t }),
 }))
 vi.mock('@/services/error-reporting', () => ({ captureException: mocks.error }))
 vi.mock('@/stores', async () => ({
   useEditorStateStore: (await import('@/stores/useEditorStateStore')).default,
-  useEditorStore: Object.assign((selector: (state: typeof mocks.editorStore) => unknown) => selector(mocks.editorStore), {
-    getState: () => mocks.editorStore,
-  }),
+  // Defer forwarding until render so the barrel does not await its own store's import cycle.
+  useEditorStore: Object.assign(
+    <T,>(selector: (state: ReturnType<typeof useEditorStore.getState>) => T) => useEditorStore(selector),
+    { getState: () => useEditorStore.getState() },
+  ),
 }))
+vi.mock('react-resizable-panels', () => {
+  const Box = ({ children, className }: PropsWithChildren<{ className?: string }>) => <div className={className}>{children}</div>
+  return { Group: Box, Panel: Box, Separator: () => null }
+})
+vi.mock('overlayscrollbars-react', () => ({
+  OverlayScrollbarsComponent: ({ children, className }: PropsWithChildren<{ className?: string }>) => <div className={className}>{children}</div>,
+}))
+vi.mock('./EditorAreaTabs', () => ({ default: () => null }))
+vi.mock('./EditorGroupToolbar', () => ({ default: () => null }))
+vi.mock('./EmptyState', () => ({ EmptyState: () => null }))
+vi.mock('./ExternalFileChangeAlert', () => ({ ExternalFileChangeAlert: () => null }))
+vi.mock('./editorToolBar/FindReplace', () => ({ FindReplace: () => null }))
 vi.mock('@/stores/useAppSettingStore', () => {
   const state = { settingData: { autosave: false, autosave_interval: 1000, editor_root_font_size: 16, editor_root_line_height: '1.7' } }
   return { default: Object.assign((selector: (value: typeof state) => unknown) => selector(state), { getState: () => state }) }
@@ -80,7 +97,10 @@ vi.mock('./createWysiwygDelegateOptions', () => ({
   getCurrentEditorInsertDateFormat: vi.fn(),
   normalizeLivePreviewBlockBehavior: () => 'source',
 }))
-vi.mock('./fileSnapshot', () => ({ readStableFileSnapshot: async () => ({ status: 'success', content: '# Opened file\n\nBody\n', revision: 'disk:A' }) }))
+vi.mock('./fileSnapshot', () => ({
+  readStableFileSnapshot: async () => ({ status: 'success', content: '# Opened file\n\nBody\n', revision: 'disk:A' }),
+  promoteOpeningRead: vi.fn(),
+}))
 vi.mock('./openEditorLink', () => ({ openEditorLink: vi.fn() }))
 vi.mock('./pdf-print/PdfPrintController', () => ({ PdfPrintController: () => null }))
 vi.mock('./pandoc-export/PandocExportController', () => ({ PandocExportController: () => null }))
@@ -92,7 +112,8 @@ vi.mock('rme', async (importOriginal) => {
   mocks.rmeLoaded()
   return importOriginal<typeof Rme>()
 })
-vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
+vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke, isTauri: () => true }))
+vi.mock('@tauri-apps/api/window', () => ({ getCurrentWindow: () => ({ label: 'main' }) }))
 vi.mock('@tauri-apps/plugin-dialog', () => ({ save: vi.fn() }))
 vi.mock('@/services/local-history', () => ({
   releaseClosedFileContent: vi.fn(async () => true),
@@ -101,6 +122,15 @@ vi.mock('@/services/local-history', () => ({
   protectLocalEdit: vi.fn(async () => {}),
   historyFileSaved: vi.fn(),
   isHistoryAutosavePaused: () => false,
+  bindRecoveredDraft: vi.fn(async () => {}),
+  draftProtectionStarted: () => true,
+  flushDraftProtection: vi.fn(async () => {}),
+  historyCall: vi.fn(async () => []),
+  historyWorkspace: () => '/synthetic',
+  historyWorkspaceForPath: () => '/synthetic',
+  startDraftProtection: vi.fn(async () => {}),
+  ownsHistoryDraft: () => false,
+  retainHistoryDraftOnClose: vi.fn(async () => {}),
 }))
 
 enableMapSet()
@@ -117,6 +147,213 @@ afterEach(() => {
 })
 
 describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor opening', () => {
+  it('keeps a hidden dirty document through its first split and saves its original draft', async () => {
+    const previous = useEditorStore.getState()
+    const previousRelease = vi.mocked(releaseClosedFileContent).getMockImplementation()
+    const history = await vi.importActual<typeof LocalHistory>('@/services/local-history')
+    vi.mocked(releaseClosedFileContent).mockImplementation(history.releaseClosedFileContent)
+    const alpha = 'first-split-alpha'
+    const beta = 'first-split-beta'
+    const group = 'first-split-group'
+    createFile({ id: alpha, name: 'alpha.md', path: '/synthetic/split/alpha.md', ext: 'md', kind: 'file' })
+    createFile({ id: beta, name: 'beta.md', path: '/synthetic/split/beta.md', ext: 'md', kind: 'file' })
+    useEditorStore.getState().setEditorLayout({ type: 'leaf', id: group, opened: [alpha, beta], activeId: alpha }, group)
+    function WorkspaceEditors() {
+      const layout = useEditorStore((state) => state.editorLayout)
+      const activeGroupId = useEditorStore((state) => state.activeGroupId)
+      return <EditorLayoutView node={layout} activeGroupId={activeGroupId} zenModeActive={false} />
+    }
+    try {
+      const { container } = render(<WorkspaceEditors />)
+      await waitFor(() => expect(getCapricornEditor(alpha)).toBeDefined())
+      await act(async () => getCapricornEditor(alpha)?.commands.insertLink?.({ href: 'https://example.com', text: 'FIRST-SPLIT-DRAFT' }))
+      const draft = getCapricornEditor(alpha)!.getMarkdown()
+      expect(draft).toContain('FIRST-SPLIT-DRAFT')
+      expect(useEditorStateStore.getState().idStateMap.get(alpha)?.hasUnsavedChanges).toBe(true)
+      await act(async () => useEditorStore.getState().setActiveId(beta))
+      await waitFor(() => expect(getCapricornEditor(beta)).toBeDefined())
+      expect(editorSnapshotRegistry.hasSources(alpha)).toBe(true)
+
+      await act(async () => { useEditorStore.getState().splitGroup(group, 'horizontal') })
+      expect(useEditorStore.getState().editorLayout.type).toBe('branch')
+      await waitFor(() => expect(editorSnapshotRegistry.hasSources(alpha)).toBe(false))
+      expect(useEditorStore.getState().opened).toContain(alpha)
+      await act(async () => { await Promise.resolve() })
+      expect(useEditorStateStore.getState().idStateMap.get(alpha)?.hasUnsavedChanges).toBe(true)
+      expect(getFileObject(alpha)?.content).toBe(draft)
+      expect(fileSaveCoordinator.getDiskRevision(alpha)).toBe('disk:A')
+
+      await act(async () => {
+        useEditorStore.getState().setActiveGroupId(group)
+        useEditorStore.getState().setActiveId(alpha)
+      })
+      await waitFor(() => expect(getCapricornEditor(alpha)?.getMarkdown()).toBe(draft))
+      expect(container.textContent).toContain('FIRST-SPLIT-DRAFT')
+      expect(editorAutomationRegistry.get(alpha)?.readContent()).toBe(draft)
+      expect(useEditorStateStore.getState().idStateMap.get(alpha)?.hasUnsavedChanges).toBe(true)
+      await act(async () => { expect(await getSaveOpenedEditorEntries(alpha)?.()).toBe(true) })
+      expect(mocks.invoke).toHaveBeenCalledWith('conditional_write_file', expect.objectContaining({
+        filePath: '/synthetic/split/alpha.md', content: draft,
+      }))
+    } finally {
+      cleanup()
+      await Promise.resolve()
+      useEditorStore.setState(previous)
+      if (previousRelease) vi.mocked(releaseClosedFileContent).mockImplementation(previousRelease)
+    }
+  })
+
+  it('releases a closed clean document after its last editor unmounts', async () => {
+    const previous = useEditorStore.getState()
+    const previousRelease = vi.mocked(releaseClosedFileContent).getMockImplementation()
+    const history = await vi.importActual<typeof LocalHistory>('@/services/local-history')
+    vi.mocked(releaseClosedFileContent).mockImplementation(history.releaseClosedFileContent)
+    const id = 'closed-clean-editor'
+    const group = 'closed-clean-group'
+    createFile({ id, name: 'closed.md', path: '/synthetic/split/closed.md', kind: 'file' })
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+    useEditorStore.getState().setEditorLayout({ type: 'leaf', id: group, opened: [id], activeId: id }, group)
+    try {
+      const { unmount } = render(<TextEditor active id={id} groupId={group} fileTypeConfig={{
+        type: 'markdown', defaultMode: EditorViewType.WYSIWYG,
+        supportedModes: [EditorViewType.WYSIWYG],
+      }} />)
+      await waitFor(() => expect(getCapricornEditor(id)).toBeDefined())
+      expect(getFileObject(id)?.content).toBe('# Opened file\n\nBody\n')
+      expect(fileSaveCoordinator.getDiskRevision(id)).toBe('disk:A')
+      expect(useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges).toBe(false)
+
+      await act(async () => {
+        useEditorStore.getState().setEditorLayout({ type: 'leaf', id: group, opened: [] }, group)
+        unmount()
+      })
+      await waitFor(() => expect(fileSaveCoordinator.getDiskRevision(id)).toBeUndefined())
+      expect(editorSnapshotRegistry.hasSources(id)).toBe(false)
+      expect(getCapricornEditor(id)).toBeUndefined()
+      expect(getSaveOpenedEditorEntries(id)).toBeUndefined()
+      expect(getFileObject(id)?.content).toBeUndefined()
+      expect(useEditorStateStore.getState().idStateMap.has(id)).toBe(false)
+    } finally {
+      cleanup()
+      await Promise.resolve()
+      useEditorStore.setState(previous)
+      if (previousRelease) vi.mocked(releaseClosedFileContent).mockImplementation(previousRelease)
+    }
+  })
+
+  it.each(['reopened', 'recovering'] as const)(
+    'retains a hidden %s document when an earlier close finishes releasing',
+    async (transition) => {
+      const previous = useEditorStore.getState()
+      const previousRelease = vi.mocked(releaseClosedFileContent).getMockImplementation()
+      let finishRelease!: (released: boolean) => void
+      const release = new Promise<boolean>((resolve) => { finishRelease = resolve })
+      vi.mocked(releaseClosedFileContent).mockImplementation(() => release)
+      const id = `close-race-${transition}`
+      const group = `close-race-${transition}-group`
+      const draft = `# Draft after ${transition}\n`
+      let finishRecovery: (() => void) | undefined
+      createFile({ id, name: `${transition}.md`, path: `/synthetic/split/${transition}.md`, kind: 'file' })
+      useEditorStore.getState().setEditorLayout({ type: 'leaf', id: group, opened: [id], activeId: id }, group)
+      try {
+        const { unmount } = render(<TextEditor active id={id} groupId={group} fileTypeConfig={{
+          type: 'markdown', defaultMode: EditorViewType.WYSIWYG,
+          supportedModes: [EditorViewType.WYSIWYG],
+        }} />)
+        await waitFor(() => expect(getCapricornEditor(id)).toBeDefined())
+        await act(async () => {
+          useEditorStore.getState().setEditorLayout({ type: 'leaf', id: group, opened: [] }, group)
+          unmount()
+        })
+        await waitFor(() => expect(releaseClosedFileContent).toHaveBeenCalledWith(id))
+        expect(editorSnapshotRegistry.hasSources(id)).toBe(false)
+        if (transition === 'reopened') {
+          // The reopened tab is still hidden, so no replacement editor can protect it.
+          useEditorStore.getState().setEditorLayout({ type: 'leaf', id: group, opened: [id] }, group)
+        } else {
+          finishRecovery = registerDraftRecovery(id, () => undefined)
+        }
+        setFileObject(id, { ...getFileObject(id)!, content: draft })
+        fileSaveCoordinator.recordContent(id, draft)
+        fileSaveCoordinator.setDiskRevision(id, 'disk:after-close')
+        useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: true })
+
+        await act(async () => { finishRelease(true) })
+        expect(editorSnapshotRegistry.hasSources(id)).toBe(false)
+        expect(fileSaveCoordinator.getDiskRevision(id)).toBe('disk:after-close')
+        expect(getFileObject(id)?.content).toBe(draft)
+        expect(useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges).toBe(true)
+      } finally {
+        finishRelease(false)
+        finishRecovery?.()
+        cleanup()
+        await Promise.resolve()
+        useEditorStore.setState(previous)
+        if (previousRelease) vi.mocked(releaseClosedFileContent).mockImplementation(previousRelease)
+      }
+    },
+  )
+
+  it('replaces an already mounted disk document when its workspace draft arrives later', async () => {
+    const id = 'late-workspace-draft'
+    const path = '/synthetic/late-workspace-draft.md'
+    const recovered = '# Recovered draft\n\nDRAFT-B-20261024-2330\n'
+    const previousEditorState = useEditorStore.getState()
+    const previousHistoryCall = vi.mocked(historyCall).getMockImplementation()
+    createFile({ id, name: 'late-workspace-draft.md', path, kind: 'file' })
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+    useEditorStore.setState({
+      folderData: [createFile({ kind: 'dir', path: '/synthetic' })],
+      opened: [id], activeId: id, activeGroupId: 'late-draft-group',
+      editorLayout: { type: 'leaf', id: 'late-draft-group', opened: [id], activeId: id },
+    })
+    const draft: DraftDescriptor = {
+      document: { id: 'native-late-draft', name: 'late-workspace-draft.md', path, workspace: '/synthetic', generation: 0 },
+      writer: 'closed-child:bravo', sequence: 1, hash: 'draft-hash', paused: true,
+      diskRevision: 'disk:A', format: { encoding: 'utf-8', bom: 'none' },
+    }
+    vi.mocked(historyCall).mockImplementation(async (operation) =>
+      operation === 'recoveryDraftIndex' ? [draft] : { ...draft, content: recovered },
+    )
+    const controller = new AbortController()
+    try {
+      const { container } = render(<TextEditor active id={id} groupId='late-draft-group' fileTypeConfig={{
+        type: 'markdown', defaultMode: EditorViewType.WYSIWYG,
+        supportedModes: [EditorViewType.WYSIWYG],
+      }} />)
+      await waitFor(() => expect(getCapricornEditor(id)?.getMarkdown()).toBe('# Opened file\n\nBody\n'))
+      const mounted = getCapricornEditor(id)
+      const onError = vi.fn()
+      let count = 0
+      await act(async () => {
+        const recovery = await stageDraftRecovery({ signal: controller.signal, onError })
+        count = await recovery.finished
+      })
+      expect(onError).not.toHaveBeenCalled()
+      expect(count).toBe(1)
+      expect(getCapricornEditor(id)).toBe(mounted)
+      expect(getCapricornEditor(id)?.getMarkdown()).toBe(recovered)
+      expect(container.textContent).toContain('DRAFT-B-20261024-2330')
+      expect(editorAutomationRegistry.get(id)?.readContent()).toBe(recovered)
+      expect(useEditorStore.getState().getEditorContent(id)).toBe(recovered)
+      expect(getFileObject(id)?.content).toBe(recovered)
+      expect(bindRecoveredDraft).toHaveBeenCalledWith(id, expect.objectContaining({ content: recovered }))
+      expect(useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges).toBe(true)
+      await act(async () => {
+        expect(await getSaveOpenedEditorEntries(id)?.()).toBe(true)
+      })
+      expect(mocks.invoke).toHaveBeenCalledWith('conditional_write_file', expect.objectContaining({
+        filePath: path, content: recovered,
+      }))
+    } finally {
+      controller.abort()
+      cleanup()
+      useEditorStore.setState(previousEditorState)
+      if (previousHistoryCall) vi.mocked(historyCall).mockImplementation(previousHistoryCall)
+      else vi.mocked(historyCall).mockReset()
+    }
+  })
+
   it('retains the selected preview mode when a document gains another editor instance', async () => {
     const id = 'opening-preview'
     setFileObject(id, { id, name: 'preview.md', path: '/synthetic/preview.md', kind: 'file' })

@@ -27,8 +27,8 @@ use std::{collections::HashMap, sync::Mutex, sync::OnceLock};
 use std::{env, fs};
 
 use app::{
-    bookmarks, conf, extensions, keybindings, opened_cache, process, themes, window_manager,
-    workspace,
+    application_session, bookmarks, conf, extensions, keybindings, opened_cache, process, themes,
+    window_manager, workspace,
 };
 use dotenv;
 use lazy_static::lazy_static;
@@ -525,34 +525,31 @@ fn write_cli_runtime_state(state: &CliRuntimeState) -> Result<(), String> {
 }
 
 fn collect_cli_runtime_windows(app: &tauri::AppHandle) -> Vec<CliWindowState> {
-    let mut windows = Vec::new();
-
     let instances = WINDOW_INSTANCES
         .lock()
-        .map(|instances| {
-            instances
-                .iter()
-                .map(|(label, path)| (label.clone(), path.clone()))
-                .collect::<Vec<_>>()
-        })
+        .map(|instances| instances.clone())
         .unwrap_or_default();
 
-    for (label, path) in instances {
-        if app.get_webview_window(&label).is_some() {
-            windows.push(CliWindowState {
-                id: label,
-                workspace_path: path.to_string_lossy().to_string(),
-            });
-        }
-    }
+    cli_runtime_windows_for_labels(app.webview_windows().into_keys(), &instances)
+}
 
-    if app.get_webview_window("main").is_some() && !windows.iter().any(|window| window.id == "main")
-    {
-        windows.push(CliWindowState {
-            id: "main".to_string(),
-            workspace_path: "".to_string(),
-        });
-    }
+fn cli_runtime_windows_for_labels(
+    labels: impl IntoIterator<Item = String>,
+    instances: &HashMap<String, PathBuf>,
+) -> Vec<CliWindowState> {
+    // Workspace registration is optional for a live editor (for example a
+    // standalone file window). Discover windows from Tauri, then attach paths.
+    let mut windows: Vec<_> = labels
+        .into_iter()
+        .filter(|label| label == "main" || label.starts_with("main_"))
+        .map(|label| CliWindowState {
+            workspace_path: instances
+                .get(&label)
+                .map(|path| path.to_string_lossy().into_owned())
+                .unwrap_or_default(),
+            id: label,
+        })
+        .collect();
 
     windows.sort_by(|a, b| a.id.cmp(&b.id));
     windows
@@ -617,8 +614,63 @@ fn sync_cli_runtime_windows(app: &tauri::AppHandle) -> Result<(), String> {
 #[cfg(test)]
 mod cli_runtime_writer_tests {
     use super::{
-        apply_cli_runtime_patch, CliCommandState, CliRuntimePatch, CliRuntimeState, CliWindowState,
+        apply_cli_runtime_patch, cli_runtime_windows_for_labels, CliCommandState, CliRuntimePatch,
+        CliRuntimeState, CliWindowState,
     };
+    use std::{collections::HashMap, path::PathBuf};
+
+    #[test]
+    fn window_discovery_includes_standalone_editors_without_workspace_entries() {
+        let windows = cli_runtime_windows_for_labels(
+            ["main_standalone", "main_workspace", "main"].map(String::from),
+            &HashMap::from([("main_workspace".into(), PathBuf::from("/workspace"))]),
+        );
+
+        assert_eq!(
+            windows
+                .iter()
+                .map(|window| (window.id.as_str(), window.workspace_path.as_str()))
+                .collect::<Vec<_>>(),
+            vec![
+                ("main", ""),
+                ("main_standalone", ""),
+                ("main_workspace", "/workspace"),
+            ]
+        );
+    }
+
+    #[test]
+    fn window_discovery_omits_closed_editors_and_auxiliary_windows() {
+        let windows = cli_runtime_windows_for_labels(
+            ["conf", "pdf-export", "main_live"].map(String::from),
+            &HashMap::from([
+                ("main_closed".into(), PathBuf::from("/closed")),
+                ("conf".into(), PathBuf::from("/settings")),
+                ("main_live".into(), PathBuf::from("/workspace")),
+            ]),
+        );
+
+        assert_eq!(windows.len(), 1);
+        assert_eq!(windows[0].id, "main_live");
+        assert_eq!(windows[0].workspace_path, "/workspace");
+    }
+
+    #[test]
+    fn window_discovery_keeps_editor_after_workspace_is_closed() {
+        let labels = ["main_standalone".to_string()];
+        let mut instances =
+            HashMap::from([("main_standalone".into(), PathBuf::from("/workspace"))]);
+        assert_eq!(
+            cli_runtime_windows_for_labels(labels.clone(), &instances)[0].workspace_path,
+            "/workspace"
+        );
+
+        instances.remove("main_standalone");
+        let windows = cli_runtime_windows_for_labels(labels, &instances);
+        assert_eq!(windows.len(), 1);
+        assert_eq!(windows[0].id, "main_standalone");
+        assert!(windows[0].workspace_path.is_empty());
+    }
 
     #[test]
     fn runtime_patches_merge_without_dropping_other_fields() {
@@ -1665,8 +1717,8 @@ pub fn run() {
         .plugin(window_state_migration_plugin())
         .plugin(
             tauri_plugin_window_state::Builder::default()
-                // Dynamic workspace and print-window labels are never reused, so
-                // persisting them only grows the startup state file indefinitely.
+                // Keep geometry bounded to stable application windows; document
+                // sessions restore dynamic editor labels through their own manifest.
                 .with_filename(WINDOW_STATE_FILENAME)
                 .with_filter(window_manager::should_persist_window_state)
                 // Windows renders a custom frameless title bar. Restoring the
@@ -1778,6 +1830,8 @@ pub fn run() {
             app::window_manager::check_window_by_path,
             app::window_manager::is_file_in_workspace,
             app::window_manager::focus_window_by_label,
+            app::application_session::cancel_app_quit,
+            app::application_session::close_session_window,
             keybindings::cmd::get_keyboard_infos,
             keybindings::cmd::update_keybinding,
             opened_cache::cmd::get_opened_cache,
@@ -2005,7 +2059,6 @@ pub fn run() {
         }
     };
 
-    let mut pending_exit_code = None;
     app.run(move |app, event| {
         match &event {
             tauri::RunEvent::ExitRequested { api, code, .. }
@@ -2019,13 +2072,23 @@ pub fn run() {
                     })
                     .collect();
                 if !editors.is_empty() {
-                    // Cmd+Q and the native Quit menu must await the same draft save as window close.
+                    // Commit the complete session before requesting any closes.
+                    // Each renderer then awaits its normal draft/session flush.
                     api.prevent_exit();
-                    pending_exit_code = Some(code.unwrap_or(0));
-                    for window in editors {
-                        if let Err(error) = window.close() {
-                            eprintln!("Failed to request window close: {error}");
+                    match application_session::begin_quit(app, code.unwrap_or(0)) {
+                        Ok(Some(labels)) => {
+                            for label in labels {
+                                if let Some(window) = app.get_webview_window(&label) {
+                                    if let Err(error) = window.close() {
+                                        application_session::cancel_app_quit();
+                                        eprintln!("Failed to request window close: {error}");
+                                        break;
+                                    }
+                                }
+                            }
                         }
+                        Ok(None) => {}
+                        Err(error) => eprintln!("Failed to preserve application session: {error}"),
                     }
                 }
             }
@@ -2033,15 +2096,11 @@ pub fn run() {
                 label,
                 event: tauri::WindowEvent::Destroyed,
                 ..
-            } if pending_exit_code.is_some() => {
-                let has_editor = app
-                    .webview_windows()
-                    .keys()
-                    .any(|key| key != label && (key == "main" || key.starts_with("main_")));
-                if !has_editor {
-                    if let Some(code) = pending_exit_code.take() {
-                        app.exit(code);
-                    }
+            } => {
+                match application_session::window_destroyed(app, label) {
+                    Ok(Some(code)) => app.exit(code),
+                    Ok(None) => {},
+                    Err(error) => eprintln!("Failed to retire closed window session: {error}"),
                 }
             }
             _ => {}

@@ -790,7 +790,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     },
   )
 
-  it('reflows content-based table columns with the host width without changing the document or session', async () => {
+  it('reflows content-based table columns when the host widens and shrinks without changing the document or session', async () => {
     const markdown =
       '| Name | Description |\n| --- | --- |\n| A | A much longer description for this entry |\n| B | Short |'
     const onChange = vi.fn()
@@ -826,6 +826,10 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
       expect(container.querySelectorAll('[role="row"][data-markdown-table]')).toHaveLength(3),
     )
     const runtime = onEditorChange.mock.calls.find(([adapter]) => adapter)![0]!
+    const runtimeHost = container.querySelector<HTMLElement>('[data-mf-capricorn-runtime]')!
+    // Fixed table columns must not become the grid item's automatic minimum:
+    // the host needs to shrink before the runtime can measure its new width.
+    expect(Number.parseFloat(getComputedStyle(runtimeHost).minWidth)).toBe(0)
     const content = container.querySelector<HTMLElement>('[data-cap-content]')!
     const root = container.querySelector<HTMLElement>('[data-cap-editable]')!
     const rows = [...root.querySelectorAll<HTMLElement>('[role="row"][data-markdown-table]')]
@@ -882,6 +886,13 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
       expect(
         rows.every((row) => row.style.getPropertyValue('--cap-table-columns') === columns()),
       ).toBe(true)
+      hostWidth = 640
+      rerender(withLayout(false))
+      act(() => window.dispatchEvent(new Event('resize')))
+      await waitFor(() => expect(columns()).toBe(initialColumns))
+      expect(Number.parseFloat(rows[0].style.getPropertyValue('--cap-table-width'))).toBeCloseTo(
+        hostWidth - padding,
+      )
       expect(container.querySelector('[data-cap-content]')).toBe(content)
       expect(container.querySelector('[data-cap-editable]')).toBe(root)
       expect(onEditorChange.mock.calls.filter(([adapter]) => adapter !== null)).toHaveLength(1)

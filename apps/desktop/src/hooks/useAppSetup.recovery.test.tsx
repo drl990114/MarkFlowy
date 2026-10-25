@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as DraftRecoveryState from '@/services/draftRecoveryState'
 import type { switchWorkspaceInCurrentWindow } from '@/services/workspace-switch'
 import type * as AppSetup from './useAppSetup'
+import { normalizeStartupAppearance } from '@/startup/appearance'
 
 const mocks = vi.hoisted(() => ({
   invoke: vi.fn(),
@@ -17,10 +18,21 @@ const mocks = vi.hoisted(() => ({
   afterInteractive: vi.fn<(task: () => void) => () => void>(),
   checkUpdate: vi.fn(),
   syncSystemTheme: vi.fn(),
+  stageRecovery: vi.fn(),
+  readSession: vi.fn(),
+  restoreDocuments: vi.fn(),
+  restoreWorkspace: vi.fn(),
+  sessionReload: vi.fn(),
+  closeNative: vi.fn(),
+  closeDrafts: vi.fn<(cache: unknown, label: string, close: () => Promise<void>) => Promise<boolean>>(),
+  closeRequested: async () => {},
+  openExternalPaths: vi.fn(),
+  opened: [] as string[],
+  paths: {} as Record<string, string | undefined>,
   windowLabel: 'main',
   settingData: { auto_update: false },
   error: vi.fn(),
-  getRootPath: vi.fn(() => '/one'),
+  getRootPath: vi.fn<() => string | undefined>(() => '/one'),
   cache: { flush: vi.fn(), dispose: vi.fn() },
 }))
 
@@ -33,11 +45,14 @@ vi.mock('@/services/windows', () => ({
   currentWindow: {
     get label() { return mocks.windowLabel },
     emitTo: mocks.emitTo,
-    listen: async () => vi.fn(),
+    listen: async (event: string, handler: () => Promise<void>) => {
+      if (event === 'tauri://close-requested') mocks.closeRequested = handler
+      return vi.fn()
+    },
   },
 }))
 vi.mock('@/helper/logger', () => ({ logger: { debug: vi.fn(), error: mocks.error } }))
-vi.mock('@/helper/files', () => ({ getFileObject: (id: string) => ({ id, name: `${id}.md` }) }))
+vi.mock('@/helper/files', () => ({ getFileObject: (id: string) => ({ id, name: `${id}.md`, path: mocks.paths[id] }) }))
 vi.mock('@/helper/filesys', () => ({ getFileNameFromPath: vi.fn(), releaseSecurityScope: vi.fn() }))
 vi.mock('@/helper/updater', () => ({ checkUpdate: mocks.checkUpdate }))
 vi.mock('@/i18n', () => ({ i18nInit: vi.fn(), t: (key: string) => key }))
@@ -48,7 +63,7 @@ vi.mock('@/commands', () => ({
 vi.mock('@/themes/library', () => ({ startThemeLibrary: vi.fn() }))
 vi.mock('@/stores/editorResumeStore', () => ({ flushEditorResumeStates: vi.fn() }))
 vi.mock('@/stores', () => ({
-  useEditorStore: { getState: () => ({ getRootPath: mocks.getRootPath }), subscribe: () => vi.fn() },
+  useEditorStore: { getState: () => ({ getRootPath: mocks.getRootPath, opened: mocks.opened }), subscribe: () => vi.fn() },
 }))
 vi.mock('@/stores/useAppSettingStore', () => ({
   default: { getState: () => ({ settingData: mocks.settingData }) },
@@ -70,26 +85,27 @@ vi.mock('@/stores/useThemeStore', () => ({
 }))
 vi.mock('@/services/app-setting', () => ({ appSettingStoreSetup: async () => ({ theme_mode: 'system' }) }))
 vi.mock('@/services/draft-recovery', () => ({
-  listenForDraftReload: () => vi.fn(), closeWithDraftRecovery: vi.fn(),
+  listenForDraftReload: () => vi.fn(), closeWithDraftRecovery: mocks.closeDrafts,
 }))
 vi.mock('@/services/staged-draft-recovery', () => ({
-  stageDraftRecovery: async () => ({ visibleReady: Promise.resolve(), finished: Promise.resolve(0) }),
+  stageDraftRecovery: mocks.stageRecovery,
 }))
 vi.mock('@/services/dialog', () => ({ dialog: { confirm: mocks.confirm } }))
 vi.mock('@/services/cli', () => ({ listenForCliRequests: mocks.listenCli }))
 vi.mock('@/services/editor-file', () => ({ ensureDocument: vi.fn(), addExistingMarkdownFileEdit: vi.fn() }))
-vi.mock('@/services/open-external-paths', () => ({ openExternalPaths: vi.fn() }))
+vi.mock('@/services/open-external-paths', () => ({ openExternalPaths: mocks.openExternalPaths }))
 vi.mock('@/services/workspace-cache', () => ({ createWorkspaceCachePersistence: () => mocks.cache }))
 vi.mock('@/services/window-session', () => ({
   createWindowSessionPersistence: () => ({ flush: mocks.flush, dispose: vi.fn() }),
-  readWindowSession: vi.fn(), restoreWindowDocuments: vi.fn(),
+  readWindowSession: mocks.readSession, restoreWindowDocuments: mocks.restoreDocuments,
+  isWindowSessionReload: mocks.sessionReload,
 }))
 vi.mock('@/services/workspace-session', () => ({
   switchWorkspaceSession: mocks.switchSession, attachWorkspaceSession: mocks.attachSession,
   releaseDetachedWorkspaceScopes: vi.fn(),
 }))
 vi.mock('@/services/workspace-refresh', () => ({ refreshWorkspaceDirectory: vi.fn() }))
-vi.mock('@/startup/restoreStartupWorkspace', () => ({ restoreStartupWorkspace: vi.fn() }))
+vi.mock('@/startup/restoreStartupWorkspace', () => ({ restoreStartupWorkspace: mocks.restoreWorkspace }))
 vi.mock('@/startup/prepareEditor', () => ({
   prepareStartupEditorModules: async () => {}, prepareStartupDocumentRead: vi.fn(),
 }))
@@ -109,14 +125,23 @@ beforeEach(async () => {
   vi.resetModules()
   vi.resetAllMocks()
   window.openedUrls = []
+  delete window.__MARKFLOWY_BOOTSTRAP__
   mocks.windowLabel = 'main'
   mocks.settingData.auto_update = false
+  mocks.opened = []
+  mocks.paths = {}
+  mocks.stageRecovery.mockResolvedValue({ visibleReady: Promise.resolve(), finished: Promise.resolve(0) })
+  mocks.sessionReload.mockReturnValue(false)
+  mocks.closeDrafts.mockImplementation(async (_cache, _label, close) => { await close(); return true })
   mocks.afterInteractive.mockReturnValue(vi.fn())
   mocks.checkUpdate.mockResolvedValue(undefined)
   mocks.syncSystemTheme.mockResolvedValue(undefined)
   mocks.getRootPath.mockReturnValue('/one')
-  mocks.invoke.mockImplementation(async (command) => command === 'get_opened_cache'
-    ? { recent_workspaces: [] } : undefined)
+  mocks.invoke.mockImplementation(async (command) => {
+    if (command === 'get_opened_cache') return { recent_workspaces: [] }
+    if (command === 'close_session_window') return mocks.closeNative()
+    return undefined
+  })
   mocks.switchSession.mockResolvedValue(true)
   mocks.attachSession.mockResolvedValue(true)
   mocks.confirm.mockResolvedValue('cancel')
@@ -149,6 +174,158 @@ async function startRuntime() {
   await act(async () => {})
   return hook
 }
+
+function bootstrapSession(restoreSessionLabel: string | null) {
+  window.__MARKFLOWY_BOOTSTRAP__ = {
+    appearance: normalizeStartupAppearance({}),
+    sessionId: 'app-session',
+    openedUrls: [],
+    restoreSessionLabel,
+  }
+}
+
+describe('application window restoration', () => {
+  it('restores the exact window snapshot before recovering its drafts', async () => {
+    vi.resetModules()
+    bootstrapSession('main_workspace')
+    mocks.windowLabel = 'main_workspace'
+    const session = { windowLabel: 'main_workspace', rootPath: '/workspace' }
+    mocks.readSession.mockResolvedValue(session)
+    await (await import('./useAppSetup')).startAppSetup()
+    expect(mocks.readSession).toHaveBeenLastCalledWith(expect.anything(), 'main_workspace', 'main_workspace')
+    expect(mocks.restoreWorkspace).toHaveBeenCalledWith('/workspace', expect.any(Promise), expect.any(AbortSignal))
+    expect(mocks.restoreDocuments).toHaveBeenCalledWith(session)
+    expect(mocks.stageRecovery).toHaveBeenLastCalledWith(expect.objectContaining({ session, freshWindow: false }))
+    expect(mocks.restoreDocuments.mock.invocationCallOrder[0]).toBeLessThan(mocks.stageRecovery.mock.invocationCallOrder.at(-1)!)
+  })
+
+  it.each([null, 'main_missing'])('does not reopen the last workspace for an explicit native session (%s)', async (label) => {
+    vi.resetModules()
+    bootstrapSession(label)
+    mocks.invoke.mockImplementation(async (command) => command === 'get_opened_cache'
+      ? { recent_workspaces: [{ path: '/old-workspace' }] } : undefined)
+    await (await import('./useAppSetup')).startAppSetup()
+    expect(mocks.restoreWorkspace).not.toHaveBeenCalled()
+    expect(mocks.stageRecovery).toHaveBeenLastCalledWith(expect.objectContaining({
+      isolatedWindow: 'main', freshWindow: true,
+    }))
+  })
+
+  it('allows WebView reload recovery in a window originally opened empty', async () => {
+    vi.resetModules()
+    bootstrapSession(null)
+    mocks.sessionReload.mockReturnValue(true)
+    mocks.readSession.mockResolvedValue({ windowLabel: 'main' })
+    await (await import('./useAppSetup')).startAppSetup()
+    expect(mocks.stageRecovery).toHaveBeenLastCalledWith(expect.objectContaining({ freshWindow: false }))
+  })
+
+  it('still recovers an explicitly opened file in a fresh window', async () => {
+    vi.resetModules()
+    bootstrapSession(null)
+    mocks.getRootPath.mockReturnValue(undefined)
+    window.openedUrls = ['/standalone.md']
+    mocks.openExternalPaths.mockImplementation(async () => {
+      mocks.opened = ['standalone']
+      mocks.paths = { standalone: '/standalone.md' }
+    })
+    await (await import('./useAppSetup')).startAppSetup()
+    expect(mocks.stageRecovery).toHaveBeenLastCalledWith(expect.objectContaining({
+      freshWindow: false, reopenPaths: ['/standalone.md'], preserveOpenDocuments: true,
+    }))
+  })
+})
+
+describe('application quit cancellation', () => {
+  it('clears a pending app quit when a window cancels close, and allows another close', async () => {
+    await startRuntime()
+    mocks.closeDrafts.mockResolvedValueOnce(false)
+    await act(async () => { await mocks.closeRequested() })
+    expect(mocks.invoke).toHaveBeenCalledWith('cancel_app_quit')
+    expect(mocks.closeNative).not.toHaveBeenCalled()
+    await act(async () => { await mocks.closeRequested() })
+    expect(mocks.closeNative).toHaveBeenCalledOnce()
+  })
+
+  it('clears pending quit and keeps the window when its final persistence fails', async () => {
+    await startRuntime()
+    mocks.flush.mockRejectedValueOnce(new Error('disk full'))
+    await act(async () => { await mocks.closeRequested() })
+    expect(mocks.invoke).toHaveBeenCalledWith('cancel_app_quit')
+    expect(mocks.closeNative).not.toHaveBeenCalled()
+    expect(mocks.error).toHaveBeenCalledWith('Failed to close window safely', expect.any(Error))
+  })
+
+  it('allows retry when native session persistence or window teardown fails', async () => {
+    await startRuntime()
+    mocks.closeNative.mockRejectedValueOnce(new Error('could not preserve window list'))
+    await act(async () => { await mocks.closeRequested() })
+    expect(mocks.invoke).toHaveBeenCalledWith('cancel_app_quit')
+    expect(mocks.error).toHaveBeenCalledWith('Failed to close window safely', expect.any(Error))
+    await act(async () => { await mocks.closeRequested() })
+    expect(mocks.closeNative).toHaveBeenCalledTimes(2)
+  })
+
+  it('coalesces repeated close requests until the protected close finishes', async () => {
+    await startRuntime()
+    let finish!: () => void
+    mocks.closeDrafts.mockReturnValueOnce(new Promise<boolean>((resolve) => { finish = () => resolve(false) }))
+    await act(async () => {
+      const first = mocks.closeRequested()
+      await Promise.resolve()
+      const repeated = mocks.closeRequested()
+      await vi.waitFor(() => expect(mocks.closeDrafts).toHaveBeenCalledOnce())
+      finish()
+      await Promise.all([first, repeated])
+    })
+    expect(mocks.invoke.mock.calls.filter(([command]) => command === 'cancel_app_quit')).toHaveLength(1)
+  })
+})
+
+describe('explicit standalone startup recovery', () => {
+  it.each(['main', 'main_reopened'])('scopes recovery to paths actually opened in %s', async (label) => {
+    vi.resetModules()
+    mocks.stageRecovery.mockClear()
+    mocks.windowLabel = label
+    mocks.getRootPath.mockReturnValue(undefined)
+    window.openedUrls = ['/w/active.md', '/w/another-window.md']
+    mocks.openExternalPaths.mockImplementation(async () => {
+      mocks.opened = ['active', 'untitled']
+      mocks.paths = { active: '/w/active.md' }
+    })
+    await (await import('./useAppSetup')).startAppSetup()
+    expect(mocks.stageRecovery).toHaveBeenCalledOnce()
+    expect(mocks.stageRecovery).toHaveBeenCalledWith(expect.objectContaining({
+      isolatedWindow: label, reopenPaths: ['/w/active.md'],
+      preserveOpenDocuments: true, session: undefined,
+    }))
+  })
+
+  it('does not broaden recovery for a workspace startup', async () => {
+    vi.resetModules()
+    mocks.stageRecovery.mockClear()
+    window.openedUrls = ['/one']
+    mocks.opened = ['active']
+    mocks.paths = { active: '/one/active.md' }
+    await (await import('./useAppSetup')).startAppSetup()
+    expect(mocks.stageRecovery).toHaveBeenCalledWith(expect.objectContaining({
+      isolatedWindow: undefined, reopenPaths: undefined, preserveOpenDocuments: true,
+    }))
+  })
+
+  it('keeps secondary startup without explicit paths owner-isolated', async () => {
+    vi.resetModules()
+    mocks.stageRecovery.mockClear()
+    mocks.windowLabel = 'main_blank'
+    mocks.getRootPath.mockReturnValue(undefined)
+    mocks.opened = ['active']
+    mocks.paths = { active: '/w/active.md' }
+    await (await import('./useAppSetup')).startAppSetup()
+    expect(mocks.stageRecovery).toHaveBeenCalledWith(expect.objectContaining({
+      isolatedWindow: 'main_blank', reopenPaths: undefined, preserveOpenDocuments: false,
+    }))
+  })
+})
 
 describe('deferred startup updates', () => {
   it.each([false, true])('checks once in the main window after startup is interactive (automatic: %s)', async (automatic) => {

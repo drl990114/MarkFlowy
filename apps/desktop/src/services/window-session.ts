@@ -48,11 +48,25 @@ export const windowSessionSchema = z.object({
 export type WindowSession = z.infer<typeof windowSessionSchema>
 type SessionStore = Pick<LazyStore, 'get' | 'set' | 'save'>
 
-export async function readWindowSession(store: SessionStore, label: string) {
-  const key =
-    label === 'main' && sessionStorage.getItem(RELOAD_WINDOW_KEY) !== label
-      ? await store.get<string>(LAST_WINDOW_SESSION_KEY)
-      : windowSessionKey(label)
+export const isWindowSessionReload = (label: string) =>
+  sessionStorage.getItem(RELOAD_WINDOW_KEY) === label
+
+export async function readWindowSession(
+  store: SessionStore,
+  label: string,
+  restoreSessionLabel?: string | null,
+) {
+  // A WebView reload keeps its own latest snapshot. Cold launches instead use
+  // the native app-session list; null explicitly starts an empty window.
+  const key = isWindowSessionReload(label)
+    ? windowSessionKey(label)
+    : restoreSessionLabel === null
+      ? undefined
+      : restoreSessionLabel !== undefined
+        ? windowSessionKey(restoreSessionLabel)
+        : label === 'main'
+          ? await store.get<string>(LAST_WINDOW_SESSION_KEY)
+          : windowSessionKey(label)
   if (!key) return undefined
   const parsed = windowSessionSchema.safeParse(await store.get(key))
   return parsed.success ? parsed.data : undefined

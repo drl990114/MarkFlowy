@@ -1,3 +1,4 @@
+pub(crate) mod application_session;
 pub mod bookmarks;
 pub mod clipboard;
 pub mod conf;

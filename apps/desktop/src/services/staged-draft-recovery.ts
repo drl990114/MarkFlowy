@@ -1,14 +1,20 @@
-import { sameTextFormat } from '@/components/EditorArea/textFileFormat'
 import { isTauri } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { nanoid } from 'nanoid'
-import { markExternalFileConflict } from '@/components/EditorArea/externalFileChanges'
+import {
+  EXTERNAL_FILE_CONTENT_SYNC_EVENT,
+  markExternalFileConflict,
+  type ExternalFileContentSyncPayload,
+} from '@/components/EditorArea/externalFileChanges'
+import { editorSnapshotRegistry } from '@/components/EditorArea/editorSnapshotRegistry'
 import { fileSaveCoordinator } from '@/components/EditorArea/fileSaveCoordinator'
 import { promoteOpeningRead, readStableFileSnapshot } from '@/components/EditorArea/fileSnapshot'
 import {
   OpeningReadQueue,
   type OpeningReadPriority,
 } from '@/components/EditorArea/openingReadQueue'
+import { sameTextFormat } from '@/components/EditorArea/textFileFormat'
+import bus from '@/helper/eventBus'
 import { getFileObject, getFileObjectByPath } from '@/helper/files'
 import { createFile, updateFile, type IFile } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
@@ -88,14 +94,25 @@ function visibleIds(layout: EditorLayoutNode): string[] {
     : layout.children.flatMap(visibleIds)
 }
 
+const draftWriterKey = (draft: DraftDescriptor) => `${draft.document.id}:${draft.writer}`
+
 async function readSources(
   cache: DraftSessionStore | undefined,
   reload: boolean,
   session?: WindowSession,
   isolatedWindow?: string,
+  reopenPaths: readonly string[] = [],
+  freshWindow = false,
 ) {
   const rootPath = useEditorStore.getState().getRootPath()
+  const rootKey = getPathIdentityKey(rootPath ?? '')
   const workspace = historyWorkspace()
+  const savedDocuments = session ? recoveryDocuments(session.drafts) : []
+  const savedDrafts = savedDocuments.flatMap((doc) => doc.source.kind === 'native' ? [doc.source.draft] : [])
+  const savedFiles = [...(session?.files ?? []), ...savedDocuments]
+  const savedIds = new Set(savedFiles.map((file) => file.id))
+  const savedPaths = new Set(savedFiles.flatMap((file) => file.path ? [getPathIdentityKey(file.path)] : []))
+  const followedDrafts = new Map<string, DraftDescriptor>()
   const readSource = async (name: string, read: () => Promise<RecoverySource[]>) => {
     markStartupStage(`draft-${name}-source-start`)
     try {
@@ -106,37 +123,53 @@ async function readSources(
   }
   const results = await Promise.allSettled([
     readSource('native', async () => {
-      if (!isTauri()) return []
+      if (!isTauri() || (freshWindow && !session)) return []
       const ownerPrefix = `${getCurrentWindow().label}:`
-      const workspaces = new Set([workspace, ''])
-      const savedDocumentIds = new Set<string>()
-      for (const doc of session ? recoveryDocuments(session.drafts) : []) {
-        if (doc.source.kind === 'native') {
-          workspaces.add(doc.source.draft.document.workspace)
-          savedDocumentIds.add(doc.source.draft.document.id)
-        }
-      }
+      const workspaces = new Set([workspace])
+      for (const draft of savedDrafts) workspaces.add(draft.document.workspace)
       const groups = await Promise.all(
         [...workspaces].map((scope) =>
           historyCall<DraftDescriptor[]>('recoveryDraftIndex', { workspace: scope, ownerPrefix }),
         ),
       )
+      const indexed = groups.flat()
+      for (const saved of savedDrafts) {
+        const matches = indexed.filter((draft) => sameRecoveryDocument(draft.document, saved.document))
+        const original = matches.find((draft) => draft.writer === saved.writer)
+        const current = matches.filter((draft) => draft.writer.startsWith(ownerPrefix))
+        // A reused main label can still have an unrelated closed window's draft.
+        // Prefer the saved writer; follow a completed claim only when unambiguous.
+        const next = original ?? (current.length === 1 ? current[0] : undefined)
+        if (next) followedDrafts.set(draftWriterKey(saved), next)
+      }
       const owner = session?.windowLabel ?? isolatedWindow
-      return groups
-        .flat()
-        .filter(
-          (draft) =>
-            !owner ||
+      const reopened = new Set(reopenPaths.map(getPathIdentityKey))
+      return indexed
+        .filter((draft) => {
+          const references = savedDrafts.filter((saved) => sameRecoveryDocument(draft.document, saved.document))
+          // A window may attach or close a workspace while retaining a draft.
+          // Only its explicit references may cross that workspace boundary.
+          if (draft.document.workspace !== workspace && !references.length) return false
+          if (session) {
+            if (references.length)
+              return references.some((saved) => followedDrafts.get(draftWriterKey(saved)) === draft)
+            return !!draft.document.path && savedPaths.has(getPathIdentityKey(draft.document.path)) &&
+              draft.writer.startsWith(`${session.windowLabel}:`)
+          }
+          return !owner ||
             draft.writer.startsWith(`${owner}:`) ||
-            (savedDocumentIds.has(draft.document.id) && draft.writer.startsWith(ownerPrefix)),
-        )
+            // Explicit single-file startup may recover the same path from a closed
+            // window. Native indexing and claiming still reject another live owner.
+            (!session && isolatedWindow && draft.document.workspace === workspace &&
+              draft.document.path && reopened.has(getPathIdentityKey(draft.document.path)))
+        })
         .map((draft) => ({ native: true, documents: [nativeRecoveryDocument(draft)] }))
     }),
     readSource('reload', async () => {
       const raw = reload ? window.sessionStorage.getItem(RELOAD_SESSION_KEY) : null
       if (!raw) return []
       const reloadSession = recoverySessionSchema.parse(JSON.parse(raw))
-      if (reloadSession.rootPath && reloadSession.rootPath !== rootPath) return []
+      if (getPathIdentityKey(reloadSession.rootPath ?? '') !== rootKey) return []
       return [
         {
           documents: recoveryDocuments(reloadSession),
@@ -146,7 +179,7 @@ async function readSources(
       ]
     }),
     readSource('exit', async () => {
-      if (!cache) return []
+      if (!cache || (freshWindow && !session)) return []
       const sources: RecoverySource[] = []
       for (const [key, value] of await cache.entries<unknown>()) {
         if (!key.startsWith(SESSION_KEY_PREFIX)) continue
@@ -158,12 +191,30 @@ async function readSources(
           continue
         }
         const exitSession = parsed.data
-        if (exitSession.rootPath && exitSession.rootPath !== rootPath) continue
+        if (getPathIdentityKey(exitSession.rootPath ?? '') !== rootKey) continue
+        const documents = recoveryDocuments(exitSession)
+        const selected = new Set(documents.flatMap((doc, index) => {
+          if (!session) return [index]
+          if (!savedIds.has(doc.id) && !(doc.path && savedPaths.has(getPathIdentityKey(doc.path)))) return []
+          if (doc.source.kind === 'native' && doc.source.draft.document.workspace !== workspace) {
+            const previous = doc.source.draft.document
+            if (!savedDrafts.some((saved) => sameRecoveryDocument(previous, saved.document))) return []
+          }
+          return [index]
+        }))
+        if (session && !selected.size) continue
+        const remaining = exitSession.documents.filter((_doc, index) => !selected.has(index))
         sources.push({
-          documents: recoveryDocuments(exitSession),
+          documents: documents.filter((_doc, index) => selected.has(index)),
           activeId: exitSession.activeId,
           consume: async () => {
-            await cache.delete(key)
+            if (remaining.length) {
+              // A window session may select only part of an older exit snapshot.
+              // Keep the other bodies/references available for their own recovery.
+              await cache.set(key, { ...exitSession, documents: remaining,
+                activeId: remaining.some((doc) => doc.id === exitSession.activeId) ? exitSession.activeId : undefined,
+              })
+            } else await cache.delete(key)
             await cache.save()
           },
         })
@@ -186,18 +237,11 @@ async function readSources(
     else errors.push(result.reason)
   // A recovery claim changes the writer. If the app exits before its next session
   // save, retain the saved tab identity while following that one current draft.
-  const indexed = sources.filter((source) => source.native).flatMap((source) => source.documents)
   for (const source of sources.filter((entry) => entry.restoreIds)) {
     source.documents = source.documents.map((doc) => {
       if (doc.source.kind !== 'native') return doc
-      const previous = doc.source.draft
-      const candidates = indexed.filter(
-        (candidate) =>
-          candidate.source.kind === 'native' &&
-          candidate.source.draft.document.id === previous.document.id,
-      )
-      if (candidates.length !== 1 || candidates[0].source.kind !== 'native') return doc
-      return { ...doc, source: candidates[0].source }
+      const next = followedDrafts.get(draftWriterKey(doc.source.draft))
+      return next ? { ...doc, source: { ...doc.source, draft: next } } : doc
     })
   }
   return { sources, errors }
@@ -220,6 +264,8 @@ export async function stageDraftRecovery({
   onError,
   session,
   isolatedWindow,
+  reopenPaths,
+  freshWindow = false,
   preserveOpenDocuments = false,
 }: {
   cache?: DraftSessionStore
@@ -228,6 +274,10 @@ export async function stageDraftRecovery({
   onError: (error: unknown) => void
   session?: WindowSession
   isolatedWindow?: string
+  /** Explicitly reopened paths may cross the isolated owner boundary in this workspace. */
+  reopenPaths?: readonly string[]
+  /** A newly created window must not revive drafts from a previously closed owner. */
+  freshWindow?: boolean
   preserveOpenDocuments?: boolean
 }): Promise<StagedDraftRecovery> {
   const initial = useEditorStore.getState()
@@ -265,7 +315,7 @@ export async function stageDraftRecovery({
     },
     { once: true },
   )
-  const { sources, errors } = await readSources(cache, reload, session, isolatedWindow)
+  const { sources, errors } = await readSources(cache, reload, session, isolatedWindow, reopenPaths, freshWindow)
   errors.forEach(onError)
   if (controller.signal.aborted) {
     cleanup()
@@ -299,6 +349,12 @@ export async function stageDraftRecovery({
     )
     if (job.document.diskRevision)
       fileSaveCoordinator.setDiskRevision(job.fileId, job.document.diskRevision)
+    // Workspace switching can mount the disk document before recovery is indexed.
+    // Replace that live document too, before any reader or draft binding sees it.
+    bus.emit(EXTERNAL_FILE_CONTENT_SYNC_EVENT, undefined, {
+      fileId: job.fileId,
+      content,
+    } satisfies ExternalFileContentSyncPayload)
   }
 
   const claimCandidate = async (candidate: Candidate, claims: Map<string, PersistedDraft>) => {
@@ -415,8 +471,13 @@ export async function stageDraftRecovery({
   ) => {
     const { fileId } = job
     const editor = useEditorStore.getState()
+    if (controller.signal.aborted || !editor.opened.includes(fileId))
+      throw new DOMException('Draft recovery canceled.', 'AbortError')
+    // Flush coalesced input before comparing revisions. A replacement must not
+    // cancel a newer local edit or an active composition in an already mounted view.
+    editorSnapshotRegistry.flushForRead(fileId)
     const file = getFileObject(fileId)
-    if (controller.signal.aborted || !editor.opened.includes(fileId) || !file || file.path !== path)
+    if (!file || file.path !== path)
       throw new DOMException('Draft recovery canceled.', 'AbortError')
     if (fileSaveCoordinator.getDiskRevision(fileId) !== startingDiskRevision)
       throw new Error('The document changed while its draft was being recovered.')
@@ -634,16 +695,16 @@ export async function stageDraftRecovery({
     nativeKey: string | undefined,
     inline: string | undefined,
   ) => {
-    if (
+    const preserveExisting = !!(
       existing &&
       useEditorStateStore.getState().idStateMap.get(existing.id)?.hasUnsavedChanges &&
       (!prior || prior.published) &&
       existing.content !== inline
     )
-      path = undefined
+    if (preserveExisting) path = undefined
     // Distinct native writers retain independent versions even when they share a path.
     if (source.native && prior && nativeKey && !nativeJobs.has(nativeKey)) path = undefined
-    return path
+    return { path, preserveExisting }
   }
 
   const resolveRecoveryFile = (source: RecoverySource, doc: RecoveryDocument) => {
@@ -652,18 +713,29 @@ export async function stageDraftRecovery({
       doc.source.kind === 'native'
         ? `${doc.source.draft.document.id}:${doc.source.draft.writer}`
         : undefined
-    const existing = path
+    let existing = path
       ? getFileObjectByPath(path)
       : source.restoreIds
         ? getFileObject(doc.id)
         : undefined
-    const prior = (nativeKey && nativeJobs.get(nativeKey)) || (existing && jobs.get(existing.id))
     const inline = doc.source.kind === 'inline' ? doc.source.content : undefined
-    path = resolveRecoveryPath(source, path, existing, prior, nativeKey, inline)
+    const composing = !!(existing && inline !== undefined && !editorSnapshotRegistry.canRead(existing.id))
+    if (existing && inline !== undefined && !composing) {
+      // Inline bodies publish during registration. Read pending input before
+      // deciding whether the old draft can reuse this live document's identity.
+      editorSnapshotRegistry.flushForRead(existing.id)
+      existing = getFileObject(existing.id)
+    }
+    const prior = (nativeKey && nativeJobs.get(nativeKey)) || (existing && jobs.get(existing.id))
+    const resolved = resolveRecoveryPath(source, path, existing, prior, nativeKey, inline)
+    // Composition cannot be read yet. Preserve both versions independently,
+    // without blocking unrelated drafts in the same recovery batch.
+    const preserveExisting = composing || resolved.preserveExisting
+    path = preserveExisting ? undefined : resolved.path
     const file =
       nativeKey && nativeJobs.has(nativeKey)
         ? getFileObject(nativeJobs.get(nativeKey)!.fileId)!
-        : existing && (path || source.restoreIds)
+        : existing && !preserveExisting && (path || source.restoreIds)
           ? existing
           : createFile({ name: doc.name, content: undefined, path, ext: doc.ext ?? 'md' })
     return { file, existing, nativeKey, inline }

@@ -12,6 +12,7 @@ import { commandRegistry } from '@/commands'
 import { listenForCliRequests } from '@/services/cli'
 import bus from '@/helper/eventBus'
 import { hasFileExcludePatternsChanged } from '@/helper/file-exclude'
+import { getFileObject } from '@/helper/files'
 import { getFileNameFromPath, releaseSecurityScope } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
@@ -24,6 +25,7 @@ import {
 } from '@/services/editor-file'
 import {
   createWindowSessionPersistence,
+  isWindowSessionReload,
   readWindowSession,
   restoreWindowDocuments,
   type WindowSession,
@@ -90,6 +92,7 @@ let startupSession: WindowSession | undefined
 let isolateStartupDrafts = false
 let collectingStartupOpenedPaths = false
 let preserveStartupDocuments = false
+let freshStartupWindow = false
 
 const setupDraftRecovery = async (
   signal?: AbortSignal,
@@ -103,7 +106,14 @@ const setupDraftRecovery = async (
       reload,
       signal,
       session: reload ? startupSession : undefined,
+      freshWindow: reload && freshStartupWindow && !startupSession && !preserveOpenDocuments,
       isolatedWindow: reload && isolateStartupDrafts ? currentWindow.label : undefined,
+      reopenPaths: reload && isolateStartupDrafts && preserveOpenDocuments
+        ? useEditorStore.getState().opened.flatMap((id) => {
+            const path = getFileObject(id)?.path
+            return path ? [path] : []
+          })
+        : undefined,
       preserveOpenDocuments,
       onError: (error) => {
         logger.error('Failed to restore unsaved documents', error)
@@ -257,9 +267,11 @@ const readWorkspaceInputs = createWorkspaceInputReader(async () => {
 })
 
 async function appWorkspaceSetup(signal: AbortSignal) {
+  const restoreSessionLabel = window.__MARKFLOWY_BOOTSTRAP__?.restoreSessionLabel
   collectingStartupOpenedPaths = true
   startupSession = undefined
-  isolateStartupDrafts = currentWindow.label !== 'main'
+  isolateStartupDrafts = currentWindow.label !== 'main' || restoreSessionLabel !== undefined
+  freshStartupWindow = restoreSessionLabel === null && !isWindowSessionReload(currentWindow.label)
   preserveStartupDocuments = false
   const { setRecentWorkspaces } = useOpenedCacheStore.getState()
   logger.debug('==== appWorkspaceSetup: Checking window.openedUrls ===')
@@ -304,7 +316,7 @@ async function appWorkspaceSetup(signal: AbortSignal) {
       return
     }
 
-    startupSession = await readWindowSession(cacheStore, currentWindow.label)
+    startupSession = await readWindowSession(cacheStore, currentWindow.label, restoreSessionLabel)
     if (startupSession) {
       if (startupSession.rootPath) {
         try {
@@ -318,8 +330,11 @@ async function appWorkspaceSetup(signal: AbortSignal) {
       restoreWindowDocuments(startupSession)
       return
     }
+    // A missing native snapshot must not reopen drafts belonging to a previous
+    // lifetime of the same window label (for example main after an ordinary close).
+    if (restoreSessionLabel !== undefined) freshStartupWindow = true
 
-    if (currentWindow.label === 'main' && recentWorkspaces.length > 0) {
+    if (restoreSessionLabel === undefined && currentWindow.label === 'main' && recentWorkspaces.length > 0) {
       logger.debug('Found recent workspaces:', recentWorkspaces)
       const targetWorkspacePath = recentWorkspaces[0].path
       logger.debug('Target workspace path:', targetWorkspacePath)
@@ -494,13 +509,21 @@ export const useAppRuntimeSetup = () => {
             await windowSessionPersistence?.flush()
             await releaseDetachedWorkspaceScopes()
             await releaseSecurityScope(rootPath)
-            await currentWindow.destroy()
+            await invoke('close_session_window')
           }),
         )
         .catch((error) => {
           logger.error('Failed to close window safely', error)
           toast.error(t('drafts.close_failed'))
           return false
+        })
+        .then(async (closed) => {
+          if (!closed) {
+            await invoke('cancel_app_quit').catch((error) =>
+              logger.error('Failed to cancel application quit', error),
+            )
+          }
+          return closed
         })
       closeWindowPromise = closeAttempt
 

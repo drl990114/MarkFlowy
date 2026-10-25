@@ -342,7 +342,9 @@ const pruneEmptyEditorGroups = (node: EditorLayoutNode): EditorLayoutNode => {
   return {
     ...node,
     children,
-    sizes: normalizeSizes(children.length),
+    sizes: children.length === node.children.length && node.sizes.length === children.length
+      ? node.sizes
+      : normalizeSizes(children.length),
   }
 }
 
