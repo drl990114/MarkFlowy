@@ -46,6 +46,105 @@ function container() {
 }
 
 describe.skipIf(!isCapricornRuntimeAvailable)('published runtime host compatibility', () => {
+  it.each(['continuous batch', 'tail after a rendered batch'] as const)(
+    'renders all pending native input from a %s before another editor action',
+    async (timing) => {
+      const source = container()
+      const rectangle = (height: number) => new DOMRect(0, 0, 800, height)
+      vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+        this: HTMLElement,
+      ) {
+        return rectangle(this === source ? 600 : 24)
+      })
+      vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function (
+        this: HTMLElement,
+      ) {
+        return this === source ? 600 : 24
+      })
+      vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(800)
+      vi.spyOn(Range.prototype, 'getBoundingClientRect').mockReturnValue(rectangle(24))
+      vi.spyOn(Range.prototype, 'getClientRects').mockReturnValue(
+        [rectangle(24)] as unknown as DOMRectList,
+      )
+      const onError = vi.fn()
+      await act(async () => {
+        adapter = createCapricornRuntimeAdapter({
+          container: source,
+          createRuntime,
+          onChange: vi.fn(),
+          options: {
+            markdown: '',
+            autoFocus: true,
+            virtualize: { enable: true },
+            getScrollableContainer: () => source,
+            onError,
+          },
+        })
+        await frame()
+        await frame()
+      })
+      await act(frame)
+      const input = getCapricornRuntimeInput(source)!
+      expect(input).not.toBeNull()
+      expect(document.activeElement).toBe(input)
+      const nativeSet = Object.getOwnPropertyDescriptor(
+        HTMLTextAreaElement.prototype,
+        'value',
+      )!.set!
+      const renderedText = () =>
+        Array.from(source.querySelectorAll('[data-cap-leaf]'), (leaf) => leaf.textContent).join('')
+      const typeCharacter = (character: string) => {
+        const init = {
+          key: character,
+          code: character === ' ' ? 'Space' : `Key${character.toUpperCase()}`,
+          keyCode: character.toUpperCase().charCodeAt(0),
+        }
+        input.dispatchEvent(createKeyboardEvent('keydown', init))
+        expect(input.dispatchEvent(new InputEvent('beforeinput', {
+          inputType: 'insertText',
+          data: character,
+          bubbles: true,
+          cancelable: true,
+        }))).toBe(true)
+        const position = input.selectionStart
+        nativeSet.call(
+          input,
+          `${input.value.slice(0, position)}${character}${input.value.slice(input.selectionEnd)}`,
+        )
+        input.setSelectionRange(position + 1, position + 1)
+        input.dispatchEvent(new InputEvent('input', {
+          inputType: 'insertText',
+          data: character,
+          bubbles: true,
+        }))
+        input.dispatchEvent(createKeyboardEvent('keyup', init))
+      }
+      const expected = 'Unsaved content survives every mode'
+      let pendingText = expected
+      if (timing === 'tail after a rendered batch') {
+        await act(async () => {
+          for (const character of expected.slice(0, -2)) typeCharacter(character)
+        })
+        expect(renderedText()).toBe(expected.slice(0, -2))
+        pendingText = expected.slice(-2)
+      }
+      // Keep consecutive input notifications in one React batch. A separate
+      // act per character would force the intermediate commits and hide this.
+      await act(async () => {
+        for (const character of pendingText) {
+          typeCharacter(character)
+          await Promise.resolve()
+        }
+      })
+      expect(adapter!.getMarkdown()).toBe(expected)
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 650))
+      })
+      expect(adapter!.getMarkdown()).toBe(expected)
+      expect(onError).not.toHaveBeenCalled()
+      expect(renderedText()).toBe(expected)
+    },
+  )
   it.each(['MacIntel', 'Win32', 'Linux x86_64'])(
     'dispatches recorded shortcuts through the installed runtime on %s',
     async (platform) => {
