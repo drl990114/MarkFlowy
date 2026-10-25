@@ -1,4 +1,7 @@
+import { FileResultCode, type FileSysResult } from '@markflowy/interface'
 import { getVersion } from '@tauri-apps/api/app'
+import { invoke } from '@tauri-apps/api/core'
+import { appDataDir, join } from '@tauri-apps/api/path'
 import { LazyStore } from '@tauri-apps/plugin-store'
 import type { Update } from '@tauri-apps/plugin-updater'
 
@@ -8,7 +11,8 @@ export interface UpdateAttempt {
   startedAt: number
 }
 
-const store = new LazyStore('.markflowy_updater.dat', { defaults: {}, autoSave: false })
+const STORE_PATH = '.markflowy_updater.dat'
+const store = new LazyStore(STORE_PATH, { defaults: {}, autoSave: false })
 const ATTEMPT_KEY = 'pending_install'
 
 export const recordUpdateAttempt = async (update: Pick<Update, 'currentVersion' | 'version'>) => {
@@ -35,6 +39,16 @@ export const clearUpdateAttempt = async () => {
 }
 
 export const getInterruptedUpdate = async (): Promise<UpdateAttempt | null> => {
+  try {
+    // Initial Store loading swallows IO/JSON errors; reload surfaces them.
+    // Keep the default merge behavior to retain markers from failed saves.
+    await store.reload()
+  } catch (error) {
+    const filePath = await join(await appDataDir(), STORE_PATH)
+    const result = await invoke<FileSysResult>('get_file_content', { filePath })
+    // Only a genuinely missing file is safe. exists() also hides IO errors.
+    if (result.code !== FileResultCode.NotFound) throw error
+  }
   const attempt = await store.get<unknown>(ATTEMPT_KEY)
   if (attempt === undefined) return null
   if (

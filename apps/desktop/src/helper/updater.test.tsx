@@ -1,3 +1,4 @@
+import { FileResultCode } from '@markflowy/interface'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import useUpdaterStore from '@/stores/useUpdaterStore'
@@ -19,6 +20,7 @@ const mocks = vi.hoisted(() => ({
   setAttempt: vi.fn(),
   deleteAttempt: vi.fn(),
   saveAttempt: vi.fn(),
+  reloadAttempt: vi.fn(),
   attempt: undefined as unknown,
   savedAttempt: undefined as unknown,
 }))
@@ -26,6 +28,10 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@tauri-apps/plugin-updater', () => ({ check: mocks.check }))
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
 vi.mock('@tauri-apps/api/app', () => ({ getVersion: mocks.getVersion }))
+vi.mock('@tauri-apps/api/path', () => ({
+  appDataDir: async () => '/app-data',
+  join: async (...parts: string[]) => parts.join('/'),
+}))
 vi.mock('@tauri-apps/plugin-os', () => ({ type: mocks.osType }))
 vi.mock('@tauri-apps/plugin-store', () => ({
   LazyStore: class {
@@ -33,6 +39,7 @@ vi.mock('@tauri-apps/plugin-store', () => ({
     set = mocks.setAttempt
     delete = mocks.deleteAttempt
     save = mocks.saveAttempt
+    reload = mocks.reloadAttempt
   },
 }))
 vi.mock('@/services/app-setting', () => ({ writeSettingPatch: mocks.writeSettingPatch }))
@@ -73,12 +80,14 @@ function createUpdate(version = '1.0.0') {
 beforeEach(() => {
   vi.clearAllMocks()
   mocks.check.mockReset()
+  mocks.invoke.mockReset()
   mocks.confirm.mockReset().mockResolvedValue('cancel')
   mocks.osType.mockReset().mockReturnValue('macos')
   mocks.getVersion.mockReset().mockResolvedValue('0.9.0')
   mocks.writeSettingPatch.mockReset().mockResolvedValue(undefined)
   mocks.attempt = undefined
   mocks.savedAttempt = undefined
+  mocks.reloadAttempt.mockReset().mockResolvedValue(undefined)
   mocks.getAttempt.mockReset().mockImplementation(async () => mocks.attempt)
   mocks.setAttempt.mockReset().mockImplementation(async (_key: string, value: unknown) => {
     mocks.attempt = value
@@ -276,6 +285,55 @@ describe('Windows update recovery', () => {
 
     await checkUpdate({ install: true })
 
+    expect(mocks.check).not.toHaveBeenCalled()
+    expect(mocks.error).toHaveBeenCalledWith('updater.check_failed')
+  })
+
+  it.each([FileResultCode.Success, FileResultCode.PermissionDenied, FileResultCode.UnknownError])(
+    'blocks automatic installation when strict recovery loading fails with file result %s',
+    async (code) => {
+      // Native initial loading can swallow the error and leave get() returning undefined.
+      mocks.reloadAttempt.mockRejectedValue(new Error('Failed to deserialize store'))
+      mocks.invoke.mockResolvedValue({ code, content: '{"pending_install":' })
+      const update = createUpdate()
+      mocks.check.mockResolvedValue(update)
+
+      await checkUpdate({ install: true })
+
+      expect(mocks.invoke).toHaveBeenCalledWith('get_file_content', {
+        filePath: '/app-data/.markflowy_updater.dat',
+      })
+      expect(mocks.getAttempt).not.toHaveBeenCalled()
+      expect(mocks.check).not.toHaveBeenCalled()
+      expect(update.download).not.toHaveBeenCalled()
+      expect(update.install).not.toHaveBeenCalled()
+      expect(mocks.saveAttempt).not.toHaveBeenCalled()
+      expect(mocks.error).toHaveBeenCalledWith('updater.check_failed')
+    },
+  )
+
+  it('allows the first automatic update when the recovery file does not exist', async () => {
+    mocks.reloadAttempt.mockRejectedValue(new Error('file not found'))
+    mocks.invoke.mockResolvedValue({ code: FileResultCode.NotFound, content: '' })
+    const update = createUpdate()
+    mocks.check.mockResolvedValue(update)
+
+    await checkUpdate({ install: true })
+
+    expect(mocks.check).toHaveBeenCalledOnce()
+    expect(update.install).toHaveBeenCalledOnce()
+    expect(mocks.savedAttempt).toMatchObject({ targetVersion: update.version })
+    expect(mocks.error).not.toHaveBeenCalled()
+  })
+
+  it('fails closed when the recovery file probe itself fails', async () => {
+    mocks.reloadAttempt.mockRejectedValue(new Error('store unavailable'))
+    mocks.invoke.mockRejectedValue(new Error('read unavailable'))
+    mocks.check.mockResolvedValue(createUpdate())
+
+    await checkUpdate({ install: true })
+
+    expect(mocks.getAttempt).not.toHaveBeenCalled()
     expect(mocks.check).not.toHaveBeenCalled()
     expect(mocks.error).toHaveBeenCalledWith('updater.check_failed')
   })
