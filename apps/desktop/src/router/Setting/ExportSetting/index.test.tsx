@@ -145,4 +145,39 @@ describe('PDF browser export settings', () => {
     expect((await screen.findByRole('alert')).textContent).toContain('save_failed')
     expect(mocks.probeBrowser).toHaveBeenCalledOnce()
   })
+
+  it('retains native probe diagnostics and clears them after a successful retry', async () => {
+    mocks.probeBrowser.mockResolvedValue({
+      available: false,
+      compatible: false,
+      executablePath: '/usr/bin/chromium',
+      error: { code: 'browser_failed', message: 'Browser failed', detail: 'Failed to launch' },
+    })
+    const { container } = render(<ExportSetting />)
+    await screen.findByText('pdf_export.browser_check_failed')
+    expect(screen.queryByText('settings.export.pdf.status.not_found')).toBeNull()
+    expect(container.querySelector('details')?.open).toBe(false)
+    expect(container.querySelector('pre')?.textContent).toContain('[browser_failed] Browser failed')
+    expect(container.querySelector('pre')?.textContent).toContain('Failed to launch')
+    mocks.probeBrowser.mockResolvedValue(ready)
+    fireEvent.click(screen.getByRole('button', { name: 'settings.export.pdf.check_again' }))
+    await screen.findByText('settings.export.pdf.status.ready 130')
+    expect(container.querySelector('details')).toBeNull()
+    expect(screen.queryByText('/usr/bin/chromium')).toBeNull()
+  })
+
+  it.each([
+    [new Error('IPC channel closed'), '[browser_check_failed] IPC channel closed'],
+    ['IPC request failed', '[browser_check_failed] IPC request failed'],
+    [
+      { code: 'access_denied', message: 'Window rejected', detail: 'Permission check failed' },
+      'Permission check failed',
+    ],
+  ])('reports rejected probes without claiming the browser is missing: %j', async (error, detail) => {
+    mocks.probeBrowser.mockRejectedValue(error)
+    const { container } = render(<ExportSetting />)
+    await screen.findByText('pdf_export.browser_check_failed')
+    expect(container.querySelector('pre')?.textContent).toContain(detail)
+    expect(screen.queryByText('settings.export.pdf.status.not_found')).toBeNull()
+  })
 })

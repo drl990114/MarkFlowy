@@ -10,6 +10,11 @@ import {
   probePdfBrowser,
   type PdfBrowserInfo,
 } from '@/components/EditorArea/pdf-export/pdfExport'
+import {
+  getPdfBrowserFailure,
+  normalizePdfBrowserError,
+} from '@/components/EditorArea/pdf-export/pdfBrowserDiagnostics'
+import { PdfBrowserErrorDetails } from '@/components/EditorArea/pdf-export/PdfBrowserErrorDetails'
 import { useTranslation } from '@/i18n'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
@@ -59,8 +64,10 @@ function PdfBrowserSetting() {
       try {
         const result = await probePdfBrowser(path || undefined, refresh)
         if (isCurrent()) setInfo(result)
-      } catch {
-        if (isCurrent()) setInfo({ available: false, compatible: false })
+      } catch (error: unknown) {
+        if (isCurrent()) {
+          setInfo({ available: false, compatible: false, error: normalizePdfBrowserError(error) })
+        }
       } finally {
         if (isCurrent()) setChecking(false)
       }
@@ -101,12 +108,14 @@ function PdfBrowserSetting() {
   }
 
   let status = t('settings.export.pdf.status.not_found')
+  const failure = getPdfBrowserFailure(info)
   if (checking) status = t('settings.export.pdf.status.checking')
   else if (info?.available && info.compatible) {
     status = t('settings.export.pdf.status.ready', { version: info.version ?? '' })
-  } else if (configuredPath && info?.error?.code === 'invalid_executable') {
+  } else if (failure === 'invalid_executable') {
     status = t('settings.export.pdf.status.invalid_executable')
-  } else if (info?.available) status = t('settings.export.pdf.status.incompatible')
+  } else if (failure === 'failed') status = t('pdf_export.browser_check_failed')
+  else if (failure === 'incompatible') status = t('settings.export.pdf.status.incompatible')
 
   return (
     <SettingGroupContainer $anchorId={getSettingGroupAnchorId('export', 'pdf')}>
@@ -123,6 +132,7 @@ function PdfBrowserSetting() {
                 {info?.executablePath || configuredPath}
               </span>
             ) : null}
+            {!checking ? <PdfBrowserErrorDetails info={info} /> : null}
             {saveError ? (
               <span role='alert' className='text-right text-ui-caption text-destructive'>
                 {t('settings.export.pdf.status.save_failed')}

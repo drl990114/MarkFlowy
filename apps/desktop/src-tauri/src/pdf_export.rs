@@ -314,14 +314,21 @@ fn normalize_executable(path: &Path) -> Result<PathBuf, PdfExportError> {
         };
         candidate = candidate.join("Contents/MacOS").join(binary);
     }
-    let candidate = fs::canonicalize(&candidate).map_err(|e| {
+    if !candidate.is_absolute() {
+        candidate = std::env::current_dir()
+            .map_err(browser_error)?
+            .join(candidate);
+    }
+    // Validate the target, but launch the original entry point. Dispatchers such
+    // as /snap/bin/chromium depend on argv[0] to select the browser to run.
+    let target = fs::canonicalize(&candidate).map_err(|e| {
         PdfExportError::new(
             "invalid_executable",
             "The selected browser executable does not exist.",
         )
         .detail(e)
     })?;
-    if !candidate.is_file() {
+    if !target.is_file() {
         return Err(PdfExportError::new(
             "invalid_executable",
             "The selected browser executable is not a file.",
@@ -330,7 +337,7 @@ fn normalize_executable(path: &Path) -> Result<PathBuf, PdfExportError> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        if fs::metadata(&candidate)
+        if fs::metadata(&target)
             .map_err(browser_error)?
             .permissions()
             .mode()
@@ -430,6 +437,10 @@ fn browser_candidates() -> Vec<PathBuf> {
     ] {
         candidates.push(PathBuf::from(path));
     }
+    normalize_browser_candidates(candidates)
+}
+
+fn normalize_browser_candidates(candidates: Vec<PathBuf>) -> Vec<PathBuf> {
     let mut seen = HashSet::new();
     candidates
         .into_iter()
@@ -1275,7 +1286,7 @@ mod tests {
         assert!(normalize_executable(&directory.path().join("missing")).is_err());
     }
     #[test]
-    fn automatic_probe_excludes_canonical_browser_paths() {
+    fn automatic_probe_excludes_browser_launch_paths() {
         let directory = tempfile::tempdir().unwrap();
         let chrome = directory.path().join("chrome");
         let edge = directory.path().join("edge");
@@ -1294,6 +1305,53 @@ mod tests {
         assert_eq!(
             exclude_browser_candidates(candidates, &[chrome.to_string_lossy().into_owned()]),
             vec![normalize_executable(&edge).unwrap()]
+        );
+    }
+    #[cfg(unix)]
+    #[test]
+    fn browser_symlink_preserves_the_launcher_name() {
+        use std::os::unix::{fs::symlink, fs::PermissionsExt};
+
+        let directory = tempfile::tempdir().unwrap();
+        let dispatcher = directory.path().join("dispatcher");
+        fs::write(
+            &dispatcher,
+            "#!/bin/sh\ncase \"${0##*/}\" in chromium) printf 'Chromium';; *) exit 1;; esac\n",
+        )
+        .unwrap();
+        fs::set_permissions(&dispatcher, fs::Permissions::from_mode(0o700)).unwrap();
+        let chromium = directory.path().join("chromium");
+        symlink(&dispatcher, &chromium).unwrap();
+
+        let output = std::process::Command::new(normalize_executable(&chromium).unwrap())
+            .output()
+            .unwrap();
+        assert!(output.status.success());
+        assert_eq!(output.stdout, b"Chromium");
+    }
+    #[cfg(unix)]
+    #[test]
+    fn excluding_one_browser_does_not_exclude_another_using_the_same_dispatcher() {
+        use std::os::unix::{fs::symlink, fs::PermissionsExt};
+
+        let directory = tempfile::tempdir().unwrap();
+        let dispatcher = directory.path().join("dispatcher");
+        fs::write(&dispatcher, "browser dispatcher fixture").unwrap();
+        fs::set_permissions(&dispatcher, fs::Permissions::from_mode(0o700)).unwrap();
+        let chromium = directory.path().join("chromium");
+        let chrome = directory.path().join("google-chrome");
+        symlink(&dispatcher, &chromium).unwrap();
+        symlink(&dispatcher, &chrome).unwrap();
+
+        let candidates = normalize_browser_candidates(vec![
+            chromium.clone(),
+            chrome.clone(),
+            chromium.clone(),
+        ]);
+        assert_eq!(candidates, vec![chromium.clone(), chrome.clone()]);
+        assert_eq!(
+            exclude_browser_candidates(candidates, &[chromium.to_string_lossy().into_owned()]),
+            vec![normalize_executable(&chrome).unwrap()]
         );
     }
     fn test_browser() -> PathBuf {

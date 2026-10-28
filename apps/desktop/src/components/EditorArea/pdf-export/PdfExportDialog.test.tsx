@@ -98,4 +98,54 @@ describe('PDF export dialog', () => {
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
     expect(props.onOpenChange).toHaveBeenCalledTimes(2)
   })
+
+  it.each(['browser_failed', 'timed_out'])(
+    'shows %s diagnostics without describing an installed browser as missing',
+    (code) => {
+      const { props } = renderDialog({
+        browserInfo: {
+          available: false,
+          compatible: false,
+          executablePath: '/usr/bin/chromium',
+          error: { code, message: 'The browser could not export.', detail: 'Browser stderr' },
+        },
+      })
+      const dialog = screen.getByRole('dialog', { name: 'pdf_export.title' })
+      expect(screen.getByRole('status').textContent).toBe('pdf_export.browser_check_failed')
+      expect(screen.queryByText('pdf_export.browser.not_found')).toBeNull()
+      expect(dialog.querySelector('details')?.open).toBe(false)
+      expect(dialog.querySelector('pre')?.textContent).toContain(`[${code}]`)
+      expect(dialog.querySelector('pre')?.textContent).toContain('/usr/bin/chromium')
+      expect(dialog.querySelector('pre')?.textContent).toContain('Browser stderr')
+      expect(
+        screen.getByRole<HTMLButtonElement>('button', { name: 'pdf_export.export' }).disabled,
+      ).toBe(true)
+      fireEvent.click(screen.getByRole('button', { name: 'pdf_export.system_print' }))
+      expect(props.onPrint).toHaveBeenCalledOnce()
+    },
+  )
+
+  it.each([
+    ['not_found', 'pdf_export.browser.not_found'],
+    ['invalid_executable', 'settings.export.pdf.status.invalid_executable'],
+    ['unsupported_browser', 'pdf_export.browser.incompatible'],
+  ])('distinguishes %s from browser probe failures', (code, status) => {
+    renderDialog({
+      browserInfo: {
+        available: code === 'unsupported_browser',
+        compatible: false,
+        error: { code, message: 'Browser check result' },
+      },
+    })
+    expect(screen.getByRole('status').textContent).toBe(status)
+    if (code === 'not_found') {
+      expect(screen.queryByText('pdf_export.browser.error_details')).toBeNull()
+    }
+  })
+
+  it('does not show a missing-browser status when the controller reports a probe error', () => {
+    renderDialog({ browserInfo: undefined, error: 'IPC channel closed' })
+    expect(screen.getByRole('status').textContent).toBe('pdf_export.browser_check_failed')
+    expect(screen.getByRole('alert').textContent).toBe('IPC channel closed')
+  })
 })

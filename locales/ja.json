@@ -1604,6 +1604,7 @@
     "system_print": "システム印刷…",
     "system_print_hint": "システム印刷も利用できます。印刷ダイアログから PDF として保存しても、見出しブックマークは保証されません。",
     "browser": {
+      "error_details": "エラーの詳細",
       "checking": "PDF エクスポート用ブラウザを確認しています…",
       "ready": "ブラウザ {{version}} を使用できます。",
       "not_found": "互換性のある PDF エクスポート用ブラウザが見つかりません。",

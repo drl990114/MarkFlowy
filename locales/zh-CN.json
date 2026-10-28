@@ -1604,6 +1604,7 @@
     "system_print": "系统打印…",
     "system_print_hint": "也可以使用系统打印。通过打印对话框另存为 PDF 时，不保证包含标题目录书签。",
     "browser": {
+      "error_details": "错误详情",
       "checking": "正在检测 PDF 导出浏览器…",
       "ready": "浏览器 {{version}} 已就绪。",
       "not_found": "未找到兼容的 PDF 导出浏览器。",

@@ -31,6 +31,7 @@ import {
 } from '../pdf-export/pdfExport'
 import { PDF_EXPORT_EVENT } from '../pdf-export/pdfExportMenuItem'
 import type { PdfExportOptions } from '../pdf-export/PdfExportDialog'
+import { normalizePdfBrowserError } from '../pdf-export/pdfBrowserDiagnostics'
 
 const PdfExportDialog = lazy(() =>
   import('../pdf-export/PdfExportDialog').then((module) => ({ default: module.PdfExportDialog })),
@@ -202,10 +203,16 @@ export function PdfPrintController({
         if (current) setBrowserInfo(info)
       })
       .catch((error: unknown) => {
-        if (current)
+        if (current) {
+          setBrowserInfo({
+            available: false,
+            compatible: false,
+            error: normalizePdfBrowserError(error),
+          })
           setExportError(
             error instanceof Error ? error.message : t('pdf_export.browser_check_failed'),
           )
+        }
       })
       .finally(() => {
         if (current) setCheckingBrowser(false)

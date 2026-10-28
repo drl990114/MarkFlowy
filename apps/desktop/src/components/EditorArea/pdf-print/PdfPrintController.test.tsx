@@ -797,6 +797,11 @@ describe('PdfPrintController', () => {
     await renderController()
     await requestExport()
     expect(screen.getByRole('alert').textContent).toBe('Initial browser probe failed')
+    expect(exportUi.props?.browserInfo).toMatchObject({
+      available: false,
+      compatible: false,
+      error: { code: 'browser_check_failed', message: 'Initial browser probe failed' },
+    })
     await act(async () =>
       useAppSettingStore.setState({
         settingData: { pdf_browser_executable_path: '/corrected/browser' },
@@ -805,6 +810,19 @@ describe('PdfPrintController', () => {
     await waitFor(() => expect(exportUi.props?.checking).toBe(false))
     expect(screen.getByRole('status').textContent).toBe('Chromium 130')
     expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('preserves structured browser probe rejection details for the export dialog', async () => {
+    const error = { code: 'access_denied', message: 'Window rejected', detail: 'Permission failed' }
+    exportMocks.probeBrowser.mockRejectedValueOnce(error)
+    await renderController()
+    await requestExport()
+    expect(exportUi.props?.browserInfo).toEqual({
+      available: false,
+      compatible: false,
+      error,
+    })
+    expect(exportMocks.exportPdf).not.toHaveBeenCalled()
   })
 
   it('does not subscribe when the active file is not Markdown', async () => {

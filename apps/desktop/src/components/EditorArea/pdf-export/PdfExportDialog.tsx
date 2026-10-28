@@ -5,6 +5,8 @@ import { Dialog } from '@/components/ui/dialog'
 import { Select } from '@/components/ui/select'
 import { useTranslation } from '@/i18n'
 import type { PdfBrowserInfo } from './pdfExport'
+import { getPdfBrowserFailure } from './pdfBrowserDiagnostics'
+import { PdfBrowserErrorDetails } from './PdfBrowserErrorDetails'
 
 export interface PdfExportOptions {
   paperSize: 'a4' | 'letter'
@@ -39,13 +41,18 @@ export function PdfExportDialog({
   const [landscape, setLandscape] = useState(false)
   const [includeOutline, setIncludeOutline] = useState(true)
   const ready = browserInfo?.available === true && browserInfo.compatible
+  const failure = getPdfBrowserFailure(browserInfo)
   const status = checking
     ? t('pdf_export.browser.checking')
     : ready
       ? t('pdf_export.browser.ready', { version: browserInfo.version ?? '' })
-      : browserInfo?.available
-        ? t('pdf_export.browser.incompatible')
-        : t('pdf_export.browser.not_found')
+      : failure === 'invalid_executable'
+        ? t('settings.export.pdf.status.invalid_executable')
+        : failure === 'failed' || (!browserInfo && error)
+          ? t('pdf_export.browser_check_failed')
+          : failure === 'incompatible'
+            ? t('pdf_export.browser.incompatible')
+            : t('pdf_export.browser.not_found')
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -135,6 +142,7 @@ export function PdfExportDialog({
               {t('pdf_export.system_print_hint')}
             </p>
           </div>
+          {!checking && !ready ? <PdfBrowserErrorDetails info={browserInfo} /> : null}
           {error ? (
             <p role='alert' className='m-0 whitespace-pre-wrap text-ui-control text-destructive'>
               {error}

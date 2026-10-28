@@ -1604,6 +1604,7 @@
     "system_print": "System print…",
     "system_print_hint": "System print is also available. Saving as PDF through the print dialog does not guarantee heading bookmarks.",
     "browser": {
+      "error_details": "Detalles del error",
       "checking": "Checking the PDF export browser…",
       "ready": "Browser {{version}} is ready.",
       "not_found": "No compatible PDF export browser was found.",
