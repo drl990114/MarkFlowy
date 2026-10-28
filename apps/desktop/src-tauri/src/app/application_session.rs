@@ -306,6 +306,8 @@ impl QuitState {
     fn close_window(
         &mut self,
         label: &str,
+        windows: impl IntoIterator<Item = String>,
+        quit_on_last_window: bool,
         read: impl FnOnce() -> Result<Option<ApplicationSession>, String>,
         mut save: impl FnMut(Option<&ApplicationSession>) -> Result<(), String>,
         destroy: impl FnOnce() -> Result<(), String>,
@@ -313,14 +315,35 @@ impl QuitState {
         if self.exit_code.is_some() {
             return destroy();
         }
+        // Count live editors, not the old manifest or failed restore sources.
+        // A previous close may still be waiting for its Destroyed event.
+        let live_windows: Vec<_> = windows
+            .into_iter()
+            .filter(|label| is_editor_window(label) && !self.prepared_closes.contains(label))
+            .collect();
+        let quitting = quit_on_last_window && live_windows == [label];
         let previous = read()?;
-        let next = self.without_window(previous.clone(), label);
+        let next = if quitting {
+            self.capture(live_windows, Some(label.into()))
+        } else {
+            self.without_window(previous.clone(), label)
+        };
         save(Some(&next))?;
+        if quitting {
+            // The renderer has already flushed this final window. Freeze its
+            // session before destroy; ExitRequested arrives too late to capture it.
+            self.exit_code = Some(0);
+        }
         if let Err(error) = destroy() {
+            if quitting {
+                self.exit_code = None;
+            }
             save(previous.as_ref())?;
             return Err(error);
         }
-        self.prepared_closes.insert(label.into());
+        if !quitting {
+            self.prepared_closes.insert(label.into());
+        }
         Ok(())
     }
 }
@@ -372,8 +395,9 @@ pub fn cancel_app_quit() {
         .exit_code = None;
 }
 
-/// The caller has already flushed document/draft state. Persist an ordinary
-/// close before destroying the native window so a failed save leaves it usable.
+/// The caller has already flushed document/draft state. On Windows/Linux,
+/// closing the final editor exits the app and preserves that window for restore.
+/// Persist the close before destroying the window so a failed save leaves it usable.
 #[tauri::command]
 pub fn close_session_window(window: WebviewWindow) -> Result<(), String> {
     let app = window.app_handle();
@@ -387,6 +411,8 @@ pub fn close_session_window(window: WebviewWindow) -> Result<(), String> {
     let previous_value = read_session_value(app).map_err(|error| error.to_string())?;
     state.close_window(
         label,
+        app.webview_windows().into_keys(),
+        cfg!(any(target_os = "windows", target_os = "linux")),
         || Ok(session_for_close(previous_value.clone())),
         |session| match session {
             Some(session) => save_session(app, Some(session)),
@@ -430,6 +456,7 @@ pub(crate) fn window_destroyed(app: &AppHandle, label: &str) -> Result<Option<i3
 mod tests {
     use super::*;
     use serde_json::json;
+    use std::cell::RefCell;
 
     #[test]
     fn quit_manifest_includes_single_file_windows_and_excludes_auxiliary_windows() {
@@ -503,10 +530,263 @@ mod tests {
     }
 
     #[test]
+    fn last_editor_close_preserves_its_session_with_or_without_auxiliary_windows() {
+        for windows in [vec!["main"], vec!["main", "conf", "mf-pdf-print-1"]] {
+            let mut state = QuitState::default();
+            let saved = RefCell::new(None);
+            let expected = ApplicationSession::new(["main".into()], Some("main".into()));
+            state
+                .close_window(
+                    "main",
+                    windows.into_iter().map(String::from),
+                    true,
+                    || Ok(None),
+                    |session| {
+                        *saved.borrow_mut() = session.cloned();
+                        Ok(())
+                    },
+                    || {
+                        // Capture before native teardown, even on a first launch
+                        // with no previous application manifest.
+                        assert_eq!(*saved.borrow(), Some(expected.clone()));
+                        Ok(())
+                    },
+                )
+                .unwrap();
+            assert_eq!(state.exit_code, Some(0));
+            assert!(state.prepared_closes.is_empty());
+            assert_eq!(
+                saved.borrow().as_ref().unwrap().restore_windows(),
+                [("main".into(), "main".into())]
+            );
+            assert_eq!(state.finish(false), Some(0));
+        }
+    }
+
+    #[test]
+    fn sequential_closes_restore_only_the_final_window_even_before_destroyed_arrives() {
+        for first in ["main", "main_file"] {
+            for destroyed in [false, true] {
+                let second = if first == "main" { "main_file" } else { "main" };
+                let mut state = QuitState::default();
+                let windows = ["main", "main_file"].map(String::from);
+                let saved = RefCell::new(Some(ApplicationSession::new(windows.clone(), None)));
+                state
+                    .close_window(
+                        first,
+                        windows.clone(),
+                        true,
+                        || Ok(saved.borrow().clone()),
+                        |session| {
+                            *saved.borrow_mut() = session.cloned();
+                            Ok(())
+                        },
+                        || Ok(()),
+                    )
+                    .unwrap();
+                assert_eq!(state.exit_code, None);
+                assert_eq!(saved.borrow().as_ref().unwrap().windows, [second]);
+                assert!(state.prepared_closes.contains(first));
+
+                let live_windows = if destroyed {
+                    state.prepared_closes.remove(first);
+                    vec![second.into()]
+                } else {
+                    windows.to_vec()
+                };
+                state
+                    .close_window(
+                        second,
+                        live_windows,
+                        true,
+                        || Ok(saved.borrow().clone()),
+                        |session| {
+                            *saved.borrow_mut() = session.cloned();
+                            Ok(())
+                        },
+                        || Ok(()),
+                    )
+                    .unwrap();
+                assert_eq!(state.exit_code, Some(0));
+                assert_eq!(
+                    *saved.borrow(),
+                    Some(ApplicationSession::new(
+                        [second.into()],
+                        Some(second.into())
+                    ))
+                );
+                assert_eq!(
+                    saved.borrow().as_ref().unwrap().restore_windows(),
+                    [("main".into(), second.into())]
+                );
+                if !destroyed {
+                    // If the final window is destroyed first, wait for the
+                    // earlier ordinary close before completing application exit.
+                    assert_eq!(state.finish(true), None);
+                }
+                assert_eq!(state.finish(false), Some(0));
+            }
+        }
+    }
+
+    #[test]
+    fn macos_last_window_close_still_retires_the_session() {
+        let mut state = QuitState::default();
+        let saved = RefCell::new(Some(ApplicationSession::new(["main".into()], None)));
+        state
+            .close_window(
+                "main",
+                ["main".into()],
+                false,
+                || Ok(saved.borrow().clone()),
+                |session| {
+                    *saved.borrow_mut() = session.cloned();
+                    Ok(())
+                },
+                || Ok(()),
+            )
+            .unwrap();
+        assert_eq!(*saved.borrow(), Some(ApplicationSession::new([], None)));
+        assert_eq!(state.exit_code, None);
+        assert!(state.prepared_closes.contains("main"));
+    }
+
+    #[test]
+    fn a_close_for_an_absent_window_does_not_quit_another_editor() {
+        for windows in [vec![], vec!["main_file".into()]] {
+            let mut state = QuitState::default();
+            state
+                .close_window("main", windows, true, || Ok(None), |_| Ok(()), || Ok(()))
+                .unwrap();
+            assert_eq!(state.exit_code, None);
+        }
+    }
+
+    #[test]
+    fn last_close_keeps_failed_restore_sources_but_uses_the_current_snapshot_label() {
+        let mut state = QuitState::default();
+        state
+            .restore_aliases
+            .insert("main".into(), "main_old".into());
+        state.unrestored_sources.insert("main_failed".into());
+        let previous = ApplicationSession::new(
+            ["main_old", "main_failed"].map(String::from),
+            Some("main_old".into()),
+        );
+        let mut saved = None;
+        state
+            .close_window(
+                "main",
+                ["main".into()],
+                true,
+                || Ok(Some(previous)),
+                |session| {
+                    saved = session.cloned();
+                    Ok(())
+                },
+                || Ok(()),
+            )
+            .unwrap();
+        assert_eq!(state.exit_code, Some(0));
+        assert_eq!(
+            saved,
+            Some(ApplicationSession::new(
+                ["main", "main_failed"].map(String::from),
+                Some("main".into())
+            ))
+        );
+    }
+
+    #[test]
+    fn last_close_save_failure_keeps_the_window_alive_and_allows_retry() {
+        let mut state = QuitState::default();
+        assert_eq!(
+            state.close_window(
+                "main",
+                ["main".into()],
+                true,
+                || Ok(None),
+                |_| Err("disk full".into()),
+                || panic!("window must remain alive"),
+            ),
+            Err("disk full".into())
+        );
+        assert_eq!(state.exit_code, None);
+        assert!(state.prepared_closes.is_empty());
+        state
+            .close_window(
+                "main",
+                ["main".into()],
+                true,
+                || Ok(None),
+                |_| Ok(()),
+                || Ok(()),
+            )
+            .unwrap();
+        assert_eq!(state.exit_code, Some(0));
+    }
+
+    #[test]
+    fn last_close_destroy_failure_rolls_back_the_manifest_and_exit_state() {
+        for previous in [None, Some(ApplicationSession::new([], None))] {
+            let mut state = QuitState::default();
+            let mut saved = vec![];
+            let result = state.close_window(
+                "main",
+                ["main".into()],
+                true,
+                || Ok(previous.clone()),
+                |session| {
+                    saved.push(session.cloned());
+                    Ok(())
+                },
+                || Err("native teardown failed".into()),
+            );
+            assert_eq!(result, Err("native teardown failed".into()));
+            assert_eq!(
+                saved,
+                [
+                    Some(ApplicationSession::new(
+                        ["main".into()],
+                        Some("main".into())
+                    )),
+                    previous
+                ]
+            );
+            assert_eq!(state.exit_code, None);
+            assert!(state.prepared_closes.is_empty());
+        }
+    }
+
+    #[test]
+    fn last_close_rollback_failure_does_not_leave_the_app_quitting() {
+        let mut state = QuitState::default();
+        let result = state.close_window(
+            "main",
+            ["main".into()],
+            true,
+            || Ok(None),
+            |session| {
+                if session.is_none() {
+                    Err("rollback failed".into())
+                } else {
+                    Ok(())
+                }
+            },
+            || Err("native teardown failed".into()),
+        );
+        assert_eq!(result, Err("rollback failed".into()));
+        assert_eq!(state.exit_code, None);
+        assert!(state.prepared_closes.is_empty());
+    }
+
+    #[test]
     fn manual_close_save_failure_leaves_the_window_alive() {
         let mut state = QuitState::default();
         let result = state.close_window(
             "main",
+            ["main".into()],
+            false,
             || Ok(None),
             |_| Err("disk full".into()),
             || panic!("window must remain alive"),
@@ -522,6 +802,8 @@ mod tests {
         let mut saved = vec![];
         let result = state.close_window(
             "main",
+            ["main", "main_file"].map(String::from),
+            false,
             || Ok(Some(original.clone())),
             |session| {
                 saved.push(session.cloned());
@@ -544,7 +826,14 @@ mod tests {
     fn quit_excludes_a_manual_close_waiting_for_its_destroyed_event() {
         let mut state = QuitState::default();
         state
-            .close_window("main_file", || Ok(None), |_| Ok(()), || Ok(()))
+            .close_window(
+                "main_file",
+                ["main", "main_file"].map(String::from),
+                false,
+                || Ok(None),
+                |_| Ok(()),
+                || Ok(()),
+            )
             .unwrap();
         assert_eq!(
             state.capture(
@@ -562,6 +851,8 @@ mod tests {
         state
             .close_window(
                 "main",
+                ["main".into()],
+                true,
                 || panic!("do not reread the manifest"),
                 |_| panic!("do not overwrite the manifest"),
                 || Ok(()),
