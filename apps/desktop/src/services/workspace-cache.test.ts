@@ -3,6 +3,8 @@ import type { LazyStore } from '@tauri-apps/plugin-store'
 import useFileCacheStore, { getFileObject, setFileObject } from '@/helper/files'
 import { createFile, type IFile } from '@/helper/filesys'
 import useEditorStore from '@/stores/useEditorStore'
+import useEditorStateStore from '@/stores/useEditorStateStore'
+import useAppSettingStore from '@/stores/useAppSettingStore'
 import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import {
   createWorkspaceCachePersistence,
@@ -29,6 +31,8 @@ describe('workspace cache and recent files', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     useFileCacheStore.setState({ entries: {}, pathEntries: {}, metadataRevision: 0 })
+    useEditorStateStore.setState({ idStateMap: new Map() })
+    useAppSettingStore.setState({ settingData: {} })
     useEditorStore.setState({
       folderData: [],
       opened: [],
@@ -100,6 +104,85 @@ describe('workspace cache and recent files', () => {
     const editor = useEditorStore.getState()
     expect(getFileObject(editor.activeId!)?.path).toBe('/w/A.md')
     expect(editor.getActiveGroup()?.activeId).toBe(editor.activeId)
+  })
+
+  it('round-trips each group preview by path while preserving tab order and selection', async () => {
+    restoreWorkspaceCache({
+      editorLayout: {
+        type: 'branch', id: 'split', direction: 'horizontal', sizes: [40, 60],
+        children: [
+          {
+            type: 'leaf', id: 'left', openedFilePaths: ['/w/A.md', '/w/B.md'],
+            activeFilePath: '/w/A.md', previewFilePath: '/w/B.md',
+          },
+          {
+            type: 'leaf', id: 'right', openedFilePaths: ['/w/C.md'],
+            activeFilePath: '/w/C.md', previewFilePath: '/w/C.md',
+          },
+        ],
+      },
+      activeGroupId: 'left',
+    }, folder('/w'))
+    const originalPreviewId = useEditorStore.getState().getGroup('left')?.previewId
+    await persistence.flush()
+    const cache = structuredClone(data.get('/w')!)
+    expect(cache.editorLayout).toMatchObject({
+      children: [
+        { openedFilePaths: ['/w/A.md', '/w/B.md'], previewFilePath: '/w/B.md' },
+        { openedFilePaths: ['/w/C.md'], previewFilePath: '/w/C.md' },
+      ],
+    })
+
+    useFileCacheStore.setState({ entries: {}, pathEntries: {}, contentEntries: {}, metadataRevision: 0 })
+    restoreWorkspaceCache(cache, folder('/w'))
+    const editor = useEditorStore.getState()
+    const left = editor.getGroup('left')!
+    const right = editor.getGroup('right')!
+    expect(left.opened.map((id) => getFileObject(id).path)).toEqual(['/w/A.md', '/w/B.md'])
+    expect(getFileObject(left.activeId!).path).toBe('/w/A.md')
+    expect(getFileObject(left.previewId!).path).toBe('/w/B.md')
+    expect(left.previewId).not.toBe(originalPreviewId)
+    expect(getFileObject(right.previewId!).path).toBe('/w/C.md')
+    expect(editor.activeGroupId).toBe('left')
+  })
+
+  it.each([undefined, '/w/missing.md'])('does not invent a preview for an absent or invalid path: %s', (previewFilePath) => {
+    restoreWorkspaceCache({
+      editorLayout: {
+        type: 'leaf', id: 'group', openedFilePaths: ['/w/A.md'],
+        activeFilePath: '/w/A.md', previewFilePath,
+      },
+    }, folder('/w'))
+    expect(useEditorStore.getState().getActiveGroup()?.previewId).toBeUndefined()
+    expect(openedPaths()).toEqual(['/w/A.md'])
+    expect(Object.values(useFileCacheStore.getState().entries).map((file) => file.path)).not.toContain('/w/missing.md')
+  })
+
+  it('restores previews as ordinary tabs when the setting is disabled', () => {
+    useAppSettingStore.setState({ settingData: { editor_enable_preview_tabs: false } })
+    restoreWorkspaceCache({
+      editorLayout: {
+        type: 'leaf', id: 'group', openedFilePaths: ['/w/A.md'],
+        activeFilePath: '/w/A.md', previewFilePath: '/w/A.md',
+      },
+    }, folder('/w'))
+    expect(useEditorStore.getState().getActiveGroup()?.previewId).toBeUndefined()
+    expect(openedPaths()).toEqual(['/w/A.md'])
+  })
+
+  it('keeps a cached dirty document open when the saved layout still marks it as a preview', () => {
+    const file = createFile({ name: 'A.md', path: '/w/A.md', content: 'unsaved text' })
+    useEditorStateStore.setState({ idStateMap: new Map([[file.id, { hasUnsavedChanges: true }]]) })
+    restoreWorkspaceCache({
+      editorLayout: {
+        type: 'leaf', id: 'group', openedFilePaths: ['/w/A.md'],
+        activeFilePath: '/w/A.md', previewFilePath: '/w/A.md',
+      },
+    }, folder('/w'))
+    const group = useEditorStore.getState().getActiveGroup()!
+    expect(group.previewId).toBeUndefined()
+    expect(group.opened).toEqual([file.id])
+    expect(getFileObject(file.id).content).toBe('unsaved text')
   })
 
   it('restores history-only caches and filters malformed entries independently from editor layout', () => {

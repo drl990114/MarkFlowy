@@ -138,7 +138,6 @@ export function openQuickOpenFile(entry: QuickOpenFile): IFile | undefined {
   const file = knownFile
     ? (getFileObject(knownFile.id) ?? createFile(knownFile))
     : createFile({ name: entry.name, path: entry.path, ext: entry.ext })
-  state.addOpenedFile(file.id)
-  state.setActiveId(file.id)
-  return file
+  const group = state.getActiveGroup()
+  return group && state.openFileInGroup(group.id, file.id, { mode: 'permanent' }) ? file : undefined
 }

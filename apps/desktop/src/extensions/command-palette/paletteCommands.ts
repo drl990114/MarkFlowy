@@ -39,6 +39,7 @@ const APPLICATION_COMMANDS = [
   ['app_openFolder', 'file', 'workspace directory'],
   ['app_save', 'file', 'write document'],
   ['app_closeCurrentEditorTab', 'file', 'close tab'],
+  ['app_keepEditorOpen', 'file', 'keep open preview tab 保持 打开 预览 标签页'],
   ['app_findReplaceEditor', 'editor', 'search find replace'],
   ['app_toggleLeftsidebarVisible', 'view', 'sidebar explorer'],
   ['app_toggleRightsidebarVisible', 'view', 'sidebar outline'],
@@ -55,6 +56,7 @@ const APPLICATION_COMMANDS = [
 const DOCUMENT_COMMANDS = new Set([
   'app_save',
   'app_closeCurrentEditorTab',
+  'app_keepEditorOpen',
   'app_findReplaceEditor',
   'app_toggleEditorType',
   'app_splitEditorRight',
@@ -117,6 +119,11 @@ function applicationUnavailable(
   }
   const targetReason = applicationTargetUnavailable(id, target, layout.zenModeActive)
   if (targetReason) return targetReason
+  if (target && id === 'app_keepEditorOpen') {
+    if (!target.groupId) return 'unavailable'
+    const group = useEditorStore.getState().getGroup(target.groupId)
+    if (group?.previewId !== target.fileId) return 'unavailable'
+  }
   if (target && id === 'app_findReplaceEditor') return searchUnavailable(target)
   if (target && id === 'app_toggleEditorType') {
     const reason = modeSwitchUnavailable(target)

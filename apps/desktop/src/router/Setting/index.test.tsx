@@ -63,9 +63,10 @@ vi.mock('@/services/app-setting', () => ({
 vi.mock('@/stores/useAppInfoStore', () => ({
   default: () => ({ appInfo: { name: 'MarkFlowy', version: '1.0.0' } }),
 }))
-vi.mock('@/stores/useAppSettingStore', () => ({
-  default: () => ({ settingData: { file_exclude_patterns: '**/node_modules/**' } }),
-}))
+vi.mock('@/stores/useAppSettingStore', async () => {
+  const { create } = await import('zustand')
+  return { default: create(() => ({ settingData: { file_exclude_patterns: '**/node_modules/**' } })) }
+})
 vi.mock('zens', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock('./CopilotSetting', () => ({ CopilotSetting: () => null }))
 vi.mock('./ExportSetting', () => ({ ExportSetting: () => null }))

@@ -11,6 +11,7 @@ import { captureProtectedDraftSession } from './draft-recovery'
 import { stageDraftRecovery } from './staged-draft-recovery'
 import {
   createWindowSessionPersistence,
+  filterSessionLayout,
   LAST_WINDOW_SESSION_KEY,
   readWindowSession,
   restoreWindowDocuments,
@@ -47,6 +48,7 @@ const cleanups: (() => Promise<void>)[] = []
 beforeEach(() => {
   vi.mocked(invoke).mockReset()
   resetEditor()
+  useAppSettingStore.setState({ settingData: {} })
   sessionStorage.clear()
 })
 afterEach(async () => {
@@ -67,6 +69,64 @@ const disk = () => {
 }
 
 describe('document-first sessions', () => {
+  it('reads, restores and persists preview identity alongside its group and tab position', async () => {
+    const { store } = disk()
+    const layout: EditorLayoutNode = {
+      type: 'branch', id: 'split', direction: 'horizontal', sizes: [40, 60],
+      children: [
+        { type: 'leaf', id: 'left', opened: ['a', 'b'], activeId: 'a', previewId: 'b' },
+        { type: 'leaf', id: 'right', opened: ['c'], activeId: 'c', previewId: 'c' },
+      ],
+    }
+    const snapshot: WindowSession = {
+      version: 1, windowLabel: 'main', editorLayout: layout, activeGroupId: 'left',
+      files: ['a', 'b', 'c'].map((id) => ({ id, name: `${id}.md`, path: `/${id}.md` })),
+      drafts: { version: 1, documents: [] },
+    }
+    await store.set(windowSessionKey('main'), snapshot)
+    const session = await readWindowSession(store, 'main', 'main')
+    expect(session?.editorLayout).toEqual(layout)
+    restoreWindowDocuments(session!)
+    expect(useEditorStore.getState().editorLayout).toEqual(layout)
+    const persistence = createWindowSessionPersistence(store, 'main')
+    cleanups.push(persistence.dispose)
+    await persistence.flush()
+    expect((await readWindowSession(store, 'main'))?.editorLayout).toEqual(layout)
+  })
+
+  it.each(['a', 'former-id'])('keeps session drafts permanent before staged recovery starts: %s', (draftId) => {
+    restoreWindowDocuments({
+      version: 1, windowLabel: 'main',
+      files: [{ id: 'a', name: 'a.md', path: '/a.md' }],
+      editorLayout: { type: 'leaf', id: 'group', opened: ['a'], activeId: 'a', previewId: 'a' },
+      drafts: { version: 1, documents: [{ id: draftId, name: 'a.md', path: '/a.md', content: 'unsaved draft' }] },
+    })
+    expect(useEditorStore.getState().getActiveGroup()).toMatchObject({ opened: ['a'], activeId: 'a' })
+    expect(useEditorStore.getState().getActiveGroup()?.previewId).toBeUndefined()
+  })
+
+  it('restores a saved preview as ordinary when preview tabs are disabled', () => {
+    useAppSettingStore.setState({ settingData: { editor_enable_preview_tabs: false } })
+    restoreWindowDocuments({
+      version: 1, windowLabel: 'main',
+      files: [{ id: 'a', name: 'a.md', path: '/a.md' }],
+      editorLayout: { type: 'leaf', id: 'group', opened: ['a'], activeId: 'a', previewId: 'a' },
+      drafts: { version: 1, documents: [] },
+    })
+    expect(useEditorStore.getState().getActiveGroup()?.previewId).toBeUndefined()
+    expect(useEditorStore.getState().opened).toEqual(['a'])
+  })
+
+  it('clears filtered and dangling preview references without turning legacy tabs into previews', () => {
+    for (const previewId of [undefined, 'removed', 'unopened']) {
+      const layout = filterSessionLayout({
+        type: 'leaf', id: 'group', opened: ['a', 'removed'], activeId: 'removed', previewId,
+      }, new Set(['a', 'unopened']))
+      expect(layout).toMatchObject({ opened: ['a'], activeId: 'a' })
+      expect(layout.type === 'leaf' && layout.previewId).toBeUndefined()
+    }
+  })
+
   it('creates one editable but clean starter and excludes it from draft recovery', async () => {
     ensureDocument()
     ensureDocument()

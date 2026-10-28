@@ -40,9 +40,8 @@ export async function openWorkspaceMarkdownLink(href: string): Promise<boolean> 
   const editor = useEditorStore.getState()
   const cached = getFileObjectByPath(path) ?? editor.getFileNodeByPath(path)
   if (cached) {
-    editor.addOpenedFile(cached.id)
-    editor.setActiveId(cached.id)
-    return true
+    const group = editor.getActiveGroup()
+    return Boolean(group && editor.openFileInGroup(group.id, cached.id, { mode: 'permanent' }))
   }
 
   const content = await getFileContent({ filePath: path })

@@ -367,7 +367,10 @@
       "export_pandoc_exit_code": "Code de sortie",
       "export_pandoc_error_message": "Message",
       "export_pandoc_error_details": "Détails",
-      "export_image": "Exporter en tant qu'image"
+      "export_image": "Exporter en tant qu'image",
+      "keep_open": "Garder ouvert",
+      "preview": "Onglet d’aperçu",
+      "preview_hint": "Onglet d’aperçu — double-cliquez pour le garder ouvert"
     }
   },
   "notification": {},
@@ -641,6 +644,13 @@
         },
         "default_value": "{{value}} (par défaut)",
         "typography_disabled": "« Utiliser mes polices, tailles et interlignes » est désactivé. La taille du texte et la hauteur de ligne personnalisées ne sont donc pas appliquées."
+      },
+      "tabs": {
+        "label": "Onglets",
+        "enable_preview": {
+          "label": "Activer les onglets d’aperçu",
+          "desc": "Un clic sur un fichier dans l’explorateur ou les résultats de recherche réutilise un onglet d’aperçu. Un double-clic ou une modification le garde ouvert, même après l’enregistrement."
+        }
       }
     },
     "keyboard": {
@@ -1113,7 +1123,8 @@
       "editor_toggleH3": "Basculer sur H3",
       "editor_toggleH4": "Basculer sur H4",
       "editor_toggleH5": "Bascule à H5",
-      "editor_toggleH6": "Basculer sur H6"
+      "editor_toggleH6": "Basculer sur H6",
+      "app_keepEditorOpen": "Garder ouvert"
     }
   },
   "request": {

@@ -60,8 +60,9 @@ export const addMarkdownFileEdit = async (params: AddMarkdownFileEditParams) => 
   removePristineDocuments()
   const existing = params.path ? getFileObjectByPath(params.path) : undefined
   if (existing) {
-    useEditorStore.getState().addOpenedFile(existing.id)
-    useEditorStore.getState().setActiveId(existing.id)
+    const editor = useEditorStore.getState()
+    const group = editor.getActiveGroup()
+    if (group) editor.openFileInGroup(group.id, existing.id, { mode: 'permanent' })
     return
   }
   const { fileName } = params

@@ -7,6 +7,7 @@ enum EVENT {
   app_openSetting = 'app_openSetting',
   app_hide = 'app_hide',
   app_closeCurrentEditorTab = 'app_closeCurrentEditorTab',
+  app_keepEditorOpen = 'app_keepEditorOpen',
   app_toggleEditorType = 'app_toggleEditorType',
   app_toggleZenMode = 'app_toggleZenMode',
   app_splitEditorRight = 'app_splitEditorRight',

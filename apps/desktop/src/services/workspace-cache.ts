@@ -20,6 +20,7 @@ type PersistedEditorLayoutNode =
       id?: string
       openedFilePaths?: string[]
       activeFilePath?: string
+      previewFilePath?: string
     }
 
 export interface WorkspaceCache {
@@ -96,6 +97,9 @@ const serializeEditorLayout = (
         .map((fileId) => filePathsById.get(fileId))
         .filter((path): path is string => Boolean(path)),
       activeFilePath: node.activeId ? filePathsById.get(node.activeId) : undefined,
+      previewFilePath: node.previewId && node.opened.includes(node.previewId)
+        ? filePathsById.get(node.previewId)
+        : undefined,
     }
   }
 
@@ -305,12 +309,16 @@ const hydrateEditorLayout = (node: PersistedEditorLayoutNode): EditorLayoutNode 
     const activeId = node.activeFilePath
       ? ensureCachedFileByPath(node.activeFilePath).id
       : opened[0]
+    const previewId = node.previewFilePath && node.openedFilePaths?.includes(node.previewFilePath)
+      ? ensureCachedFileByPath(node.previewFilePath).id
+      : undefined
 
     return {
       type: 'leaf',
       id: node.id || nanoid(),
       opened,
       activeId,
+      previewId,
     }
   }
 

@@ -79,6 +79,7 @@ vi.mock('@/stores/useAppSettingStore', () => {
   return {
     default: Object.assign((selector: (value: typeof state) => unknown) => selector(state), {
       getState: () => state,
+      subscribe: () => () => {},
     }),
   }
 })

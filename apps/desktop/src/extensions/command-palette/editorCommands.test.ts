@@ -118,6 +118,27 @@ function richEditor() {
 }
 
 describe('palette editor execution', () => {
+  it('offers Keep Open only for the captured preview tab and rejects another active group', async () => {
+    source()
+    useEditorStore.setState({
+      editorLayout: { type: 'leaf', id: 'left', opened: ['file'], activeId: 'file', previewId: 'file' },
+    })
+    const context = { target: captureEditorCommandTarget(), platform: 'mac' as const }
+    const command = paletteCommands.find((item) => item.id === 'app_keepEditorOpen')!
+    const handler = vi.fn(() => useEditorStore.getState().keepFileOpen('left', 'file'))
+    const registration = commandRegistry.registerCommand({ id: command.id, handler })
+    expect(command.getUnavailableReason(context)).toBeUndefined()
+    useEditorStore.setState({ activeGroupId: 'right' })
+    expect(await command.execute(context)).toBe(false)
+    expect(handler).not.toHaveBeenCalled()
+    useEditorStore.setState({ activeGroupId: 'left' })
+    expect(await command.execute(context)).toBe(true)
+    expect(handler).toHaveBeenCalledOnce()
+    expect(command.getUnavailableReason(context)).toBe('unavailable')
+    expect(command.getUnavailableReason({ ...context, target: null })).toBe('no_document')
+    registration.dispose()
+  })
+
   it('delegates document and layout actions to existing application commands', async () => {
     source()
     const context = { target: captureEditorCommandTarget(), platform: 'mac' as const }

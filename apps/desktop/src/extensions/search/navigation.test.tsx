@@ -84,6 +84,58 @@ afterEach(() => {
 })
 
 describe('global search result coordinates', () => {
+  async function renderTwoFileResults() {
+    useSearchStore.setState({ searchKeyword: 'foo' })
+    vi.mocked(invoke).mockResolvedValue({
+      data: ['one', 'two'].map((name) => ({
+        id: name,
+        path: `/workspace/${name}.md`,
+        name: `${name}.md`,
+        ext: 'md',
+        is_folder: false,
+        relative_path: `${name}.md`,
+        matches: [{ id: `${name}-line`, line: 2, content: `${name} foo` }],
+      })),
+    })
+    render(<TooltipProvider>{Search.components}</TooltipProvider>)
+    fireEvent.click(screen.getByRole('button', { name: 'search.text' }))
+    await waitFor(() => expect(document.querySelectorAll('button.search-info')).toHaveLength(2))
+    return document.querySelectorAll<HTMLButtonElement>('button.search-info')
+  }
+
+  it('reuses a preview for click/Space and keeps results on double click/Enter', async () => {
+    const rows = await renderTwoFileResults()
+    fireEvent.keyDown(rows[0], { key: ' ' })
+    const firstId = getFileObjectByPath('/workspace/one.md')!.id
+    expect(useEditorStore.getState().getGroup('main')?.previewId).toBe(firstId)
+    fireEvent.click(rows[1])
+    const secondId = getFileObjectByPath('/workspace/two.md')!.id
+    expect(useEditorStore.getState().getGroup('main')).toMatchObject({ opened: [secondId], previewId: secondId })
+    expect(useEditorSearchStore.getState().navigation).toMatchObject({ fileId: secondId, line: 2, startColumn: 4 })
+
+    fireEvent.doubleClick(rows[1])
+    expect(useEditorStore.getState().getGroup('main')?.previewId).toBeUndefined()
+    fireEvent.click(rows[0])
+    expect(useEditorStore.getState().getGroup('main')).toMatchObject({ opened: [secondId, firstId], previewId: firstId })
+    fireEvent.keyDown(rows[0], { key: 'Enter' })
+    expect(useEditorStore.getState().getGroup('main')?.previewId).toBeUndefined()
+  })
+
+  it('does not navigate or change the selected match when opening is blocked', async () => {
+    const rows = await renderTwoFileResults()
+    fireEvent.click(rows[0])
+    const navigation = useEditorSearchStore.getState().navigation
+    const activeMatch = useSearchStore.getState().activeMatch
+    const open = vi.spyOn(useEditorStore.getState(), 'openFileInGroup').mockReturnValue(false)
+    try {
+      fireEvent.click(rows[1])
+      expect(useEditorSearchStore.getState().navigation).toBe(navigation)
+      expect(useSearchStore.getState().activeMatch).toBe(activeMatch)
+    } finally {
+      open.mockRestore()
+    }
+  })
+
   it('opens a result from an unexpanded directory and reuses its file identity when the tree loads later', async () => {
     const path = '/workspace/unexpanded/中文😀.md'
     useSearchStore.setState({ searchKeyword: 'foo' })

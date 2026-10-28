@@ -10,6 +10,6 @@ export function openBookmark(bookmark: Bookmark): void {
     createFile({ name: bookmark.title, path: bookmark.target.path })
 
   const editor = useEditorStore.getState()
-  editor.addOpenedFile(file.id)
-  editor.setActiveId(file.id)
+  const group = editor.getActiveGroup()
+  if (group) editor.openFileInGroup(group.id, file.id, { mode: 'permanent' })
 }

@@ -3,10 +3,11 @@ import { z } from 'zod'
 import useFileCacheStore, { getFileObject } from '@/helper/files'
 import { createFile } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
+import { getPathIdentityKey } from '@/helper/pathIdentity'
 import useEditorStore, { type EditorLayoutNode } from '@/stores/useEditorStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
 import { captureProtectedDraftSession } from './draft-recovery'
-import { recoverySessionSchema } from './draftSessionFormat'
+import { recoveryDocuments, recoverySessionSchema } from './draftSessionFormat'
 import { isPristineDocument } from './pristine-document'
 
 export const LAST_WINDOW_SESSION_KEY = 'window-session:last-active'
@@ -19,6 +20,7 @@ const layoutSchema: z.ZodType<EditorLayoutNode> = z.lazy(() =>
       id: z.string(),
       opened: z.array(z.string()),
       activeId: z.string().optional(),
+      previewId: z.string().optional(),
     }),
     z.object({
       type: z.literal('branch'),
@@ -75,10 +77,16 @@ export async function readWindowSession(
 export function restoreWindowDocuments(session: WindowSession) {
   // Draft placeholders are gated by staged recovery before the editor mounts.
   for (const file of session.files) createFile({ ...file, content: undefined })
+  const drafts = recoveryDocuments(session.drafts)
+  const draftIds = new Set(drafts.map((file) => file.id))
+  const draftPaths = new Set(drafts.flatMap((file) => file.path ? [getPathIdentityKey(file.path)] : []))
+  for (const file of session.files) {
+    if (file.path && draftPaths.has(getPathIdentityKey(file.path))) draftIds.add(file.id)
+  }
   useEditorStore
     .getState()
     .setEditorLayout(
-      filterSessionLayout(session.editorLayout, new Set(session.files.map((file) => file.id))),
+      filterSessionLayout(session.editorLayout, new Set(session.files.map((file) => file.id)), draftIds),
       session.activeGroupId,
     )
 }
@@ -86,14 +94,18 @@ export function restoreWindowDocuments(session: WindowSession) {
 export function filterSessionLayout(
   node: EditorLayoutNode,
   ids: ReadonlySet<string>,
+  permanentIds: ReadonlySet<string> = new Set(),
 ): EditorLayoutNode {
   if (node.type === 'branch')
-    return { ...node, children: node.children.map((child) => filterSessionLayout(child, ids)) }
+    return { ...node, children: node.children.map((child) => filterSessionLayout(child, ids, permanentIds)) }
   const opened = node.opened.filter((id) => ids.has(id))
   return {
     ...node,
     opened,
     activeId: node.activeId && ids.has(node.activeId) ? node.activeId : opened[0],
+    previewId: node.previewId && opened.includes(node.previewId) && !permanentIds.has(node.previewId)
+      ? node.previewId
+      : undefined,
   }
 }
 

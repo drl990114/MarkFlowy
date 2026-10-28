@@ -18,6 +18,7 @@ import { hasRenameConflict } from './rename-conflict'
 import { EmptyFolderStatus, LoadingIcon, NodeContainer } from './styles'
 import { SimpleTree } from './types'
 import { getFileNameFromPath } from './verify-file-name'
+import type { FileTreeOpenOptions } from './FileTree'
 
 export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   getCurrentFolderData: () => IFile[]
@@ -25,6 +26,7 @@ export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   setFolderData: (data: IFile[]) => void
   refreshDirectory?: (directory: IFile, previousDirectoryPath?: string) => Promise<void>
   onFocusActiveFile?: (id: string) => Promise<void> | void
+  onOpen?: (file: IFile, options: FileTreeOpenOptions) => void
   isRoot?: boolean
   onShowConfirm: (params: { title: string; onConfirm: () => void }) => void
   /** Let the host present a product-specific deletion confirmation. */
@@ -150,6 +152,7 @@ function FileNode({
   setFolderData,
   refreshDirectory,
   onFocusActiveFile,
+  onOpen,
   isRoot = false,
   onShowConfirm,
   onRequestDelete,
@@ -311,6 +314,7 @@ function FileNode({
         changes: { ...pendingNode.data, ...targetFile },
       })
       setFolderData(mutationTree.data)
+      if (targetFile.kind === 'file') onOpen?.(targetFile, { mode: 'permanent' })
       await refreshDirectory?.(currentParent.data)
     })
   }

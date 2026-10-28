@@ -1,6 +1,6 @@
 export { default as FileTree } from './FileTree'
 export { fileTreeHandler } from './FileTree'
-export type { FileTreeProps } from './FileTree'
+export type { FileTreeOpenOptions, FileTreeProps } from './FileTree'
 export { default as FileNode } from './FileNode'
 export { default as NewFileInput } from './NewFileInput'
 export { default as FileTreeStyles } from './FileTreeStyles'

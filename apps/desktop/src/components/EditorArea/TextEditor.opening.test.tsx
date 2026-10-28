@@ -89,7 +89,7 @@ vi.mock('./ExternalFileChangeAlert', () => ({ ExternalFileChangeAlert: () => nul
 vi.mock('./editorToolBar/FindReplace', () => ({ FindReplace: () => null }))
 vi.mock('@/stores/useAppSettingStore', () => {
   const state = { settingData: { autosave: false, autosave_interval: 1000, editor_root_font_size: 16, editor_root_line_height: '1.7' } }
-  return { default: Object.assign((selector: (value: typeof state) => unknown) => selector(state), { getState: () => state }) }
+  return { default: Object.assign((selector: (value: typeof state) => unknown) => selector(state), { getState: () => state, subscribe: () => () => {} }) }
 })
 vi.mock('@/stores/useThemeStore', () => ({ default: (selector: (value: { curTheme: { mode: string } }) => unknown) => selector({ curTheme: { mode: 'light' } }) }))
 vi.mock('./createWysiwygDelegateOptions', () => ({
@@ -147,16 +147,20 @@ afterEach(() => {
 })
 
 describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor document lifecycle', () => {
-  // These regressions exercise mounted documents. Prepare the real runtime
-  // outside their 5s behavior deadline so cold CI module loading has its own budget.
+  let history: typeof LocalHistory
+  // Prepare both real modules before taking per-test state snapshots. A cold
+  // import inside a timed-out test can resume later and clean up the next test.
   beforeAll(async () => {
-    await capricornRuntime.loadCapricornRuntimeFactory()
+    const [loadedHistory] = await Promise.all([
+      vi.importActual<typeof LocalHistory>('@/services/local-history'),
+      capricornRuntime.loadCapricornRuntimeFactory(),
+    ])
+    history = loadedHistory
   }, 30_000)
 
   it('keeps a hidden dirty document through its first split and saves its original draft', async () => {
     const previous = useEditorStore.getState()
     const previousRelease = vi.mocked(releaseClosedFileContent).getMockImplementation()
-    const history = await vi.importActual<typeof LocalHistory>('@/services/local-history')
     vi.mocked(releaseClosedFileContent).mockImplementation(history.releaseClosedFileContent)
     const alpha = 'first-split-alpha'
     const beta = 'first-split-beta'
@@ -212,7 +216,6 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor document lifecycle', (
   it('releases a closed clean document after its last editor unmounts', async () => {
     const previous = useEditorStore.getState()
     const previousRelease = vi.mocked(releaseClosedFileContent).getMockImplementation()
-    const history = await vi.importActual<typeof LocalHistory>('@/services/local-history')
     vi.mocked(releaseClosedFileContent).mockImplementation(history.releaseClosedFileContent)
     const id = 'closed-clean-editor'
     const group = 'closed-clean-group'

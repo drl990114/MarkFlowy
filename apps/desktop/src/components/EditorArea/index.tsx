@@ -60,6 +60,13 @@ function EditorArea() {
         }
       },
     })
+    const keepEditorOpenDisposable = commandRegistry.registerCommand({
+      id: EVENT.app_keepEditorOpen,
+      handler: () => {
+        const { activeGroupId, activeId, keepFileOpen } = useEditorStore.getState()
+        if (activeGroupId && activeId) keepFileOpen(activeGroupId, activeId)
+      },
+    })
     const splitEditorRightDisposable = commandRegistry.registerCommand({
       id: EVENT.app_splitEditorRight,
       handler: () => {
@@ -100,6 +107,7 @@ function EditorArea() {
     return () => {
       toggleEditorTypeDisposable.dispose()
       closeCurrentEditorTabDisposable.dispose()
+      keepEditorOpenDisposable.dispose()
       splitEditorRightDisposable.dispose()
       splitEditorDownDisposable.dispose()
     }

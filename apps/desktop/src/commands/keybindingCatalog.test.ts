@@ -9,6 +9,15 @@ import { KeybindingRegistry } from './KeybindingRegistry'
 import { editorKeymap, keybindingProblem } from './keybindingValidation'
 
 describe('command and binding contracts', () => {
+  it.each(['mac', 'windows', 'linux'] as const)('allows binding Keep Open without a default on %s', (platform) => {
+    expect(getDefaultKeybindings(platform).find((rule) => rule.command === 'app_keepEditorOpen')).toMatchObject({
+      configurable: true,
+      target: 'app',
+      keys: [],
+      when: 'always',
+    })
+  })
+
   it('defines unique rules with known commands and explicit editor adapters', () => {
     expect(new Set(keybindingCommands.map((command) => command.id)).size).toBe(
       keybindingCommands.length,

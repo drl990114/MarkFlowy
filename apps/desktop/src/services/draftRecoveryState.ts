@@ -8,9 +8,20 @@ interface PendingRecovery {
 }
 
 const pending = new Map<string, PendingRecovery>()
+const discoveries = new Set<symbol>()
 const completions = new Map<string, { version: number }>()
 const listeners = new Set<() => void>()
 const notify = () => listeners.forEach((listener) => listener())
+
+/** Until draft sources are indexed, a clean cached tab may still own unsaved
+ * content. Keep preview replacement blocked without changing its saved identity. */
+export const isDraftRecoveryDiscoveryPending = () => discoveries.size > 0
+
+export function beginDraftRecoveryDiscovery(): () => void {
+  const token = Symbol('draft-recovery-discovery')
+  discoveries.add(token)
+  return () => { discoveries.delete(token) }
+}
 
 /** Only successful recovery wakes an error surface. Cancellation also releases
  * the pending gate, but does not make its placeholder safe to mount. */

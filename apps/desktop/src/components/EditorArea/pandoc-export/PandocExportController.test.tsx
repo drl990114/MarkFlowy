@@ -64,6 +64,7 @@ vi.mock('@/services/app-setting', () => ({
 }))
 vi.mock('@/stores/useAppSettingStore', () => ({
   default: {
+    subscribe: () => () => {},
     getState: () => ({
       settingData: {
         pandoc_executable_path: settingsState.pandocExecutablePath,

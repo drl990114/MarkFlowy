@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
-  addOpenedFile: vi.fn(),
+  openFileInGroup: vi.fn(),
+  getActiveGroup: vi.fn(),
   createFile: vi.fn(),
   dirname: vi.fn(),
   getFileNodeByPath: vi.fn(),
@@ -12,7 +13,6 @@ const mocks = vi.hoisted(() => ({
   isAbsolute: vi.fn(),
   openUrl: vi.fn(),
   resolve: vi.fn(),
-  setActiveId: vi.fn(),
 }))
 
 vi.mock('@/helper/files', () => ({
@@ -29,10 +29,10 @@ vi.mock('@/helper/logger', () => ({
 vi.mock('@/stores/useEditorStore', () => ({
   default: {
     getState: () => ({
-      addOpenedFile: mocks.addOpenedFile,
+      openFileInGroup: mocks.openFileInGroup,
+      getActiveGroup: mocks.getActiveGroup,
       getFileNodeByPath: mocks.getFileNodeByPath,
       getRootPath: mocks.getRootPath,
-      setActiveId: mocks.setActiveId,
     }),
   },
 }))
@@ -50,6 +50,8 @@ describe('editor links', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     mocks.getRootPath.mockReturnValue('/workspace')
+    mocks.getActiveGroup.mockReturnValue({ id: 'main' })
+    mocks.openFileInGroup.mockReturnValue(true)
     mocks.getFileObject.mockReturnValue({
       id: 'source',
       name: 'source.md',
@@ -113,8 +115,7 @@ describe('editor links', () => {
 
     await expect(openEditorLink('./subfolder/test.md', 'source')).resolves.toBe(true)
 
-    expect(mocks.addOpenedFile).toHaveBeenCalledWith('target')
-    expect(mocks.setActiveId).toHaveBeenCalledWith('target')
+    expect(mocks.openFileInGroup).toHaveBeenCalledWith('main', 'target', { mode: 'permanent' })
     expect(mocks.openUrl).not.toHaveBeenCalled()
     expect(mocks.invoke).not.toHaveBeenCalled()
   })
@@ -139,8 +140,7 @@ describe('editor links', () => {
       ext: 'json',
       path: targetPath,
     })
-    expect(mocks.addOpenedFile).toHaveBeenCalledWith('created')
-    expect(mocks.setActiveId).toHaveBeenCalledWith('created')
+    expect(mocks.openFileInGroup).toHaveBeenCalledWith('main', 'created', { mode: 'permanent' })
   })
 
   it('opens external URLs in the browser', async () => {
@@ -173,7 +173,6 @@ describe('editor links', () => {
     await expect(openEditorLink('https://example.com')).resolves.toBe(true)
     settle('/workspace/notes/slow.md')
     await expect(old).resolves.toBe(true)
-    expect(mocks.setActiveId).not.toHaveBeenCalled()
-    expect(mocks.addOpenedFile).not.toHaveBeenCalled()
+    expect(mocks.openFileInGroup).not.toHaveBeenCalled()
   })
 })

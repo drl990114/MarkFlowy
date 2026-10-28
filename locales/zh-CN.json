@@ -400,7 +400,10 @@
       "export_pandoc_exit_code": "退出代码",
       "export_pandoc_error_message": "错误信息",
       "export_pandoc_error_details": "详细信息",
-      "export_image": "导出为图片"
+      "export_image": "导出为图片",
+      "keep_open": "保持打开",
+      "preview": "预览标签页",
+      "preview_hint": "预览标签页，双击以保持打开"
     }
   },
   "notification": {},
@@ -740,6 +743,13 @@
         },
         "default_value": "{{value}}（默认）",
         "typography_disabled": "“使用个人字体、字号与行高”已关闭，自定义字号和行高暂不生效。"
+      },
+      "tabs": {
+        "label": "标签页",
+        "enable_preview": {
+          "label": "启用预览标签页",
+          "desc": "单击文件树或搜索结果中的文件时复用预览标签页；双击或编辑后保持打开，保存后也不会被替换。"
+        }
       }
     },
     "image": {
@@ -1146,7 +1156,8 @@
       "editor_toggleH3": "切换到H3",
       "editor_toggleH4": "切换到H4",
       "editor_toggleH5": "切换到H5",
-      "editor_toggleH6": "切换到H6"
+      "editor_toggleH6": "切换到H6",
+      "app_keepEditorOpen": "保持打开"
     }
   },
   "ai": {

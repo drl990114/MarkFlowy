@@ -29,6 +29,14 @@ describe('AI setting map', () => {
 })
 
 describe('Editor setting map', () => {
+  it('enables preview tabs independently of the Markdown display mode', () => {
+    expect(getSettingMap().editor.Tabs.enablePreview).toMatchObject({
+      key: 'editor_enable_preview_tabs',
+      type: 'switch',
+      defaultValue: true,
+    })
+  })
+
   it('offers Preview as a Markdown default mode', () => {
     const options = getSettingMap().editor.Behavior.mdDefaultMode.options
 

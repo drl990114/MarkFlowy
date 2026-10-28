@@ -372,7 +372,10 @@
       "export_pandoc_exit_code": "終了コード",
       "export_pandoc_error_message": "メッセージ",
       "export_pandoc_error_details": "詳細",
-      "export_image": "画像にエクスポート"
+      "export_image": "画像にエクスポート",
+      "keep_open": "開いたままにする",
+      "preview": "プレビュータブ",
+      "preview_hint": "プレビュータブ — ダブルクリックで開いたままにします"
     }
   },
   "notification": {},
@@ -646,6 +649,13 @@
         },
         "default_value": "{{value}} (既定値)",
         "typography_disabled": "「個人設定のフォント、文字サイズ、行間を使用」がオフのため、カスタムの文字サイズと行の高さは現在適用されません。"
+      },
+      "tabs": {
+        "label": "タブ",
+        "enable_preview": {
+          "label": "プレビュータブを有効にする",
+          "desc": "エクスプローラーや検索結果のファイルをシングルクリックすると、プレビュータブを再利用します。ダブルクリックまたは編集すると開いたままになり、保存後も置き換えられません。"
+        }
       }
     },
     "keyboard": {
@@ -1113,7 +1123,8 @@
       "editor_toggleH3": "H3 に切り替える",
       "editor_toggleH4": "H4 に切り替える",
       "editor_toggleH5": "H5 に切り替える",
-      "editor_toggleH6": "H6 に切り替える"
+      "editor_toggleH6": "H6 に切り替える",
+      "app_keepEditorOpen": "開いたままにする"
     }
   },
   "request": {

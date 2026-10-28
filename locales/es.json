@@ -367,7 +367,10 @@
       "export_pandoc_exit_code": "Código de salida",
       "export_pandoc_error_message": "Mensaje",
       "export_pandoc_error_details": "Detalles",
-      "export_image": "Exportar como imagen"
+      "export_image": "Exportar como imagen",
+      "keep_open": "Mantener abierto",
+      "preview": "Pestaña de vista previa",
+      "preview_hint": "Pestaña de vista previa: haz doble clic para mantenerla abierta"
     }
   },
   "notification": {},
@@ -641,6 +644,13 @@
         },
         "default_value": "{{value}} (predeterminado)",
         "typography_disabled": "«Usar fuentes, tamaño e interlineado personales» está desactivado. El tamaño de letra y la altura de línea personalizados no se aplican actualmente."
+      },
+      "tabs": {
+        "label": "Pestañas",
+        "enable_preview": {
+          "label": "Activar pestañas de vista previa",
+          "desc": "Un clic en un archivo del explorador o de los resultados de búsqueda reutiliza una pestaña de vista previa. Haz doble clic o edita para mantenerla abierta, incluso después de guardar."
+        }
       }
     },
     "keyboard": {
@@ -1113,7 +1123,8 @@
       "editor_toggleH3": "Alternar a H3",
       "editor_toggleH4": "Alternar a H4",
       "editor_toggleH5": "Alternar a H5",
-      "editor_toggleH6": "Alternar a H6"
+      "editor_toggleH6": "Alternar a H6",
+      "app_keepEditorOpen": "Mantener abierto"
     }
   },
   "request": {

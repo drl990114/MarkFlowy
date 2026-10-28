@@ -56,6 +56,11 @@
       "target": "app"
     },
     {
+      "id": "app_keepEditorOpen",
+      "configurable": true,
+      "target": "app"
+    },
+    {
       "id": "app_hide",
       "configurable": true,
       "target": "app"
@@ -281,6 +286,12 @@
       "id": "app_closeCurrentEditorTab.default",
       "command": "app_closeCurrentEditorTab",
       "keys": ["CommandOrCtrl", "w"],
+      "when": "always"
+    },
+    {
+      "id": "app_keepEditorOpen.default",
+      "command": "app_keepEditorOpen",
+      "keys": [],
       "when": "always"
     },
     {

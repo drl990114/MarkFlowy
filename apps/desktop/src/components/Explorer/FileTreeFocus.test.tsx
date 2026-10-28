@@ -5,6 +5,7 @@ import { ThemeProvider } from 'styled-components'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import FileTree, {
   fileTreeHandler,
+  type FileTreeOpenOptions,
 } from '../../../../../packages/interface/src/components/FileTree/FileTree'
 import { SimpleTree } from '../../../../../packages/interface/src/components/FileTree/types'
 import {
@@ -68,13 +69,17 @@ function Harness({
   initialChildren = [],
   rootPath = '/workspace',
   onSelect = vi.fn(),
+  onOpen,
   onPathsChange = vi.fn(),
+  stickyRoot = true,
 }: {
   active?: IFile | null
   initialChildren?: IFile[]
   rootPath?: string
   onSelect?: (file: IFile) => void
+  onOpen?: (file: IFile, options: FileTreeOpenOptions) => void
   onPathsChange?: (paths: string[]) => void
+  stickyRoot?: boolean
 }) {
   const [data, setData] = useState<IFile[]>([
     { id: 'root', kind: 'dir', name: 'Workspace', path: rootPath, children: initialChildren },
@@ -111,10 +116,11 @@ function Harness({
             getFileObjectByPath={() => undefined}
             iconButtonComponent={ActionButton}
             onSelect={onSelect}
+            onOpen={onOpen}
             onShowConfirm={vi.fn()}
             onShowContextMenu={vi.fn()}
             rowHeight={26}
-            stickyRoot
+            stickyRoot={stickyRoot}
           />
         </FileTreeContext.Provider>
       </FileSystemContext.Provider>
@@ -149,6 +155,41 @@ beforeEach(() => {
 afterEach(() => {
   cleanup()
   vi.restoreAllMocks()
+})
+
+describe('FileTree user opening intent', () => {
+  it.each([true, false])('previews on click/Space and keeps on double click/Enter with sticky root %s', async (stickyRoot) => {
+    const onOpen = vi.fn()
+    render(<Harness active={null} initialChildren={[activeFile]} onOpen={onOpen} stickyRoot={stickyRoot} />)
+    const label = await screen.findByText(activeFile.name)
+    const row = label.closest<HTMLElement>('[role="treeitem"]')!
+
+    fireEvent.click(label)
+    expect(onOpen).toHaveBeenLastCalledWith(activeFile, { mode: 'preview' })
+    fireEvent.doubleClick(label)
+    expect(onOpen).toHaveBeenLastCalledWith(activeFile, { mode: 'permanent' })
+    fireEvent.keyDown(row, { key: ' ' })
+    expect(onOpen).toHaveBeenLastCalledWith(activeFile, { mode: 'preview' })
+    fireEvent.keyDown(row, { key: 'Enter' })
+    expect(onOpen).toHaveBeenLastCalledWith(activeFile, { mode: 'permanent' })
+    expect(onOpen).toHaveBeenCalledTimes(4)
+    fireEvent.click(label, { ctrlKey: true })
+    expect(onOpen).toHaveBeenLastCalledWith(activeFile, { mode: 'preview' })
+    expect(onOpen).toHaveBeenCalledTimes(5)
+    expect(document.querySelector('.mf-file-tree-name-input')).toBeNull()
+  })
+
+  it('keeps selection synchronization, arrows, and Focus Active File separate from opening', async () => {
+    const onOpen = vi.fn()
+    const view = render(<Harness active={null} initialChildren={[activeFile]} onOpen={onOpen} />)
+    const row = (await screen.findByText(activeFile.name)).closest<HTMLElement>('[role="treeitem"]')!
+    act(() => fileTreeHandler.rootTree?.select(activeFile.id))
+    fireEvent.keyDown(row, { key: 'ArrowUp' })
+    view.rerender(<Harness active={activeFile} initialChildren={[activeFile]} onOpen={onOpen} />)
+    clickRootAction('Focus Active File')
+    await expectActiveRow()
+    expect(onOpen).not.toHaveBeenCalled()
+  })
 })
 
 describe('FileTree Focus Active File', () => {

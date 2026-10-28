@@ -1402,6 +1402,7 @@ function TextEditor(props: TextEditorProps) {
           return true
         }
         if (!canBeginSave()) return false
+        if (!params.autosave && groupId) useEditorStore.getState().keepFileOpen(groupId, id)
 
         const fileBeforeFlush = getFileObject(id) ?? curFile
         if (!fileBeforeFlush) return false
@@ -1663,7 +1664,7 @@ function TextEditor(props: TextEditorProps) {
         )
       }, params)
     },
-    [active, id, delegate, t, insertNodeToFolderData, snapshotPublisher],
+    [active, groupId, id, delegate, t, insertNodeToFolderData, snapshotPublisher],
   )
 
   const debounceSave = useDebouncedAutosave(() => saveHandler({ active: true, autosave: true }), {

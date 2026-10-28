@@ -399,7 +399,10 @@
       "export_pandoc_exit_code": "Exit code",
       "export_pandoc_error_message": "Message",
       "export_pandoc_error_details": "Details",
-      "export_image": "Export to Image"
+      "export_image": "Export to Image",
+      "keep_open": "Keep Open",
+      "preview": "Preview tab",
+      "preview_hint": "Preview tab — double-click to keep open"
     }
   },
   "notification": {},
@@ -451,7 +454,8 @@
       "editor_toggleH3": "toggle to H3",
       "editor_toggleH4": "toggle to H4",
       "editor_toggleH5": "toggle to H5",
-      "editor_toggleH6": "toggle to H6"
+      "editor_toggleH6": "toggle to H6",
+      "app_keepEditorOpen": "Keep Open"
     }
   },
   "text_encoding": {
@@ -709,6 +713,13 @@
         },
         "default_value": "{{value}} (default)",
         "typography_disabled": "“Use personal fonts, size and line height” is off. Custom font size and line height are not currently applied."
+      },
+      "tabs": {
+        "label": "Tabs",
+        "enable_preview": {
+          "label": "Enable preview tabs",
+          "desc": "Single-click files in the Explorer or search results to reuse a preview tab. Double-click or edit to keep it open. Saved tabs stay open."
+        }
       }
     },
     "keyboard": {

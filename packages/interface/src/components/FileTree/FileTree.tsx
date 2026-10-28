@@ -44,6 +44,7 @@ function fileTreePathKey(path: string) {
 }
 
 type FileTreeRowState = {
+  onOpen?: FileTreeProps['onOpen']
   revealRoot?: () => void
   rootId?: string
   suppressRoot: boolean
@@ -67,7 +68,9 @@ export interface FileTreeProps {
   /** Persistent directory paths supplied by the host; IDs may change between sessions. */
   expandedPaths?: readonly string[]
   onExpandedPathsChange?: (paths: string[]) => void
-  onSelect: (file: IFile) => void
+  onSelect?: (file: IFile) => void
+  /** User opening intent, independent of programmatic selection and reveal. */
+  onOpen?: (file: IFile, options: FileTreeOpenOptions) => void
   dndRootElement?: Node | null
   disableDrag?: boolean
   /** Hide tree operations when the backing adapter only supports reading existing files. */
@@ -113,6 +116,10 @@ export interface FileTreeProps {
   rowHeight?: number
 }
 
+export interface FileTreeOpenOptions {
+  mode: 'preview' | 'permanent'
+}
+
 export function shouldShowFileTreeStickyRoot(scrollOffset: number) {
   return scrollOffset > 0
 }
@@ -133,6 +140,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
     expandedPaths,
     onExpandedPathsChange,
     onSelect,
+    onOpen,
     dndRootElement,
     disableDrag = false,
     disableFileOperations = false,
@@ -225,8 +233,8 @@ const FileTree: FC<FileTreeProps> = (props) => {
   )
   const revealRoot = useCallback(() => setShowStickyRoot(false), [])
   const fileTreeRowState = useMemo<FileTreeRowState>(
-    () => ({ revealRoot, rootId, suppressRoot: stickyRoot && showStickyRoot }),
-    [revealRoot, rootId, showStickyRoot, stickyRoot],
+    () => ({ onOpen, revealRoot, rootId, suppressRoot: stickyRoot && showStickyRoot }),
+    [onOpen, revealRoot, rootId, showStickyRoot, stickyRoot],
   )
 
   const handleScroll = useCallback<NonNullable<TreeProps<IFile>['onScroll']>>(
@@ -633,7 +641,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
 
   const handleSelect = (nodes: { data: IFile }[] | null | undefined) => {
     if (nodes && nodes.length > 0 && nodes[0]?.data) {
-      onSelect(nodes[0].data)
+      onSelect?.(nodes[0].data)
     }
   }
 
@@ -650,6 +658,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
       setFolderData={commitFolderData}
       refreshDirectory={refreshDirectory}
       onFocusActiveFile={focusActiveFile}
+      onOpen={onOpen}
       isRoot={isRoot}
       onShowConfirm={onShowConfirm}
       onRequestDelete={onRequestDelete ? requestDelete : undefined}
@@ -722,7 +731,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
               indent={indentSize}
               rowHeight={rowHeight}
               rowClassName='mf-file-tree-item'
-              renderRow={stickyRoot ? FileTreeRow : undefined}
+              renderRow={stickyRoot || onOpen ? FileTreeRow : undefined}
               disableMultiSelection
               onSelect={handleSelect}
               onMove={onMove}
@@ -786,7 +795,11 @@ const FileTree: FC<FileTreeProps> = (props) => {
             </Tree>
           )
 
-          if (!stickyRoot) return treeElement
+          if (!stickyRoot) return (
+            <FileTreeRowStateContext.Provider value={fileTreeRowState}>
+              {treeElement}
+            </FileTreeRowStateContext.Provider>
+          )
 
           const rootTree = treeRef.current
           const rootNode = rootTree?.get(rootId ?? null)
@@ -885,6 +898,7 @@ export function FileTreeRow({
   const suppressRoot = suppressRootOverride ?? rowState.suppressRoot
   const isRoot = node.id === rootId
   const suppressed = isRoot && suppressRoot
+  const canOpen = Boolean(rowState.onOpen) && node.data.kind === 'file' && !node.isEditing
 
   return (
     <div
@@ -893,7 +907,23 @@ export function FileTreeRow({
       aria-label={suppressed ? node.data.name : attrs['aria-label']}
       data-mf-file-tree-root-row={isRoot || undefined}
       data-mf-file-tree-root-row-suppressed={suppressed || undefined}
-      onClick={node.handleClick}
+      onClick={(event) => {
+        node.handleClick(event)
+        if (canOpen && !event.defaultPrevented) {
+          rowState.onOpen?.(node.data, { mode: 'preview' })
+        }
+      }}
+      onDoubleClick={(event) => {
+        if (!canOpen || event.defaultPrevented) return
+        rowState.onOpen?.(node.data, { mode: 'permanent' })
+      }}
+      onKeyDown={(event) => {
+        if (!canOpen || event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) return
+        event.preventDefault()
+        event.stopPropagation()
+        node.select()
+        rowState.onOpen?.(node.data, { mode: event.key === 'Enter' ? 'permanent' : 'preview' })
+      }}
       onFocus={(event) => {
         if (suppressed) revealRoot?.()
         event.stopPropagation()

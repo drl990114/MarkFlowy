@@ -26,7 +26,20 @@ describe('settings transactions', () => {
     mocks.invoke.mockRejectedValueOnce(new Error('config unavailable'))
     const defaults = await appSettingStoreSetup()
     expect(defaults.open_file_in_new_window).toBe(true)
+    expect(defaults.editor_enable_preview_tabs).toBe(true)
     expect(useAppSettingStore.getState().settingData.open_file_in_new_window).toBe(true)
+  })
+
+  it('persists the preview-tab preference without changing other editor settings', async () => {
+    await writeSettingData({ key: 'editor_enable_preview_tabs' }, false)
+    expect(mocks.invoke).toHaveBeenCalledWith('save_app_conf', {
+      data: { editor_enable_preview_tabs: false },
+    })
+    expect(useAppSettingStore.getState().settingData).toEqual({
+      language: 'en',
+      theme_mode: 'light',
+      editor_enable_preview_tabs: false,
+    })
   })
 
   it('persists disabling new windows while preserving other settings', async () => {

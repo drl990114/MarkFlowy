@@ -44,7 +44,8 @@ vi.mock('@/stores', () => ({
     getState: () => ({
       opened: mocks.opened,
       activeId: mocks.activeId,
-      setActiveId: mocks.activate,
+      getActiveGroup: () => ({ id: 'main' }),
+      openFileInGroup: mocks.activate,
     }),
   },
   useEditorStateStore: { getState: () => ({ idStateMap: new Map() }) },
@@ -104,8 +105,9 @@ beforeEach(async () => {
   mocks.snapshotBytes = new TextEncoder().encode('# target')
   mocks.activeId = 'other'
   mocks.opened = ['target', 'other']
-  mocks.activate.mockImplementation((id) => {
+  mocks.activate.mockImplementation((_groupId, id) => {
     mocks.activeId = id
+    return true
   })
   mocks.hasCommand.mockReturnValue(true)
   mocks.render.mockResolvedValue(new TextEncoder().encode('<p>target</p>'))
@@ -330,7 +332,7 @@ describe('targeted CLI operations', () => {
         content: Array.from(new TextEncoder().encode('<p>target</p>')),
       }),
     )
-    expect(mocks.activate).toHaveBeenCalledWith('target')
+    expect(mocks.activate).toHaveBeenCalledWith('main', 'target', { mode: 'permanent' })
     expect(settled).toBe(false)
     completeWrite({ path: '/out/target.html', bytes: 13, sha256: 'verified' })
     expect(await pending).toMatchObject({

@@ -33,7 +33,7 @@ import {
   type DraftDescriptor,
   type RecoveryDocument,
 } from './draftSessionFormat'
-import { registerDraftRecovery, isDraftRecoveryPending } from './draftRecoveryState'
+import { beginDraftRecoveryDiscovery, registerDraftRecovery, isDraftRecoveryPending } from './draftRecoveryState'
 import { persistentDiskRevision } from './draftDiskRevision'
 import type { WindowSession } from './window-session'
 import {
@@ -286,6 +286,7 @@ export async function stageDraftRecovery({
   const controller = new AbortController()
   activeRecovery?.abort()
   activeRecovery = controller
+  const finishDiscovery = beginDraftRecoveryDiscovery()
   const jobs = new Map<string, RecoveryJob>()
   const sourceJobs = new Map<RecoverySource, Set<RecoveryJob>>()
   const nativeJobs = new Map<string, RecoveryJob>()
@@ -294,11 +295,11 @@ export async function stageDraftRecovery({
   let stopBackground = () => {}
   const abort = () => controller.abort()
   signal?.addEventListener('abort', abort, { once: true })
-  if (signal?.aborted) abort()
   const stopWorkspaceWatch = useEditorStore.subscribe((state) => {
     if (state.getRootPath() !== rootPath) abort()
   })
   const cleanup = () => {
+    finishDiscovery()
     signal?.removeEventListener('abort', abort)
     stopWorkspaceWatch()
     stopBackground()
@@ -315,8 +316,22 @@ export async function stageDraftRecovery({
     },
     { once: true },
   )
+  if (signal?.aborted) abort()
+  if (controller.signal.aborted) {
+    cleanup()
+    return { visibleReady: Promise.resolve(), finished: Promise.resolve(0) }
+  }
   const { sources, errors } = await readSources(cache, reload, session, isolatedWindow, reopenPaths, freshWindow)
-  errors.forEach(onError)
+    .catch((error: unknown) => {
+      abort()
+      throw error
+    })
+  try {
+    errors.forEach(onError)
+  } catch (error) {
+    abort()
+    throw error
+  }
   if (controller.signal.aborted) {
     cleanup()
     return { visibleReady: Promise.resolve(), finished: Promise.resolve(0) }
@@ -803,10 +818,15 @@ export async function stageDraftRecovery({
       preferredActiveId || useEditorStore.getState().activeId || jobs.keys().next().value
     if (active && canRestoreFocus && active !== useEditorStore.getState().activeId)
       useEditorStore.getState().setActiveId(active)
+    // Every indexed draft is now registered and dirty. Their per-file recovery
+    // gates protect content while the remaining body reads continue.
+    finishDiscovery()
     await startDraftProtection().catch(onError)
   } catch (error) {
     abort()
     throw error
+  } finally {
+    finishDiscovery()
   }
 
   const activeId = useEditorStore.getState().activeId

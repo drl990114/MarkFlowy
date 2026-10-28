@@ -20,7 +20,7 @@ import {
   type DraftSession,
   type DraftSessionStore,
 } from './draft-recovery'
-import { isDraftRecoveryPending, keepDraftRecoveryAndClose, waitForDraftRecovery, waitForAllDraftRecovery } from './draftRecoveryState'
+import { isDraftRecoveryDiscoveryPending, isDraftRecoveryPending, keepDraftRecoveryAndClose, waitForDraftRecovery, waitForAllDraftRecovery } from './draftRecoveryState'
 import { bindRecoveredDraft, flushDraftProtection, historyCall, historyWorkspace, protectLocalEdit, retainHistoryDraftOnClose } from './local-history'
 import { dialog } from './dialog'
 import { stageDraftRecovery } from './staged-draft-recovery'
@@ -158,6 +158,70 @@ const sessionFor = (windowLabel: string, item: DraftDescriptor): WindowSession =
   drafts: { version: 2, activeId: 'saved-tab', documents: [{
     ...nativeRecoveryDocument(item), id: 'saved-tab', source: { kind: 'native', draft: item },
   }] },
+})
+
+describe('draft discovery protection', () => {
+  it('protects cached previews until every discovered draft has been registered and marked dirty', async () => {
+    let resolveIndex!: (documents: DraftDescriptor[]) => void
+    const index = new Promise<DraftDescriptor[]>((resolve) => { resolveIndex = resolve })
+    vi.mocked(historyCall).mockImplementation(async (operation) => operation === 'recoveryDraftIndex' ? index : [])
+    open('one')
+    useEditorStore.getState().setEditorLayout({
+      type: 'leaf', id: 'group', opened: ['one'], activeId: 'one', previewId: 'one',
+    }, 'group')
+    const dirtyDiscoveryStates: boolean[] = []
+    cleanups.push(useEditorStateStore.subscribe((state) => {
+      if (state.idStateMap.get('one')?.hasUnsavedChanges) {
+        dirtyDiscoveryStates.push(isDraftRecoveryDiscoveryPending())
+      }
+    }))
+    const { cache } = cacheFor([draft('one')])
+    const recoveryPromise = start({ cache, onError: vi.fn() })
+    expect(isDraftRecoveryDiscoveryPending()).toBe(true)
+    expect(useEditorStore.getState().getActiveGroup()?.previewId).toBe('one')
+    resolveIndex([])
+    const recovery = await recoveryPromise
+    expect(dirtyDiscoveryStates).toContain(true)
+    expect(isDraftRecoveryDiscoveryPending()).toBe(false)
+    expect(useEditorStore.getState().getActiveGroup()?.previewId).toBeUndefined()
+    settle('one')
+    await recovery.finished
+  })
+
+  it('releases aborted discovery immediately without a late older result clearing the next discovery', async () => {
+    const releaseIndexes: ((documents: DraftDescriptor[]) => void)[] = []
+    vi.mocked(historyCall).mockImplementation(async (operation) => operation === 'recoveryDraftIndex'
+      ? new Promise<DraftDescriptor[]>((resolve) => { releaseIndexes.push(resolve) })
+      : [])
+    const first = start({ onError: vi.fn() })
+    expect(isDraftRecoveryDiscoveryPending()).toBe(true)
+    const controller = new AbortController()
+    const second = start({ onError: vi.fn(), signal: controller.signal })
+    releaseIndexes[0]([])
+    await first
+    expect(isDraftRecoveryDiscoveryPending()).toBe(true)
+    controller.abort()
+    expect(isDraftRecoveryDiscoveryPending()).toBe(false)
+    releaseIndexes[1]([])
+    await second
+    expect(isDraftRecoveryDiscoveryPending()).toBe(false)
+  })
+
+  it('releases discovery if source error reporting fails', async () => {
+    vi.mocked(historyCall).mockRejectedValue(new Error('index unavailable'))
+    const onError = vi.fn(() => { throw new Error('report failed') })
+    await expect(start({ onError })).rejects.toThrow('report failed')
+    expect(isDraftRecoveryDiscoveryPending()).toBe(false)
+  })
+
+  it('does not start source reads for an already aborted discovery', async () => {
+    const controller = new AbortController()
+    controller.abort()
+    const recovery = await start({ onError: vi.fn(), signal: controller.signal })
+    await recovery.finished
+    expect(isDraftRecoveryDiscoveryPending()).toBe(false)
+    expect(historyCall).not.toHaveBeenCalled()
+  })
 })
 
 describe('indexed draft recovery', () => {

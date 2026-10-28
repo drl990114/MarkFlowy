@@ -5,12 +5,15 @@ import { editorSnapshotRegistry } from '@/components/EditorArea/editorSnapshotRe
 import { createFile, FileResultCode, getFolderPathFromPath, isMdFile, releaseSecurityScope, type IFile } from '@/helper/filesys'
 import { getPathIdentityKey } from '@/helper/pathIdentity'
 import { isEmptyEditor } from '@/services/editor-file'
+import { isDraftRecoveryDiscoveryPending } from '@/services/draftRecoveryState'
 import { invoke } from '@tauri-apps/api/core'
 import { nanoid } from 'nanoid'
 import type { EditorContext, EditorDelegate } from 'rme'
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { toast } from 'zens'
+import useAppSettingStore from './useAppSettingStore'
+import useEditorStateStore from './useEditorStateStore'
 
 const findParentNode = (fileNode: IFile, rootFile: IFile) => {
   const dfs = (file: IFile): undefined | IFile => {
@@ -79,6 +82,11 @@ export type EditorSplitDirection = 'horizontal' | 'vertical'
 export type EditorSplitPlacement = 'before' | 'after'
 export type EditorLayoutNode = EditorLayoutBranch | EditorLayoutLeaf
 
+export interface OpenFileInGroupOptions {
+  activate?: boolean
+  mode?: 'preview' | 'permanent'
+}
+
 export interface EditorLayoutBranch {
   type: 'branch'
   id: string
@@ -92,6 +100,7 @@ export interface EditorLayoutLeaf {
   id: string
   opened: string[]
   activeId?: string
+  previewId?: string
 }
 
 const createEditorLeaf = (opened: string[] = [], activeId?: string): EditorLayoutLeaf => ({
@@ -106,6 +115,13 @@ const createDefaultEditorLayout = () => createEditorLeaf()
 const isEditorLeaf = (node: EditorLayoutNode): node is EditorLayoutLeaf => node.type === 'leaf'
 
 const unique = (ids: string[]) => Array.from(new Set(ids.filter(Boolean)))
+
+const canPreviewFile = (id: string) => {
+  const file = getFileObject(id)
+  return useAppSettingStore.getState().settingData.editor_enable_preview_tabs !== false &&
+    file?.kind === 'file' && Boolean(file.path) &&
+    !useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges
+}
 
 const normalizeSizes = (length: number) => {
   if (length <= 0) return []
@@ -386,6 +402,11 @@ const cloneEditorLayout = (node: EditorLayoutNode): EditorLayoutNode => {
 
 const commitEditorLayoutState = (layout: EditorLayoutNode, activeGroupId?: string) => {
   const editorLayout = cloneEditorLayout(pruneEmptyEditorGroups(layout))
+  for (const group of getAllGroups(editorLayout)) {
+    if (group.previewId && (!group.opened.includes(group.previewId) || !canPreviewFile(group.previewId))) {
+      delete group.previewId
+    }
+  }
   return {
     editorLayout,
     ...syncEditorLayoutState(editorLayout, activeGroupId),
@@ -432,6 +453,7 @@ const flushBeforeEditorRemount = (
 
 const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) => {
   const initialEditorLayout = createDefaultEditorLayout()
+  let openRequestRevision = 0
   const applyLayoutChange = (
     previous: EditorLayoutNode,
     next: EditorLayoutNode,
@@ -724,30 +746,76 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
     },
 
     openFileInGroup: (groupId, id, options = {}) => {
-      const previous = get()
+      const requestRevision = ++openRequestRevision
+      let previous = get()
       const previousGroup = findGroup(previous.editorLayout, groupId) || getFirstGroup(previous.editorLayout)
-      if (previousGroup && options.activate !== false && previousGroup.activeId !== id) {
-        beginEditorOpenMeasurement(id, { viewId: previousGroup.id, kind: previousGroup.opened.includes(id) ? 'switch' : 'open' })
+      if (!previousGroup) return false
+      // Legacy activation actions mutate the old leaf before committing a clone.
+      // Snapshot values, rather than retaining that leaf as the reentry guard.
+      const previousOpened = [...previousGroup.opened]
+      const previousActiveId = previousGroup.activeId
+      const previousActiveGroupId = previous.activeGroupId
+      const previousSessionRevision = previous.editorSessionRevision
+      const previewId = previousGroup.previewId
+      if (
+        options.mode === 'preview' && canPreviewFile(id) &&
+        !previousGroup.opened.includes(id) && previewId && previousGroup.opened.includes(previewId) && previewId !== id &&
+        canPreviewFile(previewId)
+      ) {
+        if (isDraftRecoveryDiscoveryPending()) return false
+        try {
+          editorSnapshotRegistry.flushForRead(previewId)
+        } catch (error) {
+          toast.error(error instanceof Error ? error.message : String(error))
+          return false
+        }
+        const latest = get()
+        const latestGroup = findGroup(latest.editorLayout, previousGroup.id)
+        // A flush can promote a dirty preview synchronously. Rebase that change,
+        // but never override a newer open, navigation, or workspace switch.
+        if (
+          requestRevision !== openRequestRevision ||
+          latest.editorSessionRevision !== previousSessionRevision ||
+          latest.activeGroupId !== previousActiveGroupId ||
+          !latestGroup || latestGroup.activeId !== previousActiveId ||
+          latestGroup.opened.length !== previousOpened.length ||
+          latestGroup.opened.some((openedId, index) => openedId !== previousOpened[index]) ||
+          (latestGroup.previewId && latestGroup.previewId !== previewId)
+        ) return false
+        previous = latest
       }
-      set((state) => {
-        const group = findGroup(state.editorLayout, groupId) || getFirstGroup(state.editorLayout)
-        if (!group) return state
-
-        addFileToGroup(group, id)
-        if (options.activate !== false) {
-          group.activeId = id
+      const layout = cloneEditorLayout(previous.editorLayout)
+      const group = findGroup(layout, previousGroup.id)
+      if (!group) return false
+      const alreadyOpen = group.opened.includes(id)
+      const preview = options.mode === 'preview' && canPreviewFile(id)
+      if (!alreadyOpen) {
+        if (preview && group.previewId && group.opened.includes(group.previewId) && canPreviewFile(group.previewId)) {
+          group.opened.splice(group.opened.indexOf(group.previewId), 1, id)
+        } else {
+          addFileToGroup(group, id)
         }
+        if (preview) group.previewId = id
+      }
+      if ((options.mode === 'permanent' || !canPreviewFile(id)) && group.previewId === id) {
+        delete group.previewId
+      }
+      if (options.activate !== false && previousActiveId !== id) {
+        beginEditorOpenMeasurement(id, { viewId: previousGroup.id, kind: previousOpened.includes(id) ? 'switch' : 'open' })
+      }
+      if (options.activate !== false) group.activeId = id
+      return applyLayoutChange(
+        previous.editorLayout, layout,
+        options.activate === false ? previous.activeGroupId : group.id,
+      )
+    },
 
-        const synced = commitEditorLayoutState(
-          state.editorLayout,
-          options.activate === false ? state.activeGroupId : group.id,
-        )
-
-        return {
-          ...state,
-          ...synced,
-        }
-      })
+    keepFileOpen: (groupId, id) => {
+      const state = get()
+      if (findGroup(state.editorLayout, groupId)?.previewId !== id) return
+      const layout = cloneEditorLayout(state.editorLayout)
+      delete findGroup(layout, groupId)!.previewId
+      set(commitEditorLayoutState(layout, state.activeGroupId))
     },
 
     closeFileInGroup: (groupId, id) => {
@@ -790,6 +858,9 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
 
       if (!sourceGroup || !targetGroup || !sourceGroup.opened.includes(id)) return
 
+      if (sourceGroup.previewId === id) delete sourceGroup.previewId
+      if (targetGroup.previewId === id) delete targetGroup.previewId
+
       if (sourceGroup.id === targetGroup.id) {
         if (typeof targetIndex === 'number') {
           const sourceIndex = targetGroup.opened.indexOf(id)
@@ -826,7 +897,12 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
       const state = get()
       const sourceGroup = findGroup(state.editorLayout, groupId)
       if (!sourceGroup) return
-      const result = splitGroupInLayout(state.editorLayout, groupId, direction, insertion)
+      const layout = cloneEditorLayout(state.editorLayout)
+      const splittingGroup = findGroup(layout, groupId)!
+      if (splittingGroup.previewId === (splittingGroup.activeId || splittingGroup.opened[0])) {
+        delete splittingGroup.previewId
+      }
+      const result = splitGroupInLayout(layout, groupId, direction, insertion)
       if (!result.newGroup) return
 
       // A new sibling needs the latest source, and wrapping the source leaf in
@@ -997,7 +1073,8 @@ type EditorStore = {
   setActiveGroupId: (groupId: string) => void
   getActiveGroup: () => EditorLayoutLeaf | undefined
   getGroup: (groupId: string) => EditorLayoutLeaf | undefined
-  openFileInGroup: (groupId: string, id: string, options?: { activate?: boolean }) => void
+  openFileInGroup: (groupId: string, id: string, options?: OpenFileInGroupOptions) => boolean
+  keepFileOpen: (groupId: string, id: string) => void
   closeFileInGroup: (groupId: string, id: string) => void
   closeOtherFilesInGroup: (groupId: string, id: string) => void
   closeAllFilesInGroup: (groupId: string) => void
@@ -1032,5 +1109,20 @@ type EditorStore = {
   clearEditorResources: (id: string) => void
   getEditorCtx: (id: string) => EditorContext | undefined
 }
+
+// These synchronous subscriptions cover all document mutation paths, including
+// composition and draft recovery, before a delayed snapshot or autosave runs.
+const normalizePreviewTabs = () => {
+  const state = useEditorStore.getState()
+  if (getAllGroups(state.editorLayout).some((group) => group.previewId && !canPreviewFile(group.previewId))) {
+    useEditorStore.setState(commitEditorLayoutState(state.editorLayout, state.activeGroupId))
+  }
+}
+const stopDirtyPreviewSubscription = useEditorStateStore.subscribe(normalizePreviewTabs)
+const stopPreviewSettingSubscription = useAppSettingStore.subscribe(normalizePreviewTabs)
+if (import.meta.hot) import.meta.hot.dispose(() => {
+  stopDirtyPreviewSubscription()
+  stopPreviewSettingSubscription()
+})
 
 export default useEditorStore

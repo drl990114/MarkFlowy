@@ -106,8 +106,8 @@ export async function openEditorLink(href: string, sourceFileId?: string): Promi
   }
 
   if (!isCurrentLinkNavigation(navigation)) return true
-  editor.addOpenedFile(targetFile.id)
-  editor.setActiveId(targetFile.id)
+  const group = useEditorStore.getState().getActiveGroup()
+  if (!group || !editor.openFileInGroup(group.id, targetFile.id, { mode: 'permanent' })) return false
   const fragment = resourceFragment(target)
   if (fragment !== undefined) {
     const reached = await navigateLinkFragment(targetFile.id, fragment, navigation)

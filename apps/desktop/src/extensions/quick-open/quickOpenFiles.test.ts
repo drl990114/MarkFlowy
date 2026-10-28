@@ -42,6 +42,19 @@ beforeEach(() => {
 })
 
 describe('Quick Open file inventory', () => {
+  it('keeps an existing preview open when selected through Quick Open', () => {
+    const file = createFile({ name: 'note.md', path: '/workspace/note.md', content: 'kept source' })
+    useEditorStore.getState().openFileInGroup('group', file.id, { mode: 'preview' })
+    expect(useEditorStore.getState().getGroup('group')?.previewId).toBe(file.id)
+
+    expect(openQuickOpenFile(entry(file.path!))?.id).toBe(file.id)
+    expect(useEditorStore.getState().getGroup('group')?.previewId).toBeUndefined()
+    const next = createFile({ name: 'next.md', path: '/workspace/next.md' })
+    useEditorStore.getState().openFileInGroup('group', next.id, { mode: 'preview' })
+    expect(useEditorStore.getState().getGroup('group')?.opened).toEqual([file.id, next.id])
+    expect(getFileObject(file.id).content).toBe('kept source')
+  })
+
   it('scans names only with user exclusions and includes files from unopened directories', async () => {
     vi.mocked(invoke).mockResolvedValue({
       data: [

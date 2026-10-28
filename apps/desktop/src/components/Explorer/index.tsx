@@ -1,6 +1,6 @@
 import { getExplorerStateStore } from '@/stores/useExplorerStateStore'
 import { FileTree } from '@markflowy/interface'
-import type { ContextMenuItem, FileTreeDeletionRequest } from '@markflowy/interface'
+import type { ContextMenuItem, FileTreeDeletionRequest, FileTreeOpenOptions } from '@markflowy/interface'
 import type { IFile } from '@/helper/filesys'
 import { dialog } from '@/services/dialog'
 import { getUnsavedFileIds } from '@/services/checkUnsavedFiles'
@@ -122,7 +122,7 @@ const explorerFileTreePresentation = {
 
 const Explorer: FC<ExplorerProps> = (props) => {
   const { t } = useTranslation()
-  const { folderData, addOpenedFile, setActiveId } = useEditorStore()
+  const folderData = useEditorStore((state) => state.folderData)
   const workspacePath = folderData?.[0]?.path ?? ''
   const directory = useWorkspaceDirectoryState()
   const directoryState = directory.root === folderData?.[0] ? directory.status : 'idle'
@@ -132,12 +132,12 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const treePersistence = { expandedPaths, onExpandedPathsChange }
   const [dndRootElement, setDndRootElement] = useState<HTMLDivElement | null>(null)
 
-  const handleSelect = (item: IFile) => {
+  const handleOpen = useCallback((item: IFile, options: FileTreeOpenOptions) => {
     if (item?.kind !== 'file') return
-
-    addOpenedFile(item.id)
-    setActiveId(item.id)
-  }
+    const editor = useEditorStore.getState()
+    const group = editor.getActiveGroup()
+    if (group) editor.openFileInGroup(group.id, item.id, options)
+  }, [])
 
   const handleContextMenu: MouseEventHandler = useCallback((e) => e.preventDefault(), [])
 
@@ -278,7 +278,7 @@ const Explorer: FC<ExplorerProps> = (props) => {
             {...explorerFileTreePresentation}
             {...treePersistence}
             data={folderData ?? []}
-            onSelect={handleSelect}
+            onOpen={handleOpen}
             dndRootElement={dndRootElement as unknown as Node}
             fillFlexParentComponent={
               FillFlexParent as FC<{

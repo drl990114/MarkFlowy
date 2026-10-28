@@ -28,6 +28,27 @@ afterEach(async () => {
 })
 
 describe('file cache and real save coordinator lifetime', () => {
+  it.each([false, true])('releases a replaced preview only after its last group closes (shared=%s)', async (shared) => {
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+    setFileObject('next-preview', {
+      id: 'next-preview', name: 'next.md', path: '/workspace/next.md', kind: 'file', content: 'next',
+    })
+    const left = { type: 'leaf' as const, id: 'left', opened: [id], activeId: id, previewId: id }
+    useEditorStore.getState().setEditorLayout(shared ? {
+      type: 'branch', id: 'root', direction: 'horizontal', sizes: [50, 50], children: [
+        left, { type: 'leaf', id: 'right', opened: [id], activeId: id },
+      ],
+    } : left, 'left')
+    expect(useEditorStore.getState().openFileInGroup('left', 'next-preview', { mode: 'preview' })).toBe(true)
+    expect(await releaseClosedFileContent(id)).toBe(!shared)
+    expect(getFileObject(id).content).toBe(shared ? 'unsaved' : undefined)
+    if (shared) {
+      useEditorStore.getState().closeFileInGroup('right', id)
+      expect(await releaseClosedFileContent(id)).toBe(true)
+      expect(getFileObject(id).content).toBeUndefined()
+    }
+  })
+
   it.each(['saved', 'failed', 'reopened'] as const)('handles a closed document while its save is %s', async (outcome) => {
     let finish!: (saved: boolean) => void
     const pending = new Promise<boolean>((resolve) => { finish = resolve })

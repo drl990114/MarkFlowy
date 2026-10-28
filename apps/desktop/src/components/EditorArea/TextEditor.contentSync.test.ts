@@ -150,6 +150,7 @@ function createHarness({
     EditorViewType,
     isCapricornView,
     id: 'file',
+    groupId: 'group',
     instanceIdRef: { current: 'source' },
     editorSnapshotRegistry: registry,
     snapshotDemandHandlerRef: { current: () => {} },
@@ -192,6 +193,7 @@ function createHarness({
     },
     useEditorStore: {
       getState: () => ({
+        keepFileOpen: vi.fn(),
         getEditorContent: () => {
           registry.flushForRead('file')
           return getFileObject('file')?.content ?? ''

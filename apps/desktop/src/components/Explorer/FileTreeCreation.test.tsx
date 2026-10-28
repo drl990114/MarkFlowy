@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as Zens from 'zens'
 import FileTree, {
   fileTreeHandler,
+  type FileTreeOpenOptions,
 } from '../../../../../packages/interface/src/components/FileTree/FileTree'
 import { SimpleTree } from '../../../../../packages/interface/src/components/FileTree/types'
 import {
@@ -76,11 +77,13 @@ function Harness({
   initialChildren = [],
   initialExpandedPaths,
   onPathsChange,
+  onOpen,
   deferTreeMount = false,
 }: {
   initialChildren?: IFile[]
   initialExpandedPaths?: string[]
   onPathsChange?: (paths: string[]) => void
+  onOpen?: (file: IFile, options: FileTreeOpenOptions) => void
   deferTreeMount?: boolean
 }) {
   const [expandedPaths, setExpandedPaths] = useState(initialExpandedPaths)
@@ -122,6 +125,7 @@ function Harness({
               getFileObject={(id) => new SimpleTree(data).find(id)?.data}
               getFileObjectByPath={() => undefined}
               onSelect={vi.fn()}
+              onOpen={onOpen}
               onShowConfirm={vi.fn()}
               onShowContextMenu={showContextMenu}
               renderNodeIcon={(file) => <span data-testid={`icon-${file.kind}`} />}
@@ -169,6 +173,50 @@ afterEach(async () => {
 })
 
 describe('FileTree inline creation', () => {
+  it.each(['file', 'folder'] as const)('permanently opens only a successfully created file: %s', async (kind) => {
+    const onOpen = vi.fn()
+    let finishWrite!: () => void
+    if (kind === 'file') {
+      vi.mocked(fileSystem.writeFile).mockImplementationOnce(() => new Promise<void>((resolve) => {
+        finishWrite = resolve
+      }))
+    }
+    render(<Harness onOpen={onOpen} />)
+    const input = await startCreation(kind)
+    fireEvent.change(input, { target: { value: 'Created' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    if (kind === 'file') {
+      await waitFor(() => expect(fileSystem.writeFile).toHaveBeenCalledWith('/workspace/Created.md', ''))
+      expect(onOpen).not.toHaveBeenCalled()
+      await act(async () => finishWrite())
+    }
+    await screen.findByText(kind === 'file' ? 'Created.md' : 'Created')
+    if (kind === 'file') {
+      expect(onOpen).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ kind: 'file', name: 'Created.md', path: '/workspace/Created.md', content: '' }),
+        { mode: 'permanent' },
+      )
+    } else {
+      expect(onOpen).not.toHaveBeenCalled()
+    }
+  })
+
+  it.each(['failed', 'cancelled'] as const)('does not open a %s creation', async (outcome) => {
+    const onOpen = vi.fn()
+    render(<Harness onOpen={onOpen} />)
+    const input = await startCreation('file')
+    if (outcome === 'failed') {
+      vi.mocked(fileSystem.writeFile).mockRejectedValueOnce(new Error('write failed'))
+      fireEvent.change(input, { target: { value: 'Failed' } })
+      fireEvent.keyDown(input, { key: 'Enter' })
+      await waitFor(() => expect(input.getAttribute('aria-invalid')).toBe('true'))
+    } else {
+      fireEvent.keyDown(input, { key: 'Escape' })
+      await waitFor(() => expect(screen.queryByRole('textbox')).toBeNull())
+    }
+    expect(onOpen).not.toHaveBeenCalled()
+  })
+
   it('orders a created file using the parent directory read and preserves loaded nodes', async () => {
     const subfolder: IFile = {
       id: 'subfolder', kind: 'dir', name: 'Subfolder', path: '/workspace/Subfolder', children: [

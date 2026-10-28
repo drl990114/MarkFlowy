@@ -73,6 +73,7 @@ function createHarness(initialContent = 'A', visibleSibling = false) {
   const written: string[] = []
   let finishFirstWrite: (() => void) | undefined
   const autosave = vi.fn()
+  const keepFileOpen = vi.fn()
   const getMarkdown = vi.fn(() => state.editorContent)
   const capricornStatisticsScheduler = { cancel: vi.fn(), schedule: vi.fn() }
   const capricornRuntimeAdapter = {}
@@ -89,6 +90,7 @@ function createHarness(initialContent = 'A', visibleSibling = false) {
     delegate: null,
     runSaveOperation,
     getFileObject: () => state.file,
+    useEditorStore: { getState: () => ({ keepFileOpen }) },
     useEditorStateStore: {
       getState: () => ({
         idStateMap: new Map([['file', { hasUnsavedChanges: state.dirty }]]),
@@ -177,6 +179,7 @@ function createHarness(initialContent = 'A', visibleSibling = false) {
     state,
     written,
     autosave,
+    keepFileOpen,
     capricornStatisticsScheduler,
     publisher,
     getMarkdown,
@@ -239,7 +242,7 @@ function createHarness(initialContent = 'A', visibleSibling = false) {
       registry.flushForRead('file')
       return state.file.content
     },
-    save: getCallback<(params?: { onSuccess?: () => void }) => Promise<boolean>>(
+    save: getCallback<(params?: { onSuccess?: () => void; autosave?: boolean }) => Promise<boolean>>(
       'saveHandler',
       bindings,
     ),
@@ -261,6 +264,30 @@ function createHarness(initialContent = 'A', visibleSibling = false) {
 afterEach(() => vi.useRealTimers())
 
 describe('TextEditor deferred snapshots during saving', () => {
+  it('keeps a clean preview open on explicit save before the no-change return', async () => {
+    const harness = createHarness()
+    harness.state.dirty = false
+    await expect(harness.save()).resolves.toBe(true)
+    expect(harness.keepFileOpen).toHaveBeenCalledWith('group', 'file')
+    expect(harness.written).toEqual([])
+  })
+
+  it('does not use an automatic save as an explicit keep-open action', async () => {
+    const harness = createHarness()
+    harness.state.dirty = false
+    harness.bindings.useAppSettingStore = { getState: () => ({ settingData: { autosave: true } }) }
+    harness.bindings.isHistoryAutosavePaused = () => false
+    await expect(harness.save({ autosave: true })).resolves.toBe(true)
+    expect(harness.keepFileOpen).not.toHaveBeenCalled()
+  })
+
+  it('keeps a preview even when its explicit save cannot read a composing editor', async () => {
+    const harness = createHarness()
+    harness.state.composing = true
+    await expect(harness.save()).resolves.toBe(false)
+    expect(harness.keepFileOpen).toHaveBeenCalledWith('group', 'file')
+  })
+
   it.each([
     ['text_confirm_encoding: Confirm the detected encoding before overwriting this file.', '检测到的编码尚未确认'],
     ["text_unmappable: Character '🙂' (U+1F642) at UTF-16 offset 52 cannot be saved in GBK.", 'GBK 无法保存字符“🙂”'],
@@ -312,7 +339,7 @@ describe('TextEditor deferred snapshots during saving', () => {
       getFileNameFromPath: () => 'new.md',
       insertNodeToFolderData: vi.fn(),
       closeCleanPhysicalAliases: vi.fn(),
-      useEditorStore: { getState: () => ({ opened: ['file'], delOpenedFile: vi.fn() }) },
+      useEditorStore: { getState: () => ({ opened: ['file'], delOpenedFile: vi.fn(), keepFileOpen: harness.keepFileOpen }) },
       conditionalWriteExpectedIfAllowed: write,
       historyWorkspaceForPath,
     })

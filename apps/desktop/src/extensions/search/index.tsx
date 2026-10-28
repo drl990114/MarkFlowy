@@ -251,8 +251,6 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
   const resultQuery = useSearchStore((state) => state.resultQuery)
   const resultCaseSensitive = useSearchStore((state) => state.resultCaseSensitive)
   const setSearchState = useSearchStore((state) => state.setSearchState)
-  const addOpenedFile = useEditorStore((state) => state.addOpenedFile)
-  const setActiveId = useEditorStore((state) => state.setActiveId)
   const folderData = useEditorStore((state) => state.folderData)
   const activeId = useEditorStore((state) => state.activeId)
   const fileExcludePatterns = useAppSettingStore((state) =>
@@ -578,6 +576,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
       index: number,
       match: NormalizedSearchMatch,
       matchIndexInLine: number,
+      mode: 'preview' | 'permanent' = 'preview',
     ) => {
       const { path, name, ext } = searchInfo
       const position = match.positions[matchIndexInLine]
@@ -593,8 +592,9 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
         ? (getFileObject(knownFile.id) ?? createFile(knownFile))
         : createFile({ path, name, ext })
       if (!getFileObjectByPath(path)) setFileObjectByPath(path, curFile)
-      addOpenedFile(curFile.id)
-      setActiveId(curFile.id)
+      const editor = useEditorStore.getState()
+      const group = editor.getActiveGroup()
+      if (!group || !editor.openFileInGroup(group.id, curFile.id, { mode })) return
       requestSearchNavigation({
         fileId: curFile.id,
         path,
@@ -610,7 +610,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
         activeMatch: { path, line: match.line, startColumn: position.start },
       })
     },
-    [addOpenedFile, setActiveId, resultCaseSensitive, resultQuery, setSearchState, t],
+    [resultCaseSensitive, resultQuery, setSearchState, t],
   )
 
   const toggleSearchInfoExpand = useCallback(
@@ -870,8 +870,30 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
                       item.matchIndexInLine,
                     )
                   }
+                  onDoubleClick={() =>
+                    handleFileInfoClick(
+                      item.searchInfo,
+                      item.globalIndex,
+                      item.match,
+                      item.matchIndexInLine,
+                      'permanent',
+                    )
+                  }
                   onFocus={() => setFocusedRowIndex(virtualItem.index)}
-                  onKeyDown={(event) => handleSearchRowKeyDown(event, virtualItem.index)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      handleFileInfoClick(
+                        item.searchInfo,
+                        item.globalIndex,
+                        item.match,
+                        item.matchIndexInLine,
+                        event.key === 'Enter' ? 'permanent' : 'preview',
+                      )
+                      return
+                    }
+                    handleSearchRowKeyDown(event, virtualItem.index)
+                  }}
                   size='sm'
                   style={{
                     height: `${virtualItem.size}px`,

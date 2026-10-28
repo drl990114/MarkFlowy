@@ -311,6 +311,16 @@ export const getSettingMap = (
           },
         },
       },
+      Tabs: {
+        i18nKey: 'settings.editor.tabs.label',
+        enablePreview: {
+          key: 'editor_enable_preview_tabs',
+          type: 'switch',
+          defaultValue: true,
+          title: { i18nKey: 'settings.editor.tabs.enable_preview.label' },
+          desc: { i18nKey: 'settings.editor.tabs.enable_preview.desc' },
+        },
+      },
       Behavior: {
         i18nKey: 'settings.editor.behavior.label',
         mdDefaultMode: {

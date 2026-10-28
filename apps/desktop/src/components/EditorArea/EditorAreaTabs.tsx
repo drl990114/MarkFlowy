@@ -97,6 +97,7 @@ interface EditorAreaTabProps {
   handleDrop: (e: DragEvent<HTMLElement>) => void
   id: string
   index: number
+  preview: boolean
   onSelect: (id: string) => void
 }
 
@@ -187,6 +188,7 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
     handleDrop,
     id,
     index,
+    preview,
     onSelect,
   } = props
   const hasUnsavedChanges = useEditorStateStore(
@@ -230,6 +232,12 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
       x: e.clientX,
       y: e.clientY,
       items: [
+        ...(preview ? [{
+          label: t('contextmenu.editor_tab.keep_open'),
+          value: 'keep_open',
+          commandId: EVENT.app_keepEditorOpen,
+          handler: () => useEditorStore.getState().keepFileOpen(groupId, id),
+        }] : []),
         {
           label: t('contextmenu.editor_tab.close'),
           value: 'close',
@@ -312,24 +320,27 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <button
-            aria-label={
-              hasUnsavedChanges
-                ? `${fileName}, ${t('contextmenu.editor_tab.unsaved', {
-                    defaultValue: 'Unsaved changes',
-                  })}`
-                : fileName
-            }
+            aria-label={[
+              fileName,
+              preview ? t('contextmenu.editor_tab.preview') : null,
+              hasUnsavedChanges ? t('contextmenu.editor_tab.unsaved', {
+                defaultValue: 'Unsaved changes',
+              }) : null,
+            ].filter(Boolean).join(', ')}
             aria-selected={active}
             aria-controls={`editor-panel-${groupId}`}
             className='tab-select'
             data-mf-editor-tab-id={id}
+            data-mf-preview-tab={preview || undefined}
             id={getEditorTabId(groupId, id)}
             onClick={() => onSelect(id)}
+            onDoubleClick={() => useEditorStore.getState().keepFileOpen(groupId, id)}
             role='tab'
             tabIndex={active ? 0 : -1}
             type='button'
           >
             <span
+              className={preview ? 'italic' : undefined}
               style={{
                 maxWidth: compact ? '112px' : '160px',
                 overflow: 'hidden',
@@ -345,7 +356,10 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
             ) : null}
           </button>
         </TooltipTrigger>
-        <TooltipContent>{fileName}</TooltipContent>
+        <TooltipContent>
+          {fileName}
+          {preview ? <div>{t('contextmenu.editor_tab.preview_hint')}</div> : null}
+        </TooltipContent>
       </Tooltip>
       <span className='mf-editor-tab-trailing'>
         {hasUnsavedChanges ? <Dot aria-hidden='true' className='mf-editor-tab-dirty' /> : null}
@@ -706,6 +720,7 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
             index={index}
             key={id}
             onSelect={onSelectItem}
+            preview={group?.previewId === id}
           />
         ))}
         <div

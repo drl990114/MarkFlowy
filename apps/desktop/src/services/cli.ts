@@ -228,7 +228,9 @@ async function inspectLiveContent(
 
 async function openCliFile(request: CliRequest, fileId: string | undefined) {
   if (fileId) {
-    useEditorStore.getState().setActiveId(fileId)
+    const editor = useEditorStore.getState()
+    const group = editor.getActiveGroup()
+    if (!group || !editor.openFileInGroup(group.id, fileId, { mode: 'permanent' })) return undefined
   } else {
     await invoke('save_security_bookmark', { path: request.path })
     checkCliDeadline(request)
