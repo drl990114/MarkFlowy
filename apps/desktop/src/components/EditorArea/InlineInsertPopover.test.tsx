@@ -100,10 +100,15 @@ describe('InlineInsertPopover', () => {
     },
   )
 
-  it('keeps a Base64 image intact when editing its description', async () => {
+  it.each([
+    'data:image/png;base64,',
+    'data:image/png;charset=UTF-8;base64,',
+    'DATA:IMAGE/PNG;CHARSET=UTF-8;BASE64,',
+    'data:application/octet-stream;base64,',
+  ])('keeps a %s image intact when editing its description', async (prefix) => {
     const h = harness()
     const src =
-      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8L8AAAAASUVORK5CYII='
+      `${prefix}iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8L8AAAAASUVORK5CYII=`
     h.bookmark.image = { key: 'image-1', src, alt: '旧说明' }
     render(<InlineInsertPopover editor={h.editor} active />)
     h.show('image')
@@ -113,6 +118,35 @@ describe('InlineInsertPopover', () => {
     await waitFor(() =>
       expect(h.editor.commands.updateImage).toHaveBeenCalledWith('image-1', { src, alt: '新说明' }),
     )
+  })
+
+  it.each([
+    'data:image/svg+xml;base64,PHN2Zy8+',
+    'data:text/html;base64,PHNjcmlwdC8+',
+    'data:image/png;charset;base64,aW1hZ2U=',
+  ])('rejects unsupported image metadata: %s', (src) => {
+    const h = harness()
+    render(<InlineInsertPopover editor={h.editor} active />)
+    h.show('image')
+    fireEvent.change(screen.getByLabelText('inline_insert.address'), { target: { value: src } })
+    fireEvent.click(screen.getByText('inline_insert.insert'))
+    expect(screen.getByRole('alert').textContent).toBe('inline_insert.invalid_address')
+    expect(h.editor.commands.insertImage).not.toHaveBeenCalled()
+  })
+
+  it('keeps the form open when the runtime rejects an unrecognized binary image', () => {
+    const h = harness()
+    vi.mocked(h.editor.commands.insertImage).mockImplementation(() => {
+      throw new Error('Unsupported embedded image')
+    })
+    render(<InlineInsertPopover editor={h.editor} active />)
+    h.show('image')
+    fireEvent.change(screen.getByLabelText('inline_insert.address'), {
+      target: { value: 'data:application/octet-stream;base64,PHN2Zy8+' },
+    })
+    fireEvent.click(screen.getByText('inline_insert.insert'))
+    expect(screen.getByRole('alert').textContent).toBe('inline_insert.insert_error')
+    expect(screen.getByLabelText('inline_insert.address')).toBeTruthy()
   })
 
   it('retains malformed escapes and data URLs when formatting an address', () => {

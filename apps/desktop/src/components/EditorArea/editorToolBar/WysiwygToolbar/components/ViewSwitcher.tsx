@@ -1,5 +1,5 @@
 import bus from '@/helper/eventBus'
-import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
+import { EditorViewType, type EditorViewTarget, type EditorViewTypeValue } from '@/constants/editorViewType'
 import { getFileObject } from '@/helper/files'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
@@ -13,6 +13,7 @@ import { showContextMenu } from '../../../../ui-v2/ContextMenu'
 
 interface ViewSwitcherProps {
   editorId?: string
+  groupId?: string
 }
 
 const VIEW_TYPE_ICONS: Record<EditorViewTypeValue, LucideIcon> = {
@@ -22,19 +23,22 @@ const VIEW_TYPE_ICONS: Record<EditorViewTypeValue, LucideIcon> = {
 }
 
 export const ViewSwitcher = (props: ViewSwitcherProps) => {
-  const { editorId } = props
+  const { editorId, groupId } = props
   const activeId = useEditorStore((state) => state.activeId)
   const targetEditorId = editorId ?? activeId
-  const { editorViewTypeMap } = useEditorViewTypeStore()
+  const editorViewType = useEditorViewTypeStore(
+    (state) => state.editorViewTypeMap.get(targetEditorId ?? '') ?? EditorViewType.WYSIWYG,
+  )
   const { t } = useTranslation()
   const ref = useRef<HTMLButtonElement>(null)
 
   const curFile = targetEditorId ? getFileObject(targetEditorId) : undefined
-  const editorViewType = editorViewTypeMap.get(curFile?.id || '') || EditorViewType.WYSIWYG
 
   const handleViewClick = useCallback(() => {
     const rect = ref.current?.getBoundingClientRect()
-    if (rect === undefined) return
+    if (rect === undefined || !targetEditorId) return
+
+    const target: EditorViewTarget = { editorId: targetEditorId, groupId }
 
     const { getFileTypeConfigById } = useFileTypeConfigStore.getState()
     const curFileTypeConfig = getFileTypeConfigById(curFile?.id || '')
@@ -48,26 +52,26 @@ export const ViewSwitcher = (props: ViewSwitcherProps) => {
           value: EditorViewType.SOURCECODE,
           checked: editorViewType === EditorViewType.SOURCECODE,
           commandId: 'app_toggleEditorType',
-          handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE),
+          handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE, target),
         },
         {
           label: t('view.wysiwyg'),
           value: EditorViewType.WYSIWYG,
           checked: editorViewType === EditorViewType.WYSIWYG,
           commandId: 'app_toggleEditorType',
-          handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG),
+          handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG, target),
         },
         {
           label: t('view.preview'),
           value: EditorViewType.PREVIEW,
           checked: editorViewType === EditorViewType.PREVIEW,
-          handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.PREVIEW),
+          handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.PREVIEW, target),
         },
       ].filter((item) => {
         return curFileTypeConfig ? curFileTypeConfig?.supportedModes?.includes(item.value) : false
       }),
     })
-  }, [curFile, editorViewType, t])
+  }, [curFile, editorViewType, groupId, t, targetEditorId])
 
   if (!curFile) return null
 
@@ -82,7 +86,7 @@ export const ViewSwitcher = (props: ViewSwitcherProps) => {
     <EditorAreaActionButton
       aria-haspopup='menu'
       icon={VIEW_TYPE_ICONS[editorViewType]}
-      label={label}
+      label={`${t('view.label')}: ${label}`}
       onClick={handleViewClick}
       ref={ref}
     />

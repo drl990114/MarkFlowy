@@ -8,10 +8,11 @@ import { ViewSwitcher } from '../WysiwygToolbar/components/ViewSwitcher'
 
 interface PreviewToolbarProps {
   editorId?: string
+  groupId?: string
 }
 
 export const PreviewToolbar: FC<PreviewToolbarProps> = (props) => {
-  const { editorId } = props
+  const { editorId, groupId } = props
   const activeId = useEditorStore((state) => state.activeId)
   const { getEditorViewType } = useEditorViewTypeStore()
   const targetEditorId = editorId ?? activeId
@@ -20,7 +21,7 @@ export const PreviewToolbar: FC<PreviewToolbarProps> = (props) => {
 
   const sections = useMemo(() => [{ id: 'common', priority: 100 }], [])
 
-  const { containerRef, hiddenIds, registerItemWidth } = usePriorityHidden({
+  const { containerRef, registerItemWidth } = usePriorityHidden({
     items: sections,
     gap: 0,
   })
@@ -34,10 +35,10 @@ export const PreviewToolbar: FC<PreviewToolbarProps> = (props) => {
       <ToolbarSection
         id='common'
         registerWidth={registerItemWidth}
-        hidden={hiddenIds.has('common')}
+        hidden={false}
       >
+        <ViewSwitcher editorId={targetEditorId} groupId={groupId} />
         <MenuList editorId={targetEditorId} />
-        <ViewSwitcher editorId={targetEditorId} />
       </ToolbarSection>
     </ToolbarWrapper>
   )

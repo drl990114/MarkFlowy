@@ -32,6 +32,7 @@ import { EVENT } from '@/constants'
 import {
   EditorViewType,
   isCapricornView as isCapricornEditorView,
+  type EditorViewTarget,
   type EditorViewTypeValue,
 } from '@/constants/editorViewType'
 import { capricornRuntimeEntrySha256, capricornRuntimeVersion } from '@/constants/capricornRuntime'
@@ -1957,7 +1958,9 @@ function TextEditor(props: TextEditorProps) {
       }
       // Save only after preparation: the current editor remains usable while
       // loading, and any edits made during that time must reach the new mode.
-      bus.emit(EVENT.app_save, undefined, {
+      // A toolbar menu can address a visible pane after another pane becomes active.
+      void saveHandler({
+        active: true,
         onSuccess: () => {
           saveSucceeded = true
           void completeSwitch().catch((error) => {
@@ -1980,6 +1983,7 @@ function TextEditor(props: TextEditorProps) {
       isHtml,
       prepareRmeRuntime,
       rmeRuntime,
+      saveHandler,
       switchHtmlView,
       t,
     ],
@@ -1996,14 +2000,17 @@ function TextEditor(props: TextEditorProps) {
   }, [currentViewType, sharedHtmlViewType, status, requestViewType])
 
   useEffect(() => {
-    const cb = (payload: EditorViewTypeValue) => {
-      if (active) void requestViewType(payload)
+    const cb = (payload: EditorViewTypeValue, target?: EditorViewTarget) => {
+      const matchesTarget = target
+        ? visible && id === target.editorId && (!target.groupId || groupId === target.groupId)
+        : active
+      if (matchesTarget) void requestViewType(payload)
     }
     bus.on('editor_toggle_type', cb)
     return () => {
       bus.detach('editor_toggle_type', cb)
     }
-  }, [active, requestViewType])
+  }, [active, groupId, id, requestViewType, visible])
 
   useEffect(() => {
     const exportImageHandler = async () => {

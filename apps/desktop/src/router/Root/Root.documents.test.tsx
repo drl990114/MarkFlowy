@@ -56,6 +56,7 @@ vi.mock('./styles', () => ({
   StyleSeparator: () => null,
 }))
 vi.mock('./ZenModeHint', () => ({ ZenModeHint: () => null }))
+vi.mock('./ZenModeControls', () => ({ ZenModeControls: () => null }))
 
 enableMapSet()
 

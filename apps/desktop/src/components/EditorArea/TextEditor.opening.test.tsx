@@ -2,12 +2,12 @@
 import { EditorView } from '@codemirror/view'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { enableMapSet } from 'immer'
+import { save as saveDialog } from '@tauri-apps/plugin-dialog'
 import type { PropsWithChildren } from 'react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import type * as Rme from 'rme'
 import type * as Zens from 'zens'
 import type * as LocalHistory from '@/services/local-history'
-import { EVENT } from '@/constants'
 import { EditorViewType } from '@/constants/editorViewType'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import bus from '@/helper/eventBus'
@@ -28,6 +28,7 @@ import { EXTERNAL_FILE_CONTENT_SYNC_EVENT } from './externalFileChanges'
 import { sourceCodeCodemirrorViewMap } from './sourceCodeEditorRegistry'
 import * as rmeRuntime from './rmeRuntime'
 import * as capricornRuntime from './capricornRuntimeAdapter'
+import * as conditionalFileWrite from './conditionalFileWrite'
 import { bindRecoveredDraft, endHistoryBatch, historyCall, releaseClosedFileContent } from '@/services/local-history'
 import { stageDraftRecovery } from '@/services/staged-draft-recovery'
 import { registerDraftRecovery } from '@/services/draftRecoveryState'
@@ -415,8 +416,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor source mode transition
     const id = 'opening-deferred-source'
     setFileObject(id, { id, name: 'modes.md', path: '/synthetic/modes.md', kind: 'file' })
     useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
-    const save = vi.fn()
-    bus.on(EVENT.app_save, save)
+    const save = vi.spyOn(conditionalFileWrite, 'conditionalWriteExpectedIfAllowed')
     try {
       const loading = vi.fn()
       const { container } = render(<TextEditor onLoadingChange={loading} active id={id} fileTypeConfig={{
@@ -457,7 +457,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor source mode transition
       expect(getFileObject(id)?.content).toBe(edited)
       expect(useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges).toBe(false)
     } finally {
-      bus.detach(EVENT.app_save, save)
+      save.mockRestore()
     }
   })
 
@@ -483,6 +483,47 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor source mode transition
     expect(container.querySelector('[data-cap-content]')).toBe(body)
     expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
     expect(useEditorViewTypeStore.getState().getEditorViewType(id)).toBe(EditorViewType.WYSIWYG)
+  })
+
+  it.each(['canceled', 'failed'] as const)('keeps the target pane and its draft when its save is %s', async (result) => {
+    const id = `mode-target-save-${result}`
+    setFileObject(id, {
+      id,
+      name: 'draft.md',
+      kind: 'file',
+      ...(result === 'failed' ? { path: `/synthetic/${id}.md` } : { content: '# Draft' }),
+    })
+    useEditorStateStore.getState().setIdStateMap(id, { hasUnsavedChanges: false })
+    const { container } = render(<TextEditor active={false} visible id={id} groupId='target' fileTypeConfig={{
+      type: 'markdown', defaultMode: EditorViewType.WYSIWYG,
+      supportedModes: [EditorViewType.WYSIWYG, EditorViewType.SOURCECODE],
+    }} />)
+    await waitFor(() => expect(container.querySelector('[data-cap-content]')).not.toBeNull())
+    const editor = getCapricornEditor(id)!
+    await act(async () => editor.commands.insertLink?.({ href: 'https://example.com', text: 'Unsaved edit' }))
+    const draft = editor.getMarkdown()
+    expect(useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges).toBe(true)
+
+    const write = vi.spyOn(conditionalFileWrite, 'conditionalWriteExpectedIfAllowed')
+    if (result === 'failed') write.mockRejectedValueOnce(new Error('Disk unavailable'))
+    else vi.mocked(saveDialog).mockResolvedValueOnce(null)
+
+    await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE, {
+      editorId: id,
+      groupId: 'target',
+    }))
+    if (result === 'failed') {
+      await waitFor(() => expect(write).toHaveBeenCalled())
+      expect(write.mock.calls[0][0]).toBe(`/synthetic/${id}.md`)
+    } else {
+      await waitFor(() => expect(saveDialog).toHaveBeenCalled())
+      expect(write).not.toHaveBeenCalled()
+    }
+    expect(container.querySelector('[data-cap-content]')).not.toBeNull()
+    expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
+    expect(editor.getMarkdown()).toBe(draft)
+    expect(useEditorViewTypeStore.getState().getEditorViewType(id)).toBe(EditorViewType.WYSIWYG)
+    expect(useEditorStateStore.getState().idStateMap.get(id)?.hasUnsavedChanges).toBe(true)
   })
 
   it('keeps focus on the same content selection across modes instead of restoring stale mode positions', async () => {

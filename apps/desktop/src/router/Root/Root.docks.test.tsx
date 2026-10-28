@@ -63,6 +63,7 @@ vi.mock('@/stores', () => ({ useEditorStore: Object.assign(
 ) }))
 vi.mock('zens', () => ({ toast: { info: vi.fn() } }))
 vi.mock('./ZenModeHint', () => ({ ZenModeHint: () => null }))
+vi.mock('./ZenModeControls', () => ({ ZenModeControls: () => null }))
 
 let windowWidth = 1200
 const ariaDisabledDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'ariaDisabled')

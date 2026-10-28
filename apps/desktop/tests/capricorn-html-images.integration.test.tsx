@@ -71,6 +71,43 @@ async function mount(
 }
 
 describe('Capricorn HTML image host integration', () => {
+  const pngDataUrl =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8L8AAAAASUVORK5CYII='
+  const base64Images = [
+    { name: 'Markdown', markdown: `![Base64 image](${pngDataUrl})` },
+    {
+      name: 'reference Markdown',
+      markdown: `![Base64 image][embedded]\n\n[embedded]: ${pngDataUrl}`,
+    },
+    { name: 'HTML image', markdown: `<img src="${pngDataUrl}" alt="Base64 image">` },
+    {
+      name: 'nested HTML image',
+      markdown: `<div><img src="${pngDataUrl}" alt="Base64 image"></div>`,
+    },
+  ]
+
+  describe.each(['edit', 'preview'] as const)('Base64 images in %s mode', (mode) => {
+    it.each(base64Images)('preserves the embedded source in $name', async ({ markdown }) => {
+      const host = await mount(markdown, '/workspace/notes', mode)
+
+      await waitFor(() => {
+        const image = host.container.querySelector('img')
+        expect(image?.getAttribute('src')).toBe(pngDataUrl)
+        expect(image?.getAttribute('alt')).toBe('Base64 image')
+      })
+
+      expect(native.invoke).not.toHaveBeenCalled()
+      expect(native.join).not.toHaveBeenCalled()
+      expect(native.convertFileSrc).not.toHaveBeenCalled()
+      expect(host.adapter.getMarkdown()).toBe(markdown)
+      expect(host.adapter.getUiState().canUndo).toBe(false)
+      expect(host.onChange).not.toHaveBeenCalledWith(
+        expect.objectContaining({ documentChanged: true }),
+      )
+      expect(host.onError).not.toHaveBeenCalled()
+    })
+  })
+
   it('shows surrounding HTML while an image resolver is still pending', async () => {
     let resolve!: (value: string) => void
     const pending = new Promise<string>((done) => {

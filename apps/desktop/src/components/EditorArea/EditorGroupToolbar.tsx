@@ -16,11 +16,12 @@ import { useGlobalOSInfo } from '@/hooks'
 
 interface EditorGroupToolbarProps {
   editorId?: string
+  groupId?: string
   compactGroupId?: string
 }
 
 function EditorGroupToolbar(props: EditorGroupToolbarProps) {
-  const { editorId, compactGroupId } = props
+  const { editorId, groupId, compactGroupId } = props
   const { osType } = useGlobalOSInfo()
   const type = useFileTypeConfigStore((state) => state.fileTypeConfigMap.get(editorId ?? '')?.type)
   const mode = useEditorViewTypeStore((state) => state.editorViewTypeMap.get(editorId ?? ''))
@@ -69,9 +70,9 @@ function EditorGroupToolbar(props: EditorGroupToolbarProps) {
     <ToolbarHost className='editor-group-toolbar flex items-center'>
       {title}
       <div className='min-w-0 flex-1'>
-        <WysiwygToolbar editorId={editorId} />
-        <SourceCodeToolbar editorId={editorId} />
-        <PreviewToolbar editorId={editorId} />
+        <WysiwygToolbar editorId={editorId} groupId={groupId} />
+        <SourceCodeToolbar editorId={editorId} groupId={groupId} />
+        <PreviewToolbar editorId={editorId} groupId={groupId} />
       </div>
       {actions}
     </ToolbarHost>

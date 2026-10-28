@@ -10,6 +10,11 @@ export const EditorViewType = {
 
 export type EditorViewTypeValue = RmeEditorViewType
 
+export interface EditorViewTarget {
+  editorId: string
+  groupId?: string
+}
+
 export function isCapricornView(
   viewType: EditorViewTypeValue | undefined,
   runtimeAvailable = isCapricornRuntimeAvailable,

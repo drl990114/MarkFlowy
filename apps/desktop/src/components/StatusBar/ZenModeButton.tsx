@@ -16,7 +16,7 @@ export function ZenModeButton() {
   const { t } = useTranslation()
   const [hovered, setHovered] = useState(false)
 
-  if (!activeId) return null
+  if (!activeId && !zenModeActive) return null
 
   const label = t('command.id_descriptions.app_toggleZenMode')
   const zenModeKeybinding = keyboardInfos.find(

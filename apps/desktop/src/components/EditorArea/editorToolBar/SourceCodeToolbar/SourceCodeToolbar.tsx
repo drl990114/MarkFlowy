@@ -36,9 +36,11 @@ import {
 } from '../components'
 import { sourceCodeCodemirrorViewMap } from '../../sourceCodeEditorRegistry'
 import { insertSourceImage, insertSourceLink } from '../../sourceInsertCommands'
+import { ViewSwitcher } from '../WysiwygToolbar/components/ViewSwitcher'
 
 interface SourceCodeToolbarProps {
   editorId?: string
+  groupId?: string
 }
 
 const TOOLBAR_GROUPS = [
@@ -54,7 +56,7 @@ const TOOLBAR_SECTIONS = [{ id: 'common', priority: 100 }, ...TOOLBAR_GROUPS]
 const sourceCommandMap = createCommandMap()
 
 export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
-  const { editorId } = props
+  const { editorId, groupId } = props
   const activeId = useEditorStore((state) => state.activeId)
   const { getEditorViewType } = useEditorViewTypeStore()
   const { t } = useTranslation()
@@ -234,6 +236,7 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
   return (
     <ToolbarWrapper className='mf-editor-toolbar' ref={containerRef}>
       <ToolbarSection id='common' registerWidth={registerItemWidth} hidden={false}>
+        <ViewSwitcher editorId={targetEditorId} groupId={groupId} />
         <MenuList
           editorId={targetEditorId}
           prependItems={overflowMenuItems}

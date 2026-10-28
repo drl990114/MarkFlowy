@@ -13,7 +13,12 @@ export function normalizeInlineAddress(value: string, kind: 'link' | 'image'): s
   if (!address || /[\u0000-\u001f\u007f]/.test(address)) return null
   if (/^(javascript|vbscript):/i.test(address)) return null
   if (/^data:/i.test(address)) {
-    return kind === 'image' && /^data:image\/(avif|gif|jpe?g|png|webp);base64,/i.test(address)
+    // Match MIME metadata here; the runtime image commands validate the payload,
+    // including recognizing a supported raster signature for octet-stream URLs.
+    const comma = address.indexOf(',')
+    const metadata = comma > 0 && comma <= 1024 ? address.slice(0, comma) : ''
+    return kind === 'image' &&
+      /^data:(?:image\/(?:avif|gif|jpe?g|png|webp)|application\/octet-stream)(?:;[\w!#$%&'*+.^`|~-]+=[\w!#$%&'*+.^`|~-]+)*;base64$/i.test(metadata)
       ? address
       : null
   }

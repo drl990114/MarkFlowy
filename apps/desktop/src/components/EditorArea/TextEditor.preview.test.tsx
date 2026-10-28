@@ -29,6 +29,7 @@ const mocks = vi.hoisted(() => ({
     setEditorCtx: vi.fn(),
     getEditorCtx: () => undefined,
     insertNodeToFolderData: vi.fn(),
+    keepFileOpen: vi.fn(),
   },
 }))
 
@@ -227,6 +228,54 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor preview integration', 
     )
     expect(container.querySelector('[data-mf-capricorn-runtime]')).toBeNull()
     expect(getCapricornEditor(id)).toBeUndefined()
+    expect(mocks.error).not.toHaveBeenCalled()
+  })
+
+  it('switches only the addressed visible pane even when another pane is active', async () => {
+    const activeId = 'view-target-active'
+    const targetId = 'view-target-inactive'
+    seedFile(activeId)
+    seedFile(targetId)
+    const { container } = render(
+      <>
+        <TextEditor active id={activeId} groupId='left' fileTypeConfig={previewConfig} />
+        <TextEditor active={false} visible id={targetId} groupId='right' fileTypeConfig={previewConfig} />
+      </>,
+    )
+    await waitFor(() => expect(container.querySelectorAll('[data-cap-mode="preview"]')).toHaveLength(2))
+
+    // A stale menu from another group showing the same file must not switch this pane.
+    await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG, {
+      editorId: targetId,
+      groupId: 'closed-group',
+    }))
+    expect(container.querySelectorAll('[data-cap-mode="preview"]')).toHaveLength(2)
+
+    await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG, {
+      editorId: targetId,
+      groupId: 'right',
+    }))
+    await waitFor(() => expect(getCapricornEditor(targetId)!.getUiState().readOnly).toBe(false))
+    expect(getCapricornEditor(activeId)!.getUiState().readOnly).toBe(true)
+    expect(mocks.editorStore.keepFileOpen).toHaveBeenCalledWith('right', targetId)
+    expect(mocks.editorStore.keepFileOpen).not.toHaveBeenCalledWith('left', activeId)
+    expect(mocks.error).not.toHaveBeenCalled()
+  })
+
+  it('ignores a targeted mode selection after the target tab has become hidden', async () => {
+    const id = 'view-target-hidden'
+    seedFile(id)
+    const { container, rerender } = render(
+      <TextEditor active id={id} groupId='left' fileTypeConfig={previewConfig} />,
+    )
+    await waitFor(() => expect(container.querySelector('[data-cap-mode="preview"]')).not.toBeNull())
+    rerender(<TextEditor active={false} visible={false} id={id} groupId='left' fileTypeConfig={previewConfig} />)
+    await act(async () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG, {
+      editorId: id,
+      groupId: 'left',
+    }))
+    expect(container.querySelector('[data-cap-mode="preview"]')).not.toBeNull()
+    expect(container.querySelector('[data-cap-mode="wysiwyg"]')).toBeNull()
     expect(mocks.error).not.toHaveBeenCalled()
   })
 })

@@ -70,6 +70,15 @@ describe('ZenModeButton', () => {
     expect(renderZenModeButton()).toBe('')
   })
 
+  it('keeps the exit action available if the active document closes in Zen Mode', () => {
+    zenModeButtonState.zenModeActive = true
+
+    const markup = renderZenModeButton()
+
+    expect(markup).toContain('aria-label="Toggle Zen Mode (⌘⇧F)"')
+    expect(markup).toContain('aria-pressed="true"')
+  })
+
   it('renders an accessible status-bar action for the active document', () => {
     zenModeButtonState.activeId = 'document-1'
     const markup = renderZenModeButton()

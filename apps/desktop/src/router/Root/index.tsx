@@ -29,6 +29,7 @@ import { toast } from 'zens'
 import { RootPageLayout, StyleSeparator } from './styles'
 import { useStatusBarReveal } from './useStatusBarReveal'
 import { ZenModeHint } from './ZenModeHint'
+import { ZenModeControls } from './ZenModeControls'
 import { WorkspaceOpenError } from '@/components/WorkspaceOpenError'
 import {
   queueDoubleEscapeResolution,
@@ -294,6 +295,7 @@ function Root() {
         <StatusBar />
       </div>
       <ZenModeHint active={zenModeActive} />
+      <ZenModeControls active={zenModeActive} />
       <DockDragLifecycle />
       <BookMarkDialog />
       <QuickOpenDialog />

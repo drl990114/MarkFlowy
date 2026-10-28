@@ -216,7 +216,7 @@ const EditorGroupPane = memo((props: EditorGroupPaneProps) => {
         <EditorAreaTabs compact={isSplitMode} groupId={groupId} />
       )}
       {isActiveGroup ? <FindReplace /> : null}
-      <EditorGroupToolbar editorId={activeFileId} compactGroupId={singleDocument ? groupId : undefined} />
+      <EditorGroupToolbar editorId={activeFileId} groupId={groupId} compactGroupId={singleDocument ? groupId : undefined} />
       <EditorPanel
         aria-labelledby={activeFileId && !singleDocument ? getEditorTabId(groupId, activeFileId) : undefined}
         aria-label={singleDocument ? activeFileName : undefined}
