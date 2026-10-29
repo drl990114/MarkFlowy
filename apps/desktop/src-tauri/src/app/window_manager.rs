@@ -24,6 +24,7 @@ fn get_webview_url(path: &str) -> WebviewUrl {
 
 static APP_SESSION_ID: OnceLock<String> = OnceLock::new();
 static WINDOW_RECENCY: Mutex<Vec<String>> = Mutex::new(Vec::new());
+static WINDOW_CREATION_QUEUE: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -198,6 +199,10 @@ pub fn get_window_instances() -> Result<std::collections::HashMap<String, String
 /// 创建新窗口
 #[command]
 pub async fn create_new_window(_app: AppHandle, path: Option<String>) -> Result<String, String> {
+    // Different renderers can request the same document before its first
+    // WebView has finished building. Serialize the check/build/register cycle
+    // without blocking the UI thread or holding WINDOW_INSTANCES during build.
+    let _creation_guard = WINDOW_CREATION_QUEUE.lock().await;
     let workspace_path = path.clone().map(PathBuf::from);
 
     // 检查是否已存在打开相同路径的窗口
@@ -211,7 +216,7 @@ pub async fn create_new_window(_app: AppHandle, path: Option<String>) -> Result<
         let mut existing_window_label: Option<String> = None;
 
         for (existing_label, existing_path) in instances.iter() {
-            if existing_path == target_path {
+            if window_paths_match(existing_path, target_path) {
                 if _app.get_webview_window(existing_label).is_some() {
                     // 窗口存在，记录标签
                     existing_window_label = Some(existing_label.clone());
@@ -310,7 +315,7 @@ pub fn check_window_by_path(_app: AppHandle, path: String) -> Result<Option<Stri
 
     // 查找是否有相同路径的活跃窗口
     for (existing_label, existing_path) in instances.iter() {
-        if existing_path == &target_path {
+        if window_paths_match(existing_path, &target_path) {
             // 检查窗口是否仍然存在
             if _app.get_webview_window(existing_label).is_some() {
                 return Ok(Some(existing_label.clone()));
@@ -319,6 +324,25 @@ pub fn check_window_by_path(_app: AppHandle, path: String) -> Result<Option<Stri
     }
 
     Ok(None)
+}
+
+fn window_paths_match(left: &Path, right: &Path) -> bool {
+    if left == right {
+        return true;
+    }
+
+    // Older startup bindings may still contain file URLs. Native file identity
+    // also handles Windows drive casing, separators and filesystem aliases.
+    let native_path = |path: &Path| {
+        path.to_str()
+            .and_then(|value| url::Url::parse(value).ok())
+            .filter(|url| url.scheme() == "file")
+            .and_then(|url| url.to_file_path().ok())
+            .unwrap_or_else(|| path.to_path_buf())
+    };
+    let left = native_path(left);
+    let right = native_path(right);
+    left == right || crate::fc::paths_refer_to_same_file(&left, &right)
 }
 
 pub(crate) fn file_is_in_workspace(path: &Path, root_path: &Path) -> bool {
@@ -409,13 +433,54 @@ pub fn focus_window_by_label(_app: AppHandle, window_label: String) -> Result<bo
 mod tests {
     use super::{
         file_is_in_workspace, serialize_javascript_string, serialize_javascript_value,
-        should_persist_window_state, update_window_recency, WindowBootstrap,
+        should_persist_window_state, update_window_recency, window_paths_match, WindowBootstrap,
     };
     use crate::app::conf::{
         ResolvedThemeMode, StartupAppearance, StartupPalette, ThemePreference,
         STARTUP_APPEARANCE_SCHEMA_VERSION,
     };
     use std::fs;
+
+    #[test]
+    fn window_path_identity_matches_file_urls_and_native_paths() {
+        let directory = tempfile::tempdir().unwrap();
+        let document = directory.path().join("notes #1, 100%.md");
+        fs::write(&document, "note").unwrap();
+        let url = url::Url::from_file_path(&document).unwrap();
+        assert!(window_paths_match(
+            std::path::Path::new(url.as_str()),
+            &document
+        ));
+        assert!(window_paths_match(
+            &document,
+            &directory.path().join("./notes #1, 100%.md")
+        ));
+        assert!(!window_paths_match(
+            &document,
+            &directory.path().join("other.md")
+        ));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn window_path_identity_matches_a_symlink_to_an_existing_document() {
+        let directory = tempfile::tempdir().unwrap();
+        let document = directory.path().join("note.md");
+        let alias = directory.path().join("alias.md");
+        fs::write(&document, "note").unwrap();
+        std::os::unix::fs::symlink(&document, &alias).unwrap();
+        assert!(window_paths_match(&document, &alias));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn window_path_identity_matches_windows_casing_and_separators() {
+        let directory = tempfile::tempdir().unwrap();
+        let document = directory.path().join("Notes.md");
+        fs::write(&document, "note").unwrap();
+        let alternate = document.to_string_lossy().replace('\\', "/").to_uppercase();
+        assert!(window_paths_match(&document, std::path::Path::new(&alternate)));
+    }
 
     #[test]
     fn workspace_membership_uses_native_components_and_normalizes_parent_segments() {

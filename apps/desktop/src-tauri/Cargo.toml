@@ -176,6 +176,10 @@ features = ["derive"]
 [dev-dependencies.thiserror]
 version = "2.0.8"
 
+[dev-dependencies.tauri]
+version = "2.12.4"
+features = ["test"]
+
 [dev-dependencies.tokio]
 version = "1.41.0"
 features = [

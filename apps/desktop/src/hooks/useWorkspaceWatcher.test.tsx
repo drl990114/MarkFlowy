@@ -4,6 +4,7 @@ import type { IFile } from '@/helper/filesys'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useWorkspaceWatcher } from './useWorkspaceWatcher'
 import useFileCacheStore, { setFileObject } from '@/helper/files'
+import { createInteractiveGate, startupInteractive } from '@/startup/interactive'
 
 const mocks = vi.hoisted(() => ({
   getWorkspace: vi.fn(),
@@ -44,6 +45,9 @@ const root = (path: string): IFile => ({
 
 describe('useWorkspaceWatcher', () => {
   beforeEach(() => {
+    const gate = createInteractiveGate()
+    gate.settle('editable')
+    vi.spyOn(startupInteractive, 'subscribe').mockImplementation(gate.subscribe)
     mocks.getWorkspace.mockResolvedValue({})
     mocks.invoke.mockResolvedValue(undefined)
     mocks.watch.mockReset()
@@ -55,6 +59,47 @@ describe('useWorkspaceWatcher', () => {
   afterEach(() => {
     cleanup()
     vi.clearAllMocks()
+    vi.restoreAllMocks()
+  })
+
+  it.each([false, true])('retains the bootstrap binding when readiness precedes React commit: %s', (settleBeforeCommit) => {
+    const gate = createInteractiveGate()
+    vi.mocked(startupInteractive.subscribe).mockImplementation(gate.subscribe)
+    mocks.watch.mockResolvedValue(vi.fn())
+    useEditorStore.setState({ folderData: null, opened: [] })
+    renderHook(() => useWorkspaceWatcher())
+
+    expect(mocks.invoke).not.toHaveBeenCalled()
+
+    act(() => {
+      setFileObject('document', {
+        id: 'document', name: 'REQ-044.md', kind: 'file', path: 'C:/Notes/REQ-044.md',
+      })
+      useEditorStore.setState({ opened: ['document'] })
+      if (settleBeforeCommit) gate.settle('editable')
+    })
+    if (!settleBeforeCommit) {
+      expect(mocks.invoke).not.toHaveBeenCalled()
+      act(() => { gate.settle('editable') })
+    }
+
+    expect(mocks.invoke).toHaveBeenCalled()
+    for (const call of mocks.invoke.mock.calls) {
+      expect(call).toEqual([
+        'update_window_path', { windowLabel: 'main', newPath: 'C:/Notes/REQ-044.md' },
+      ])
+    }
+  })
+
+  it('cancels pending window path registration when unmounted during startup', () => {
+    const gate = createInteractiveGate()
+    vi.mocked(startupInteractive.subscribe).mockImplementation(gate.subscribe)
+    const { unmount } = renderHook(() => useWorkspaceWatcher())
+
+    unmount()
+    gate.settle('empty')
+
+    expect(mocks.invoke).not.toHaveBeenCalled()
   })
 
   it('uses a window-local official watcher and replaces it when the root changes', async () => {

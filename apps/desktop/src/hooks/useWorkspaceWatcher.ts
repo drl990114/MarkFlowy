@@ -9,6 +9,7 @@ import { dirname } from '@tauri-apps/api/path'
 import { currentWindow } from '@/services/windows'
 import { getWorkspace, type WorkSpace } from '@/services/workspace'
 import { useEditorStore } from '@/stores'
+import { startupInteractive } from '@/startup/interactive'
 import { invoke } from '@tauri-apps/api/core'
 import { watch, type UnwatchFn } from '@tauri-apps/plugin-fs'
 import { createGlobalStore } from 'hox'
@@ -42,12 +43,18 @@ export const useWorkspaceWatcher = () => {
 
   const rootPath = folderData?.[0]?.path
   const windowPath = rootPath ?? (opened.length === 1 ? getFileObject(opened[0])?.path : undefined)
-  useEffect(() => {
+  // The shell mounts before its bootstrap file is loaded. Keep the native
+  // binding during that gap so repeated open requests can find this window.
+  useEffect(() => startupInteractive.subscribe(() => {
+    // Read live state in case the gate settles before React commits the update.
+    const editor = useEditorStore.getState()
+    const path = editor.getRootPath() ??
+      (editor.opened.length === 1 ? getFileObject(editor.opened[0])?.path : undefined)
     void invoke('update_window_path', {
       windowLabel: currentWindow.label,
-      newPath: windowPath,
+      newPath: path,
     }).catch((error: unknown) => logger.warn('Failed to update the window path', error))
-  }, [windowPath])
+  }), [windowPath])
   useEffect(() => { resetExternalFileChanges() }, [sessionRevision])
   const loosePaths = JSON.stringify(
     opened

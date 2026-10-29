@@ -1,5 +1,5 @@
 use crate::app::{application_session, window_manager};
-use tauri::{utils::config::WebviewUrl, AppHandle, Emitter, Manager};
+use tauri::{utils::config::WebviewUrl, AppHandle, Manager};
 
 pub fn init(
     app_handle: AppHandle,
@@ -10,7 +10,7 @@ pub fn init(
         // The existing renderer may not have consumed its initial paths yet.
         // Merge only the pending paths; never replace its appearance/session bootstrap.
         crate::update_window_opened_urls(&existing_window, &opened_urls);
-        let _ = existing_window.emit("opened-urls", opened_urls.clone());
+        let _ = crate::emit_opened_urls(&existing_window, &opened_urls);
 
         // 确保窗口被聚焦
         let _ = existing_window.set_focus();

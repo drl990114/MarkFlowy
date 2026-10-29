@@ -1,6 +1,8 @@
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorStore from '@/stores/useEditorStore'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import useEditorStateStore from '@/stores/useEditorStateStore'
+import { deleteFileObject, getFileObject, setFileObject, setFileObjectByPath } from '@/helper/files'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { openStandaloneFile } from './open-file'
 
 const mocks = vi.hoisted(() => ({
@@ -20,6 +22,10 @@ vi.mock('./editor-file', () => ({
 beforeEach(() => {
   useAppSettingStore.setState({ settingData: {} })
   useEditorStore.setState({ folderData: null, opened: ['source-draft'], activeId: 'source-draft' })
+  useEditorStore.getState().setEditorLayout({
+    type: 'leaf', id: 'source', opened: ['source-draft'], activeId: 'source-draft',
+  }, 'source')
+  useEditorStateStore.setState({ idStateMap: new Map() })
   mocks.invoke.mockReset().mockImplementation(async (command: string) => {
     if (command === 'is_file_in_workspace') return false
     if (command === 'create_new_window') return 'document-window'
@@ -28,11 +34,100 @@ beforeEach(() => {
   mocks.addExistingFile.mockReset().mockResolvedValue(undefined)
 })
 
+afterEach(() => {
+  deleteFileObject('existing-file')
+})
+
+const cacheFile = (path = '/documents/notes.md') => {
+  const file = { id: 'existing-file', kind: 'file' as const, name: 'notes.md', path, content: 'unsaved text' }
+  setFileObject(file.id, file)
+  setFileObjectByPath(path, file)
+  return file
+}
+
 const setWorkspace = () => useEditorStore.setState({
   folderData: [{ id: 'workspace', kind: 'dir', name: 'Workspace', path: '/workspace' }],
 })
 
 describe('standalone file opening', () => {
+  it.each(['preference', 'current'] as const)('reactivates an open file without reloading its unsaved content (%s)', async (target) => {
+    const file = cacheFile()
+    useEditorStore.getState().setEditorLayout({
+      type: 'leaf', id: 'source', opened: [file.id, 'source-draft'], activeId: 'source-draft',
+    }, 'source')
+    const dirtyState = { hasUnsavedChanges: true }
+    useEditorStateStore.setState({ idStateMap: new Map([[file.id, dirtyState]]) })
+
+    await expect(openStandaloneFile(file.path, target)).resolves.toBe('current')
+    await expect(openStandaloneFile(file.path, target)).resolves.toBe('current')
+
+    expect(useEditorStore.getState().getGroup('source')).toMatchObject({
+      opened: [file.id, 'source-draft'], activeId: file.id,
+    })
+    expect(getFileObject(file.id).content).toBe('unsaved text')
+    expect(useEditorStateStore.getState().idStateMap.get(file.id)).toBe(dirtyState)
+    expect(mocks.invoke).not.toHaveBeenCalled()
+    expect(mocks.addExistingFile).not.toHaveBeenCalled()
+  })
+
+  it.each(['c:/notes/REQ-044.md', 'C:\\NOTES\\req-044.MD'])('recognizes the Windows path alias %s', async (path) => {
+    const file = cacheFile('C:\\Notes\\REQ-044.md')
+    useEditorStore.getState().setEditorLayout({
+      type: 'leaf', id: 'source', opened: [file.id], activeId: file.id,
+    }, 'source')
+
+    await expect(openStandaloneFile(path)).resolves.toBe('current')
+
+    expect(useEditorStore.getState().opened).toEqual([file.id])
+    expect(mocks.invoke).not.toHaveBeenCalled()
+    expect(mocks.addExistingFile).not.toHaveBeenCalled()
+  })
+
+  it('activates the existing split and promotes its preview without duplicating the tab', async () => {
+    const file = cacheFile()
+    useEditorStore.getState().setEditorLayout({
+      type: 'branch', id: 'root', direction: 'horizontal', sizes: [50, 50], children: [
+        { type: 'leaf', id: 'source', opened: ['source-draft'], activeId: 'source-draft' },
+        { type: 'leaf', id: 'other', opened: [file.id], activeId: file.id, previewId: file.id },
+      ],
+    }, 'source')
+
+    await expect(openStandaloneFile(file.path)).resolves.toBe('current')
+
+    expect(useEditorStore.getState().activeGroupId).toBe('other')
+    expect(useEditorStore.getState().getGroup('source')?.opened).toEqual(['source-draft'])
+    expect(useEditorStore.getState().getGroup('other')).toEqual({
+      type: 'leaf', id: 'other', opened: [file.id], activeId: file.id,
+    })
+    expect(mocks.invoke).not.toHaveBeenCalled()
+    expect(mocks.addExistingFile).not.toHaveBeenCalled()
+  })
+
+  it('keeps the active split when the same file is already open in both splits', async () => {
+    const file = cacheFile()
+    useEditorStore.getState().setEditorLayout({
+      type: 'branch', id: 'root', direction: 'horizontal', sizes: [50, 50], children: [
+        { type: 'leaf', id: 'first', opened: [file.id], activeId: file.id },
+        { type: 'leaf', id: 'second', opened: [file.id, 'source-draft'], activeId: 'source-draft' },
+      ],
+    }, 'second')
+
+    await expect(openStandaloneFile(file.path)).resolves.toBe('current')
+
+    expect(useEditorStore.getState().activeGroupId).toBe('second')
+    expect(useEditorStore.getState().getGroup('second')?.activeId).toBe(file.id)
+    expect(mocks.invoke).not.toHaveBeenCalled()
+  })
+
+  it('still applies the window preference to cached files with no open tab', async () => {
+    const file = cacheFile()
+
+    await expect(openStandaloneFile(file.path)).resolves.toBe('new')
+
+    expect(mocks.invoke).toHaveBeenCalledWith('create_new_window', { path: file.path })
+    expect(mocks.addExistingFile).not.toHaveBeenCalled()
+  })
+
   it.each([{}, { open_file_in_new_window: true }])(
     'creates a new window when the setting is enabled or missing: %j',
     async (settingData) => {

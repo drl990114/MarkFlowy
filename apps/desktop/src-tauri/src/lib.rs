@@ -162,6 +162,15 @@ pub(crate) fn update_window_opened_urls(window: &tauri::WebviewWindow, opened_ur
     }
 }
 
+pub(crate) fn emit_opened_urls<R: tauri::Runtime>(
+    window: &tauri::WebviewWindow<R>,
+    opened_urls: &[String],
+) -> tauri::Result<()> {
+    // Emitter::emit broadcasts even when called on a window. Match the label
+    // so only this window's frontend can route the request to a document.
+    window.emit_to(window.label(), "opened-urls", opened_urls)
+}
+
 fn migrate_window_state_file(config_dir: &Path) -> Result<bool, String> {
     let target_path = config_dir.join(WINDOW_STATE_FILENAME);
     if target_path.exists() {
@@ -229,9 +238,48 @@ fn window_state_migration_plugin<R: tauri::Runtime>() -> tauri::plugin::TauriPlu
 #[cfg(test)]
 mod opened_url_tests {
     use super::{
-        migrate_window_state_file, opened_urls_to_paths, opened_urls_update_script,
+        emit_opened_urls, migrate_window_state_file, opened_urls_to_paths, opened_urls_update_script,
         LEGACY_WINDOW_STATE_FILENAME, WINDOW_STATE_FILENAME,
     };
+
+    #[test]
+    fn opened_url_delivery_only_reaches_the_selected_window() {
+        use std::sync::{Arc, Mutex};
+        use tauri::{Listener, Manager, WebviewWindowBuilder};
+
+        let app = tauri::test::mock_builder()
+            .build(tauri::test::mock_context(tauri::test::noop_assets()))
+            .unwrap();
+        let target = WebviewWindowBuilder::new(&app, "target", Default::default())
+            .build()
+            .unwrap();
+        WebviewWindowBuilder::new(&app, "other", Default::default())
+            .build()
+            .unwrap();
+        let received = Arc::new(Mutex::new(Vec::new()));
+        for label in ["target", "other"] {
+            let received = received.clone();
+            // getCurrentWindow().listen uses EventTarget::Window, not
+            // EventTarget::WebviewWindow, even in a single-WebView window.
+            app.get_webview_window(label)
+                .unwrap()
+                .as_ref()
+                .window()
+                .listen("opened-urls", move |event| {
+                    received
+                        .lock()
+                        .unwrap()
+                        .push((label, event.payload().to_string()));
+                });
+        }
+
+        let paths = vec![r"C:\Notes\one.md".to_string()];
+        emit_opened_urls(&target, &paths).unwrap();
+        assert_eq!(
+            *received.lock().unwrap(),
+            vec![("target", serde_json::to_string(&paths).unwrap())]
+        );
+    }
 
     #[test]
     fn opened_url_paths_preserve_commas_as_one_array_entry() {
@@ -2119,20 +2167,18 @@ pub fn run() {
                 println!("Processed {} opened URL(s)", opened_url_paths.len());
 
                 if let Some(window) = window_manager::get_focused_window(app) {
-                    use tauri::Emitter;
                     println!("Emitting to focused window: {}", window.label());
                     update_window_opened_urls(&window, &opened_url_paths);
-                    let result = window.emit("opened-urls", opened_url_paths.clone());
+                    let result = emit_opened_urls(&window, &opened_url_paths);
                     if let Some(opened_urls) = &opened_urls {
                         clear_opened_urls(opened_urls.inner());
                     }
                     println!("Emit result: {:?}", result);
                 } else {
                     if let Some(window) = window_manager::get_last_opened_window(app) {
-                        use tauri::Emitter;
                         println!("Emitting to last opened window: {}", window.label());
                         update_window_opened_urls(&window, &opened_url_paths);
-                        let result = window.emit("opened-urls", opened_url_paths.clone());
+                        let result = emit_opened_urls(&window, &opened_url_paths);
                         if let Some(opened_urls) = &opened_urls {
                             clear_opened_urls(opened_urls.inner());
                         }
