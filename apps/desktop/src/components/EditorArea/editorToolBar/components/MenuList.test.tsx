@@ -9,6 +9,8 @@ import { MenuList } from './MenuList'
 import useFileTextDirectionStore, { getFileTextDirectionKey } from '@/stores/useFileTextDirectionStore'
 import { writeSettingData } from '@/services/app-setting'
 import { commandRegistry } from '@/commands'
+import bus from '@/helper/eventBus'
+import type * as EditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import type { Bookmark } from '@/extensions/bookmarks/types'
 
 const mocks = vi.hoisted(() => ({
@@ -45,9 +47,10 @@ vi.mock('@/stores/useAppSettingStore', () => ({
   default: (selector: (state: { settingData: Record<string, unknown> }) => unknown) =>
     selector({ settingData: {} }),
 }))
-vi.mock('@/stores/useEditorViewTypeStore', () => ({
-  default: (selector: (state: { editorViewTypeMap: Map<string, string> }) => unknown) =>
-    selector({ editorViewTypeMap: new Map() }),
+vi.mock('@/stores/useEditorViewTypeStore', async (importOriginal) => ({
+  ...(await importOriginal<typeof EditorViewTypeStore>()),
+  default: (selector: (state: { editorViewTypeMap: Map<string, string>; editorGroupViewTypeMap: Map<string, Map<string, string>> }) => unknown) =>
+    selector({ editorViewTypeMap: new Map(), editorGroupViewTypeMap: new Map() }),
 }))
 vi.mock('@/stores/useFileTypeConfigStore', () => ({
   default: {
@@ -191,5 +194,20 @@ describe('toolbar file text direction', () => {
 
   it.each(['image', 'start'])('omits body direction for non-Markdown content: %s', (editorId) => {
     expect(openMenu(editorId, 'text_direction')).toBeUndefined()
+  })
+})
+
+it('retains the originating pane when a More-menu view command is selected', () => {
+  render(<TooltipProvider><MenuList editorId='pane' groupId='right' /></TooltipProvider>)
+  fireEvent.click(screen.getByRole('button', { name: 'action.more' }))
+  const viewMenu = mocks.showMenu.mock.calls.at(-1)![0].items.find(
+    (item) => 'value' in item && item.value === 'view_switcher',
+  )
+  if (!viewMenu || !('children' in viewMenu)) throw new Error('View menu missing')
+  const sourceItem = viewMenu.children?.find((item) => 'value' in item && item.value === 'sourceCode')
+  if (!sourceItem || !('handler' in sourceItem)) throw new Error('Source command missing')
+  act(() => sourceItem.handler?.())
+  expect(bus.emit).toHaveBeenCalledWith('editor_toggle_type', undefined, 'sourceCode', {
+    editorId: 'pane', groupId: 'right',
   })
 })

@@ -83,7 +83,10 @@ beforeEach(() => {
   harness.recordStage.mockReset()
   useFileCacheStore.setState({ entries: {}, metadataRevision: 0, pathEntries: {} })
   useFileTypeConfigStore.setState({ fileTypeConfigMap: new Map() })
-  useEditorViewTypeStore.setState({ editorViewTypeMap: new Map() })
+  useEditorViewTypeStore.setState({
+    editorViewTypeMap: new Map(),
+    editorGroupViewTypeMap: new Map(),
+  })
 })
 
 afterEach(() => {
@@ -223,7 +226,7 @@ describe('Editor initialization lifecycle', () => {
     view.rerender(<Editor id='file-a' active visible groupId='group' />)
     await view.findByTestId('text-editor')
     expect(harness.getFileTypeConfig).toHaveBeenCalledOnce()
-    expect(useEditorViewTypeStore.getState().editorViewTypeMap.get('file-a')).toBe(EditorViewType.SOURCECODE)
+    expect(useEditorViewTypeStore.getState().editorGroupViewTypeMap.get('group')?.get('file-a')).toBe(EditorViewType.SOURCECODE)
   })
 
   it('does not publish type state, prewarm, or diagnostics after the tab closes', async () => {
@@ -244,6 +247,7 @@ describe('Editor initialization lifecycle', () => {
 
     expect(useFileTypeConfigStore.getState().fileTypeConfigMap.has('file-a')).toBe(false)
     expect(useEditorViewTypeStore.getState().editorViewTypeMap.has('file-a')).toBe(false)
+    expect(useEditorViewTypeStore.getState().editorGroupViewTypeMap.has('group')).toBe(false)
     expect(harness.preload).not.toHaveBeenCalled()
     expect(harness.recordStage).not.toHaveBeenCalled()
   })
@@ -279,8 +283,8 @@ describe('Editor initialization lifecycle', () => {
 
     expect(useFileTypeConfigStore.getState().fileTypeConfigMap.has('file-a')).toBe(false)
     expect(useEditorViewTypeStore.getState().editorViewTypeMap.has('file-a')).toBe(false)
-    expect(useEditorViewTypeStore.getState().editorViewTypeMap.get('file-b')).toBe(
-      EditorViewType.WYSIWYG,
+    expect(useEditorViewTypeStore.getState().editorGroupViewTypeMap.get('group')).toEqual(
+      new Map([['file-b', EditorViewType.WYSIWYG]]),
     )
     expect(harness.preload).toHaveBeenCalledOnce()
   })

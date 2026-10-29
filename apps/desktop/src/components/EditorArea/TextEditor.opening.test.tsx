@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { EditorView } from '@codemirror/view'
-import { act, cleanup, render, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { enableMapSet } from 'immer'
 import { save as saveDialog } from '@tauri-apps/plugin-dialog'
 import type { PropsWithChildren } from 'react'
@@ -17,6 +17,7 @@ import useEditorStore from '@/stores/useEditorStore'
 import { createEditorResumeStore } from '@/stores/editorResumeStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import TextEditor from './TextEditor'
 import EditorLayoutView from './EditorLayoutView'
 import { fileSaveCoordinator } from './fileSaveCoordinator'
@@ -25,7 +26,7 @@ import { getCapricornEditor } from './capricornEditorRegistry'
 import { editorAutomationRegistry } from './editorAutomationRegistry'
 import { getCapricornRuntimeInput } from './capricornRuntimeDom'
 import { EXTERNAL_FILE_CONTENT_SYNC_EVENT } from './externalFileChanges'
-import { sourceCodeCodemirrorViewMap } from './sourceCodeEditorRegistry'
+import { getSourceCodeEditor, sourceCodeCodemirrorViewMap } from './sourceCodeEditorRegistry'
 import * as rmeRuntime from './rmeRuntime'
 import * as capricornRuntime from './capricornRuntimeAdapter'
 import * as conditionalFileWrite from './conditionalFileWrite'
@@ -33,11 +34,23 @@ import { bindRecoveredDraft, endHistoryBatch, historyCall, releaseClosedFileCont
 import { stageDraftRecovery } from '@/services/staged-draft-recovery'
 import { registerDraftRecovery } from '@/services/draftRecoveryState'
 import type { DraftDescriptor } from '@/services/draftSessionFormat'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { desktopDarkTheme } from '@markflowy/theme'
+import { ThemeProvider } from 'styled-components'
+import { WysiwygToolbar } from './editorToolBar/WysiwygToolbar/WysiwygToolbar'
+import { SourceCodeToolbar } from './editorToolBar/SourceCodeToolbar/SourceCodeToolbar'
+import { PreviewToolbar } from './editorToolBar/PreviewToolbar/PreviewToolbar'
+import type { IShowContextMenuParams } from '@/stores/useContextMenuStore'
+import { EVENT } from '@/constants'
+import EditorArea from './index'
+
 
 const mocks = vi.hoisted(() => ({
   t: (key: string) => key,
   error: vi.fn(),
   rmeLoaded: vi.fn(),
+  showMenu: vi.fn<(params: IShowContextMenuParams) => void>(),
+  registerCommand: vi.fn<(command: { id: string; handler: () => void }) => { dispose: () => void }>(() => ({ dispose: vi.fn() })),
   invoke: vi.fn(async (command: string) =>
     command === 'get_snippets'
       ? { version: 1, revision: 0, items: [], hiddenBuiltinIds: [] }
@@ -47,7 +60,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/commands', () => ({ commandRegistry: {
   execute: vi.fn(),
-  registerCommand: () => ({ dispose: vi.fn() }),
+  registerCommand: mocks.registerCommand,
 } }))
 vi.mock('@/AppThemeProvider', () => ({ AppEditorThemeProvider: ({ children }: { children: React.ReactNode }) => children }))
 vi.mock('@/helper/clipboard', () => ({ clipboardRead: vi.fn() }))
@@ -85,6 +98,9 @@ vi.mock('overlayscrollbars-react', () => ({
 }))
 vi.mock('./EditorAreaTabs', () => ({ default: () => null }))
 vi.mock('./EditorGroupToolbar', () => ({ default: () => null }))
+vi.mock('./editorAreaLoader', () => ({ loadEditorAreaContent: async () => ({ default: () => null }) }))
+vi.mock('./editorToolBar/components/MenuList', () => ({ MenuList: () => null }))
+vi.mock('@/components/ui-v2/ContextMenu', () => ({ showContextMenu: mocks.showMenu }))
 vi.mock('./EmptyState', () => ({ EmptyState: () => null }))
 vi.mock('./ExternalFileChangeAlert', () => ({ ExternalFileChangeAlert: () => null }))
 vi.mock('./editorToolBar/FindReplace', () => ({ FindReplace: () => null }))
@@ -136,6 +152,7 @@ vi.mock('@/services/local-history', () => ({
 
 enableMapSet()
 beforeAll(() => {
+  Object.defineProperty(document, 'elementFromPoint', { configurable: true, value: () => null })
   Object.defineProperty(Range.prototype, 'getClientRects', { configurable: true, value: () => [] })
   Object.defineProperty(Range.prototype, 'getBoundingClientRect', {
     configurable: true,
@@ -808,5 +825,103 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor source mode transition
     }))
     expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
   })
+
+  it('keeps same-file split modes, toolbars, commands and runtime owners independent', async () => {
+    vi.stubGlobal('ResizeObserver', class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    })
+    await Promise.all([rmeRuntime.loadRmeRuntime(), capricornRuntime.loadCapricornRuntimeFactory()])
+    const previous = useEditorStore.getState()
+    const previousModes = useEditorViewTypeStore.getState()
+    const id = 'same-file-split-modes'
+    const left = 'split-modes-left'
+    const right = 'split-modes-right'
+    createFile({ id, name: 'modes.md', path: '/synthetic/split/modes.md', ext: 'md', kind: 'file' })
+    useEditorStore.getState().setEditorLayout({
+      type: 'branch', id: 'split-modes', direction: 'horizontal', sizes: [50, 50],
+      children: [left, right].map((groupId) => ({ type: 'leaf', id: groupId, opened: [id], activeId: id })),
+    }, left)
+    const fileTypeConfig = {
+      type: 'markdown' as const, defaultMode: EditorViewType.WYSIWYG,
+      supportedModes: [EditorViewType.WYSIWYG, EditorViewType.SOURCECODE, EditorViewType.PREVIEW],
+    }
+    useFileTypeConfigStore.getState().setFileTypeConfig(id, fileTypeConfig)
+    function SplitEditors() {
+      const state = useEditorStore()
+      return <ThemeProvider theme={desktopDarkTheme}><TooltipProvider>
+        <EditorArea />
+        {[left, right].filter((groupId) => state.getGroup(groupId)).map((groupId) => (
+          <section aria-label={groupId} key={groupId}>
+            <WysiwygToolbar editorId={id} groupId={groupId} />
+            <SourceCodeToolbar editorId={id} groupId={groupId} />
+            <PreviewToolbar editorId={id} groupId={groupId} />
+            <TextEditor id={id} groupId={groupId} active={state.activeGroupId === groupId} visible fileTypeConfig={fileTypeConfig} />
+          </section>
+        ))}
+      </TooltipProvider></ThemeProvider>
+    }
+    try {
+      const { container } = render(<SplitEditors />)
+      const leftPane = container.querySelector<HTMLElement>(`section[aria-label="${left}"]`)!
+      const rightPane = container.querySelector<HTMLElement>(`section[aria-label="${right}"]`)!
+      const button = (pane: HTMLElement, label: string) => pane.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)!
+      await waitFor(() => {
+        expect(button(leftPane, 'view.label: view.wysiwyg')).not.toBeNull()
+        expect(button(rightPane, 'view.label: view.wysiwyg')).not.toBeNull()
+      })
+      const leftEditor = getCapricornEditor(id, left)!
+      // A menu can remain open while another pane becomes active.
+      fireEvent.click(button(rightPane, 'view.label: view.wysiwyg'))
+      const sourceItem = mocks.showMenu.mock.calls.at(-1)![0].items.find((item) => 'value' in item && item.value === EditorViewType.SOURCECODE)
+      if (!sourceItem || 'type' in sourceItem) throw new Error('Missing source view menu item')
+      await act(async () => sourceItem.handler?.())
+      await waitFor(() => expect(rightPane.querySelector('.cm-editor')).not.toBeNull())
+      expect(leftPane.querySelector('[data-cap-content]')).not.toBeNull()
+      expect(button(leftPane, 'view.label: view.wysiwyg')).not.toBeNull()
+      expect(button(rightPane, 'view.label: view.source_code')).not.toBeNull()
+      expect(useEditorViewTypeStore.getState().getEditorViewType(id)).toBe(EditorViewType.WYSIWYG)
+      expect(getCapricornEditor(id)).toBe(leftEditor)
+      expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
+      const rightSource = getSourceCodeEditor(id, right)!
+      expect(rightSource.cm.dom.closest('section')).toBe(rightPane)
+      const bodyOffset = rightSource.content.indexOf('Body')
+      await act(async () => rightSource.cm.dispatch({ selection: { anchor: bodyOffset, head: bodyOffset + 4 } }))
+      fireEvent.click(button(rightPane, 'toolbar.bold'))
+      expect(rightSource.content).toContain('**Body**')
+
+      // The keyboard command must read the left pane's actual WYSIWYG mode.
+      const toggle = mocks.registerCommand.mock.calls.findLast(([command]) => command.id === EVENT.app_toggleEditorType)![0].handler
+      await act(async () => toggle())
+      await waitFor(() => expect(leftPane.querySelector('.cm-editor')).not.toBeNull())
+      expect(getSourceCodeEditor(id, right)).toBe(rightSource)
+      await act(async () => toggle())
+      await waitFor(() => expect(leftPane.querySelector('[data-cap-content]')).not.toBeNull())
+      expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
+      const currentLeftEditor = getCapricornEditor(id, left)!
+      await act(async () => useEditorStore.getState().setActiveGroupId(right))
+      expect(getCapricornEditor(id)).toBeUndefined()
+      const toggleMark = vi.spyOn(currentLeftEditor.commands, 'toggleMark')
+      fireEvent.click(button(leftPane, 'toolbar.bold'))
+      expect(toggleMark).toHaveBeenCalledWith('bold')
+      expect(getSourceCodeEditor(id, right)).toBe(rightSource)
+
+      await act(async () => useEditorStore.getState().closeGroup(right))
+      await waitFor(() => expect(getCapricornEditor(id)).toBe(currentLeftEditor))
+      expect(getSourceCodeEditor(id, right)).toBeUndefined()
+      expect(sourceCodeCodemirrorViewMap.get(id)).toBeUndefined()
+      expect(useEditorViewTypeStore.getState().editorGroupViewTypeMap.has(right)).toBe(false)
+      expect(button(leftPane, 'view.label: view.wysiwyg')).not.toBeNull()
+      await act(async () => toggle())
+      await waitFor(() => expect(leftPane.querySelector('.cm-editor')).not.toBeNull())
+    } finally {
+      cleanup()
+      useEditorStore.setState(previous)
+      useEditorViewTypeStore.setState(previousModes)
+      vi.unstubAllGlobals()
+    }
+  })
+
 
 })

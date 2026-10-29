@@ -20,7 +20,7 @@ import { bindEditorResume, bindSourceEditorResume } from './editorResume'
 import { captureEditorModeFocus } from './editorModeFocus'
 import { editorAutomationRegistry, type EditorAutomationHandle } from './editorAutomationRegistry'
 import { exportHtmlDocument } from './exportHtmlDocument'
-import { setSourceCodeEditor } from './sourceCodeEditorRegistry'
+import { setSourceCodeEditor, sourceCodeViewRegistry } from './sourceCodeEditorRegistry'
 import { reportEditorSearchLoadFailure, useEditorSearchStore } from './editorSearchStore'
 import { commandRegistry } from '@/commands'
 import { capricornClipboard, handleCapricornClipboardResult } from './capricornClipboard'
@@ -85,7 +85,7 @@ import { useEditorStateStore, useEditorStore } from '@/stores'
 import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorCounterStore from '@/stores/useEditorCounterStore'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useEditorViewTypeStore, { selectEditorViewType } from '@/stores/useEditorViewTypeStore'
 import useExternalFileChangeStore, {
   isExternalFileSaveBlocked,
 } from '@/stores/useExternalFileChangeStore'
@@ -164,7 +164,7 @@ import {
   type CapricornRuntimeProgress,
 } from './capricornRuntimeAdapter'
 import { createCapricornStatisticsScheduler } from './capricornStatisticsScheduler'
-import { setCapricornEditor } from './capricornEditorRegistry'
+import { capricornEditorInstanceRegistry, setCapricornEditor } from './capricornEditorRegistry'
 import { openEditorLink } from './openEditorLink'
 import { conditionalWriteExpectedIfAllowed, getFileWriteRevision } from './conditionalFileWrite'
 import { EditorInstanceLifecycle } from './editorInstanceLifecycle'
@@ -387,8 +387,6 @@ export { sourceCodeCodemirrorViewMap } from './sourceCodeEditorRegistry'
 
 const editorDelegateRegistry = new InstanceResourceRegistry<EditorDelegate<any>>()
 const editorContextRegistry = new InstanceResourceRegistry<EditorContext>()
-const capricornEditorInstanceRegistry = new InstanceResourceRegistry<CapricornRuntimeAdapter>()
-const sourceCodeViewRegistry = new InstanceResourceRegistry<MfCodemirrorView>()
 const textEditorSaveHandlerRegistry = new InstanceResourceRegistry<() => Promise<boolean>>()
 
 function registerCompatibilityResource<T>(
@@ -398,8 +396,9 @@ function registerCompatibilityResource<T>(
   resource: T,
   shouldPromote: boolean,
   setCurrent: (current: T) => void,
+  groupId?: string,
 ) {
-  const registration = registry.register(fileId, instanceId, resource)
+  const registration = registry.register(fileId, instanceId, resource, groupId)
   const current = shouldPromote
     ? registry.promote(fileId, instanceId)
     : registration.currentChanged
@@ -475,6 +474,7 @@ function registerSourceCodeViewResource(
   instanceId: string,
   view: MfCodemirrorView,
   shouldPromote: boolean,
+  groupId?: string,
 ) {
   registerCompatibilityResource(
     sourceCodeViewRegistry,
@@ -483,6 +483,7 @@ function registerSourceCodeViewResource(
     view,
     shouldPromote,
     (current) => setSourceCodeEditor(fileId, current),
+    groupId,
   )
 }
 
@@ -491,6 +492,7 @@ function registerCapricornEditorResource(
   instanceId: string,
   editor: CapricornRuntimeAdapter,
   shouldPromote: boolean,
+  groupId?: string,
 ) {
   registerCompatibilityResource(
     capricornEditorInstanceRegistry,
@@ -499,6 +501,7 @@ function registerCapricornEditorResource(
     editor,
     shouldPromote,
     (current) => setCapricornEditor(fileId, current),
+    groupId,
   )
 }
 
@@ -699,7 +702,7 @@ function TextEditor(props: TextEditorProps) {
             resolveCodeEditorPreferences(useAppSettingStore.getState().settingData).source,
           )
           setResumeSource(cmView)
-          registerSourceCodeViewResource(id, instanceIdRef.current!, cmView, activeRef.current)
+          registerSourceCodeViewResource(id, instanceIdRef.current!, cmView, activeRef.current, groupId)
           if (activeRef.current && fileTypeConfig.type === 'markdown') {
             commandRegistry.execute('app:toc_refresh')
           }
@@ -709,7 +712,7 @@ function TextEditor(props: TextEditorProps) {
         },
       })
     },
-    [id, fileTypeConfig.type],
+    [id, groupId, fileTypeConfig.type],
   )
   const [status, setStatus] = useState(TextEditorStatus.LOADING)
   useEffect(() => {
@@ -843,15 +846,11 @@ function TextEditor(props: TextEditorProps) {
   const externalChangeResolving =
     externalChangeState === 'reload' || externalChangeState === 'overwrite'
   const [currentViewType, setCurrentViewType] = useState<EditorViewTypeValue>(() => {
-    const selected = useEditorViewTypeStore.getState().editorViewTypeMap.get(id)
+    const selected = selectEditorViewType(useEditorViewTypeStore.getState(), id, groupId)
     return selected && isSupportedMode(fileTypeConfig, selected)
       ? selected
       : fileTypeConfig.defaultMode
   })
-  const initialViewTypeRef = useRef(currentViewType)
-  const sharedHtmlViewType = useEditorViewTypeStore((state) =>
-    isHtml ? state.editorViewTypeMap.get(id) : undefined,
-  )
   const currentViewTypeRef = useRef(currentViewType)
   currentViewTypeRef.current = currentViewType
   const needsRmeRuntime =
@@ -892,7 +891,6 @@ function TextEditor(props: TextEditorProps) {
   const capricornEditorRef = useRef<CapricornEditorHandle>(null)
   const capricornRuntimeAdapterRef = useRef<CapricornRuntimeAdapter | null>(null)
   const stopFirstPaintObservationRef = useRef<(() => void) | undefined>(undefined)
-  const editorInitializedRef = useRef(false)
   const editorContextRef = useRef<EditorChangeEventParams>(null)
   const counterIdleHandleRef = useRef<number | null>(null)
   const counterDocumentRef = useRef<EditorChangeEventParams['state']['doc'] | null>(null)
@@ -1081,7 +1079,7 @@ function TextEditor(props: TextEditorProps) {
     if (active) {
       promoteEditorInstanceResources(id, instanceIdRef.current!)
     }
-  }, [active, id])
+  }, [active, currentViewType, id])
 
   const updateCachedFileContent = useCallback(
     (nextContent: string) => {
@@ -1367,12 +1365,15 @@ function TextEditor(props: TextEditorProps) {
     }
   }, [filePath, groupId, id, updateCachedFileContent])
 
-  useEffect(() => {
-    if (status !== TextEditorStatus.SUCCESS || editorInitializedRef.current) return
-    editorInitializedRef.current = true
-    const initialMode = initialViewTypeRef.current
-    useEditorViewTypeStore.getState().setEditorViewType(id, initialMode)
-  }, [status, id])
+  useLayoutEffect(() => {
+    const store = useEditorViewTypeStore.getState()
+    // Publish the committed mode of this pane. Global consumers follow only
+    // the active pane; another visible pane may finish a targeted switch later.
+    if (groupId) store.setEditorViewType(id, currentViewType, groupId)
+    if (active || !groupId || !store.editorViewTypeMap.has(id)) {
+      store.setEditorViewType(id, currentViewType)
+    }
+  }, [active, currentViewType, groupId, id])
 
   useEffect(() => {
     if (
@@ -1807,15 +1808,15 @@ function TextEditor(props: TextEditorProps) {
             instanceIdRef.current!,
             resumeSource,
             activeRef.current,
+            groupId,
           )
         }
       } else {
         unregisterSourceCodeViewResource(id, instanceIdRef.current!)
       }
-      useEditorViewTypeStore.getState().setEditorViewType(id, mode)
       setCurrentViewType(mode)
     },
-    [currentViewType, delegate, id, isHtml, resumeSource],
+    [currentViewType, delegate, groupId, id, isHtml, resumeSource],
   )
 
   const requestViewType = useCallback(
@@ -1948,7 +1949,6 @@ function TextEditor(props: TextEditorProps) {
         } else if (payload === EditorViewType.PREVIEW) {
           debounceRefreshToc()
         }
-        useEditorViewTypeStore.getState().setEditorViewType(curFile.id, payload)
         modeTargetRef.current = payload === EditorViewType.PREVIEW ? undefined : payload
         setCurrentViewType(payload)
         switched = true
@@ -1990,19 +1990,9 @@ function TextEditor(props: TextEditorProps) {
   )
 
   useEffect(() => {
-    if (
-      status === TextEditorStatus.SUCCESS &&
-      sharedHtmlViewType &&
-      sharedHtmlViewType !== currentViewType
-    ) {
-      void requestViewType(sharedHtmlViewType)
-    }
-  }, [currentViewType, sharedHtmlViewType, status, requestViewType])
-
-  useEffect(() => {
     const cb = (payload: EditorViewTypeValue, target?: EditorViewTarget) => {
       const matchesTarget = target
-        ? visible && id === target.editorId && (!target.groupId || groupId === target.groupId)
+        ? visible && id === target.editorId && (target.groupId ? groupId === target.groupId : active)
         : active
       if (matchesTarget) void requestViewType(payload)
     }
@@ -2760,13 +2750,13 @@ function TextEditor(props: TextEditorProps) {
       capricornRuntimeAdapterRef.current = editor
       setResumeCapricorn(editor)
       if (editor) {
-        registerCapricornEditorResource(id, instanceId, editor, activeRef.current)
+        registerCapricornEditorResource(id, instanceId, editor, activeRef.current, groupId)
       } else {
         capricornStatisticsScheduler.cancel()
         unregisterCapricornEditorResource(id, instanceId)
       }
     },
-    [capricornStatisticsScheduler, id],
+    [capricornStatisticsScheduler, groupId, id],
   )
 
   useEffect(() => {
@@ -2997,7 +2987,6 @@ function TextEditor(props: TextEditorProps) {
           editorRef.current?.toggleType(EditorViewType.PREVIEW)
         }
         setContent(markdown)
-        useEditorViewTypeStore.getState().setEditorViewType(id, EditorViewType.PREVIEW)
         setCurrentViewType(EditorViewType.PREVIEW)
       },
       render: async (format) => {

@@ -1,6 +1,6 @@
 import { useEditorStore } from '@/stores'
 import { EditorViewType } from '@/constants/editorViewType'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useEditorViewTypeStore, { selectEditorViewType } from '@/stores/useEditorViewTypeStore'
 import { type FC, useCallback, useMemo } from 'react'
 import { useTranslation } from '@/i18n'
 import {
@@ -34,7 +34,7 @@ import {
   toOverflowMenuItems,
   type ToolbarAction,
 } from '../components'
-import { sourceCodeCodemirrorViewMap } from '../../sourceCodeEditorRegistry'
+import { getSourceCodeEditor } from '../../sourceCodeEditorRegistry'
 import { insertSourceImage, insertSourceLink } from '../../sourceInsertCommands'
 import { ViewSwitcher } from '../WysiwygToolbar/components/ViewSwitcher'
 
@@ -58,12 +58,13 @@ const sourceCommandMap = createCommandMap()
 export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
   const { editorId, groupId } = props
   const activeId = useEditorStore((state) => state.activeId)
-  const { getEditorViewType } = useEditorViewTypeStore()
   const { t } = useTranslation()
   const targetEditorId = editorId ?? activeId
   const imageLabel = t('toolbar.image') || 'Image'
 
-  const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
+  const viewType = useEditorViewTypeStore((state) =>
+    selectEditorViewType(state, targetEditorId ?? '', groupId) ?? EditorViewType.WYSIWYG,
+  )
 
   const { containerRef, hiddenIds, registerItemWidth } = usePriorityHidden({
     items: TOOLBAR_SECTIONS,
@@ -72,8 +73,8 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
 
   const getEditorView = useCallback(() => {
     if (!targetEditorId) return undefined
-    return sourceCodeCodemirrorViewMap.get(targetEditorId)?.cm
-  }, [targetEditorId])
+    return getSourceCodeEditor(targetEditorId, groupId)?.cm
+  }, [targetEditorId, groupId])
 
   const runSourceCommand = useCallback(
     (commandName: string, attrs?: Record<string, unknown>) => {
@@ -90,13 +91,13 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
 
   const handleInsertImage = useCallback(async () => {
     const view = getEditorView()
-    if (view) await insertSourceImage(view, targetEditorId)
-  }, [getEditorView, targetEditorId])
+    if (view) await insertSourceImage(view, targetEditorId, undefined, groupId)
+  }, [getEditorView, targetEditorId, groupId])
 
   const handleInsertLink = useCallback(async () => {
     const view = getEditorView()
-    if (view) await insertSourceLink(view, targetEditorId)
-  }, [getEditorView, targetEditorId])
+    if (view) await insertSourceLink(view, targetEditorId, undefined, groupId)
+  }, [getEditorView, targetEditorId, groupId])
 
   const actions = useMemo<ToolbarAction[]>(
     () => [
@@ -239,6 +240,7 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
         <ViewSwitcher editorId={targetEditorId} groupId={groupId} />
         <MenuList
           editorId={targetEditorId}
+          groupId={groupId}
           prependItems={overflowMenuItems}
         />
       </ToolbarSection>

@@ -38,7 +38,7 @@ vi.mock('../capricornEditorRegistry', () => ({
   getCapricornEditor: () => mocks.editor,
   subscribeCapricornEditors: () => () => {},
 }))
-vi.mock('../sourceCodeEditorRegistry', () => ({ sourceCodeCodemirrorViewMap: new Map() }))
+vi.mock('../sourceCodeEditorRegistry', () => ({ getSourceCodeEditor: () => undefined }))
 vi.mock('../sourceInsertCommands', () => ({ insertSourceImage: vi.fn(), insertSourceLink: vi.fn() }))
 vi.mock('./components/MenuList', () => ({ MenuList: () => <button type='button'>More</button> }))
 
@@ -46,7 +46,7 @@ enableMapSet()
 beforeEach(() => {
   vi.clearAllMocks()
   mocks.supportedModes = ['wysiwyg', 'sourceCode', 'preview']
-  useEditorViewTypeStore.setState({ editorViewTypeMap: new Map() })
+  useEditorViewTypeStore.setState({ editorViewTypeMap: new Map(), editorGroupViewTypeMap: new Map() })
 })
 afterEach(() => {
   cleanup()

@@ -2,14 +2,19 @@ import { clipboardRead } from '@/helper/clipboard'
 import { EditorSelection, Transaction } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
 import { requestImageInsert } from './requestImageInsert'
-import { sourceCodeCodemirrorViewMap } from './sourceCodeEditorRegistry'
+import { getSourceCodeEditor } from './sourceCodeEditorRegistry'
 
 /** Keep asynchronous clipboard/image requests bound to their original document and selection. */
-function selectionRestorer(view: EditorView, fileId?: string, isCurrent = () => true) {
+function selectionRestorer(
+  view: EditorView,
+  fileId?: string,
+  isCurrent = () => true,
+  groupId?: string,
+) {
   const { doc, selection } = view.state
   return () => {
     if (!isCurrent() || view.state.readOnly || view.state.doc !== doc) return false
-    if (fileId && sourceCodeCodemirrorViewMap.get(fileId)?.cm !== view) return false
+    if (fileId && getSourceCodeEditor(fileId, groupId)?.cm !== view) return false
     view.focus()
     view.dispatch({ selection, annotations: Transaction.addToHistory.of(false) })
     return true
@@ -20,8 +25,9 @@ export async function insertSourceLink(
   view: EditorView,
   fileId?: string,
   isCurrent?: () => boolean,
+  groupId?: string,
 ) {
-  const restore = selectionRestorer(view, fileId, isCurrent)
+  const restore = selectionRestorer(view, fileId, isCurrent, groupId)
   const { text } = await clipboardRead().catch(() => ({ text: '' }))
   if (!restore()) return false
   const url = /^(https?:\/\/|ftp:\/\/|mailto:|www\.)[^\s]+$/i.test(text) ? text : ''
@@ -43,8 +49,9 @@ export async function insertSourceImage(
   view: EditorView,
   fileId?: string,
   isCurrent?: () => boolean,
+  groupId?: string,
 ) {
-  const restore = selectionRestorer(view, fileId, isCurrent)
+  const restore = selectionRestorer(view, fileId, isCurrent, groupId)
   const attributes = await requestImageInsert(fileId)
   if (!restore()) return false
   if (!attributes) {

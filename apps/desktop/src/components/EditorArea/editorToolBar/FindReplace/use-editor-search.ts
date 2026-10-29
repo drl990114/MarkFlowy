@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import useEditorStore from '@/stores/useEditorStore'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useEditorViewTypeStore, { selectEditorViewType } from '@/stores/useEditorViewTypeStore'
 import { EditorViewType } from '@/constants/editorViewType'
 import { getCapricornEditor, subscribeCapricornEditors } from '../../capricornEditorRegistry'
 import {
@@ -24,7 +24,7 @@ export function useEditorSearchController() {
   const activeId = useEditorStore((store) => store.activeId)
   const groupId = useEditorStore((store) => store.activeGroupId)
   const mode = useEditorViewTypeStore((store) =>
-    activeId ? store.editorViewTypeMap.get(activeId) : undefined,
+    activeId ? selectEditorViewType(store, activeId, groupId) : undefined,
   )
   const capricornSnapshot = useCallback(
     () => (activeId ? getCapricornEditor(activeId) : undefined),

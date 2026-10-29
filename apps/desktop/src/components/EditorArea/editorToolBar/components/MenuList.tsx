@@ -12,7 +12,7 @@ import { dialog } from '@/services/dialog'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import type { DesktopMenuItemData } from '@/stores/useContextMenuStore'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useEditorViewTypeStore, { selectEditorViewType } from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import useFileTextDirectionStore, {
   getFileTextDirectionKey,
@@ -54,6 +54,7 @@ const EMPTY_FILE_NORMAL_INFO: FileNormalInfo = {
 export interface MenuListProps {
   /** 目标 editor，默认使用当前全局 active editor */
   editorId?: string
+  groupId?: string
   /** 是否显示视图切换选项 */
   showViewSwitcher?: boolean
   /** 是否显示打字机滚动选项 */
@@ -77,6 +78,7 @@ export interface MenuListProps {
 export const MenuList = memo((props: MenuListProps) => {
   const {
     editorId,
+    groupId,
     showViewSwitcher = true,
     showTypewriterScroll = false,
     showFileInfo = true,
@@ -98,7 +100,7 @@ export const MenuList = memo((props: MenuListProps) => {
     targetEditorId ? state.entries[targetEditorId]?.path : undefined,
   )
   const editorViewType = useEditorViewTypeStore((state) =>
-    targetEditorId ? state.editorViewTypeMap.get(targetEditorId) || 'wysiwyg' : 'wysiwyg',
+    selectEditorViewType(state, targetEditorId ?? '', groupId) ?? EditorViewType.WYSIWYG,
   )
   const editorTypewriterScroll = useAppSettingStore(
     (state) => state.settingData.editor_typewriter_scroll,
@@ -189,20 +191,20 @@ export const MenuList = memo((props: MenuListProps) => {
               value: EditorViewType.SOURCECODE,
               checked: editorViewType === EditorViewType.SOURCECODE,
               commandId: 'app_toggleEditorType',
-              handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE),
+              handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.SOURCECODE, targetEditorId ? { editorId: targetEditorId, groupId } : undefined),
             },
             {
               label: t('view.wysiwyg'),
               value: EditorViewType.WYSIWYG,
               checked: editorViewType === EditorViewType.WYSIWYG,
               commandId: 'app_toggleEditorType',
-              handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG),
+              handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.WYSIWYG, targetEditorId ? { editorId: targetEditorId, groupId } : undefined),
             },
             {
               label: t('view.preview'),
               value: EditorViewType.PREVIEW,
               checked: editorViewType === EditorViewType.PREVIEW,
-              handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.PREVIEW),
+              handler: () => bus.emit('editor_toggle_type', undefined, EditorViewType.PREVIEW, targetEditorId ? { editorId: targetEditorId, groupId } : undefined),
             },
           ].filter((item) => {
             return curFileTypeConfig
@@ -474,6 +476,7 @@ export const MenuList = memo((props: MenuListProps) => {
     return customItems || items
   }, [
     targetEditorId,
+    groupId,
     fileName,
     filePath,
     editorViewType,

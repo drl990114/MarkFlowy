@@ -22,7 +22,7 @@ function EditorArea() {
     const toggleEditorTypeDisposable = commandRegistry.registerCommand({
       id: EVENT.app_toggleEditorType,
       handler: () => {
-        const { activeId } = useEditorStore.getState()
+        const { activeId, activeGroupId } = useEditorStore.getState()
         if (!activeId) return
 
         const fileTypeConfig = useFileTypeConfigStore.getState().getFileTypeConfigById(activeId)
@@ -35,7 +35,7 @@ function EditorArea() {
 
         if (!supportsToggle) return
 
-        const currentViewType = useEditorViewTypeStore.getState().getEditorViewType(activeId)
+        const currentViewType = useEditorViewTypeStore.getState().getEditorViewType(activeId, activeGroupId)
         const targetViewType =
           currentViewType === EditorViewType.SOURCECODE
             ? fileTypeConfig.type === 'html'
@@ -43,7 +43,7 @@ function EditorArea() {
               : EditorViewType.WYSIWYG
             : EditorViewType.SOURCECODE
 
-        bus.emit('editor_toggle_type', undefined, targetViewType)
+        bus.emit('editor_toggle_type', undefined, targetViewType, { editorId: activeId, groupId: activeGroupId })
       },
     })
     const closeCurrentEditorTabDisposable = commandRegistry.registerCommand({

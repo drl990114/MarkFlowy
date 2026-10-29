@@ -1,7 +1,16 @@
 import type { MfCodemirrorView } from 'rme'
 import { SourceFind } from './sourceCodeFind'
 import { sourceCodeCodemirrorViewMap } from './sourceCodeEditorInstances'
+import { InstanceResourceRegistry } from './instanceResourceRegistry'
 export { sourceCodeCodemirrorViewMap } from './sourceCodeEditorInstances'
+
+export const sourceCodeViewRegistry = new InstanceResourceRegistry<MfCodemirrorView>()
+
+export function getSourceCodeEditor(fileId: string, groupId?: string): MfCodemirrorView | undefined {
+  return groupId === undefined
+    ? sourceCodeCodemirrorViewMap.get(fileId)
+    : sourceCodeViewRegistry.getForGroup(fileId, groupId)
+}
 
 const findApis = new WeakMap<MfCodemirrorView, SourceFind>()
 export function getSourceCodeFind(editor: MfCodemirrorView) {
@@ -29,7 +38,9 @@ export function setSourceCodeEditor(id: string, editor: MfCodemirrorView | undef
 
 export function subscribeSourceCodeEditors(listener: () => void) {
   listeners.add(listener)
+  const unsubscribeInstances = sourceCodeViewRegistry.subscribe(listener)
   return () => {
     listeners.delete(listener)
+    unsubscribeInstances()
   }
 }

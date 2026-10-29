@@ -2,7 +2,7 @@ import bus from '@/helper/eventBus'
 import { EditorViewType, type EditorViewTarget, type EditorViewTypeValue } from '@/constants/editorViewType'
 import { getFileObject } from '@/helper/files'
 import { useEditorStore } from '@/stores'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useEditorViewTypeStore, { selectEditorViewType } from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import type { LucideIcon } from 'lucide-react'
 import { CodeXmlIcon, EyeIcon, PenLineIcon } from 'lucide-react'
@@ -27,7 +27,7 @@ export const ViewSwitcher = (props: ViewSwitcherProps) => {
   const activeId = useEditorStore((state) => state.activeId)
   const targetEditorId = editorId ?? activeId
   const editorViewType = useEditorViewTypeStore(
-    (state) => state.editorViewTypeMap.get(targetEditorId ?? '') ?? EditorViewType.WYSIWYG,
+    (state) => selectEditorViewType(state, targetEditorId ?? '', groupId) ?? EditorViewType.WYSIWYG,
   )
   const { t } = useTranslation()
   const ref = useRef<HTMLButtonElement>(null)

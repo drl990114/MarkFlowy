@@ -75,6 +75,7 @@ function register(api: CapricornFindApi, id = 'first') {
 }
 beforeEach(() => {
   useEditorStore.setState({ activeId: 'first', activeGroupId: 'main' })
+  useEditorViewTypeStore.setState({ editorViewTypeMap: new Map(), editorGroupViewTypeMap: new Map() })
   useEditorViewTypeStore.getState().setEditorViewType('first', EditorViewType.WYSIWYG)
   useEditorViewTypeStore.getState().setEditorViewType('second', EditorViewType.WYSIWYG)
   useEditorSearchStore.setState({
@@ -93,6 +94,71 @@ afterEach(() => {
 })
 
 describe('editor search request ownership', () => {
+  it('navigates a background tab using its pane mode before the compatibility mode is promoted', async () => {
+    const previousEditorState = useEditorStore.getState()
+    const native = new EditorView({
+      state: EditorState.create({ doc: 'foo foo' }),
+      parent: document.body,
+    })
+    const leftSource = { cm: native, setSearchState: vi.fn() } as unknown as MfCodemirrorView
+    useEditorStore.getState().setEditorLayout({
+      type: 'branch', id: 'search-split', direction: 'horizontal', sizes: [50, 50],
+      children: [
+        { type: 'leaf', id: 'left', opened: ['first'], activeId: 'first' },
+        { type: 'leaf', id: 'right', opened: ['first', 'second'], activeId: 'second' },
+      ],
+    }, 'right')
+    const modeStore = useEditorViewTypeStore.getState()
+    modeStore.setEditorViewType('first', EditorViewType.SOURCECODE, 'left')
+    modeStore.setEditorViewType('first', EditorViewType.WYSIWYG, 'right')
+    modeStore.setEditorViewType('first', EditorViewType.SOURCECODE)
+    setSourceCodeEditor('first', leftSource)
+    const rightApi = createApi()
+    const hook = renderHook(useEditorSearchController)
+
+    try {
+      act(() => {
+        expect(useEditorStore.getState().openFileInGroup('right', 'first')).toBe(true)
+        requestSearchNavigation(target)
+      })
+      expect(useEditorSearchStore.getState().navigation).toMatchObject({
+        fileId: 'first', groupId: 'right', mode: EditorViewType.WYSIWYG,
+      })
+      expect(useEditorViewTypeStore.getState().editorViewTypeMap.get('first')).toBe(EditorViewType.SOURCECODE)
+
+      // The active TextEditor publishes its mode and runtime after the open action.
+      act(() => {
+        modeStore.setEditorViewType('first', EditorViewType.WYSIWYG)
+        setCapricornEditor('first', { find: rightApi } as unknown as CapricornRuntimeAdapter)
+        setSourceCodeEditor('first', undefined)
+      })
+      await waitFor(() => expect(rightApi.revealSourceMatch).toHaveBeenCalledOnce())
+      expect(vi.mocked(rightApi.revealSourceMatch!).mock.calls[0][0]).toMatchObject({
+        ...target, groupId: 'right', mode: EditorViewType.WYSIWYG,
+      })
+      expect(useEditorSearchStore.getState().owner).toBe('global')
+      expect(useEditorSearchStore.getState().error).toBeNull()
+      expect(native.state.selection.main.from).toBe(0)
+      expect(native.state.selection.main.to).toBe(0)
+    } finally {
+      hook.unmount()
+      setSourceCodeEditor('first', undefined)
+      native.destroy()
+      useEditorStore.setState(previousEditorState)
+    }
+  })
+
+  it.each([
+    [EditorViewType.PREVIEW, EditorViewType.WYSIWYG, false],
+    [EditorViewType.WYSIWYG, EditorViewType.PREVIEW, true],
+  ] as const)('checks the active pane mode %s before opening document search', (mode, compatibilityMode, expected) => {
+    useEditorViewTypeStore.getState().setEditorViewType('first', compatibilityMode)
+    useEditorViewTypeStore.getState().setEditorViewType('first', mode, 'main')
+
+    expect(openDocumentSearch()).toBe(expected)
+    expect(useEditorSearchStore.getState().owner).toBe(expected ? 'document' : null)
+  })
+
   it('uses the same host controller for Source Code without stealing input focus', async () => {
     const native = new EditorView({
       state: EditorState.create({ doc: 'foo foo' }),

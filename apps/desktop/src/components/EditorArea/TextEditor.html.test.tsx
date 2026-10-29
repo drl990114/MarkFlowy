@@ -279,7 +279,7 @@ it('updates an HTML preview from external content and keeps it clean', async () 
   expect(editorAutomationRegistry.get(id)?.readContent()).toBe('<p>Changed on disk</p>')
 })
 
-it('synchronizes HTML source and view changes across two visible panes', async () => {
+it('synchronizes HTML edits while keeping source and preview modes independent across panes', async () => {
   const id = 'html-two-panes'
   seed(id)
   const { container } = render(
@@ -290,13 +290,16 @@ it('synchronizes HTML source and view changes across two visible panes', async (
   )
   await waitFor(() => expect(container.querySelectorAll('[data-html-preview]')).toHaveLength(2))
   await switchTo(id, EditorViewType.SOURCECODE)
-  await waitFor(() => expect(container.querySelectorAll('.cm-editor')).toHaveLength(2))
+  await waitFor(() => expect(container.querySelectorAll('.cm-editor')).toHaveLength(1))
+  expect(container.querySelectorAll('[data-html-preview]')).toHaveLength(1)
+  expect(useEditorViewTypeStore.getState().getEditorViewType(id, 'right')).toBe(EditorViewType.PREVIEW)
   const source = sourceCodeCodemirrorViewMap.get(id)!
   await act(async () =>
     source.cm.dispatch({
       changes: { from: 0, to: source.cm.state.doc.length, insert: '<p>Shared source</p>' },
     }),
   )
+  await waitFor(() => expect(container.querySelector('[data-html-preview]')?.getAttribute('data-html-preview')).toBe('<p>Shared source</p>'))
   await switchTo(id, EditorViewType.PREVIEW)
   await waitFor(() => {
     const previews = container.querySelectorAll('[data-html-preview]')

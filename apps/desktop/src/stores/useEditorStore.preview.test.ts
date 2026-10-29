@@ -6,6 +6,8 @@ import { editorSnapshotRegistry } from '@/components/EditorArea/editorSnapshotRe
 import { beginDraftRecoveryDiscovery } from '@/services/draftRecoveryState'
 import useAppSettingStore from './useAppSettingStore'
 import useEditorStateStore from './useEditorStateStore'
+import useEditorViewTypeStore from './useEditorViewTypeStore'
+import { EditorViewType } from '@/constants/editorViewType'
 import useEditorStore, { type EditorLayoutNode } from './useEditorStore'
 
 vi.mock('zens', () => ({ toast: { error: vi.fn() } }))
@@ -241,5 +243,26 @@ describe('preview lifecycle', () => {
     store().closeFileInGroup('left', 'a')
     expect(group().opened).toEqual([])
     expect(group().previewId).toBeUndefined()
+  })
+})
+
+describe('pane view mode lifecycle', () => {
+  it('retains modes through layout remounts and clears a hidden tab or closed group without an editor instance', () => {
+    open('a', 'permanent')
+    open('b', 'permanent')
+    const modes = useEditorViewTypeStore.getState()
+    modes.setEditorViewType('a', EditorViewType.WYSIWYG, 'left')
+    modes.setEditorViewType('b', EditorViewType.PREVIEW, 'left')
+    const right = store().splitGroup('left', 'horizontal')!
+    modes.setEditorViewType('b', EditorViewType.SOURCECODE, right)
+    expect(modes.getEditorViewType('a', 'left')).toBe(EditorViewType.WYSIWYG)
+    expect(modes.getEditorViewType('b', 'left')).toBe(EditorViewType.PREVIEW)
+    store().closeFileInGroup('left', 'a')
+    expect(useEditorViewTypeStore.getState().editorGroupViewTypeMap.get('left')?.has('a')).toBe(false)
+    store().closeGroup(right)
+    expect(useEditorViewTypeStore.getState().editorGroupViewTypeMap.has(right)).toBe(false)
+    expect(modes.getEditorViewType('b', 'left')).toBe(EditorViewType.PREVIEW)
+    setLayout({ type: 'leaf', id: 'restored', opened: ['c'], activeId: 'c' })
+    expect(useEditorViewTypeStore.getState().editorGroupViewTypeMap.size).toBe(0)
   })
 })

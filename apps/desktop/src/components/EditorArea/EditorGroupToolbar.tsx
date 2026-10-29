@@ -9,7 +9,7 @@ import { EditorViewType } from '@/constants/editorViewType'
 import bus from '@/helper/eventBus'
 import { useTranslation } from '@/i18n'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useEditorViewTypeStore, { selectEditorViewType } from '@/stores/useEditorViewTypeStore'
 import { EditorAreaHeader } from './EditorAreaHeader'
 import { DocumentTitle } from '../TitleBar/DocumentTitle'
 import { useGlobalOSInfo } from '@/hooks'
@@ -24,7 +24,7 @@ function EditorGroupToolbar(props: EditorGroupToolbarProps) {
   const { editorId, groupId, compactGroupId } = props
   const { osType } = useGlobalOSInfo()
   const type = useFileTypeConfigStore((state) => state.fileTypeConfigMap.get(editorId ?? '')?.type)
-  const mode = useEditorViewTypeStore((state) => state.editorViewTypeMap.get(editorId ?? ''))
+  const mode = useEditorViewTypeStore((state) => selectEditorViewType(state, editorId ?? '', groupId))
   const { t } = useTranslation()
 
   if (!editorId) return null
@@ -47,6 +47,7 @@ function EditorGroupToolbar(props: EditorGroupToolbarProps) {
         {title}
         <MenuList
           editorId={editorId}
+          groupId={groupId}
           showViewSwitcher={false}
           showExport={false}
           showConvertText={false}
@@ -57,7 +58,7 @@ function EditorGroupToolbar(props: EditorGroupToolbarProps) {
             size='sm'
             variant={mode === value ? 'secondary' : 'ghost'}
             aria-pressed={mode === value}
-            onClick={() => bus.emit('editor_toggle_type', undefined, value)}
+            onClick={() => bus.emit('editor_toggle_type', undefined, value, { editorId, groupId })}
           >
             {t(value === EditorViewType.PREVIEW ? 'view.preview' : 'view.source_code')}
           </Button>

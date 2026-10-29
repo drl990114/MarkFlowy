@@ -1,12 +1,20 @@
 import type { CapricornRuntimeAdapter } from './capricornRuntimeAdapter'
+import { InstanceResourceRegistry } from './instanceResourceRegistry'
+
+export const capricornEditorInstanceRegistry = new InstanceResourceRegistry<CapricornRuntimeAdapter>()
 
 const currentEditors = new Map<string, CapricornRuntimeAdapter>()
 const listeners = new Set<() => void>()
 
 const notify = () => listeners.forEach((listener) => listener())
 
-export function getCapricornEditor(fileId: string): CapricornRuntimeAdapter | undefined {
-  return currentEditors.get(fileId)
+export function getCapricornEditor(
+  fileId: string,
+  groupId?: string,
+): CapricornRuntimeAdapter | undefined {
+  return groupId === undefined
+    ? currentEditors.get(fileId)
+    : capricornEditorInstanceRegistry.getForGroup(fileId, groupId)
 }
 
 export function setCapricornEditor(
@@ -22,5 +30,9 @@ export function setCapricornEditor(
 
 export function subscribeCapricornEditors(listener: () => void): () => void {
   listeners.add(listener)
-  return () => listeners.delete(listener)
+  const unsubscribeInstances = capricornEditorInstanceRegistry.subscribe(listener)
+  return () => {
+    listeners.delete(listener)
+    unsubscribeInstances()
+  }
 }

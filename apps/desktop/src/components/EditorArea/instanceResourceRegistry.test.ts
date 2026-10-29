@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { InstanceResourceRegistry } from './instanceResourceRegistry'
 
 describe('InstanceResourceRegistry', () => {
@@ -93,5 +93,57 @@ describe('InstanceResourceRegistry', () => {
       current: 'active-resource',
       currentChanged: true,
     })
+  })
+
+  it('reads only the requested pane without falling back to the active sibling', () => {
+    const registry = new InstanceResourceRegistry<string>()
+    registry.register('file', 'left-source', 'source', 'left')
+    registry.promote('file', 'right-rich')
+
+    expect(registry.getForGroup('file', 'left')).toBe('source')
+    expect(registry.getForGroup('file', 'right')).toBeUndefined()
+    expect(registry.getForGroup('other-file', 'left')).toBeUndefined()
+    expect(registry.register('file', 'left-source', 'updated-source', 'left')).toEqual({
+      currentChanged: false,
+    })
+    expect(registry.getForGroup('file', 'left')).toBe('updated-source')
+  })
+
+  it('keeps the replacement pane resource when an older instance updates and cleans up late', () => {
+    const registry = new InstanceResourceRegistry<string>()
+    registry.register('file', 'old', 'old-source', 'left')
+    registry.register('file', 'replacement', 'new-source', 'left')
+    registry.register('file', 'sibling', 'right-source', 'right')
+
+    expect(registry.getForGroup('file', 'left')).toBe('new-source')
+    registry.register('file', 'old', 'late-old-source', 'left')
+    expect(registry.getForGroup('file', 'left')).toBe('new-source')
+    registry.remove('file', 'old')
+    expect(registry.getForGroup('file', 'left')).toBe('new-source')
+    registry.remove('file', 'replacement')
+    expect(registry.getForGroup('file', 'left')).toBeUndefined()
+    expect(registry.getForGroup('file', 'right')).toBe('right-source')
+  })
+
+  it('notifies subscribers when inactive pane resources change and stops after unsubscribe', () => {
+    const registry = new InstanceResourceRegistry<string>()
+    registry.register('file', 'active', 'active-resource', 'right')
+    const listener = vi.fn()
+    const unsubscribe = registry.subscribe(listener)
+
+    registry.register('file', 'inactive', 'before', 'left')
+    expect(listener).toHaveBeenCalledTimes(1)
+    registry.register('file', 'inactive', 'before', 'left')
+    expect(listener).toHaveBeenCalledTimes(1)
+    registry.register('file', 'inactive', 'after', 'left')
+    expect(listener).toHaveBeenCalledTimes(2)
+    registry.remove('file', 'inactive')
+    expect(listener).toHaveBeenCalledTimes(3)
+    registry.remove('file', 'inactive')
+    expect(listener).toHaveBeenCalledTimes(3)
+
+    unsubscribe()
+    registry.remove('file', 'active')
+    expect(listener).toHaveBeenCalledTimes(3)
   })
 })

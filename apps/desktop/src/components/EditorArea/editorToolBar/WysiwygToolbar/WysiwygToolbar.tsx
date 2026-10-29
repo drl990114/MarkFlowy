@@ -1,6 +1,6 @@
 import { useEditorStore } from '@/stores'
 import { EditorViewType } from '@/constants/editorViewType'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useEditorViewTypeStore, { selectEditorViewType } from '@/stores/useEditorViewTypeStore'
 import { type FC, useCallback, useMemo, useSyncExternalStore } from 'react'
 import { useTranslation } from '@/i18n'
 import { getCapricornEditor, subscribeCapricornEditors } from '../../capricornEditorRegistry'
@@ -54,15 +54,16 @@ const TOOLBAR_SECTIONS = [{ id: 'common', priority: 100 }, ...TOOLBAR_GROUPS]
 export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
   const { editorId, groupId } = props
   const activeId = useEditorStore((state) => state.activeId)
-  const { getEditorViewType } = useEditorViewTypeStore()
   const { t } = useTranslation()
   const targetEditorId = editorId ?? activeId
   const imageLabel = t('toolbar.image') || 'Image'
 
-  const viewType = targetEditorId ? getEditorViewType(targetEditorId) : EditorViewType.WYSIWYG
+  const viewType = useEditorViewTypeStore((state) =>
+    selectEditorViewType(state, targetEditorId ?? '', groupId) ?? EditorViewType.WYSIWYG,
+  )
   const getEditorSnapshot = useCallback(
-    () => (targetEditorId ? getCapricornEditor(targetEditorId) : undefined),
-    [targetEditorId],
+    () => (targetEditorId ? getCapricornEditor(targetEditorId, groupId) : undefined),
+    [targetEditorId, groupId],
   )
   const editor = useSyncExternalStore(
     subscribeCapricornEditors,
@@ -279,7 +280,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
     <ToolbarWrapper className='mf-editor-toolbar' ref={containerRef}>
       <ToolbarSection id='common' registerWidth={registerItemWidth} hidden={false}>
         <ViewSwitcher editorId={targetEditorId} groupId={groupId} />
-        <MenuList editorId={targetEditorId} prependItems={overflowMenuItems} showTypewriterScroll />
+        <MenuList editorId={targetEditorId} groupId={groupId} prependItems={overflowMenuItems} showTypewriterScroll />
       </ToolbarSection>
 
       {TOOLBAR_GROUPS.map((group) => (

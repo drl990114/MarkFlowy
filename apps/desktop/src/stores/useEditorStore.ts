@@ -14,6 +14,7 @@ import { subscribeWithSelector } from 'zustand/middleware'
 import { toast } from 'zens'
 import useAppSettingStore from './useAppSettingStore'
 import useEditorStateStore from './useEditorStateStore'
+import useEditorViewTypeStore from './useEditorViewTypeStore'
 
 const findParentNode = (fileNode: IFile, rootFile: IFile) => {
   const dfs = (file: IFile): undefined | IFile => {
@@ -1120,9 +1121,16 @@ const normalizePreviewTabs = () => {
 }
 const stopDirtyPreviewSubscription = useEditorStateStore.subscribe(normalizePreviewTabs)
 const stopPreviewSettingSubscription = useAppSettingStore.subscribe(normalizePreviewTabs)
+// Hidden editors may already be unmounted when their tab closes. Retain modes
+// through layout remounts, but retire them whenever the owning tab/group closes.
+const stopGroupViewSubscription = useEditorStore.subscribe(
+  (state) => state.editorLayout,
+  (layout) => useEditorViewTypeStore.getState().pruneGroupEditorViewTypes(getAllGroups(layout)),
+)
 if (import.meta.hot) import.meta.hot.dispose(() => {
   stopDirtyPreviewSubscription()
   stopPreviewSettingSubscription()
+  stopGroupViewSubscription()
 })
 
 export default useEditorStore

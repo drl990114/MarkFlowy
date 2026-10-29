@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import useEditorStore from '@/stores/useEditorStore'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useEditorViewTypeStore, { selectEditorViewType } from '@/stores/useEditorViewTypeStore'
 import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
 import type { EditorSourceMatchRequest } from './capricornRuntimeAdapter'
 import { openPreviewSearch } from './preview/previewSearch'
@@ -47,7 +47,7 @@ export function openDocumentSearch(): boolean {
   }
   if (
     !activeId ||
-    useEditorViewTypeStore.getState().editorViewTypeMap.get(activeId) === EditorViewType.PREVIEW
+    selectEditorViewType(useEditorViewTypeStore.getState(), activeId, activeGroupId) === EditorViewType.PREVIEW
   )
     return false
   useEditorSearchStore.setState((state) => ({
@@ -64,6 +64,8 @@ export function openDocumentSearch(): boolean {
 export function requestSearchNavigation(
   target: Omit<SearchNavigationRequest, 'requestId' | 'groupId' | 'mode'>,
 ) {
+  const { activeGroupId } = useEditorStore.getState()
+  const mode = selectEditorViewType(useEditorViewTypeStore.getState(), target.fileId, activeGroupId)
   useEditorSearchStore.setState((state) => ({
     owner: 'global',
     generation: state.generation + 1,
@@ -72,8 +74,8 @@ export function requestSearchNavigation(
     navigation: {
       ...target,
       requestId: state.generation + 1,
-      groupId: useEditorStore.getState().activeGroupId,
-      mode: useEditorViewTypeStore.getState().editorViewTypeMap.get(target.fileId),
+      groupId: activeGroupId,
+      mode,
     },
   }))
 }

@@ -21,7 +21,7 @@ import {
 } from '@/services/draftRecoveryState'
 import { DraftRecoveryErrorDetails, keepFailedDraftAndClose } from '@/services/draftRecoveryActions'
 import { Button } from '@/components/ui/button'
-import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import useEditorViewTypeStore, { selectEditorViewType } from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import 'overlayscrollbars/overlayscrollbars.css'
@@ -124,12 +124,14 @@ function Editor(props: EditorProps) {
           defaultMode: fileTypeConfig.defaultMode,
         },
       )
-      const existingMode = useEditorViewTypeStore.getState().editorViewTypeMap.get(curFile.id)
+      const existingMode = selectEditorViewType(useEditorViewTypeStore.getState(), curFile.id, groupId)
       const openingMode =
         existingMode && isSupportedMode(fileTypeConfig, existingMode)
           ? existingMode
           : fileTypeConfig.defaultMode
-      useEditorViewTypeStore.getState().setEditorViewType(curFile.id, openingMode)
+      useEditorViewTypeStore.getState().setEditorViewType(
+        curFile.id, openingMode, isTextfileType(fileTypeConfig) ? groupId : undefined,
+      )
       recordEditorOpenStage(getEditorOpenMeasurement(id, groupId), 'type-ready', {
         mode: openingMode,
       })
