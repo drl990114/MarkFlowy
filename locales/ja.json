@@ -1395,6 +1395,7 @@
       "deleteRow": "現在の行を削除",
       "deleteTable": "表を削除",
       "duplicateRow": "行を複製",
+      "duplicateColumn": "列を複製",
       "moveRowUp": "行を上に移動",
       "moveRowDown": "行を下に移動",
       "moveColumnLeft": "列を左に移動",

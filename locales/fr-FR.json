@@ -1395,6 +1395,7 @@
       "deleteRow": "Supprimer la ligne actuelle",
       "deleteTable": "Supprimer le tableau",
       "duplicateRow": "Dupliquer la ligne",
+      "duplicateColumn": "Dupliquer la colonne",
       "moveRowUp": "Déplacer la ligne vers le haut",
       "moveRowDown": "Déplacer la ligne vers le bas",
       "moveColumnLeft": "Déplacer la colonne vers la gauche",

@@ -1395,6 +1395,7 @@
       "deleteRow": "Eliminar fila actual",
       "deleteTable": "Eliminar tabla",
       "duplicateRow": "Duplicar fila",
+      "duplicateColumn": "Duplicar columna",
       "moveRowUp": "Subir fila",
       "moveRowDown": "Bajar fila",
       "moveColumnLeft": "Mover columna a la izquierda",

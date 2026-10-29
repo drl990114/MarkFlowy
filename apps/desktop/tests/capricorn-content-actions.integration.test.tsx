@@ -2,8 +2,10 @@ import { act, fireEvent, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createCapricornRuntime } from 'virtual:markflowy-capricorn-runtime'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
+import i18n, { i18nInit } from '@/i18n'
 import {
   createCapricornRuntimeAdapter,
+  type CapricornLocalizationAdapter,
   type CapricornRuntimeAdapter,
   type CapricornRuntimeFactory,
   type CapricornRuntimeOptions,
@@ -74,7 +76,45 @@ const tableSource = [
   '| 第二项 |  | 完成 |',
 ].join('\n')
 
+// Match TextEditor's production localization bridge, including the cn locale.
+const localization: CapricornLocalizationAdapter = {
+  getDirection: () => (i18n.dir() === 'rtl' ? 'rtl' : 'ltr'),
+  getLocale: () => i18n.resolvedLanguage || i18n.language || 'en',
+  subscribe(listener) {
+    i18n.on('languageChanged', listener)
+    return () => i18n.off('languageChanged', listener)
+  },
+  translate: ({ defaultValue, key, values }) =>
+    i18n.t(`capricorn.${key}`, { defaultValue, ...values }),
+}
+
 describe.skipIf(!isCapricornRuntimeAvailable)('Capricorn host content actions', () => {
+  it('duplicates a column from the localized menu and saves, undoes and redoes through the host adapter', async () => {
+    await i18nInit({ lng: 'cn' })
+    const { container, runtime, onChange, onError } = await mount(tableSource, { localization })
+    const menu = await tableMenu(container, 1, 1)
+    const button = menu.querySelector<HTMLButtonElement>('[aria-label="复制当前列"]')!
+    expect(button).not.toBeNull()
+    expect(button.disabled).toBe(false)
+    await act(async () => fireEvent.click(button))
+
+    const expected = [
+      '| 名称 | 备注 | 备注 | 状态 |',
+      '| :--- | :---: | :---: | ---: |',
+      '| 第一项 | **重点** | **重点** | [详情](https://example.com) |',
+      '| 第二项 |  |  | 完成 |',
+    ].join('\n')
+    await waitFor(() => expect(runtime.getMarkdown()).toBe(expected))
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
+    expect(container.querySelector('[data-cap-markdown-table-menu]')).toBeNull()
+    expect(document.activeElement).toBe(getCapricornRuntimeInput(container))
+    await act(async () => runtime.commands.undo())
+    expect(runtime.getMarkdown()).toBe(tableSource)
+    await act(async () => runtime.commands.redo())
+    expect(runtime.getMarkdown()).toBe(expected)
+    expect(onError).not.toHaveBeenCalled()
+  })
+
   it.each([
     {
       name: 'table row',
