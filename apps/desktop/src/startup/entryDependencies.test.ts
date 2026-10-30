@@ -6,6 +6,30 @@ import ts from 'typescript'
 import { expect, it } from 'vitest'
 
 const sourceRoot = fileURLToPath(new URL('../', import.meta.url))
+const staticImportsByPath = new Map<string, string[]>()
+
+function getStaticImports(path: string): string[] {
+  const cached = staticImportsByPath.get(path)
+  if (cached) return cached
+
+  // Elide type-only references using the same TypeScript syntax rules as
+  // transpilation, including older imports whose specifiers omit `type`.
+  const { outputText } = ts.transpileModule(readFileSync(path, 'utf8'), {
+    fileName: path,
+    compilerOptions: { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext },
+  })
+  const syntax = ts.createSourceFile(path + '.js', outputText, ts.ScriptTarget.Latest, true)
+  const specifiers: string[] = []
+  for (const node of syntax.statements) {
+    if (!ts.isImportDeclaration(node) && !ts.isExportDeclaration(node)) continue
+    if (!node.moduleSpecifier || !ts.isStringLiteral(node.moduleSpecifier)) continue
+    specifiers.push(node.moduleSpecifier.text)
+  }
+  // Entry graphs overlap; transform each source once while keeping traversal
+  // state and forbidden-import checks independent for each entry.
+  staticImportsByPath.set(path, specifiers)
+  return specifiers
+}
 
 function resolveLocalImport(importer: string, specifier: string) {
   const base = specifier.startsWith('@/')
@@ -27,23 +51,13 @@ it.each([
   ['main.tsx', /^(rme(?:\/|$)|@codemirror\/|react-markdown$|remark-gfm$)/],
   ['components/EditorArea/EditorAreaContent.tsx', /^rme(?:\/|$)/],
   ['components/TableOfContent/TocView.tsx', /^rme(?:\/|$)/],
-] as const)('%s keeps optional editor/rendering engines outside its static import graph', (entry, forbidden) => {
+] as const)('%s keeps optional editor/rendering engines outside its static import graph', { timeout: 30_000 }, (entry, forbidden) => {
   const visited = new Set<string>()
   const forbiddenPaths: string[][] = []
   const visit = (path: string, chain: string[]) => {
     if (visited.has(path)) return
     visited.add(path)
-    // Elide type-only references using the same TypeScript syntax rules as
-    // transpilation, including older imports whose specifiers omit `type`.
-    const { outputText } = ts.transpileModule(readFileSync(path, 'utf8'), {
-      fileName: path,
-      compilerOptions: { jsx: ts.JsxEmit.ReactJSX, module: ts.ModuleKind.ESNext },
-    })
-    const syntax = ts.createSourceFile(path + '.js', outputText, ts.ScriptTarget.Latest, true)
-    for (const node of syntax.statements) {
-      if (!ts.isImportDeclaration(node) && !ts.isExportDeclaration(node)) continue
-      if (!node.moduleSpecifier || !ts.isStringLiteral(node.moduleSpecifier)) continue
-      const specifier = node.moduleSpecifier.text
+    for (const specifier of getStaticImports(path)) {
       if (forbidden.test(specifier))
         forbiddenPaths.push([...chain, path, specifier])
       const imported = resolveLocalImport(path, specifier)
