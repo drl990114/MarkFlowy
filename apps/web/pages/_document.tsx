@@ -36,7 +36,6 @@ export default class MyDocument extends Document {
               dangerouslySetInnerHTML={{ __html: homeScrollResetScript }}
             />
           )}
-          <link rel='stylesheet' type='text/css' href='/dmvendor.css' />
           <link rel='preconnect' href='https://fonts.googleapis.com' />
           <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
           <link
