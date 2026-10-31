@@ -74,6 +74,7 @@ function EditorArea() {
         if (activeGroupId) {
           guardUnsavedFiles({
             fileIds: activeId ? [activeId] : [],
+            context: 'continue',
             labels: {
               save: t('action.save_and_continue'),
               unsaved: t('action.continue_without_save'),
@@ -92,6 +93,7 @@ function EditorArea() {
         if (activeGroupId) {
           guardUnsavedFiles({
             fileIds: activeId ? [activeId] : [],
+            context: 'continue',
             labels: {
               save: t('action.save_and_continue'),
               unsaved: t('action.continue_without_save'),

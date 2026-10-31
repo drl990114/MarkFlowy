@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button'
-import { ButtonGroup } from '@/components/ui/button-group'
 import type { FC } from 'react'
 import { useTranslation } from '@/i18n'
 
@@ -10,13 +9,13 @@ export const ReplaceController: FC<{
   const { t } = useTranslation()
 
   return (
-    <ButtonGroup.Root>
+    <div role='group' className='flex max-w-full flex-wrap justify-end gap-1'>
       <Button type='button' variant='outline' size='sm' onClick={replace}>
         {t('find_replace.replace')}
       </Button>
       <Button type='button' variant='outline' size='sm' onClick={replaceAll}>
         {t('find_replace.replace_all')}
       </Button>
-    </ButtonGroup.Root>
+    </div>
   )
 }

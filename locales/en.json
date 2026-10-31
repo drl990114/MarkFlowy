@@ -195,6 +195,9 @@
     "close": {
       "title": "Do you want to save the changes?",
       "description": "You have unsaved files, are you sure you want to exit?"
+    },
+    "continue": {
+      "description": "You have unsaved changes. Do you want to save them before continuing?"
     }
   },
   "error": {

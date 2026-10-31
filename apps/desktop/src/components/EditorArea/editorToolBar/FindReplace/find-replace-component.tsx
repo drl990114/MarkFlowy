@@ -55,7 +55,7 @@ export function FindReplaceControls({ controller, onDismiss }: FindReplaceContro
 
   return (
     <div
-      className='flex flex-col gap-2'
+      className='flex min-w-0 flex-col gap-2'
       onKeyDown={(event) => {
         if (event.nativeEvent.isComposing || event.keyCode === 229) return
         if (event.key === 'Escape') {
@@ -70,14 +70,16 @@ export function FindReplaceControls({ controller, onDismiss }: FindReplaceContro
         }
       }}
     >
-      <div className='flex flex-nowrap gap-1'>
-        <FindInput
-          query={query}
-          setQuery={setQuery}
-          total={total}
-          activeIndex={activeIndex}
-          setComposing={controller.setComposing}
-        />
+      <div className='flex min-w-0 flex-wrap justify-end gap-1'>
+        <div className='min-w-0 flex-[1_1_12rem]'>
+          <FindInput
+            query={query}
+            setQuery={setQuery}
+            total={total}
+            activeIndex={activeIndex}
+            setComposing={controller.setComposing}
+          />
+        </div>
         <FindController
           findPrev={findPrev}
           findNext={findNext}
@@ -87,8 +89,10 @@ export function FindReplaceControls({ controller, onDismiss }: FindReplaceContro
           onDismiss={onDismiss}
         />
       </div>
-      <div className='flex flex-nowrap gap-1'>
-        <ReplaceInput replacement={replacement} setReplacement={setReplacement} />
+      <div className='flex min-w-0 flex-wrap justify-end gap-1'>
+        <div className='min-w-0 flex-[1_1_12rem]'>
+          <ReplaceInput replacement={replacement} setReplacement={setReplacement} />
+        </div>
         <ReplaceController replace={replace} replaceAll={replaceAll} />
       </div>
     </div>

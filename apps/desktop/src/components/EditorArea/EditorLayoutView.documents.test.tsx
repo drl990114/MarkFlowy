@@ -4,11 +4,13 @@ import { enableMapSet } from 'immer'
 import type { PropsWithChildren } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { DocumentTitle } from '@/components/TitleBar/DocumentTitle'
 import { createFile } from '@/helper/filesys'
 import useEditorStore from '@/stores/useEditorStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
+import { dialog } from '@/services/dialog'
 import EditorAreaContent from './EditorAreaContent'
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn(), isTauri: () => false }))
@@ -120,4 +122,27 @@ it('reveals tabs in each group after using the compact split action', async () =
   )
   expect(useEditorStore.getState().editorLayout.type).toBe('branch')
   expect(screen.getAllByRole('tablist')).toHaveLength(2)
+})
+
+it('asks about continuing when splitting an unsaved document and preserves the layout on cancel', async () => {
+  const confirm = vi.spyOn(dialog, 'confirm').mockResolvedValue('cancel')
+  try {
+    useEditorStateStore.getState().setIdStateMap('document', { hasUnsavedChanges: true })
+    renderDocument()
+
+    await act(async () =>
+      fireEvent.click(screen.getByRole('button', { name: /app_splitEditorRight/ })),
+    )
+
+    expect(confirm).toHaveBeenCalledOnce()
+    const options = confirm.mock.calls[0][0]
+    expect(renderToStaticMarkup(<>{options.content}</>)).toContain('confirm.continue.description')
+    expect(options.actions?.map(({ label }) => label)).toEqual([
+      'action.save_and_continue', 'action.continue_without_save', 'common.cancel',
+    ])
+    expect(useEditorStore.getState().editorLayout.type).toBe('leaf')
+    expect(useEditorStore.getState().getActiveGroup()?.activeId).toBe('document')
+  } finally {
+    confirm.mockRestore()
+  }
 })

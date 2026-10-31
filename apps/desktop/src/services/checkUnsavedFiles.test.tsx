@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { renderToStaticMarkup } from 'react-dom/server'
+import type { ConfirmOptions } from './dialog'
 
 const mocks = vi.hoisted(() => ({
   confirm: vi.fn(),
@@ -56,6 +58,47 @@ describe('guardUnsavedFilesAsync', () => {
     mocks.getSaveOpenedEditorEntries.mockReset()
     mocks.idStateMap.clear()
     mocks.protectDiscard.mockReset().mockResolvedValue(undefined)
+  })
+
+  it.each([undefined, 'close', 'continue'] as const)(
+    'uses the %s confirmation context without changing cancellation behavior',
+    async (context) => {
+      mocks.idStateMap.set('dirty', { hasUnsavedChanges: true })
+      mocks.getFileObject.mockReturnValue({ name: 'Note.md' })
+      mocks.confirm.mockResolvedValue('cancel')
+      const onContinue = vi.fn()
+
+      await expect(
+        guardUnsavedFilesAsync({ fileIds: ['dirty'], context, onContinue }),
+      ).resolves.toBe(false)
+
+      const options = mocks.confirm.mock.calls[0][0] as ConfirmOptions
+      const description = renderToStaticMarkup(<>{options.content}</>)
+      expect(options.title).toBe('confirm.close.title')
+      expect(description).toContain(
+        context === 'continue' ? 'confirm.continue.description' : 'confirm.close.description',
+      )
+      expect(description).toContain('Note.md')
+      expect(onContinue).not.toHaveBeenCalled()
+      expect(mocks.getSaveOpenedEditorEntries).not.toHaveBeenCalled()
+      expect(mocks.protectDiscard).not.toHaveBeenCalled()
+    },
+  )
+
+  it('retains close wording when closing an unsaved tab', async () => {
+    mocks.idStateMap.set('dirty', { hasUnsavedChanges: true })
+    mocks.confirm.mockResolvedValue('cancel')
+    const onUnsavedAndClose = vi.fn()
+
+    expect(checkUnsavedFiles({ fileIds: ['dirty'], onUnsavedAndClose })).toBe(1)
+
+    await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce())
+    const options = mocks.confirm.mock.calls[0][0] as ConfirmOptions
+    expect(renderToStaticMarkup(<>{options.content}</>)).toContain('confirm.close.description')
+    expect(options.actions?.map(({ label }) => label)).toEqual([
+      'action.save_and_close', 'action.unsave_and_close', 'common.cancel',
+    ])
+    expect(onUnsavedAndClose).not.toHaveBeenCalled()
   })
 
   it('retries failed recovery before confirming unsaved content', async () => {

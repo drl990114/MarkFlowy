@@ -195,6 +195,9 @@
     "close": {
       "title": "Voulez-vous enregistrer les modifications?",
       "description": "Avez-vous des fichiers non sauvegardés, êtes-vous sûr de vouloir quitter?"
+    },
+    "continue": {
+      "description": "Vous avez des modifications non enregistrées. Voulez-vous les enregistrer avant de continuer ?"
     }
   },
   "error": {

@@ -16,11 +16,14 @@ interface CheckUnsavedFilesParams {
 
 export interface GuardUnsavedFilesParams {
   fileIds: string[]
+  context?: UnsavedConfirmContext
   onContinue: () => void | Promise<void>
   onSaveAndContinue?: (hasUnsavedFileIds: string[]) => boolean | void | Promise<boolean | void>
   onUnsavedAndContinue?: (hasUnsavedFileIds: string[]) => void | Promise<void>
   labels?: UnsavedConfirmLabels
 }
+
+export type UnsavedConfirmContext = 'close' | 'continue'
 
 interface UnsavedConfirmLabels {
   save?: string
@@ -45,12 +48,16 @@ export const saveUnsavedFiles = async (fileIds: string[]) => {
   return results.every(Boolean)
 }
 
-const confirmUnsavedFiles = async (fileIds: string[], labels?: UnsavedConfirmLabels) => {
+const confirmUnsavedFiles = async (
+  fileIds: string[],
+  labels?: UnsavedConfirmLabels,
+  context: UnsavedConfirmContext = 'close',
+) => {
   return dialog.confirm({
     title: t('confirm.close.title'),
     content: (
       <div>
-        {t('confirm.close.description')}
+        {t(context === 'continue' ? 'confirm.continue.description' : 'confirm.close.description')}
         <div style={{ marginLeft: '1em', marginTop: '0.5em' }}>
           {fileIds.map((id) => (
             <div
@@ -80,7 +87,7 @@ const guardUnsavedFileIds = async (params: GuardUnsavedFilesParams, hasUnsavedFi
     return true
   }
 
-  const action = await confirmUnsavedFiles(hasUnsavedFiles, params.labels)
+  const action = await confirmUnsavedFiles(hasUnsavedFiles, params.labels, params.context)
 
   if (action === 'save') {
     if (params.onSaveAndContinue) {

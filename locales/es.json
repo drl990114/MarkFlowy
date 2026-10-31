@@ -195,6 +195,9 @@
     "close": {
       "title": "¿Desea guardar los cambios?",
       "description": "¿Tiene archivos no guardados, está seguro de que desea salir?"
+    },
+    "continue": {
+      "description": "Tiene cambios sin guardar. ¿Desea guardarlos antes de continuar?"
     }
   },
   "error": {

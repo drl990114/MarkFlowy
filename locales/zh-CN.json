@@ -201,6 +201,9 @@
     "close": {
       "title": "是否要保存更改？",
       "description": "你有未保存的文件，确定要退出吗？"
+    },
+    "continue": {
+      "description": "你有未保存的更改，是否在继续前保存？"
     }
   },
   "error": {

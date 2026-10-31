@@ -29,6 +29,7 @@ export const EditorAreaHeader = memo((props: EditorAreaHeaderProps) => {
     (direction: 'horizontal' | 'vertical') => {
       guardUnsavedFiles({
         fileIds: activeId ? [activeId] : [],
+        context: 'continue',
         labels: {
           save: t('action.save_and_continue'),
           unsaved: t('action.continue_without_save'),

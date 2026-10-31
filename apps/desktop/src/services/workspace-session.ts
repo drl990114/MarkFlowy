@@ -191,6 +191,7 @@ export async function switchWorkspaceSession(path: string, persistence: Workspac
 
     const allowed = await guardUnsavedFilesAsync({
       fileIds: [...useEditorStore.getState().opened],
+      context: 'continue',
       labels: {
         save: t('action.save_and_continue'),
         unsaved: t('action.continue_without_save'),
