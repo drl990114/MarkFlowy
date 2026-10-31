@@ -1,5 +1,53 @@
 # UPDATE LOG
 
+## v1.2.3
+
+Features:
+
+- **Browse files with preview tabs.** Single-click a file in the file tree or workspace search results to reuse a preview tab in that editor group. Double-click the file or its tab, choose **Keep Open** from the tab menu, or edit the document to keep it open. Preview tabs are enabled by default and can be turned off under **Settings → Editor → Tabs**.
+
+- **Switch editing modes from the toolbar.** WYSIWYG, Preview, and Source Code toolbars now all provide a direct view-switching menu. Choose a mode for the pane you are using without first activating another pane.
+
+- **Duplicate a table column.** In WYSIWYG mode, choose **Duplicate column** from a table column's menu to insert a copy beside it, including its header, cell content, formatting, and alignment. Undo and redo are supported.
+
+Improvements and Fixes:
+
+- Fixed mode switching when the same document is open in multiple panes. Each pane keeps its own mode and toolbar; find/replace and source insert actions target the corresponding pane. Unsaved content is preserved when creating a split or switching views.
+
+- Fixed some Base64 images failing to display in WYSIWYG and Preview modes, including Markdown images and HTML `<img>` tags.
+
+- Fixed repeated system file-open requests creating extra windows or duplicate tabs. Opening a file that is already open brings its existing window and tab to the front while preserving unsaved edits.
+
+- Fixed session preservation when closing the last editor window exits the app on Windows and Linux. The last window's tabs, split layout, and drafts can be restored on the next launch; windows closed earlier stay closed.
+
+- Added a visible exit button in the upper-right corner of Zen mode, making it easier to leave Zen mode while the status bar is hidden.
+
+- Improved PDF export browser diagnostics. Invalid paths, incompatible browsers, and detection failures now have clearer messages and expandable details. Also fixed detection and launch compatibility for some Linux browser launcher paths.
+
+---
+
+新功能：
+
+- **通过预览标签页浏览文件。** 单击文件树中的文件或工作区搜索结果，可在当前分栏中复用一个预览标签页。双击文件或标签页、从标签菜单选择**保持打开**，或编辑文档，即可将其保留。预览标签页默认开启，可在**设置 → 编辑器 → 标签页**中关闭。
+
+- **从工具栏直接切换编辑模式。** 所见即所得、预览和源码工具栏现在均提供直接的视图切换菜单，无需先激活其他分栏，即可切换当前操作分栏的模式。
+
+- **复制表格列。** 所见即所得模式下，在表格列菜单中选择**复制当前列**，即可在旁边插入副本，保留表头、单元格内容、格式和对齐方式，支持撤销与重做。
+
+改进与修复：
+
+- 修复同一文档在多个分栏中打开时的模式切换问题。各分栏独立保留编辑模式和工具栏，查找替换及源码插入操作作用于对应分栏；创建分屏或切换视图时保留未保存内容。
+
+- 修复部分 Base64 图片在所见即所得和预览模式下无法显示的问题，覆盖 Markdown 图片链接与 HTML `<img>` 标签写法。
+
+- 修复通过系统重复打开同一文件时，可能创建多余窗口或重复标签页的问题。文件已打开时，优先激活已有窗口和标签页，并保留未保存修改。
+
+- 修复 Windows 和 Linux 下关闭最后一个编辑器窗口并退出应用时，会话未被正确保留的问题。下次启动可恢复最后一个窗口的标签页、分栏布局和草稿，此前单独关闭的窗口保持关闭。
+
+- 在 Zen 模式右上角增加可见的退出按钮，隐藏状态栏时也能方便地退出 Zen 模式。
+
+- 改进 PDF 导出的浏览器诊断，针对路径无效、浏览器不兼容和检测失败提供更清楚的提示及可展开的错误详情；同时修复部分 Linux 浏览器启动器路径的检测与启动兼容性问题。
+
 ## v1.2.1
 
 Features:
