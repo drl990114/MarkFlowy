@@ -6,12 +6,14 @@ import zhDesktop from '../../../locales/zh-CN.json'
 import frDesktop from '../../../locales/fr-FR.json'
 import esDesktop from '../../../locales/es.json'
 import jaDesktop from '../../../locales/ja.json'
+import viDesktop from '../../../locales/vi.json'
 
 import enEditor from '../../../locales/editor/en.json'
 import zhEditor from '../../../locales/editor/cn.json'
 import frEditor from '../../../locales/editor/frFR.json'
 import esEditor from '../../../locales/editor/es.json'
 import jaEditor from '../../../locales/editor/ja.json'
+import viEditor from '../../../locales/editor/vi.json'
 
 import type { Langs } from './types'
 
@@ -23,6 +25,7 @@ const langMap = {
   frFR: { desktop: frDesktop, editor: frEditor },
   es: { desktop: esDesktop, editor: esEditor },
   ja: { desktop: jaDesktop, editor: jaEditor },
+  vi: { desktop: viDesktop, editor: viEditor },
 } as const
 
 export const desktopResources = Object.fromEntries(
