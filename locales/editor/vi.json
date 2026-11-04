@@ -1,0 +1,89 @@
+{
+  "editor": {
+    "common": {
+      "loading": "Đang tải",
+      "accept": "Chấp nhận"
+    },
+    "image": {
+      "source": "Nguồn",
+      "sourcePlaceholder": "Nhập URL hoặc đường dẫn hình ảnh",
+      "embeddedSource": "Hình ảnh nhúng",
+      "replaceSource": "Thay thế",
+      "replaceSourcePlaceholder": "Dán URL, đường dẫn hoặc data URL để thay thế",
+      "alt": "Văn bản thay thế",
+      "altPlaceholder": "Mô tả hình ảnh này",
+      "referenceLabel": "Nhãn tham chiếu",
+      "referenceLabelPlaceholder": "Nhập nhãn tham chiếu",
+      "cancel": "Hủy",
+      "apply": "Áp dụng",
+      "saving": "Đang lưu...",
+      "updateError": "Không thể cập nhật nguồn hình ảnh. Hãy thử lại.",
+      "emptyTitle": "Không có nguồn hình ảnh",
+      "emptyDescription": "Nhấp để thêm",
+      "errorTitle": "Hình ảnh không khả dụng",
+      "errorDescription": "Nhấp để chỉnh sửa nguồn"
+    },
+    "table": {
+      "insertColumnAfter": "Chèn cột phía sau",
+      "insertColumnBefore": "Chèn cột phía trước",
+      "insertRowAfter": "Chèn hàng phía sau",
+      "insertRowBefore": "Chèn hàng phía trước",
+      "alignLeft": "Căn trái",
+      "alignCenter": "Căn giữa",
+      "alignRight": "Căn phải",
+      "deleteColumn": "Xóa cột",
+      "deleteRow": "Xóa hàng"
+    },
+    "codemirror": {
+      "searchInputPlaceholder": "Nhập ngôn ngữ",
+      "frontMatterPlaceholder": "Nhập front matter YAML"
+    },
+    "ai": {
+      "generate": "Tạo văn bản",
+      "stop": "Dừng",
+      "retry": "Thử lại",
+      "regenerate": "Tạo lại",
+      "preview": "Xem trước",
+      "error": "Đã xảy ra lỗi",
+      "prompt": "Câu lệnh"
+    },
+    "toolbar": {
+      "undo": "Hoàn tác",
+      "redo": "Làm lại",
+      "separator": "Chèn đường phân cách",
+      "blockquote": "Trích dẫn",
+      "bold": "In đậm",
+      "italic": "In nghiêng",
+      "codeText": "Mã trong dòng",
+      "codeBlock": "Khối mã",
+      "heading": "Tiêu đề",
+      "bulletList": "Danh sách dấu đầu dòng",
+      "orderedList": "Danh sách đánh số",
+      "taskList": "Danh sách công việc"
+    },
+    "slashMenu": {
+      "searchPlaceholder": "Tìm kiếm mục menu...",
+      "noResults": "Không có kết quả",
+      "image": "Hình ảnh",
+      "toNavigate": "để di chuyển",
+      "toSelect": "để chọn",
+      "toCancel": "để hủy"
+    },
+    "blockType": {
+      "delete": "Xóa",
+      "paragraph": "Đoạn văn",
+      "heading": "Tiêu đề {{level}}",
+      "codeBlock": "Khối mã",
+      "blockquote": "Trích dẫn",
+      "bulletList": "Danh sách dấu đầu dòng",
+      "orderedList": "Danh sách đánh số",
+      "taskList": "Danh sách công việc",
+      "transformTo": "Chuyển thành"
+    },
+    "blockTypeGroup": {
+      "text": "Văn bản",
+      "list": "Danh sách",
+      "other": "Khác"
+    }
+  }
+}

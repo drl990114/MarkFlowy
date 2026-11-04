@@ -69,7 +69,7 @@ function main() {
     {
       directory: path.join(__dirname, '../locales/web'),
       baseFile: 'en/common.json',
-      files: ['zh/common.json', 'ja/common.json'],
+      files: ['zh/common.json', 'ja/common.json', 'vi/common.json'],
       label: 'web',
     },
   ]
