@@ -143,6 +143,8 @@ const capMap = {
   '--cap-selection': 'editor.selection.background',
   '--cap-selection-foreground': 'editor.selection.foreground',
   '--cap-inactive-selection': 'editor.selection.inactiveBackground',
+  '--cap-highlight-background': 'editor.highlight.background',
+  '--cap-highlight-foreground': 'editor.highlight.foreground',
   '--cap-caret': 'editor.caret',
   '--cap-link': 'editor.link',
   '--cap-control-hover': 'interaction.hover',

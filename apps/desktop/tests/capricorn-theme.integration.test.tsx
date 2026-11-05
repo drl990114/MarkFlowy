@@ -87,6 +87,40 @@ function Host({
   )
 }
 describe('Capricorn instance themes', () => {
+  it('consumes independent highlight colors and updates them without changing the document', async () => {
+    const onEditor = vi.fn()
+    const markdown = 'Before ==marked **important**== after'
+    const light = resolveThemeTokens('light')
+    const dark = resolveThemeTokens('dark')
+    const content = (tokens: ResolvedTokens) => (
+      <Host tokens={tokens} markdown={markdown} onEditor={onEditor} />
+    )
+    const view = render(content(light))
+    await waitFor(() => expect(onEditor).toHaveBeenCalled(), { timeout: 15000 })
+    const adapter = onEditor.mock.calls.find((call) => call[0])![0] as CapricornRuntimeAdapter
+    const instance = view.container.querySelector<HTMLElement>('[data-cap-content]')!
+    // Each formatted leaf may own a separate <mark>; do not require a single wrapper.
+    const marks = Array.from(instance.querySelectorAll('mark'))
+    expect(marks.some((mark) => mark.textContent?.includes('important'))).toBe(true)
+    const mark = marks[0]
+    expect(mark).toBeTruthy()
+    for (const highlighted of marks) {
+      expectRuntimeBinding(highlighted, 'background', '--cap-highlight-background')
+      expectRuntimeBinding(highlighted, 'color', '--cap-highlight-foreground')
+    }
+    view.rerender(content(dark))
+    await waitFor(() => expect(instance.style.getPropertyValue('--cap-highlight-background')).toBe(
+      `var(--mf-theme-editor-highlight-background, ${dark['editor.highlight.background']})`,
+    ))
+    expect(instance.style.getPropertyValue('--cap-highlight-foreground')).toBe(
+      `var(--mf-theme-editor-highlight-foreground, ${dark['editor.highlight.foreground']})`,
+    )
+    expect(instance.querySelector('mark')).toBe(mark)
+    expect(adapter.getMarkdown()).toBe(markdown)
+    expect(onEditor.mock.calls.filter((call) => call[0])).toHaveLength(1)
+    expect(errors).not.toHaveBeenCalled()
+  }, 30000)
+
   it('renders and consumes semantic themes without replacing instances or documents', async () => {
     const first = vi.fn()
     const second = vi.fn()

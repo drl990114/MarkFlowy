@@ -23,6 +23,11 @@ function renderWrapperStyles() {
 }
 
 describe('WysiwygThemeWrapper visual overrides', () => {
+  it('keeps nested bold, links and code on their highlight foreground', () => {
+    const css = renderWrapperStyles()
+    expect(css).toMatch(/mark:is\(a,strong,code\)\{color:inherit/)
+  })
+
   it('applies the host selection foreground as well as its background', () => {
     const css = renderWrapperStyles()
 

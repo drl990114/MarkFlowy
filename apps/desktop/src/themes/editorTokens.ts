@@ -5,8 +5,8 @@ import type { ResolvedTokens, ThemeTokenName } from '@markflowy/theme/semantic'
 const editorMap = {
   nodeSelectedColor: 'editor.selection.background',
   strongFontColor: 'editor.foreground',
-  markBgColor: 'accent.subtle',
-  markFontColor: 'editor.foreground',
+  markBgColor: 'editor.highlight.background',
+  markFontColor: 'editor.highlight.foreground',
   imgBgColor: 'editor.background',
   hrBgColor: 'border.default',
   hrBorderColor: 'border.default',
