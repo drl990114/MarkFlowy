@@ -3,6 +3,7 @@ import { useTranslation } from '@/i18n'
 import { cn } from '@/lib/cn'
 import {
   FileOutput,
+  RefreshCw,
   Heart,
   History,
   Image,
@@ -42,6 +43,7 @@ const navigationItems: Record<
   history: { section: 'writing', icon: History },
   ai: { section: 'ai', icon: Sparkles },
   copilot: { section: 'ai', icon: WandSparkles },
+  updates: { section: 'help', icon: RefreshCw },
   support: { section: 'help', icon: Heart },
 }
 

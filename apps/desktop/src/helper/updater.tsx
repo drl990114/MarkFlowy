@@ -1,12 +1,6 @@
 import { preserveUpdateSession } from '@/services/update-session'
 import { currentWindow } from '@/services/windows'
-import { dialog } from '@/services/dialog'
-import { writeSettingPatch } from '@/services/app-setting'
-import {
-  clearUpdateAttempt,
-  getInterruptedUpdate,
-  recordUpdateAttempt,
-} from '@/services/update-recovery'
+import { recordUpdateAttempt } from '@/services/update-recovery'
 import useUpdaterStore from '@/stores/useUpdaterStore'
 import { invoke } from '@tauri-apps/api/core'
 import { type } from '@tauri-apps/plugin-os'
@@ -129,57 +123,18 @@ export const fetchUpdate = (): Promise<Update | null> => {
   return checkPromise
 }
 
-export const checkUpdate = async (opt: { install: boolean } = { install: false }) => {
-  try {
-    // Recover before the network check, so even an offline user can disable updates.
-    const interrupted = type() === 'windows' ? await getInterruptedUpdate() : null
-    if (interrupted) {
-      const action = await dialog.confirm({
-        title: i18n.t('updater.interrupted_title'),
-        content: i18n.t('updater.interrupted_description', { version: interrupted.targetVersion }),
-        actions: [
-          { id: 'cancel', label: i18n.t('common.cancel') },
-          { id: 'disable', label: i18n.t('updater.disable_auto_update') },
-          { id: 'retry', label: i18n.t('common.retry'), primary: true },
-        ],
-      })
-      if (action === 'disable') {
-        await writeSettingPatch({ auto_update: false })
-        await clearUpdateAttempt()
-      }
-      if (action !== 'retry') return
-    }
-    const update = await fetchUpdate()
+export const checkUpdate = async () => {
+  const previousVersion = useUpdaterStore.getState().update?.version
+  const update = await fetchUpdate()
+  if (!update || update.version === previousVersion || useUpdaterStore.getState().isInstalling) return
 
-    if (update !== null) {
-      if (opt.install || interrupted) {
-        await installUpdate(update)
-      } else {
-        const { UpdateDialogContent } = await import('@/components/UpdateDialogContent')
-        const action = await dialog.confirm({
-          title: i18n.t('about.newVersion'),
-          content: (
-            <UpdateDialogContent
-              body={update.body}
-              locale={i18n.resolvedLanguage ?? i18n.language}
-              releaseDate={update.date}
-              releaseDateLabel={i18n.t('about.release')}
-              version={update.version}
-            />
-          ),
-          size: 'lg',
-          actions: [
-            { id: 'cancel', label: i18n.t('common.cancel') },
-            { id: 'install', label: i18n.t('about.install'), primary: true },
-          ],
-        })
-
-        if (action === 'install') {
-          await installUpdate(update)
-        }
-      }
-    }
-  } catch (error) {
-    toast.error(i18n.t('updater.check_failed', { error: String(error) }))
-  }
+  toast.info(i18n.t('about.newVersion'), {
+    id: 'available-update',
+    description: `v${update.version}`,
+    duration: Infinity,
+    action: {
+      label: i18n.t('updater.download_and_install'),
+      onClick: () => { void installUpdate(update) },
+    },
+  })
 }

@@ -66,7 +66,7 @@ vi.mock('@/stores', () => ({
   useEditorStore: { getState: () => ({ getRootPath: mocks.getRootPath, opened: mocks.opened }), subscribe: () => vi.fn() },
 }))
 vi.mock('@/stores/useAppSettingStore', () => ({
-  default: { getState: () => ({ settingData: mocks.settingData }) },
+  default: { getState: () => ({ settingData: mocks.settingData }), subscribe: () => vi.fn() },
 }))
 vi.mock('@/stores/useOpenedCacheStore', () => ({
   default: { getState: () => ({ setRecentWorkspaces: vi.fn() }) },
@@ -83,6 +83,7 @@ vi.mock('@/stores/useThemeStore', () => ({
     }),
   },
 }))
+vi.mock('@/services/update-session', () => ({ listenForUpdateSession: async () => vi.fn() }))
 vi.mock('@/services/app-setting', () => ({ appSettingStoreSetup: async () => ({ theme_mode: 'system' }) }))
 vi.mock('@/services/draft-recovery', () => ({
   listenForDraftReload: () => vi.fn(), closeWithDraftRecovery: mocks.closeDrafts,
@@ -333,7 +334,7 @@ describe('deferred startup updates', () => {
     const first = await startRuntime()
     expect(mocks.checkUpdate).not.toHaveBeenCalled()
     await act(async () => { mocks.afterInteractive.mock.calls[0][0]() })
-    expect(mocks.checkUpdate).toHaveBeenCalledExactlyOnceWith({ install: automatic })
+    expect(mocks.checkUpdate).toHaveBeenCalledExactlyOnceWith()
     first.unmount()
 
     await startRuntime()

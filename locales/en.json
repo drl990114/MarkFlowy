@@ -960,6 +960,17 @@
       },
       "desc": "Appearance and display settings for the application, including visually relevant configurations such as interface scaling and themes."
     },
+    "updates": {
+      "label": "Updates",
+      "desc": "Check for updates at startup. Download and install only when you choose to.",
+      "checks": "Update checks",
+      "interval": "Check while the app is running",
+      "interval_desc": "Checks run only while MarkFlowy is open. Every launch also checks for updates.",
+      "interval_0": "At startup only",
+      "interval_60": "Every hour",
+      "interval_120": "Every 2 hours",
+      "interval_240": "Every 4 hours"
+    },
     "support": {
       "label": "Support",
       "desc": "Your every support is important to us! To make this open source project better, you can participate in the following ways",

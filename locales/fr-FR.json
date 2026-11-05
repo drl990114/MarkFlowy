@@ -891,6 +891,17 @@
       },
       "desc": "Les paramètres d'apparence et d'affichage de l'application, y compris le zoom de l'interface, les thèmes et autres configurations visuelles."
     },
+    "updates": {
+      "label": "Mises à jour",
+      "desc": "Vérifier au démarrage. Télécharger et installer uniquement à votre demande.",
+      "checks": "Recherche de mises à jour",
+      "interval": "Vérifier pendant l’utilisation",
+      "interval_desc": "Les recherches ont lieu uniquement lorsque MarkFlowy est ouvert et à chaque démarrage.",
+      "interval_0": "Au démarrage uniquement",
+      "interval_60": "Toutes les heures",
+      "interval_120": "Toutes les 2 heures",
+      "interval_240": "Toutes les 4 heures"
+    },
     "support": {
       "label": "Soutien",
       "desc": "Chacun de vos soutiens est important pour nous! Pour améliorer ce projet open source, voici comment vous pouvez vous engager",

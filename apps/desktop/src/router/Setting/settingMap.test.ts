@@ -128,3 +128,17 @@ describe('Dock startup settings', () => {
     expect(Startup.rightStartup.options.map(({ value }) => value)).toEqual(['restore'])
   })
 })
+
+
+describe('Update settings', () => {
+  it('keeps notification checks separate from general settings with an hourly default', () => {
+    const settings = getSettingMap()
+    expect(settings.general.App).not.toHaveProperty('auto_update')
+    expect(settings.updates.Checks.interval).toMatchObject({
+      key: 'update_check_interval', defaultValue: '60',
+    })
+    expect(settings.updates.Checks.interval.options.map(({ value }) => value)).toEqual([
+      '0', '60', '120', '240',
+    ])
+  })
+})

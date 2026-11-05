@@ -17,6 +17,7 @@ import { getFileObject } from '@/helper/files'
 import { getFileNameFromPath, releaseSecurityScope } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
+import { startPeriodicUpdateChecks } from '@/services/update-checks'
 import { i18nInit, t } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
 import { openExternalPaths } from '@/services/open-external-paths'
@@ -432,13 +433,12 @@ let themeLibrarySetupPromise: Promise<void> | undefined
 
 const startDeferredAppSetup = () => {
   if (!deferredAppSetupPromise) {
-    const { settingData } = useAppSettingStore.getState()
     deferredAppSetupPromise = Promise.all([
       useThemeStore.getState().syncSystemTheme(),
-      // Secondary windows must not repeat installation or recover an in-flight update.
+      // Only the main window checks for releases.
       window.__MARKFLOWY_E2E__ || currentWindow.label !== 'main'
         ? undefined
-        : checkUpdate({ install: settingData.auto_update }),
+        : checkUpdate(),
     ]).then(() => undefined)
   }
 
@@ -635,10 +635,18 @@ export const useAppRuntimeSetup = () => {
   useEffect(() => {
     // Load declarative themes after the application shell is available.
     if (!themeLibrarySetupPromise) themeLibrarySetupPromise = appThemeLibrarySetup()
-    return afterStartupInteractive(() => {
+    let stopChecks: (() => void) | undefined
+    const cancel = afterStartupInteractive(() => {
+      if (!window.__MARKFLOWY_E2E__ && currentWindow.label === 'main') {
+        stopChecks = startPeriodicUpdateChecks()
+      }
       markStartupStage('deferred-start')
       void startDeferredAppSetup().catch((error) => logger.error('Deferred startup failed', error))
     })
+    return () => {
+      cancel()
+      stopChecks?.()
+    }
   }, [])
 
   useEffect(() => {

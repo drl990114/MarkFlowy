@@ -960,6 +960,17 @@
       },
       "desc": "Cài đặt giao diện và hiển thị của ứng dụng, bao gồm các cấu hình liên quan đến hình thức như tỷ lệ giao diện và chủ đề."
     },
+    "updates": {
+      "label": "Cập nhật",
+      "desc": "Kiểm tra khi khởi động. Chỉ tải và cài đặt khi bạn chọn.",
+      "checks": "Kiểm tra cập nhật",
+      "interval": "Kiểm tra khi ứng dụng đang chạy",
+      "interval_desc": "Chỉ kiểm tra khi MarkFlowy đang mở và mỗi lần khởi động.",
+      "interval_0": "Chỉ khi khởi động",
+      "interval_60": "Mỗi giờ",
+      "interval_120": "Mỗi 2 giờ",
+      "interval_240": "Mỗi 4 giờ"
+    },
     "support": {
       "label": "Ủng hộ",
       "desc": "Mọi sự ủng hộ của bạn đều quan trọng với chúng tôi! Để giúp dự án mã nguồn mở này tốt hơn, bạn có thể tham gia theo những cách sau",
