@@ -150,10 +150,12 @@ describe('theme selection preview', () => {
     expect(useThemeStore.getState().curTheme.mode).toBe('light')
   })
 
-  it('uses the bootstrap system appearance during settings initialization without another theme query', async () => {
+  it('reads the system appearance when saved settings override the dark startup default', async () => {
     await useThemeStore.getState().initFromSettings({ theme_mode: 'system' })
-    expect(mocks.theme).not.toHaveBeenCalled()
+    expect(mocks.theme).toHaveBeenCalledOnce()
     expect(mocks.invoke).not.toHaveBeenCalledWith('get_system_theme')
+    expect(useThemeStore.getState().themeMode).toBe('system')
+    expect(useThemeStore.getState().curTheme.mode).toBe('light')
   })
 
   it('coalesces concurrent theme reads and does not overwrite a newer system event', async () => {

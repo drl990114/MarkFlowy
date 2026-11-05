@@ -23,7 +23,8 @@ export const appSettingStoreSetup = async () => {
     logger.error('Failed to load app setting:', error)
     logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     const defaultSetting = {
-      theme: 'light',
+      theme: 'dark',
+      theme_mode: 'dark',
       theme_accent_color: 'system',
       language: 'en',
       webview_zoom: '1.0',

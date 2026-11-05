@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="dark light" />
     <script>
       ;(() => {
         const storageKey = 'markflowy:startup-appearance:v1'
@@ -85,7 +85,7 @@
         const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches === true
         const preference = ['light', 'dark', 'system'].includes(rawAppearance.preference)
           ? rawAppearance.preference
-          : 'system'
+          : 'dark'
         const cachedResolvedMode = ['light', 'dark'].includes(rawAppearance.resolvedMode)
           ? rawAppearance.resolvedMode
           : undefined
@@ -184,13 +184,13 @@
     </script>
     <style>
       :root {
-        --mf-boot-surface-app: #ffffff;
-        --mf-boot-surface-panel: #f9f9f9;
-        --mf-boot-surface-toolbar: #fefefe;
-        --mf-boot-foreground: #000000;
-        --mf-boot-muted-foreground: #505050;
-        --mf-boot-border: #d2d2d2;
-        --mf-boot-accent: #1f6ae2;
+        --mf-boot-surface-app: #131313;
+        --mf-boot-surface-panel: #1e1d1e;
+        --mf-boot-surface-toolbar: #323232;
+        --mf-boot-foreground: #caccca;
+        --mf-boot-muted-foreground: #9e9e9e;
+        --mf-boot-border: #404040;
+        --mf-boot-accent: #3794ff;
         /* Temporary startup layer, immediately above the persistent tooltip layer (1001). */
         --mf-boot-layer: 1002;
         background: var(--mf-boot-surface-app);

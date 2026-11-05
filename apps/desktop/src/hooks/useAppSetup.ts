@@ -182,7 +182,7 @@ async function performWorkspaceSwitch(path: string | undefined) {
 const initThemeFromSettings = async (settingData: Record<string, any>) => {
   // Migrate the legacy field before React mounts the themed application shell.
   if (!settingData.theme_mode) {
-    const oldTheme = settingData.theme || 'light'
+    const oldTheme = settingData.theme || 'dark'
     if (oldTheme === 'system' || oldTheme === 'light') {
       settingData.theme_mode = 'system'
     } else {
