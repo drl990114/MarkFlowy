@@ -387,6 +387,29 @@ pub(crate) fn begin_quit(app: &AppHandle, code: i32) -> Result<Option<Vec<String
     Ok(Some(session.windows))
 }
 
+/// Save the live manifest without closing windows; the updater exits directly.
+#[tauri::command]
+pub fn preserve_update_session(app: AppHandle, mut labels: Vec<String>) -> Result<(), String> {
+    let state = QUIT_STATE.lock().unwrap_or_else(|error| error.into_inner());
+    if state.exit_code.is_some() {
+        return Err("Application is already quitting".into());
+    }
+    let session = state.capture(
+        app.webview_windows().into_keys(),
+        super::window_manager::get_focused_editor_window(&app)
+            .map(|window| window.label().to_string()),
+    );
+    labels.sort();
+    labels.dedup();
+    let mut live: Vec<_> = app.webview_windows().into_keys()
+        .filter(|label| is_editor_window(label)).collect();
+    live.sort();
+    if labels != live {
+        return Err("Editor windows changed while preserving the update session".into());
+    }
+    save_session(&app, Some(&session))
+}
+
 #[tauri::command]
 pub fn cancel_app_quit() {
     QUIT_STATE

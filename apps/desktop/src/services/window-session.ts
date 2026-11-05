@@ -9,6 +9,8 @@ import useEditorStateStore from '@/stores/useEditorStateStore'
 import { captureProtectedDraftSession } from './draft-recovery'
 import { recoveryDocuments, recoverySessionSchema } from './draftSessionFormat'
 import { isPristineDocument } from './pristine-document'
+import useRecentFilesStore from '@/stores/useRecentFilesStore'
+import { restoreRecentFileHistory } from './recent-files'
 
 export const LAST_WINDOW_SESSION_KEY = 'window-session:last-active'
 const RELOAD_WINDOW_KEY = 'window-session:current-window'
@@ -35,6 +37,7 @@ export const windowSessionSchema = z.object({
   version: z.literal(1),
   windowLabel: z.string(),
   rootPath: z.string().optional(),
+  recentFilePaths: z.array(z.string()).optional(),
   files: z.array(
     z.object({
       id: z.string(),
@@ -83,12 +86,12 @@ export function restoreWindowDocuments(session: WindowSession) {
   for (const file of session.files) {
     if (file.path && draftPaths.has(getPathIdentityKey(file.path))) draftIds.add(file.id)
   }
-  useEditorStore
+  restoreRecentFileHistory(() => useEditorStore
     .getState()
     .setEditorLayout(
       filterSessionLayout(session.editorLayout, new Set(session.files.map((file) => file.id)), draftIds),
       session.activeGroupId,
-    )
+    ), session.recentFilePaths?.map((path) => ({ path })))
 }
 
 export function filterSessionLayout(
@@ -140,6 +143,7 @@ export function createWindowSessionPersistence(store: SessionStore, windowLabel:
       version: 1,
       windowLabel,
       rootPath: state.getRootPath(),
+      recentFilePaths: useRecentFilesStore.getState().entries.flatMap((entry) => entry.path ? [entry.path] : []),
       files,
       editorLayout: filterSessionLayout(state.editorLayout, new Set(files.map((file) => file.id))),
       activeGroupId: state.activeGroupId,
@@ -174,6 +178,7 @@ export function createWindowSessionPersistence(store: SessionStore, windowLabel:
     if (state.metadataRevision !== previous.metadataRevision) schedule()
   })
   const unsubscribeDirty = useEditorStateStore.subscribe(schedule)
+  const unsubscribeRecent = useRecentFilesStore.subscribe(schedule)
   const focus = () => {
     focused = true
     schedule()
@@ -192,6 +197,7 @@ export function createWindowSessionPersistence(store: SessionStore, windowLabel:
       unsubscribe()
       unsubscribeFiles()
       unsubscribeDirty()
+      unsubscribeRecent()
       window.removeEventListener('focus', focus)
       window.removeEventListener('blur', blur)
       await tail.catch((error) =>

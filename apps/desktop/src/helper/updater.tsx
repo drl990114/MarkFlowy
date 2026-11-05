@@ -1,3 +1,5 @@
+import { preserveUpdateSession } from '@/services/update-session'
+import { currentWindow } from '@/services/windows'
 import { dialog } from '@/services/dialog'
 import { writeSettingPatch } from '@/services/app-setting'
 import {
@@ -42,9 +44,11 @@ export const installUpdate = (update: Update): Promise<void> => {
       try {
         if (type() === 'windows') {
           await currentUpdate.download()
+          await preserveUpdateSession(currentWindow.label)
           await recordUpdateAttempt(currentUpdate)
           await currentUpdate.install()
         } else {
+          await preserveUpdateSession(currentWindow.label)
           await currentUpdate.downloadAndInstall()
         }
         useUpdaterStore.setState({ update: null, installedVersion: currentUpdate.version })
@@ -53,8 +57,13 @@ export const installUpdate = (update: Update): Promise<void> => {
         toast.success(i18n.t('updater.install_success'), {
           action: {
             label: i18n.t('updater.restart'),
-            onClick: () => {
-              invoke('app_restart')
+            onClick: async () => {
+              try {
+                await preserveUpdateSession(currentWindow.label)
+                await invoke('app_restart')
+              } catch (error) {
+                toast.error(i18n.t('updater.install_failed', { error: String(error) }))
+              }
             },
           },
         })

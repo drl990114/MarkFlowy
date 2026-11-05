@@ -1,3 +1,4 @@
+import { listenForUpdateSession } from '@/services/update-session'
 import { startThemeLibrary } from '@/themes/library'
 import { flushEditorResumeStates } from '@/stores/editorResumeStore'
 import { closeWithDraftRecovery, listenForDraftReload } from '@/services/draft-recovery'
@@ -489,6 +490,15 @@ export const useAppRuntimeSetup = () => {
         toast.error(t('drafts.reload_failed'))
       },
     })
+    const updateSessionListener = listenForUpdateSession(currentWindow.label, async () => {
+      await appStartupCoordinator.start()
+      await waitForWorkspaceSwitches()
+      await waitForAllDraftRecovery()
+      if (!workspaceCachePersistence || !windowSessionPersistence) throw new Error('Session persistence is not ready')
+      flushEditorResumeStates()
+      await workspaceCachePersistence.flush()
+      await windowSessionPersistence.flush()
+    })
     let closeWindowPromise: Promise<boolean> | undefined
     const closeRequest = currentWindow.listen('tauri://close-requested', async () => {
       if (closeWindowPromise) {
@@ -603,6 +613,7 @@ export const useAppRuntimeSetup = () => {
     return () => {
       stopDraftReload()
       unListenMenu.then((fn) => fn())
+      updateSessionListener.then((fn) => fn())
       closeRequest.then((fn) => fn())
       unListenOpenedUrls.then((fn) => fn())
       unListenCliOpen.then((fn) => fn())
