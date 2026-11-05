@@ -237,55 +237,55 @@
     {
       "id": "app_commandPalette.default",
       "command": "app_commandPalette",
-      "keys": ["CommandOrCtrl", "Shift", "p"],
+      "keys": ["CommandOrCtrl", "Shift", "[KeyP]"],
       "when": "always"
     },
     {
       "id": "app_quickOpen.default",
       "command": "app_quickOpen",
-      "keys": ["CommandOrCtrl", "p"],
+      "keys": ["CommandOrCtrl", "[KeyP]"],
       "when": "always"
     },
     {
       "id": "app_openFolder.default",
       "command": "app_openFolder",
-      "keys": ["CommandOrCtrl", "Shift", "o"],
+      "keys": ["CommandOrCtrl", "Shift", "[KeyO]"],
       "when": "always"
     },
     {
       "id": "app_toggleLeftsidebarVisible.default",
       "command": "app_toggleLeftsidebarVisible",
-      "keys": ["CommandOrCtrl", "l"],
+      "keys": ["CommandOrCtrl", "[KeyL]"],
       "when": "always"
     },
     {
       "id": "app_toggleRightsidebarVisible.default",
       "command": "app_toggleRightsidebarVisible",
-      "keys": ["CommandOrCtrl", "r"],
+      "keys": ["CommandOrCtrl", "[KeyR]"],
       "when": "always"
     },
     {
       "id": "app_toggleZenMode.default",
       "command": "app_toggleZenMode",
-      "keys": ["CommandOrCtrl", "Shift", "f"],
+      "keys": ["CommandOrCtrl", "Shift", "[KeyF]"],
       "when": "always"
     },
     {
       "id": "app_save.default",
       "command": "app_save",
-      "keys": ["CommandOrCtrl", "s"],
+      "keys": ["CommandOrCtrl", "[KeyS]"],
       "when": "always"
     },
     {
       "id": "app_findReplaceEditor.default",
       "command": "app_findReplaceEditor",
-      "keys": ["CommandOrCtrl", "f"],
+      "keys": ["CommandOrCtrl", "[KeyF]"],
       "when": "editor_focus"
     },
     {
       "id": "app_closeCurrentEditorTab.default",
       "command": "app_closeCurrentEditorTab",
-      "keys": ["CommandOrCtrl", "w"],
+      "keys": ["CommandOrCtrl", "[KeyW]"],
       "when": "always"
     },
     {
@@ -297,7 +297,7 @@
     {
       "id": "app_hide.default",
       "command": "app_hide",
-      "keys": ["CommandOrCtrl", "h"],
+      "keys": ["CommandOrCtrl", "[KeyH]"],
       "when": "always"
     },
     {
@@ -309,7 +309,7 @@
     {
       "id": "app_toggleEditorType.default",
       "command": "app_toggleEditorType",
-      "keys": ["CommandOrCtrl", "Shift", "m"],
+      "keys": ["CommandOrCtrl", "Shift", "[KeyM]"],
       "when": "editor_focus"
     },
     {
@@ -327,13 +327,13 @@
     {
       "id": "editor_redo.default",
       "command": "editor_redo",
-      "keys": ["CommandOrCtrl", "Shift", "z"],
+      "keys": ["CommandOrCtrl", "Shift", "[KeyZ]"],
       "when": "editor_focus"
     },
     {
       "id": "editor_undo.default",
       "command": "editor_undo",
-      "keys": ["CommandOrCtrl", "z"],
+      "keys": ["CommandOrCtrl", "[KeyZ]"],
       "when": "editor_focus"
     },
     {
@@ -345,25 +345,25 @@
     {
       "id": "editor_toggleStrong.default",
       "command": "editor_toggleStrong",
-      "keys": ["CommandOrCtrl", "b"],
+      "keys": ["CommandOrCtrl", "[KeyB]"],
       "when": "editor_focus"
     },
     {
       "id": "editor_toggleEmphasis.default",
       "command": "editor_toggleEmphasis",
-      "keys": ["CommandOrCtrl", "i"],
+      "keys": ["CommandOrCtrl", "[KeyI]"],
       "when": "editor_focus"
     },
     {
       "id": "editor_toggleCodeText.default",
       "command": "editor_toggleCodeText",
-      "keys": ["CommandOrCtrl", "e"],
+      "keys": ["CommandOrCtrl", "[KeyE]"],
       "when": "editor_focus"
     },
     {
       "id": "editor_toggleDelete.default",
       "command": "editor_toggleDelete",
-      "keys": ["CommandOrCtrl", "Shift", "s"],
+      "keys": ["CommandOrCtrl", "Shift", "[KeyS]"],
       "when": "editor_focus"
     },
     {

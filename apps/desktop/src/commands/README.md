@@ -20,6 +20,8 @@ To add a command, register its handler, add its catalog metadata, and add any de
 
 An empty key list removes that binding. Restoring its default removes the override. User overrides apply across platforms; `CommandOrCtrl` stays portable in storage and resolves only for dispatch/display. A semantic key such as `1` and a physical key such as `[Digit1]` retain distinct identities.
 
+Built-in configurable letter shortcuts use physical codes, for example `[KeyS]` for Save, so they continue working with Russian and other non-Latin layouts. The settings UI displays the familiar `Ctrl+S` or `⌘S` label. The shortcut recorder and saved character overrides retain their layout-dependent character semantics, including Dvorak and AZERTY customizations. Copy, cut, and paste retain their native bindings; platform menu accelerators remain owned by the operating system.
+
 Existing command IDs, rule IDs, and field meanings are stable. Extend version 1 with optional fields instead of changing these meanings. Unavailable rule IDs and unknown fields survive unrelated edits. Unsupported format versions and malformed files are reported without overwriting the file. No legacy format migration is provided.
 
 Updates address one rule, validate against the current merged snapshot, and use an atomic file replacement under the shared Tauri lock. Other windows reload the authoritative snapshot. Snapshots carry a process-local monotonic revision so an out-of-order read or save response cannot replace newer settings. The settings editor currently edits catalog rules; it does not add arbitrary commands, contexts, or chord sequences.

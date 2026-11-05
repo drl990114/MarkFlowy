@@ -409,11 +409,20 @@ fn keys_overlap(left: &[String], right: &[String]) -> bool {
             return false;
         };
         let primary = keys.pop().unwrap();
-        numpad_values(&primary).iter().any(|alias| {
-            let mut candidate = keys.clone();
-            candidate.push(alias.to_string());
-            canonical_keys(&candidate) == **other
-        })
+        let letter = primary
+            .strip_prefix("[Key")
+            .and_then(|key| key.strip_suffix(']'))
+            .filter(|key| key.len() == 1 && key.as_bytes()[0].is_ascii_uppercase())
+            .map(str::to_ascii_lowercase);
+        numpad_values(&primary)
+            .iter()
+            .copied()
+            .chain(letter.as_deref())
+            .any(|alias| {
+                let mut candidate = keys.clone();
+                candidate.push(alias.to_string());
+                canonical_keys(&candidate) == **other
+            })
     })
 }
 
@@ -593,7 +602,7 @@ mod tests {
             assert!(update(&mut config, command, &keys).is_err());
         }
         assert!(config.overrides.is_empty());
-        update(&mut config, "app_save", &["CommandOrCtrl", "S"]).unwrap();
+        update(&mut config, "app_save", &["CommandOrCtrl", "[KeyS]"]).unwrap();
         assert!(config.overrides.is_empty());
         assert_eq!(
             normalize_keys(&["Ctrl".into(), "Shift".into(), "+".into()]).unwrap(),
@@ -629,9 +638,9 @@ mod tests {
         assert!(rule(&bindings, "editor_toggleStrong").keys.is_empty());
         assert_eq!(
             rule(&bindings, "editor_toggleStrong").default_keys,
-            ["CommandOrCtrl", "b"]
+            ["CommandOrCtrl", "[KeyB]"]
         );
-        update(&mut loaded, "editor_toggleStrong", &["CommandOrCtrl", "b"]).unwrap();
+        update(&mut loaded, "editor_toggleStrong", &["CommandOrCtrl", "[KeyB]"]).unwrap();
         loaded.write_to(&path).unwrap();
         assert_eq!(
             KeybindingConfiguration::read_from(&path)
@@ -751,7 +760,7 @@ mod tests {
         let directory = tempfile::tempdir().unwrap();
         let path = directory.path().join("keybindings.json");
         let mut config = KeybindingConfiguration::default();
-        for primary in ["1", "=", "[Digit1]", "[Equal]", "[Numpad1]"] {
+        for primary in ["k", "ы", "[KeyK]", "1", "=", "[Digit1]", "[Equal]", "[Numpad1]"] {
             update(&mut config, "app_save", &["Ctrl", "Shift", primary]).unwrap();
             config.write_to(&path).unwrap();
             let loaded = KeybindingConfiguration::read_from(&path).unwrap();
@@ -761,6 +770,24 @@ mod tests {
             );
         }
         assert!(update(&mut config, "app_save", &["Ctrl", "Numpad1"]).is_err());
+    }
+
+    #[test]
+    fn physical_default_letters_conflict_with_character_aliases_in_both_directions() {
+        for (left, right) in [("[KeyS]", "s"), ("S", "[KeyS]")] {
+            assert!(keys_overlap(
+                &["Ctrl".into(), left.into()],
+                &["Ctrl".into(), right.into()]
+            ));
+        }
+        assert!(!keys_overlap(
+            &["Ctrl".into(), "[KeyS]".into()],
+            &["Ctrl".into(), "[KeyO]".into()]
+        ));
+        assert!(!keys_overlap(
+            &["Ctrl".into(), "Shift".into(), "[KeyS]".into()],
+            &["Ctrl".into(), "s".into()]
+        ));
     }
 
     #[test]
@@ -777,11 +804,11 @@ mod tests {
         let bindings = resolved(&KeybindingConfiguration::default());
         assert_eq!(
             rule(&bindings, "app_quickOpen").keys,
-            ["CommandOrCtrl", "p"]
+            ["CommandOrCtrl", "[KeyP]"]
         );
         assert_eq!(
             rule(&bindings, "app_toggleZenMode").keys,
-            ["CommandOrCtrl", "Shift", "f"]
+            ["CommandOrCtrl", "Shift", "[KeyF]"]
         );
     }
 }

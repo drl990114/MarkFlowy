@@ -151,10 +151,10 @@ function useKeyboard() {
           : [keybindingRegistry.getKeyBindingString(binding.keys)],
       )
     }
-    const findHandlers = shortcutsFor('app_findReplaceEditor', 'mod-f').map((keys) =>
+    const findHandlers = shortcutsFor('app_findReplaceEditor', 'mod-[KeyF]').map((keys) =>
       createFindShortcutHandler(keys, () => !composing() && openDocumentSearch()),
     )
-    const quickOpenHandlers = shortcutsFor(EVENT.app_quickOpen, 'mod-p').map((keys) =>
+    const quickOpenHandlers = shortcutsFor(EVENT.app_quickOpen, 'mod-[KeyP]').map((keys) =>
       createAppShortcutHandler(
         keys,
         () => {
@@ -167,7 +167,7 @@ function useKeyboard() {
         '[data-mf-quick-open]',
       ),
     )
-    const paletteHandlers = shortcutsFor(EVENT.app_commandPalette, 'mod-Shift-p').map((keys) =>
+    const paletteHandlers = shortcutsFor(EVENT.app_commandPalette, 'mod-Shift-[KeyP]').map((keys) =>
       createAppShortcutHandler(
         keys,
         (event) => {

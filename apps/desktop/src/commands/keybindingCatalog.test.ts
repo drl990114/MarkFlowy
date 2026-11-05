@@ -59,7 +59,7 @@ describe('command and binding contracts', () => {
     const registry = new KeybindingRegistry()
     registry.setKeybindings([bold, alternate])
     expect(registry.getKeybindings(bold.command)).toHaveLength(2)
-    expect(editorKeymap(registry.getKeybindings())).toEqual({ toggleStrong: ['mod-b', 'Alt-b'] })
+    expect(editorKeymap(registry.getKeybindings())).toEqual({ toggleStrong: ['mod-[KeyB]', 'Alt-b'] })
     registry.setKeybindings([{ ...bold, keys: [] }, alternate])
     expect(registry.getKeybinding(bold.command)?.id).toBe(alternate.id)
     expect(editorKeymap(registry.getKeybindings())).toEqual({ toggleStrong: ['Alt-b'] })
