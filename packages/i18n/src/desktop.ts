@@ -6,6 +6,8 @@ export * from './core'
 export { default } from './core'
 
 const loaders = {
+  ru: () =>
+    Promise.all([import('../../../locales/ru.json'), import('../../../locales/editor/ru.json')]),
   en: () =>
     Promise.all([import('../../../locales/en.json'), import('../../../locales/editor/en.json')]),
   cn: () =>
