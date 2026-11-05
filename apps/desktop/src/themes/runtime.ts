@@ -86,7 +86,7 @@ function legacyOverrides(theme: MfTheme): ThemeOverrides {
     const value = theme.styledConstants[old as keyof typeof theme.styledConstants]
     if (value && overrides[name] === undefined) overrides[name] = value
   }
-  return overrides
+  return { ...overrides, ...theme.tokens }
 }
 export function getThemeTokens(theme: MfTheme, preferences: ThemeOverrides = {}): ResolvedTokens {
   if (isSemanticTheme(theme)) return resolveTheme(theme.document, theme.variant, preferences).tokens
@@ -122,7 +122,7 @@ export function copyTheme(theme: MfTheme): ThemeDocument {
         id: theme.mode,
         name: `${theme.name} copy`,
         mode: theme.mode,
-        tokens: legacyOverrides(theme),
+        tokens: structuredClone(legacyOverrides(theme)),
       },
     ],
   }

@@ -1,6 +1,8 @@
 export * from './darken-colors'
 
 import type { CreateThemeOptions } from '@drl990114/codemirror-themes'
+import type { ThemeOverrides } from '../semantic/registry'
+import { tokyoNightTheme } from './tokyo-night'
 import {
   common,
   desktopDarkTheme as styledDarkTheme,
@@ -29,6 +31,8 @@ export type MfTheme = {
    * Replace styled constants
    */
   styledConstants: Partial<typeof styledLightTheme>
+  /** Semantic overrides supplement legacy colors for editors and theme copies. */
+  tokens?: ThemeOverrides
   /**
    * Codemirror theme.
    */
@@ -42,7 +46,7 @@ export type MfTheme = {
   globalStyleText?: string
 }
 
-export { common }
+export { common, tokyoNightTheme }
 
 export const lightTheme: MfTheme = {
   name: 'MarkFlowy Light',
@@ -94,5 +98,6 @@ export const builtInThemes: MfTheme[] = [
   gitbookTheme,
   sepiaTheme,
   nordTheme,
+  tokyoNightTheme,
 ]
 

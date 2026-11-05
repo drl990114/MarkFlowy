@@ -122,6 +122,9 @@ jobs:
           New-Item -ItemType Directory -Path $portableDir -Force | Out-Null
           New-Item -ItemType Directory -Path $portableOutput -Force | Out-Null
           Copy-Item -LiteralPath $exe -Destination (Join-Path $portableDir "MarkFlowy.exe")
+          $themeLicenses = Join-Path $portableDir "licenses/themes"
+          New-Item -ItemType Directory -Path $themeLicenses -Force | Out-Null
+          Copy-Item -Path "packages/theme/licenses/*.txt" -Destination $themeLicenses
           Compress-Archive -Path $portableDir -DestinationPath $portableZip -Force
 
       - uses: actions/upload-artifact@v4

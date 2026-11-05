@@ -357,6 +357,9 @@
       "icons/icon.ico"
     ],
     "targets": "all",
+    "resources": {
+      "../../../packages/theme/licenses/": "licenses/themes/"
+    },
     "windows": {
       "digestAlgorithm": "sha256",
       "webviewInstallMode": {
