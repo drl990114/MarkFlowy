@@ -1402,7 +1402,15 @@
       "moveRowUp": "行を上に移動",
       "moveRowDown": "行を下に移動",
       "moveColumnLeft": "列を左に移動",
-      "moveColumnRight": "列を右に移動"
+      "moveColumnRight": "列を右に移動",
+      "selectRow": "行を選択",
+      "selectColumn": "列を選択",
+      "dragRow": "ドラッグして行を並べ替え",
+      "dragColumn": "ドラッグして列を並べ替え",
+      "dragRowPosition": "{{from}} 行目を {{to}} 行目に移動",
+      "dragColumnPosition": "{{from}} 列目を {{to}} 列目に移動",
+      "movedRow": "{{position}} 行目に移動しました",
+      "movedColumn": "{{position}} 列目に移動しました"
     }
   },
   "inline_insert": {

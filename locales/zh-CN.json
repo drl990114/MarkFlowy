@@ -1402,7 +1402,15 @@
       "moveRowUp": "上移一行",
       "moveRowDown": "下移一行",
       "moveColumnLeft": "左移一列",
-      "moveColumnRight": "右移一列"
+      "moveColumnRight": "右移一列",
+      "selectRow": "选择整行",
+      "selectColumn": "选择整列",
+      "dragRow": "拖动以调整行顺序",
+      "dragColumn": "拖动以调整列顺序",
+      "dragRowPosition": "将第 {{from}} 行移动到第 {{to}} 行",
+      "dragColumnPosition": "将第 {{from}} 列移动到第 {{to}} 列",
+      "movedRow": "行已移动到第 {{position}} 行",
+      "movedColumn": "列已移动到第 {{position}} 列"
     }
   },
   "inline_insert": {

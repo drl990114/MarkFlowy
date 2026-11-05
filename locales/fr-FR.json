@@ -1402,7 +1402,15 @@
       "moveRowUp": "Déplacer la ligne vers le haut",
       "moveRowDown": "Déplacer la ligne vers le bas",
       "moveColumnLeft": "Déplacer la colonne vers la gauche",
-      "moveColumnRight": "Déplacer la colonne vers la droite"
+      "moveColumnRight": "Déplacer la colonne vers la droite",
+      "selectRow": "Sélectionner la ligne",
+      "selectColumn": "Sélectionner la colonne",
+      "dragRow": "Faire glisser pour réordonner la ligne",
+      "dragColumn": "Faire glisser pour réordonner la colonne",
+      "dragRowPosition": "Déplacer la ligne {{from}} à la position {{to}}",
+      "dragColumnPosition": "Déplacer la colonne {{from}} à la position {{to}}",
+      "movedRow": "Ligne déplacée à la position {{position}}",
+      "movedColumn": "Colonne déplacée à la position {{position}}"
     }
   },
   "inline_insert": {

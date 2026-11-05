@@ -1402,7 +1402,15 @@
       "moveRowUp": "Move row up",
       "moveRowDown": "Move row down",
       "moveColumnLeft": "Move column left",
-      "moveColumnRight": "Move column right"
+      "moveColumnRight": "Move column right",
+      "selectRow": "Select row",
+      "selectColumn": "Select column",
+      "dragRow": "Drag row to reorder",
+      "dragColumn": "Drag column to reorder",
+      "dragRowPosition": "Move row {{from}} to position {{to}}",
+      "dragColumnPosition": "Move column {{from}} to position {{to}}",
+      "movedRow": "Row moved to position {{position}}",
+      "movedColumn": "Column moved to position {{position}}"
     }
   },
   "inline_insert": {
