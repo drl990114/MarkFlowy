@@ -65,6 +65,10 @@ function FileTreeNodeRenderer(props: NodeRendererProps<IFile>) {
 
 export interface FileTreeProps {
   data: IFile[]
+  /** Optional sibling display order. Does not mutate backing nodes or their child arrays. */
+  compareNodes?: (left: IFile, right: IFile) => number
+  /** Additional host actions beside the workspace root's existing controls. */
+  rootActions?: React.ReactNode
   /** Persistent directory paths supplied by the host; IDs may change between sessions. */
   expandedPaths?: readonly string[]
   onExpandedPathsChange?: (paths: string[]) => void
@@ -137,6 +141,8 @@ export const fileTreeHandler: {
 const FileTree: FC<FileTreeProps> = (props) => {
   const {
     data,
+    compareNodes,
+    rootActions,
     expandedPaths,
     onExpandedPathsChange,
     onSelect,
@@ -172,6 +178,10 @@ const FileTree: FC<FileTreeProps> = (props) => {
   const { runFileMutation, pathJoin, fileExists, moveFilesToTargetFolder, readSubdirectory } =
     useFileSystem()
   const tree = useMemo(() => new SimpleTree<IFile>(data), [data])
+  const childrenAccessor = useCallback((file: IFile) => {
+    if (!file.children) return null
+    return compareNodes ? [...file.children].sort(compareNodes) : file.children
+  }, [compareNodes])
   const treeRef = useRef<TreeApi<IFile> | null>(null)
   const [treeApi, setTreeApi] = useState<TreeApi<IFile> | null>()
   const loadedDirsRef = useRef<Set<string>>(new Set())
@@ -678,6 +688,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
       disableFileOperations={disableFileOperations}
       iconButtonComponent={iconButtonComponent as FC<any>}
       renderNodeIcon={renderNodeIcon}
+      rootActions={rootActions}
       isLoading={loadingDirIds.has(nodeProps.node.id)}
       isEmpty={
         nodeProps.node.isOpen &&
@@ -723,6 +734,7 @@ const FileTree: FC<FileTreeProps> = (props) => {
               ref={setTreeApi}
               {...dimens}
               data={data}
+              childrenAccessor={childrenAccessor}
               dndRootElement={dndRootElement}
               disableDrag={disableDrag}
               initialOpenState={initialOpenState}

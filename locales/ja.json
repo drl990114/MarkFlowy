@@ -262,7 +262,10 @@
   "explorer": {
     "collapse_folders": "フォルダーを折りたたむ",
     "refresh_folder_data": "フォルダーのデータを更新",
-    "focus_active_file": "現在のファイルにフォーカス"
+    "focus_active_file": "現在のファイルにフォーカス",
+    "sort": "ファイルの並べ替え",
+    "sort_name_asc": "名前の昇順",
+    "sort_name_desc": "名前の降順"
   },
   "file": {
     "save_dialog_title": "ファイルを保存",

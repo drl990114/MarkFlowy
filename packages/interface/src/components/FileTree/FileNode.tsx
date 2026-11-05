@@ -57,6 +57,7 @@ export interface FileNodeComponentProps extends NodeRendererProps<IFile> {
   disableFileOperations?: boolean
   iconButtonComponent?: FC<any>
   renderNodeIcon?: FileTreeNodeIconRenderer
+  rootActions?: React.ReactNode
   isLoading?: boolean
   isEmpty?: boolean
   isStickyRoot?: boolean
@@ -172,6 +173,7 @@ function FileNode({
   disableFileOperations = false,
   iconButtonComponent: IconButton,
   renderNodeIcon,
+  rootActions,
   isLoading = false,
   isEmpty = false,
   isStickyRoot = false,
@@ -763,44 +765,49 @@ function FileNode({
         ) : null}
       </div>
 
-      {isRoot && IconButton ? (
+      {isRoot && (IconButton || rootActions) ? (
         <div style={{ display: 'flex', gap: '2px' }}>
-          <IconButton
-            size='small'
-            rounded='smooth'
-            icon={'ri-refresh-line'}
-            onClick={async (e?: React.MouseEvent) => {
-              e?.stopPropagation()
-              e?.preventDefault()
-              await refreshFolder()
-            }}
-            tooltipProps={{ title: 'Refresh' }}
-          />
-          <IconButton
-            size='small'
-            rounded='smooth'
-            icon={'ri-focus-3-line'}
-            onClick={(e?: React.MouseEvent) => {
-              e?.stopPropagation()
-              e?.preventDefault()
-              if (activeId) {
-                if (onFocusActiveFile) void onFocusActiveFile(activeId)
-                else tree.select(activeId, { align: 'center' })
-              }
-            }}
-            tooltipProps={{ title: 'Focus Active File' }}
-          />
-          <IconButton
-            size='small'
-            rounded='smooth'
-            icon={'ri-collapse-vertical-fill'}
-            onClick={(e?: React.MouseEvent) => {
-              e?.stopPropagation()
-              e?.preventDefault()
-              collapseAllFileTreeFolders(tree, node)
-            }}
-            tooltipProps={{ title: 'Collapse All' }}
-          />
+          {rootActions}
+          {IconButton ? (
+            <>
+              <IconButton
+                size='small'
+                rounded='smooth'
+                icon={'ri-refresh-line'}
+                onClick={async (e?: React.MouseEvent) => {
+                  e?.stopPropagation()
+                  e?.preventDefault()
+                  await refreshFolder()
+                }}
+                tooltipProps={{ title: 'Refresh' }}
+              />
+              <IconButton
+                size='small'
+                rounded='smooth'
+                icon={'ri-focus-3-line'}
+                onClick={(e?: React.MouseEvent) => {
+                  e?.stopPropagation()
+                  e?.preventDefault()
+                  if (activeId) {
+                    if (onFocusActiveFile) void onFocusActiveFile(activeId)
+                    else tree.select(activeId, { align: 'center' })
+                  }
+                }}
+                tooltipProps={{ title: 'Focus Active File' }}
+              />
+              <IconButton
+                size='small'
+                rounded='smooth'
+                icon={'ri-collapse-vertical-fill'}
+                onClick={(e?: React.MouseEvent) => {
+                  e?.stopPropagation()
+                  e?.preventDefault()
+                  collapseAllFileTreeFolders(tree, node)
+                }}
+                tooltipProps={{ title: 'Collapse All' }}
+              />
+            </>
+          ) : null}
         </div>
       ) : null}
     </div>

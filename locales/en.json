@@ -289,7 +289,10 @@
   "explorer": {
     "collapse_folders": "Collapse folders",
     "refresh_folder_data": "Refresh Folder Data",
-    "focus_active_file": "Focus on the current file"
+    "focus_active_file": "Focus on the current file",
+    "sort": "Sort files",
+    "sort_name_asc": "Name: A to Z",
+    "sort_name_desc": "Name: Z to A"
   },
   "file": {
     "save_dialog_title": "Save File",

@@ -1076,7 +1076,10 @@
   "explorer": {
     "collapse_folders": "Dossiers d'effondrement",
     "refresh_folder_data": "Actualiser les données du dossier",
-    "focus_active_file": "Focus sur le fichier actuel"
+    "focus_active_file": "Focus sur le fichier actuel",
+    "sort": "Trier les fichiers",
+    "sort_name_asc": "Nom : A à Z",
+    "sort_name_desc": "Nom : Z à A"
   },
   "workspace": {
     "info": "Informations sur la zone de travail",

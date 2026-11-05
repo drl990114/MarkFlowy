@@ -1076,7 +1076,10 @@
   "explorer": {
     "collapse_folders": "Contraer carpetas",
     "refresh_folder_data": "Actualizar los datos de la carpeta",
-    "focus_active_file": "Centrarse en el archivo actual"
+    "focus_active_file": "Centrarse en el archivo actual",
+    "sort": "Ordenar archivos",
+    "sort_name_asc": "Nombre: A a Z",
+    "sort_name_desc": "Nombre: Z a A"
   },
   "workspace": {
     "info": "Información del área de trabajo",

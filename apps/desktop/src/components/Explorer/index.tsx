@@ -26,7 +26,7 @@ import { Empty, EmptyTitle } from '@/components/ui/empty'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import classNames from 'classnames'
 import type { FC, MouseEventHandler } from 'react'
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import { Container, EXPLORER_FILE_TREE_INDENT_SIZE, EXPLORER_FILE_TREE_ROW_HEIGHT } from './styles'
 import { FillFlexParent } from '../fill-flex-parent'
@@ -45,6 +45,8 @@ import {
   moveFileObjectsByPathPrefix,
 } from '@/helper/files'
 import { createFile, updateFile } from '@/helper/filesys'
+import { createExplorerComparator } from './explorerSorting'
+import { ExplorerSortMenu } from './ExplorerSortMenu'
 
 const fileTreeActionIcons: Record<string, LucideIcon> = {
   'ri-collapse-vertical-fill': ChevronsUpIcon,
@@ -129,6 +131,9 @@ const Explorer: FC<ExplorerProps> = (props) => {
   const useExplorerState = getExplorerStateStore(workspacePath)
   const expandedPaths = useExplorerState((state) => state.expandedPaths)
   const onExpandedPathsChange = useExplorerState((state) => state.setExpandedPaths)
+  const sortDirection = useExplorerState((state) => state.sortDirection)
+  const setSortDirection = useExplorerState((state) => state.setSortDirection)
+  const compareNodes = useMemo(() => createExplorerComparator(sortDirection), [sortDirection])
   const treePersistence = { expandedPaths, onExpandedPathsChange }
   const [dndRootElement, setDndRootElement] = useState<HTMLDivElement | null>(null)
 
@@ -278,6 +283,8 @@ const Explorer: FC<ExplorerProps> = (props) => {
             {...explorerFileTreePresentation}
             {...treePersistence}
             data={folderData ?? []}
+            compareNodes={compareNodes}
+            rootActions={<ExplorerSortMenu direction={sortDirection} onDirectionChange={setSortDirection} />}
             onOpen={handleOpen}
             dndRootElement={dndRootElement as unknown as Node}
             fillFlexParentComponent={
