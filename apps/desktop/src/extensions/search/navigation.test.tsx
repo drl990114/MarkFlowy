@@ -53,6 +53,7 @@ const originalViewState = useEditorViewTypeStore.getState()
 const originalCacheState = useFileCacheStore.getState()
 const sources = new Map<string, EditorView>()
 beforeEach(() => {
+  useSearchStore.setState({ searchMode: 'content' })
   useEditorStore.getState().setEditorLayout({ type: 'leaf', id: 'main', opened: [] }, 'main')
   useEditorStore.setState({
     folderData: [{ id: 'folder', path: '/workspace', name: 'workspace', kind: 'dir' }],
@@ -69,6 +70,7 @@ afterEach(() => {
   useEditorViewTypeStore.setState(originalViewState, true)
   useFileCacheStore.setState(originalCacheState, true)
   useSearchStore.setState({
+    searchMode: 'content',
     hasSearched: false,
     expandedPaths: {},
     searchKeyword: '',
@@ -371,5 +373,98 @@ describe('search session recovery', () => {
     await act(async () => resolve({ data: [{ id: 'old' }] }))
     expect(getSearchStore('/other').getState().resultList).toEqual([])
     expect(useSearchStore.getState().resultList).toEqual([])
+  })
+})
+
+describe('workspace filename search #1277', () => {
+  const filenameResult = (name: string, isFolder = false) => ({
+    id: name,
+    path: `/workspace/unexpanded/${name}`,
+    relative_path: `unexpanded/${name}`,
+    name,
+    ext: name.split('.').pop() || '',
+    is_folder: isFolder,
+    matches: [],
+  })
+
+  it('searches literal file names without reading contents and filters directories', async () => {
+    vi.mocked(invoke).mockResolvedValue({
+      data: [filenameResult('notes[1].json'), filenameResult('notes[1].md'), filenameResult('notes[1].dir', true)],
+    })
+    render(<TooltipProvider>{Search.components}</TooltipProvider>)
+    fireEvent.click(screen.getByRole('radio', { name: 'search.modeFilename' }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'search.filename' }), {
+      target: { value: 'notes[1].' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'search.text' }))
+    await waitFor(() => expect(document.querySelectorAll('[data-slot="search-filename"]')).toHaveLength(2))
+    expect(invoke).toHaveBeenCalledWith('search_files_async', expect.objectContaining({
+      scope: 'global',
+      query: { dir: '/workspace', name_text: '(?i:notes\\[1\\]\\.)', contents_text: '' },
+    }))
+    expect(useSearchStore.getState().resultList.map((file) => file.name)).toEqual(['notes[1].json', 'notes[1].md'])
+    expect(document.querySelectorAll('[data-slot="search-match"]')).toHaveLength(0)
+    expect(document.querySelectorAll('[data-slot="search-filename"][aria-current="true"]')).toHaveLength(0)
+    expect(screen.queryByRole('button', { name: 'search.toggleExpandAll' })).toBeNull()
+    expect(screen.getByText('search.filenameSummary')).toBeTruthy()
+  })
+
+  it('uses preview and permanent opens without content coordinates, preserving unsaved files', async () => {
+    const existing = createFile({ name: 'note.md', path: '/workspace/unexpanded/note.md', content: 'unsaved note' })
+    useSearchStore.setState({ searchMode: 'filename', searchKeyword: 'note' })
+    vi.mocked(invoke).mockResolvedValue({ data: [filenameResult('note.md'), filenameResult('other.json')] })
+    render(<TooltipProvider>{Search.components}</TooltipProvider>)
+    fireEvent.click(screen.getByRole('button', { name: 'search.text' }))
+    await waitFor(() => expect(document.querySelectorAll('[data-slot="search-filename"]')).toHaveLength(2))
+    const rows = document.querySelectorAll<HTMLButtonElement>('[data-slot="search-filename"]')
+    fireEvent.click(rows[0])
+    expect(useEditorStore.getState().getGroup('main')?.previewId).toBe(existing.id)
+    expect(getFileObjectByPath(existing.path!)?.id).toBe(existing.id)
+    expect(getFileObject(existing.id).content).toBe('unsaved note')
+    expect(useEditorSearchStore.getState().navigation).toBeNull()
+    fireEvent.keyDown(rows[0], { key: 'Enter' })
+    expect(useEditorStore.getState().getGroup('main')?.previewId).toBeUndefined()
+    fireEvent.keyDown(rows[1], { key: ' ' })
+    const secondId = getFileObjectByPath('/workspace/unexpanded/other.json')!.id
+    expect(useEditorStore.getState().getGroup('main')?.previewId).toBe(secondId)
+    fireEvent.doubleClick(rows[1])
+    expect(useEditorStore.getState().getGroup('main')?.previewId).toBeUndefined()
+    expect(useEditorSearchStore.getState().navigation).toBeNull()
+  })
+
+  it('cancels a pending content search and clears only its global editor highlight on a mode change', async () => {
+    useSearchStore.setState({ searchKeyword: 'note' })
+    let resolve!: (value: { data: ReturnType<typeof filenameResult>[] }) => void
+    vi.mocked(invoke).mockImplementation((command) => command === 'cancel_file_search'
+      ? Promise.resolve()
+      : new Promise((done) => { resolve = done }))
+    render(<TooltipProvider>{Search.components}</TooltipProvider>)
+    fireEvent.click(screen.getByRole('button', { name: 'search.text' }))
+    act(() => useEditorSearchStore.setState({ owner: 'global' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'search.modeFilename' }))
+    expect(invoke).toHaveBeenCalledWith('cancel_file_search', expect.objectContaining({ scope: 'global' }))
+    expect(useEditorSearchStore.getState().owner).toBeNull()
+    expect(useSearchStore.getState()).toMatchObject({ searchMode: 'filename', hasSearched: false, searchKeyword: 'note', resultList: [] })
+    await act(async () => resolve({ data: [filenameResult('stale.md')] }))
+    expect(document.querySelector('[data-slot="search-filename"]')).toBeNull()
+    expect(useSearchStore.getState().resultList).toEqual([])
+    act(() => useEditorSearchStore.setState({ owner: 'document', query: 'keep document find' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'search.modeContent' }))
+    expect(useEditorSearchStore.getState()).toMatchObject({ owner: 'document', query: 'keep document find' })
+  })
+
+  it('applies case sensitivity to file names and ignores an IME confirmation', async () => {
+    useSearchStore.setState({ searchMode: 'filename', searchKeyword: 'NOTE' })
+    vi.mocked(invoke).mockResolvedValue({ data: [] })
+    render(<TooltipProvider>{Search.components}</TooltipProvider>)
+    fireEvent.click(screen.getByRole('button', { name: 'search.caseSensitive' }))
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'search.filename' }), {
+      key: 'Enter', isComposing: true, keyCode: 229,
+    })
+    expect(invoke).not.toHaveBeenCalled()
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'search.filename' }), { key: 'Enter' })
+    await waitFor(() => expect(invoke).toHaveBeenCalledWith('search_files_async', expect.objectContaining({
+      query: { dir: '/workspace', name_text: '(?-i:NOTE)', contents_text: '' },
+    })))
   })
 })

@@ -434,6 +434,14 @@
     }
   },
   "search": {
+    "mode": "搜索范围",
+    "modeContent": "内容",
+    "modeFilename": "文件名",
+    "filename": "搜索文件名",
+    "filenameReadyDesc": "输入文件名后按 Enter 或点击搜索按钮",
+    "filenameSearchingDesc": "正在按名称搜索当前工作区的文件",
+    "filenameSummary": "{{files}} 个文件：{{keyword}}",
+    "filenameEmptyDesc": "换个文件名，或检查搜索排除规则",
     "line": "第 {{number}} 行：",
     "search_empty": "无法找到符合这些搜索词的任何内容",
     "text": "搜索",
