@@ -1358,7 +1358,13 @@
       "resetSize": "恢复自动尺寸"
     },
     "preview": {
-      "retry": "重试"
+      "retry": "重试",
+      "mermaid": {
+        "size": "图表尺寸",
+        "autoSize": "可读尺寸",
+        "fitWidth": "适应宽度",
+        "actualSize": "原始尺寸（100%）"
+      }
     },
     "editor": {
       "loading": "正在加载 Capricorn 编辑器",

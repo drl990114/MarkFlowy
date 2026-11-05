@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { resolveThemeTokens, type ResolvedTokens } from '@markflowy/theme/semantic'
 import { SemanticThemeContext } from '@/themes/context'
@@ -170,6 +170,45 @@ describe('Capricorn instance themes', () => {
     expect(instance.querySelector('.cap-syntax-keyword')).toBe(keyword)
     expect(adapter.getMarkdown()).toBe(markdown)
     expect(first.mock.calls.filter((call) => call[0])).toHaveLength(1)
+    expect(errors).not.toHaveBeenCalled()
+  }, 30000)
+
+  it('binds live-preview math source tokens to the host dark palette', async () => {
+    const onEditor = vi.fn()
+    const dark = resolveThemeTokens('dark', {
+      'syntax.tag': '#88ccff',
+      'syntax.keyword': '#ffcc88',
+    })
+    const markdown = '$$\n\\begin{bmatrix}\n1 & 2 \\\\\n3 & 4\n\\end{bmatrix}\n$$'
+    const view = render(
+      <Host tokens={dark} colorScheme='dark' markdown={markdown} onEditor={onEditor} />,
+    )
+    await waitFor(() => {
+      expect(view.container.querySelector('.capricorn-live-preview-block--math button[aria-expanded]')).toBeTruthy()
+      expect(onEditor).toHaveBeenCalled()
+    }, { timeout: 15000 })
+    const adapter = onEditor.mock.calls.find((call) => call[0])![0] as CapricornRuntimeAdapter
+    const initialHistory = adapter.getUiState().canUndo
+    fireEvent.click(view.container.querySelector('.capricorn-live-preview-block--math button[aria-expanded]')!)
+    const tokenWithText = (role: string, text: string) =>
+      Array.from(view.container.querySelectorAll(`.capricorn-live-preview-block--math .cm-line .cap-syntax-${role}`))
+        .find((token) => token.textContent === text)
+    await waitFor(() => {
+      expect(tokenWithText('tag', '\\begin')).toBeTruthy()
+      expect(tokenWithText('keyword', 'bmatrix')).toBeTruthy()
+    }, { timeout: 15000 })
+    const instance = view.container.querySelector<HTMLElement>('[data-cap-content]')!
+    expect(instance.getAttribute('data-cap-color-scheme')).toBe('dark')
+    expect(instance.style.getPropertyValue('--cap-code-token-tag')).toBe(
+      'var(--mf-theme-syntax-tag, #88ccffff)',
+    )
+    expect(instance.style.getPropertyValue('--cap-code-token-keyword')).toBe(
+      'var(--mf-theme-syntax-keyword, #ffcc88ff)',
+    )
+    expectRuntimeBinding(tokenWithText('tag', '\\begin')!, 'color', '--cap-code-token-tag')
+    expectRuntimeBinding(tokenWithText('keyword', 'bmatrix')!, 'color', '--cap-code-token-keyword')
+    expect(adapter.getMarkdown()).toBe(markdown)
+    expect(adapter.getUiState().canUndo).toBe(initialHistory)
     expect(errors).not.toHaveBeenCalled()
   }, 30000)
 

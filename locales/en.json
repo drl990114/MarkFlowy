@@ -1358,7 +1358,13 @@
       "resetSize": "Restore automatic size"
     },
     "preview": {
-      "retry": "Retry"
+      "retry": "Retry",
+      "mermaid": {
+        "size": "Diagram size",
+        "autoSize": "Readable size",
+        "fitWidth": "Fit width",
+        "actualSize": "Actual size (100%)"
+      }
     },
     "editor": {
       "loading": "Loading Capricorn editor",
