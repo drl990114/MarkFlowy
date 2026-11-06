@@ -12,6 +12,7 @@ const aliLangTypeMap = {
   es: 'es',
   'fr-FR': 'fr',
   ja: 'ja',
+  vi: 'vi',
 }
 
 const baseLangName = 'zh-CN'

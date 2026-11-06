@@ -1,0 +1,1636 @@
+{
+  "drafts": {
+    "reload_failed": "Không thể giữ lại các tài liệu chưa lưu để tải lại. Hãy lưu các tệp rồi thử lại.",
+    "restore_failed": "Không thể khôi phục các tài liệu chưa lưu. Các bản nháp đã lưu tạm vẫn được giữ lại.",
+    "close_failed_description": "Thử khôi phục lại, hoặc giữ các bản nháp bị ảnh hưởng để khôi phục vào lần sau và đóng các tài liệu đó.",
+    "keep_and_close": "Giữ bản nháp và đóng",
+    "keep_failed": "Không thể giữ lại bản nháp để đóng. Tài liệu vẫn được để mở.",
+    "close_failed": "Không thể đóng cửa sổ một cách an toàn. Các tài liệu của bạn vẫn được để mở. Vui lòng thử lại.",
+    "error_details": "Chi tiết lỗi",
+    "restored": "Đã khôi phục {{count}} tài liệu chưa lưu."
+  },
+  "link_editing": {
+    "label": "Chỉnh sửa liên kết",
+    "description": "Chọn trình chỉnh sửa liên kết mặc định. Mỗi liên kết cũng có thể được chỉnh sửa dưới dạng Markdown.",
+    "popover": "Cửa sổ bật lên",
+    "markdown": "Cú pháp Markdown",
+    "open_failed": "Không thể mở liên kết hoặc tìm thấy tiêu đề của nó."
+  },
+  "command_palette": {
+    "title": "Bảng lệnh",
+    "placeholder": "Tìm kiếm lệnh…",
+    "empty": "Không có lệnh phù hợp",
+    "recent": "Dùng gần đây",
+    "hints": "↑↓ Di chuyển · Enter Thực thi · Esc Đóng",
+    "failed": "Không thể thực thi “{{command}}”.",
+    "categories": {
+      "file": "Tệp",
+      "editor": "Trình soạn thảo",
+      "view": "Xem",
+      "app": "Ứng dụng"
+    },
+    "reasons": {
+      "no_document": "Hãy mở một tài liệu trước",
+      "unavailable": "Không khả dụng trong ngữ cảnh hiện tại",
+      "preview": "Không thể chỉnh sửa trong chế độ xem trước",
+      "read_only": "Tài liệu này chỉ đọc",
+      "stale_target": "Trình soạn thảo ban đầu đã thay đổi",
+      "selection_unavailable": "Vùng chọn ban đầu không còn khả dụng",
+      "no_undo": "Không có gì để hoàn tác",
+      "no_redo": "Không có gì để làm lại",
+      "markdown_only": "Khả dụng cho tài liệu Markdown",
+      "zen_mode": "Hãy thoát Chế độ Zen trước"
+    }
+  },
+  "quick_open": {
+    "title": "Mở nhanh",
+    "placeholder": "Tìm tệp theo tên hoặc đường dẫn…",
+    "loading": "Đang tải các tệp trong không gian làm việc…",
+    "load_error": "Không thể tải các tệp trong không gian làm việc",
+    "empty": "Không có tệp phù hợp",
+    "no_recent": "Không có tệp mở gần đây. Nhập tên tệp để tìm kiếm trong không gian làm việc.",
+    "no_workspace": "Mở một không gian làm việc để tìm kiếm các tệp trong đó",
+    "show_more": "Hiện thêm (còn {{count}})",
+    "keyboard_hint": "↑ ↓ để di chuyển · Enter để mở · Esc để đóng"
+  },
+  "app_name": "MarkFlowy",
+  "editor": {
+    "render_failed": "Không thể hiển thị trình soạn thảo"
+  },
+  "find_replace": {
+    "navigation_unsupported": "Phiên bản này không hỗ trợ điều hướng tìm kiếm chính xác. Hãy cập nhật ứng dụng rồi thử lại.",
+    "navigation_stale": "Kết quả tìm kiếm đã thay đổi. Hãy tìm kiếm lại.",
+    "navigation_failed": "Không thể chuyển đến kết quả này. Hãy thử lại sau khi tài liệu tải xong.",
+    "find": "Tìm",
+    "replace": "Thay thế",
+    "replace_with": "Thay thế bằng",
+    "replace_all": "Tất cả",
+    "previous_match": "Tìm kết quả trước",
+    "next_match": "Tìm kết quả tiếp theo",
+    "match_case": "Phân biệt chữ hoa/thường",
+    "close": "Đóng tìm và thay thế",
+    "result_count": "{{current}} / {{total}}"
+  },
+  "startup": {
+    "opening_workspace": "Đang mở không gian làm việc…",
+    "workspace_open_failed": "Không thể mở không gian làm việc"
+  },
+  "common": {
+    "none": "Không có",
+    "name": "Tên",
+    "ok": "OK",
+    "confirm": "Xác nhận",
+    "cancel": "Hủy",
+    "close": "Đóng",
+    "copy": "Sao chép",
+    "error": "Lỗi",
+    "delete": "Xóa",
+    "file": "Tệp",
+    "folder": "Thư mục",
+    "fetching": "Đang tải...",
+    "submit": "Gửi",
+    "addHeader": "Thêm header",
+    "addPattern": "Thêm mẫu",
+    "key": "Khóa",
+    "value": "Giá trị",
+    "success": "Thành công",
+    "import": "Nhập",
+    "menu": "Menu",
+    "or": "hoặc",
+    "retry": "Thử lại"
+  },
+  "dialog": {
+    "remember_choice": "Ghi nhớ lựa chọn này"
+  },
+  "external_file_change": {
+    "conflict": "Phát hiện thay đổi từ bên ngoài",
+    "conflict_description": "Tự động lưu đã tạm dừng. Cập nhật sẽ tải phiên bản trên ổ đĩa; Ghi đè sẽ thay thế nó bằng nội dung hiện tại của bạn.",
+    "update": "Cập nhật",
+    "overwrite": "Ghi đè",
+    "reloaded": "Đã tải các thay đổi từ bên ngoài",
+    "overwritten": "Đã ghi đè phiên bản trên ổ đĩa",
+    "read_failed": "Không thể đọc phiên bản mới nhất trên ổ đĩa. Hãy thử lại.",
+    "resolve_failed": "Không thể xử lý thay đổi của tệp. Nội dung hiện tại của bạn vẫn được giữ lại."
+  },
+  "view": {
+    "label": "Xem",
+    "theme": {
+      "label": "Chủ đề"
+    },
+    "wysiwyg": "WYSIWYG",
+    "source_code": "Mã nguồn",
+    "preview": "Xem trước"
+  },
+  "toolbar": {
+    "undo": "Hoàn tác",
+    "redo": "Làm lại",
+    "h1": "Tiêu đề 1",
+    "h2": "Tiêu đề 2",
+    "h3": "Tiêu đề 3",
+    "bold": "In đậm",
+    "italic": "In nghiêng",
+    "code": "Mã trong dòng",
+    "strike": "Gạch ngang",
+    "link": "Liên kết",
+    "image": "Hình ảnh",
+    "quote": "Trích dẫn",
+    "bulletList": "Danh sách dấu đầu dòng",
+    "orderedList": "Danh sách đánh số",
+    "taskList": "Danh sách công việc"
+  },
+  "image_insert": {
+    "title": "Chèn hình ảnh",
+    "description": "Nhập URL hình ảnh hoặc chọn một hình ảnh từ máy tính của bạn.",
+    "url_label": "URL hình ảnh",
+    "url_placeholder": "https://example.com/image.png",
+    "insert_url": "Chèn",
+    "invalid_url": "Nhập URL hình ảnh HTTP hoặc HTTPS hợp lệ.",
+    "local_filter": "Hình ảnh",
+    "select_local": "Chọn hình ảnh trên máy",
+    "selecting_local": "Đang chọn...",
+    "local_error": "Không thể mở hoặc đọc hình ảnh đã chọn. Hãy thử lại.",
+    "local_behavior_hint": "Hình ảnh trên máy tuân theo Cài đặt > Hình ảnh > Hành vi chèn hình ảnh trên máy."
+  },
+  "image_preview": {
+    "toolbar": "Điều khiển xem trước hình ảnh",
+    "zoom_out": "Thu nhỏ",
+    "zoom_in": "Phóng to",
+    "actual_size": "Kích thước thực",
+    "fit_to_window": "Vừa cửa sổ"
+  },
+  "action": {
+    "bookmark": "Đánh dấu trang",
+    "bookmarked": "Đã đánh dấu trang",
+    "done": "Xong",
+    "edit": "Chỉnh sửa",
+    "more": "Thêm",
+    "save": "Lưu",
+    "unsave": "Bỏ lưu",
+    "create_file": "Tạo tệp mới",
+    "save_and_close": "Lưu và đóng",
+    "save_and_continue": "Lưu và tiếp tục",
+    "unsave_and_close": "Đóng không lưu",
+    "continue_without_save": "Tiếp tục mà không lưu",
+    "convert_text": "Chuyển đổi giản thể/phồn thể",
+    "convert_simplified_to_traditional_tw": "Giản thể → Phồn thể (Đài Loan)",
+    "convert_simplified_to_traditional_hk": "Giản thể → Phồn thể (Hồng Kông)",
+    "convert_traditional_to_simplified": "Phồn thể → Giản thể"
+  },
+  "confirm": {
+    "move": {
+      "description": "Bạn có chắc muốn di chuyển “{{name}}” không?"
+    },
+    "replace": {
+      "description": "Thư mục đích đã có một tệp hoặc thư mục tên “{{name}}”. Bạn có muốn thay thế không?"
+    },
+    "delete": {
+      "description": "Bạn có chắc muốn xóa {{something}} “{{name}}” không?"
+    },
+    "trash": {
+      "description": "Bạn có chắc muốn chuyển “{{name}}” vào thùng rác không?"
+    },
+    "edit_filename_cancel": {
+      "description": "Bạn có muốn lưu tên mới không?"
+    },
+    "close": {
+      "title": "Bạn có muốn lưu các thay đổi không?",
+      "description": "Bạn có tệp chưa lưu, bạn có chắc muốn thoát không?"
+    },
+    "continue": {
+      "description": "Bạn có thay đổi chưa lưu. Bạn có muốn lưu chúng trước khi tiếp tục không?"
+    }
+  },
+  "error": {
+    "unsupported_file_format": "Định dạng tệp không được hỗ trợ"
+  },
+  "sidebar": {
+    "move_left": "Chuyển sang trái",
+    "move_right": "Chuyển sang phải",
+    "panel_actions": "Thao tác bảng điều khiển",
+    "reset_layout": "Khôi phục bố cục thanh bên mặc định",
+    "drag_hint": "Kéo để di chuyển · Nhấp chuột phải để xem tùy chọn",
+    "move_explorer_command": "Tệp: Chuyển sang phía bên kia",
+    "move_search_command": "Tìm kiếm: Chuyển sang phía bên kia",
+    "move_bookmarks_command": "Dấu trang: Chuyển sang phía bên kia",
+    "move_toc_command": "Dàn ý: Chuyển sang phía bên kia",
+    "move_ai_command": "AI: Chuyển sang phía bên kia",
+    "outline_collapse": "Thu gọn",
+    "outline_expand": "Mở rộng",
+    "outline_collapse_all": "Thu gọn tất cả tiêu đề",
+    "outline_expand_all": "Mở rộng tất cả tiêu đề",
+    "explorer": "Trình khám phá",
+    "search": "Tìm kiếm",
+    "bookmarks": "Dấu trang",
+    "leftDock": "Thanh bên trái",
+    "rightDock": "Thanh bên phải",
+    "table_of_contents": "Mục lục",
+    "heading_numbering": "Bật/tắt đánh số tiêu đề",
+    "no_heading_lines": "Không tìm thấy tiêu đề nào"
+  },
+  "bookmarks": {
+    "path": "Đường dẫn",
+    "name": "Tên",
+    "tags": "Nhãn",
+    "tag_placeholder": "Thêm nhãn",
+    "create_tag": "Tạo",
+    "remove_tag": "Gỡ bỏ {{tag}}",
+    "no_tags_found": "Không tìm thấy nhãn nào.",
+    "empty": "Không có dấu trang",
+    "loading": "Đang tải dấu trang…",
+    "loadError": "Không thể tải dấu trang",
+    "retry": "Thử lại",
+    "viewByTags": "Nhóm theo nhãn",
+    "viewAsList": "Hiện dạng danh sách",
+    "removed": "Đã gỡ bỏ “{{title}}”",
+    "undo": "Hoàn tác",
+    "removeFailed": "Không thể xóa dấu trang",
+    "saving": "Đang lưu…",
+    "saveError": "Không thể lưu dấu trang.",
+    "sort": "Sắp xếp dấu trang",
+    "sortNameAsc": "Tên: A đến Z",
+    "sortNameDesc": "Tên: Z đến A",
+    "sortNewest": "Mới nhất trước",
+    "sortOldest": "Cũ nhất trước",
+    "untagged": "Chưa gắn nhãn",
+    "saveConflict": "Dấu trang đã thay đổi trong một cửa sổ khác. Các chỉnh sửa của bạn vẫn còn đây. Hãy tải lại trước khi lưu lần nữa.",
+    "noLongerExists": "Dấu trang này đã bị xóa trong một cửa sổ khác. Các chỉnh sửa của bạn vẫn còn đây.",
+    "reloadBookmark": "Tải lại và thay thế các chỉnh sửa hiện tại",
+    "reloadLibrary": "Tải lại dấu trang mới nhất",
+    "legacyCleanupWarning": "Dấu trang của bạn đã được nâng cấp, nhưng không thể gỡ bỏ tệp dấu trang cũ. Hãy thử lại để hoàn tất việc dọn dẹp.",
+    "legacyConflictWarning": "Một tệp dấu trang cũ chưa được chuyển đổi hoặc đã thay đổi. Tệp đó vẫn được giữ lại và dấu trang hiện tại của bạn vẫn khả dụng."
+  },
+  "welcome": {
+    "title": "Chào mừng bạn trở lại {{appName}}",
+    "subtitle": "Không gian làm việc tập trung cho Markdown",
+    "getStarted": "Bắt đầu",
+    "recentWorkspaces": "Không gian làm việc gần đây",
+    "emptyEditorDescription": "Chọn một tệp từ thanh bên hoặc bắt đầu một tài liệu mới.",
+    "openWorkspaceError": "Không thể mở không gian làm việc này"
+  },
+  "statusBar": {
+    "label": "Thanh trạng thái",
+    "words": "từ",
+    "chars": "ký tự",
+    "pureChars": "ký tự thuần",
+    "pureCharsOption": "ký tự thuần (không tính khoảng trắng và ngắt dòng)",
+    "displaySettings": "Cài đặt hiển thị"
+  },
+  "titleBar": {
+    "label": "Thanh tiêu đề cửa sổ",
+    "minimize": "Thu nhỏ cửa sổ",
+    "maximize": "Phóng to cửa sổ",
+    "restore": "Khôi phục cửa sổ"
+  },
+  "zenMode": {
+    "openFileFirst": "Mở một tài liệu để vào Chế độ Zen",
+    "exitHint": "Chế độ Zen · Nhấn {{shortcut}} hoặc nhấn Escape hai lần để thoát",
+    "shortcutFallback": "Cmd/Ctrl+Shift+F"
+  },
+  "explorer": {
+    "collapse_folders": "Thu gọn thư mục",
+    "refresh_folder_data": "Làm mới dữ liệu thư mục",
+    "focus_active_file": "Chuyển đến tệp hiện tại"
+  },
+  "file": {
+    "save_dialog_title": "Lưu tệp",
+    "read_failed": "Không thể đọc nội dung tệp",
+    "binary_not_openable": "Không thể mở tệp nhị phân dưới dạng văn bản",
+    "untitled": "Chưa đặt tên",
+    "not_found": "Không tìm thấy tệp",
+    "openDir": "Mở thư mục",
+    "openFolderInNewWindow": "Mở thư mục trong cửa sổ mới",
+    "closeFolder": "Đóng thư mục",
+    "closeDocument": "Đóng tài liệu",
+    "renameErrors": {
+      "empty": "Nhập tên tệp.",
+      "invalid": "Dùng tên tệp hợp lệ, không chứa dấu phân cách đường dẫn hoặc ký tự dành riêng.",
+      "exists": "Đã có một tệp trùng tên."
+    },
+    "openFile": "Mở tệp",
+    "recentDir": "Thư mục mở gần đây",
+    "emptyOpened": "Chưa mở tệp nào",
+    "emptyFolder": "Thư mục trống",
+    "unsupportedFileType": "Loại tệp không được hỗ trợ",
+    "unsupportedFileTypeDesc": "Định dạng tệp này hiện chưa được hỗ trợ để xem hoặc chỉnh sửa.",
+    "unsupportedFileTypeLink": "Yêu cầu hỗ trợ trên GitHub",
+    "lastModified": "Cập nhật lần cuối",
+    "size": "Kích thước tệp",
+    "info": "Thông tin tệp",
+    "newTab": "Thẻ mới",
+    "path": "Đường dẫn tệp",
+    "clearRecent": "Xóa danh sách gần đây",
+    "openFolderModal": {
+      "title": "Bạn muốn mở thư mục như thế nào?",
+      "currentWindow": "Cửa sổ hiện tại",
+      "newWindow": "Cửa sổ mới"
+    }
+  },
+  "about": {
+    "description": "Trình soạn thảo Markdown đa nền tảng tích hợp AI.",
+    "powered_by_tauri": "Xây dựng trên Tauri {{version}}",
+    "label": "Giới thiệu",
+    "version": "Phiên bản",
+    "newVersion": "Phiên bản mới",
+    "install": "Cài đặt",
+    "author": "Tác giả",
+    "release": "Bản phát hành",
+    "website": "Trang web",
+    "feedback": "Phản hồi",
+    "issues": "Báo lỗi",
+    "license": "Giấy phép",
+    "current": "Phiên bản hiện tại"
+  },
+  "contextmenu": {
+    "label": "Menu ngữ cảnh",
+    "explorer": {
+      "new": "Mới",
+      "add_file": "Tệp mới",
+      "add_folder": "Thư mục mới",
+      "rename": "Đổi tên",
+      "delete_file": "Xóa tệp",
+      "delete_folder": "Xóa thư mục",
+      "moveto_trash": "Chuyển vào thùng rác",
+      "copy": "Sao chép",
+      "duplicate_file": "Nhân bản tệp",
+      "copy_to": "Sao chép đến…",
+      "copy_to_title": "Sao chép đến thư mục",
+      "absolute_path": "Đường dẫn tuyệt đối",
+      "relative_path": "Đường dẫn tương đối",
+      "duplicate_success": "Đã tạo bản sao: {{name}}",
+      "copy_to_success": "Đã sao chép {{name}} đến {{folder}}",
+      "copy_failed": "Không thể sao chép tệp: {{reason}}",
+      "copy_path": "Sao chép đường dẫn",
+      "copy_relative_path": "Sao chép đường dẫn tương đối",
+      "show_in_folder": "Hiện trong thư mục"
+    },
+    "editor_tab": {
+      "close": "Đóng",
+      "unsaved": "Thay đổi chưa lưu",
+      "previous": "Thẻ trước",
+      "next": "Thẻ tiếp theo",
+      "close_others": "Đóng các thẻ khác",
+      "close_right": "Đóng các thẻ bên phải",
+      "close_all": "Đóng tất cả",
+      "export_html": "Xuất ra HTML",
+      "export_pdf": "In / Xuất PDF",
+      "export_pdf_failed": "Không thể chuẩn bị tài liệu này để in.",
+      "export_pdf_image_warning": "Không thể tải {{count}} hình ảnh. Văn bản thay thế của chúng sẽ được in thay vào đó.",
+      "export_pdf_embedded_media": "Nội dung tương tác",
+      "export_pandoc": "Xuất bằng Pandoc",
+      "export_pandoc_docx": "Tài liệu Word (.docx)",
+      "export_pandoc_odt": "Văn bản OpenDocument (.odt)",
+      "export_pandoc_epub": "Sách EPUB (.epub)",
+      "export_pandoc_format": "Xuất ra {{format}}",
+      "export_pandoc_exporting": "Đang xuất ra {{format}}...",
+      "export_pandoc_success": "Đã xuất ra {{path}}",
+      "export_pandoc_warning": "Đã xuất ra {{path}}, nhưng Pandoc trả về {{count}} cảnh báo.",
+      "export_pandoc_setup_title": "Pandoc không khả dụng",
+      "export_pandoc_setup_desc": "Cài đặt Pandoc hoặc chọn tệp thực thi của nó để xuất tệp DOCX, ODT và EPUB.",
+      "export_pandoc_install": "Hướng dẫn cài đặt",
+      "export_pandoc_select": "Chọn tệp thực thi",
+      "export_pandoc_error_not_found": "Không tìm thấy Pandoc. Hãy cài đặt hoặc cấu hình đường dẫn tệp thực thi của nó trong cài đặt Xuất.",
+      "export_pandoc_error_invalid_executable": "Tệp đã chọn không phải là tệp thực thi Pandoc hợp lệ.",
+      "export_pandoc_error_unsupported_format": "Bản cài đặt Pandoc này không hỗ trợ định dạng xuất đã chọn.",
+      "export_pandoc_error_conversion_failed": "Pandoc không thể chuyển đổi tài liệu này.",
+      "export_pandoc_error_timed_out": "Xuất bằng Pandoc đã hết thời gian chờ sau 120 giây.",
+      "export_pandoc_error_output_commit_failed": "Không thể thay thế tệp đích bằng tệp đã chuyển đổi.",
+      "export_pandoc_failed_title": "Xuất bằng Pandoc thất bại",
+      "export_pandoc_copy_error": "Sao chép chi tiết lỗi",
+      "export_pandoc_copied": "Đã sao chép chi tiết lỗi",
+      "export_pandoc_copy_failed": "Không thể sao chép chi tiết lỗi.",
+      "export_pandoc_error_code": "Mã lỗi",
+      "export_pandoc_exit_code": "Mã thoát",
+      "export_pandoc_error_message": "Thông báo",
+      "export_pandoc_error_details": "Chi tiết",
+      "export_image": "Xuất ra hình ảnh",
+      "keep_open": "Giữ mở",
+      "preview": "Thẻ xem trước",
+      "preview_hint": "Thẻ xem trước — nhấp đúp để giữ mở"
+    }
+  },
+  "notification": {},
+  "search": {
+    "line": "Dòng {{number}}:",
+    "search_empty": "Không tìm thấy kết quả nào khớp với từ khóa tìm kiếm",
+    "text": "Tìm kiếm",
+    "caseSensitive": "Phân biệt chữ hoa/thường",
+    "toggleExpandAll": "Bật/tắt mở rộng tất cả",
+    "ready": "Sẵn sàng tìm kiếm",
+    "readyDesc": "Nhập từ khóa, sau đó nhấn Enter hoặc nhấp vào tìm kiếm",
+    "searching": "Đang tìm kiếm",
+    "searchingDesc": "Đang quét các tệp Markdown trong không gian làm việc hiện tại",
+    "searchingWithKeyword": "Đang tìm kiếm “{{keyword}}”...",
+    "resultSummary": "{{files}} tệp, {{matches}} kết quả: {{keyword}}",
+    "emptyDesc": "Hãy thử từ khóa khác hoặc tắt phân biệt chữ hoa/thường",
+    "search_failed": "Tìm kiếm thất bại"
+  },
+  "command": {
+    "id_descriptions": {
+      "app_outlineCollapseAll": "Thu gọn tất cả tiêu đề",
+      "app_outlineExpandAll": "Mở rộng tất cả tiêu đề",
+      "app_commandPalette": "Bảng lệnh",
+      "app_quickOpen": "Mở nhanh",
+      "app_openFolder": "Mở thư mục",
+      "app_openSetting": "Mở cửa sổ Cài đặt",
+      "app_toggleLeftsidebarVisible": "Bật/tắt hiển thị thanh bên trái",
+      "app_toggleRightsidebarVisible": "Bật/tắt hiển thị thanh bên phải",
+      "app_toggleZenMode": "Bật/tắt Chế độ Zen",
+      "app_save": "Lưu tệp đang chỉnh sửa",
+      "app_findReplaceEditor": "Tìm và thay thế trong trình soạn thảo",
+      "app_closeCurrentEditorTab": "Đóng thẻ trình soạn thảo hiện tại",
+      "app_hide": "Ẩn ứng dụng",
+      "app_toggleEditorType": "Chuyển đổi chế độ mã nguồn / WYSIWYG",
+      "app_splitEditorRight": "Chia trình soạn thảo sang phải",
+      "app_splitEditorDown": "Chia trình soạn thảo xuống dưới",
+      "editor_copy": "Sao chép văn bản đã chọn trong trình soạn thảo",
+      "editor_cut": "Cắt văn bản đã chọn trong trình soạn thảo",
+      "editor_redo": "Làm lại",
+      "editor_undo": "Hoàn tác",
+      "editor_paste": "Dán văn bản trong trình soạn thảo",
+      "editor_toggleStrong": "Bật/tắt in đậm",
+      "editor_toggleEmphasis": "Bật/tắt in nghiêng",
+      "editor_toggleCodeText": "Bật/tắt định dạng mã",
+      "editor_toggleDelete": "Bật/tắt gạch ngang",
+      "editor_insertCurrentDate": "Chèn ngày hiện tại",
+      "editor_toggleH1": "Chuyển thành H1",
+      "editor_toggleH2": "Chuyển thành H2",
+      "editor_toggleH3": "Chuyển thành H3",
+      "editor_toggleH4": "Chuyển thành H4",
+      "editor_toggleH5": "Chuyển thành H5",
+      "editor_toggleH6": "Chuyển thành H6",
+      "app_keepEditorOpen": "Giữ mở"
+    }
+  },
+  "text_encoding": {
+    "label": "Bảng mã văn bản và ký tự xuống dòng",
+    "encoding": "Bảng mã văn bản",
+    "description": "Mở lại sẽ đọc tệp này từ ổ đĩa bằng bảng mã đã chọn. Lưu bằng bảng mã sẽ chuyển đổi văn bản hiện tại. Các ký tự xuống dòng hiện có được giữ nguyên.",
+    "mixed_endings": "Ký tự xuống dòng hỗn hợp",
+    "no_endings": "Không có ký tự xuống dòng",
+    "unconfirmed": "Chưa xác nhận",
+    "confirm_hint": "Bảng mã được suy ra từ nội dung hoặc khôi phục từ một bản nháp cũ. Hãy kiểm tra văn bản hiển thị đúng trước khi lưu bằng bảng mã đã chọn.",
+    "roundtrip_hint": "Tệp này chứa ánh xạ byte không chuẩn. Sau khi chỉnh sửa, hãy chuyển đổi rõ ràng sang một bảng mã khác.",
+    "preview_hint": "Xem trước 4.000 ký tự đầu tiên. Một bản nháp khôi phục của nội dung hiện tại sẽ được giữ lại trước khi áp dụng.",
+    "preview_reopen": "Xem trước khi mở lại",
+    "apply_reopen": "Áp dụng mở lại",
+    "save_with_encoding": "Lưu bằng bảng mã này",
+    "save_failed": "Chưa được lưu. Nội dung và lựa chọn bảng mã của bạn vẫn được giữ lại. Hãy kiểm tra thông báo lưu rồi thử lại.",
+    "errors": {
+      "invalid_encoding": "Không thể đọc tệp này bằng bảng mã đã chọn. Hãy xem trước một bảng mã khác và kiểm tra văn bản trước khi mở lại.",
+      "unsupported_encoding": "Không xác định được bảng mã của tệp hoặc bảng mã không được hỗ trợ. Hãy mở Bảng mã văn bản và ký tự xuống dòng, chọn một bảng mã và xem trước trước khi mở lại.",
+      "binary": "Tệp này chứa dữ liệu nhị phân và không thể mở dưới dạng văn bản.",
+      "invalid_bom": "Dấu hiệu bảng mã (BOM) của tệp không khớp với bảng mã đã chọn. Hãy chọn bảng mã tương ứng rồi thử lại.",
+      "unmappable": "Bảng mã hiện tại không thể lưu một số ký tự. Nội dung của bạn vẫn còn trong trình soạn thảo. Hãy lưu dưới dạng UTF-8, hoặc gỡ bỏ các ký tự không được hỗ trợ rồi thử lại.",
+      "unmappable_character": "{{encoding}} không thể lưu ký tự “{{character}}”. Nội dung của bạn vẫn còn trong trình soạn thảo. Hãy lưu dưới dạng UTF-8, hoặc gỡ bỏ ký tự này rồi thử lại.",
+      "confirm_encoding": "Bảng mã được phát hiện chưa được xác nhận. Nội dung của bạn vẫn còn trong trình soạn thảo. Hãy mở Bảng mã văn bản và ký tự xuống dòng, xem trước văn bản, sau đó chọn Lưu bằng bảng mã này.",
+      "noncanonical": "Không thể giữ nguyên ánh xạ byte ban đầu sau khi chỉnh sửa. Hãy chọn một bảng mã khác như UTF-8, hoặc lưu một bản sao.",
+      "not_reversible": "Bảng mã đã chọn sẽ làm thay đổi một số ký tự. Hãy chọn UTF-8 hoặc một bảng mã khác giữ được toàn bộ văn bản trước khi lưu.",
+      "ambiguous_bom": "Văn bản bắt đầu bằng một dấu hiệu bảng mã ẩn. Hãy chọn biến thể có BOM của bảng mã Unicode hiện tại trước khi lưu.",
+      "finish_input": "Hãy hoàn tất việc nhập văn bản hiện tại trước khi thử lại.",
+      "save_first": "Hãy lưu tệp trước khi xem trước một bảng mã khác.",
+      "retry_read": "Tệp đang thay đổi. Hãy đợi các thay đổi hoàn tất rồi xem trước lại.",
+      "preview_again": "Tài liệu hoặc tệp của nó đã thay đổi. Hãy xem trước lại trước khi áp dụng bảng mã mới.",
+      "draft_pending": "Nội dung hiện tại chưa được bảo vệ bằng bản nháp khôi phục. Hãy thử lại trước khi mở lại tệp.",
+      "invalid_unicode": "Văn bản chứa chuỗi ký tự không hợp lệ. Tệp gốc chưa bị ghi. Hãy sửa phần văn bản bị ảnh hưởng rồi thử lại.",
+      "save_failed": "Chưa được lưu. Nội dung của bạn vẫn còn trong trình soạn thảo. Hãy kiểm tra tệp có thể ghi được rồi thử lại, hoặc lưu một bản sao.",
+      "read_failed": "Không thể đọc tệp. Hãy kiểm tra tệp vẫn còn tồn tại và bạn có quyền đọc, sau đó thử lại.",
+      "preview_failed": "Không thể hoàn tất thao tác bảng mã. Nội dung hiện tại của bạn vẫn được giữ lại. Vui lòng thử lại."
+    }
+  },
+  "settings": {
+    "select_placeholder": "Chọn một tùy chọn",
+    "font_placeholder": "Chọn phông chữ",
+    "select_folder": "Chọn thư mục",
+    "value_placeholder": "Nhập giá trị…",
+    "edit_item": "Chỉnh sửa mục",
+    "delete_item": "Xóa mục",
+    "label": "Cài đặt",
+    "back_to_app": "Quay lại ứng dụng",
+    "back_to_settings": "Quay lại cài đặt",
+    "search_placeholder": "Tìm kiếm cài đặt...",
+    "search_empty": "Không có cài đặt phù hợp",
+    "search_results": "{{count}} kết quả",
+    "navigation": {
+      "preferences": "Tùy chọn",
+      "writing": "Viết và tệp",
+      "ai": "AI",
+      "help": "Trợ giúp"
+    },
+    "general": {
+      "startup": {
+        "label": "Khởi động",
+        "left": "Thanh bên trái khi khởi động",
+        "right": "Thanh bên phải khi khởi động",
+        "restore": "Khôi phục trạng thái lần trước",
+        "description": "Áp dụng vào lần khởi động ứng dụng tiếp theo. Khôi phục sẽ ghi nhớ bảng đã chọn và trạng thái mở của thanh bên."
+      },
+      "label": "Chung",
+      "app": {
+        "label": "Ứng dụng",
+        "open_file_in_new_window": {
+          "label": "Mở tệp đơn lẻ trong cửa sổ mới",
+          "desc": "Mở các tệp riêng lẻ nằm ngoài không gian làm việc hiện tại trong cửa sổ mới. Các tệp trong không gian làm việc hiện tại vẫn ở cửa sổ hiện tại. Tắt để mở tất cả tệp trong cửa sổ hiện tại."
+        },
+        "automatic_updates": {
+          "label": "Tự động cập nhật",
+          "desc": "Tự động kiểm tra và cài đặt bản cập nhật khi ứng dụng khởi động."
+        },
+        "error_reporting": {
+          "label": "Chia sẻ báo cáo lỗi",
+          "desc": "Tắt theo mặc định. Gửi loại lỗi và vị trí mã của ứng dụng đến Sentry. Nội dung tài liệu, đường dẫn tệp, thông tin xác thực và hoạt động duyệt web không được gửi. Bạn có thể tắt tùy chọn này bất cứ lúc nào."
+        }
+      },
+      "autosave": {
+        "label": "Tự động lưu",
+        "switch_auto_save": {
+          "label": "Tự động lưu",
+          "desc": "Bật/tắt tự động lưu. Tệp hiện tại sẽ được tự động lưu theo khoảng thời gian đã đặt."
+        },
+        "autosaveInterval": {
+          "label": "Khoảng thời gian tự động lưu",
+          "desc": "Đặt khoảng thời gian tự động lưu, tính bằng mili giây."
+        }
+      },
+      "misc": {
+        "label": "Khác",
+        "language": {
+          "label": "Ngôn ngữ",
+          "desc": "Đặt ngôn ngữ của ứng dụng."
+        },
+        "file_exclude_patterns": {
+          "label": "Danh sách loại trừ tệp",
+          "desc": "Loại trừ các tệp và thư mục khớp mẫu khỏi trình khám phá và tìm kiếm. Mỗi dòng một mẫu theo kiểu gitignore.",
+          "placeholder": "ví dụ: **/node_modules/*"
+        }
+      },
+      "desc": "Các cài đặt chung của ứng dụng."
+    },
+    "editor": {
+      "label": "Trình soạn thảo",
+      "style": {
+        "label": "Kiểu dáng",
+        "full_width": {
+          "label": "Toàn chiều rộng",
+          "desc": "Đặt trình soạn thảo ở chế độ toàn chiều rộng."
+        },
+        "font_size": {
+          "label": "Cỡ chữ tài liệu",
+          "desc": "Cỡ chữ khi viết và đọc."
+        },
+        "line_height": {
+          "label": "Chiều cao dòng tài liệu",
+          "desc": "Chiều cao dòng khi viết và đọc."
+        },
+        "source_font_size": {
+          "label": "Cỡ chữ mã nguồn",
+          "desc": "Cỡ chữ trong chế độ mã nguồn. Tách biệt với văn bản tài liệu."
+        },
+        "source_line_height": {
+          "label": "Chiều cao dòng mã nguồn",
+          "desc": "Chiều cao dòng trong chế độ mã nguồn."
+        },
+        "font_family": {
+          "label": "Phông chữ",
+          "desc": "Đặt phông chữ gốc của trình soạn thảo."
+        },
+        "code_font_family": {
+          "label": "Phông chữ mã",
+          "desc": "Đặt phông chữ mã của trình soạn thảo."
+        }
+      },
+      "behavior": {
+        "label": "Hành vi",
+        "md_default_mode": {
+          "label": "Chế độ mặc định của Markdown",
+          "desc": "Đặt chế độ chỉnh sửa mặc định khi tạo tệp Markdown mới."
+        },
+        "text_direction": {
+          "follow_global": "Theo cài đặt chung",
+          "label": "Hướng văn bản",
+          "desc": "Hướng văn bản nội dung trong WYSIWYG và Xem trước. Tự động sẽ phát hiện hướng của từng đoạn văn.",
+          "auto": "Tự động",
+          "ltr": "Trái sang phải (LTR)",
+          "rtl": "Phải sang trái (RTL)"
+        },
+        "typewriter_scroll": {
+          "label": "Cuộn kiểu máy đánh chữ",
+          "desc": "Khi bật, con trỏ sẽ luôn nằm giữa khung nhìn trong khi chỉnh sửa."
+        },
+        "caret_animation": {
+          "label": "Con trỏ mượt",
+          "desc": "Tạo hiệu ứng chuyển động cho con trỏ văn bản trong chế độ WYSIWYG. Tuân theo tùy chọn giảm chuyển động của hệ thống."
+        },
+        "placeholder": {
+          "label": "Văn bản gợi ý",
+          "desc": "Khi bật, văn bản gợi ý sẽ được hiển thị trong các đoạn văn trống."
+        },
+        "insert_date_format": {
+          "label": "Định dạng ngày chèn",
+          "desc": "Định dạng ngày dùng cho lệnh Chèn ngày hiện tại. Dùng các token định dạng của Day.js, như YYYY-MM-DD hoặc YYYY-MM-DD HH:mm.",
+          "preview": "Xem trước:"
+        }
+      },
+      "wysiwyg": {
+        "label": "WYSIWYG",
+        "codemirror_linewrap": {
+          "label": "Ngắt dòng khối mã",
+          "desc": "Có ngắt dòng hay không khi độ dài dòng trong khối mã vượt quá giới hạn."
+        },
+        "live_preview_block_behavior": {
+          "label": "Khối xem trước trực tiếp",
+          "desc": "Chọn thời điểm hiển thị mã nguồn cho HTML, Mermaid và khối công thức toán.",
+          "options": {
+            "auto": "Chỉ hiện mã nguồn khi chỉnh sửa",
+            "always_split": "Luôn hiện mã nguồn và xem trước"
+          }
+        },
+        "spellcheck": {
+          "label": "Kiểm tra chính tả",
+          "desc": "Có bật kiểm tra chính tả trong chế độ WYSIWYG hay không."
+        }
+      },
+      "sourcecode": {
+        "label": "Mã nguồn",
+        "spellcheck": {
+          "label": "Kiểm tra chính tả",
+          "desc": "Có bật kiểm tra chính tả trong chế độ mã nguồn hay không."
+        }
+      },
+      "desc": "Các tùy chọn cấu hình Markdown cho trình soạn thảo, bao gồm cài đặt kiểu dáng, hành vi và chế độ WYSIWYG.",
+      "code_editing": {
+        "label": "Chỉnh sửa mã",
+        "embedded_label": "Mã nhúng",
+        "default": "Mặc định",
+        "custom": "Tùy chỉnh",
+        "on": "Bật",
+        "off": "Tắt",
+        "indent_style": {
+          "label": "Thụt lề",
+          "desc": "Dùng chung cho chế độ mã nguồn và mã nhúng. Trình soạn thảo mã nguồn front matter luôn dùng dấu cách.",
+          "spaces": "Dấu cách",
+          "tabs": "Tab"
+        },
+        "indent_size": {
+          "label": "Độ rộng thụt lề",
+          "desc": "Thụt lề bằng dấu cách mặc định là 2 cột. Tab hiển thị rộng 4 cột trong chế độ mã nguồn và 2 cột trong mã nhúng. Khi chọn một độ rộng, nó sẽ được áp dụng cho cả hai.",
+          "default": "2 cột (tab thay đổi theo chế độ)"
+        },
+        "auto_close": {
+          "label": "Tự động đóng ngoặc và dấu nháy",
+          "desc": "Chèn ngoặc và dấu nháy tương ứng khi gõ trong chế độ mã nguồn và mã nhúng."
+        },
+        "whitespace": {
+          "label": "Hiện khoảng trắng",
+          "desc": "Hiển thị dấu cách và tab mà không thay đổi nội dung tài liệu.",
+          "trailing": "Khoảng trắng cuối dòng",
+          "all": "Tất cả dấu cách và tab"
+        },
+        "line_wrap": {
+          "label": "Ngắt dòng dài",
+          "desc": "Ngắt các dòng dài tại mép trình soạn thảo mà không chèn ký tự xuống dòng. Các dòng cực dài vẫn có thể cần cuộn ngang.",
+          "mixed_default": "Theo khu vực (mặc định)",
+          "mixed_desc": "Theo mặc định, khối mã thông thường không ngắt dòng; mã nguồn xem trước và front matter thì có. Chọn Bật hoặc Tắt để áp dụng một cài đặt cho mọi khu vực. Các dòng cực dài vẫn có thể cần cuộn ngang."
+        },
+        "line_numbers": {
+          "label": "Số dòng",
+          "desc": "Thưa sẽ hiện dòng đầu tiên và mỗi dòng thứ mười.",
+          "all": "Mọi dòng",
+          "sparse": "Thưa"
+        },
+        "active_line": {
+          "label": "Tô sáng dòng hiện tại",
+          "desc": "Tô sáng dòng chứa con trỏ để dễ tìm vị trí đang chỉnh sửa."
+        },
+        "font_size": {
+          "label": "Cỡ chữ mã",
+          "desc": "Mặc định bằng 87,5% cỡ chữ tài liệu và thay đổi theo cỡ chữ đó. Chọn Tùy chỉnh để đặt một kích thước cố định.",
+          "default": "Theo tài liệu ({{value}} px)",
+          "relative_default": "Theo tài liệu (87,5%)",
+          "unit": "{{value}} px"
+        },
+        "line_height": {
+          "label": "Chiều cao dòng mã",
+          "desc": "Chiều cao dòng là bội số của cỡ chữ. Mặc định là 1,6×; chọn Tùy chỉnh để điều chỉnh khoảng cách dòng.",
+          "default": "1,6× (mặc định)",
+          "unit": "{{value}}×"
+        },
+        "default_value": "{{value}} (mặc định)",
+        "typography_disabled": "“Dùng phông chữ, cỡ chữ và chiều cao dòng cá nhân” đang tắt. Cỡ chữ và chiều cao dòng tùy chỉnh hiện không được áp dụng."
+      },
+      "tabs": {
+        "label": "Thẻ",
+        "enable_preview": {
+          "label": "Bật thẻ xem trước",
+          "desc": "Nhấp một lần vào tệp trong Trình khám phá hoặc kết quả tìm kiếm để dùng lại một thẻ xem trước. Nhấp đúp hoặc chỉnh sửa để giữ thẻ mở. Các thẻ đã lưu sẽ được giữ mở."
+        }
+      }
+    },
+    "keyboard": {
+      "label": "Phím tắt",
+      "shortcut_conflict": "Phím tắt này đã được sử dụng",
+      "desc": "Tìm kiếm lệnh và nhấp vào phím tắt để thay đổi.",
+      "table_label": "Bảng phím tắt",
+      "command": "Lệnh",
+      "keybinding": "Tổ hợp phím",
+      "scope": "Ngữ cảnh",
+      "edit": "Chỉnh sửa",
+      "edit_shortcut": "Chỉnh sửa phím tắt",
+      "shortcut": "Phím tắt",
+      "save": "Lưu",
+      "load_failed": "Không thể tải phím tắt. Hãy kiểm tra tệp cấu hình rồi thử lại.",
+      "save_failed": "Không thể lưu phím tắt. Cấu hình trước đó của bạn vẫn được giữ lại. Vui lòng thử lại.",
+      "invalid_binding": "Nhấn một tổ hợp hợp lệ có chứa một phím chính.",
+      "reserved_binding": "Tổ hợp này được dành cho việc gõ, điều hướng hoặc bộ nhớ tạm của hệ thống. Hãy chọn tổ hợp khác.",
+      "unsupported_binding": "Trình soạn thảo hiện tại không hỗ trợ tổ hợp này. Hãy chọn tổ hợp khác.",
+      "conflict_with": "Đã được dùng bởi “{{command}}”. Hãy thay đổi phím tắt của lệnh đó trước.",
+      "saving": "Đang lưu…",
+      "unbound": "Chưa gán",
+      "record_help": "Nhấn phím · Enter để lưu · Esc để hủy",
+      "remove_binding": "Gỡ bỏ phím tắt",
+      "reset_default": "Khôi phục mặc định",
+      "clipboard_note": "Phím tắt cắt của hệ thống vẫn khả dụng. Bạn có thể gán thêm một phím tắt cắt tại đây.",
+      "search": "Tìm kiếm lệnh hoặc phím tắt",
+      "modified_only": "Chỉ đã sửa đổi",
+      "retry": "Thử lại",
+      "scope_app": "Ứng dụng",
+      "scope_editor": "Trình soạn thảo",
+      "modified": "Đã sửa đổi",
+      "system_binding": "Phím tắt hệ thống",
+      "no_results": "Không có phím tắt phù hợp"
+    },
+    "ai": {
+      "label": "AI",
+      "model": {
+        "label": "Mô hình AI"
+      },
+      "ChatGPT": {
+        "label": "ChatGPT",
+        "api_base": {
+          "label": "Địa chỉ API",
+          "desc": "Địa chỉ API cho ChatGPT."
+        },
+        "api_key": {
+          "label": "Khóa API",
+          "desc": "Khóa API cho ChatGPT."
+        },
+        "models": {
+          "label": "Mô hình",
+          "desc": "Danh sách mô hình phân tách bằng dấu phẩy, mặc định là \"gpt-3.5-turbo, gpt-4-32k, gpt-4\""
+        }
+      },
+      "DeepSeek": {
+        "label": "DeepSeek",
+        "api_base": {
+          "label": "Địa chỉ API",
+          "desc": "Địa chỉ API cho DeepSeek."
+        },
+        "api_key": {
+          "label": "Khóa API",
+          "desc": "Khóa API cho DeepSeek."
+        },
+        "models": {
+          "label": "Mô hình",
+          "desc": "Danh sách mô hình phân tách bằng dấu phẩy, mặc định là \"\""
+        }
+      },
+      "Ollama": {
+        "label": "Ollama",
+        "api_base": {
+          "label": "Địa chỉ API",
+          "desc": "Địa chỉ API cho Ollama."
+        },
+        "models": {
+          "label": "Mô hình",
+          "desc": "Theo mặc định, các mô hình khả dụng được tự động phát hiện nên thường không cần cấu hình. Chỉ dùng danh sách phân tách bằng dấu phẩy để tương thích hoặc làm phương án dự phòng khi không thể phát hiện."
+        }
+      },
+      "Google": {
+        "label": "Google",
+        "api_base": {
+          "label": "Địa chỉ API",
+          "desc": "Địa chỉ API AI của Google."
+        },
+        "api_key": {
+          "label": "Khóa API",
+          "desc": "Khóa API AI của Google."
+        },
+        "models": {
+          "label": "Danh sách mô hình",
+          "desc": "Danh sách mô hình, phân tách bằng dấu phẩy. Giá trị mặc định là \"\""
+        }
+      },
+      "desc": "Cấu hình mô hình AI. Khi baseUrl để trống, địa chỉ chính thức sẽ được dùng theo mặc định. Có thể dùng header của yêu cầu để cấu hình các thông tin như khóa; vui lòng tham khảo tài liệu của nhà cung cấp dịch vụ."
+    },
+    "resetAppConf": {
+      "label": "Đặt lại cấu hình ứng dụng",
+      "desc": "Đặt lại cấu hình ứng dụng để khôi phục cài đặt mặc định. Thao tác này sẽ đặt lại mọi cài đặt, bao gồm chủ đề, ngôn ngữ, tự động lưu, v.v. và không thể khôi phục.",
+      "success": "Cấu hình ứng dụng đã được đặt lại về giá trị mặc định."
+    },
+    "image": {
+      "label": "Hình ảnh",
+      "paste_event": {
+        "label": "Sự kiện dán trong trình soạn thảo",
+        "when_paste_image": {
+          "label": "Khi văn bản dán có chứa hình ảnh",
+          "desc": "Chọn hành vi mặc định khi dán hình ảnh vào trình soạn thảo.",
+          "options": {
+            "do_nothing": "Không làm gì",
+            "save_to_local_relative": "Lưu vào đường dẫn tương đối của không gian làm việc",
+            "save_to_local_absolute": "Lưu vào đường dẫn tuyệt đối chung",
+            "paste_as_base64": "Dán dưới dạng mã hóa Base64",
+            "save_to_file_relative": "Lưu vào đường dẫn tương đối với tệp hiện tại"
+          }
+        },
+        "paste_image_save_absolute_path": {
+          "label": "Đường dẫn tuyệt đối chung",
+          "desc": "Khi bạn dán hình ảnh, hình ảnh sẽ được lưu vào đường dẫn này."
+        },
+        "paste_image_save_relative_path": {
+          "label": "Đường dẫn tương đối của không gian làm việc",
+          "desc": "Khi “Dán hình ảnh”, đường dẫn lưu hình ảnh sẽ được tính tương đối với đường dẫn không gian làm việc hiện tại theo quy tắc của bạn, và hình ảnh được lưu vào đường dẫn đó"
+        },
+        "paste_image_save_relative_path_rule": {
+          "label": "Quy tắc đường dẫn",
+          "desc": "Các biến được hỗ trợ: ${documentPath} (đường dẫn thư mục cha của tệp hiện tại), ${fileName} (tên tệp hiện tại không có phần mở rộng). Ví dụ: ${documentPath}/photo/${fileName}"
+        }
+      },
+      "upload_img": {
+        "label": "Chèn hình ảnh trên máy",
+        "when_upload_image": {
+          "label": "Hành vi chèn hình ảnh trên máy",
+          "desc": "Chọn hành vi mặc định cho hình ảnh trên máy được chọn từ máy tính, thả vào trình soạn thảo hoặc dán từ phần mềm chụp màn hình.",
+          "options": {
+            "insert_path": "Chèn đường dẫn tệp gốc",
+            "save_to_local_absolute": "Lưu vào đường dẫn tuyệt đối chung",
+            "save_to_local_relative": "Lưu vào đường dẫn tương đối của không gian làm việc",
+            "paste_as_base64": "Dán dưới dạng mã hóa Base64",
+            "save_to_file_relative": "Lưu vào đường dẫn tương đối với tệp hiện tại"
+          }
+        },
+        "upload_image_save_absolute_path": {
+          "label": "Đường dẫn tuyệt đối chung",
+          "desc": "Khi bạn tải lên hình ảnh, hình ảnh sẽ được lưu vào đường dẫn này."
+        },
+        "upload_image_save_relative_path": {
+          "label": "Đường dẫn tương đối của không gian làm việc",
+          "desc": "Khi “tải lên hình ảnh”, đường dẫn lưu hình ảnh sẽ được tính tương đối với đường dẫn không gian làm việc hiện tại theo quy tắc của bạn, và hình ảnh được lưu vào đường dẫn đó"
+        },
+        "upload_image_save_relative_path_rule": {
+          "label": "Quy tắc đường dẫn",
+          "desc": "Các biến được hỗ trợ: ${documentPath} (đường dẫn thư mục cha của tệp hiện tại), ${fileName} (tên tệp hiện tại không có phần mở rộng). Ví dụ: ${documentPath}/photo/${fileName}"
+        }
+      },
+      "desc": "Cấu hình xử lý và tải lên hình ảnh, bao gồm dán hình ảnh, đường dẫn lưu và cài đặt hành vi khi tải lên tệp hình ảnh."
+    },
+    "export": {
+      "label": "Xuất",
+      "desc": "Cấu hình các công cụ tùy chọn dùng để xuất tài liệu.",
+      "pandoc": {
+        "label": "Pandoc",
+        "executable": {
+          "label": "Tệp thực thi Pandoc",
+          "desc": "Pandoc không đi kèm với MarkFlowy. Hãy dùng tính năng tự động phát hiện hoặc chọn một tệp thực thi trên máy."
+        },
+        "status": {
+          "checking": "Đang kiểm tra Pandoc...",
+          "ready": "Pandoc {{version}} đã sẵn sàng.",
+          "invalid_executable": "Đường dẫn đã cấu hình không phải là tệp thực thi Pandoc hợp lệ.",
+          "incompatible": "Đã tìm thấy Pandoc, nhưng nó không hỗ trợ tất cả các định dạng cần thiết.",
+          "not_found": "Không tìm thấy Pandoc."
+        },
+        "select": "Chọn tệp thực thi",
+        "automatic": "Dùng tự động phát hiện",
+        "check_again": "Kiểm tra lại",
+        "install_guide": "Hướng dẫn cài đặt"
+      },
+      "pdf": {
+        "label": "Xuất PDF",
+        "executable": {
+          "label": "Trình duyệt xuất PDF",
+          "desc": "MarkFlowy dùng trình duyệt Chrome, Chromium hoặc Edge trên máy để xuất PDF kèm dấu trang tiêu đề. Hãy tự động phát hiện hoặc chọn tệp thực thi của trình duyệt."
+        },
+        "status": {
+          "checking": "Đang kiểm tra trình duyệt xuất PDF…",
+          "ready": "Trình duyệt {{version}} đã sẵn sàng.",
+          "invalid_executable": "Đường dẫn đã cấu hình không phải là tệp thực thi của một trình duyệt được hỗ trợ.",
+          "incompatible": "Đã tìm thấy trình duyệt, nhưng phiên bản của nó không hỗ trợ dấu trang tiêu đề trong PDF.",
+          "not_found": "Không tìm thấy trình duyệt xuất PDF tương thích.",
+          "save_failed": "Không thể lưu cài đặt trình duyệt. Hãy thử lại."
+        },
+        "select": "Chọn tệp thực thi của trình duyệt",
+        "automatic": "Dùng tự động phát hiện",
+        "check_again": "Kiểm tra lại"
+      }
+    },
+    "display": {
+      "label": "Giao diện",
+      "theme": {
+        "unavailable": "{{name}} (không khả dụng)",
+        "unavailable_help": "Các chủ đề đã chọn không khả dụng: {{names}}. Chủ đề tích hợp sẵn sẽ được dùng tạm thời và lựa chọn của bạn vẫn được giữ lại. Hãy nhập lại các chủ đề dưới dạng JSON hoặc chọn chủ đề khác. Các chủ đề JS cũ và CSS được tải tự động cần được chuyển đổi thủ công.",
+        "migration_guide": "Hướng dẫn chuyển đổi chủ đề",
+        "label": "Chủ đề",
+        "mode": {
+          "label": "Chế độ chủ đề",
+          "desc": "Chọn cách ứng dụng chuyển đổi giữa chủ đề sáng và tối",
+          "system": "Theo hệ thống",
+          "light": "Sáng",
+          "dark": "Tối"
+        },
+        "light_theme": {
+          "label": "Chủ đề sáng",
+          "desc": "Chọn chủ đề dùng trong chế độ sáng"
+        },
+        "dark_theme": {
+          "label": "Chủ đề tối",
+          "desc": "Chọn chủ đề dùng trong chế độ tối"
+        },
+        "accent_color": {
+          "label": "Màu chủ đề",
+          "desc": "Ghi đè màu nhấn của chủ đề đã chọn",
+          "follow_theme": "Theo chủ đề",
+          "custom": "Tùy chỉnh"
+        }
+      },
+      "size": {
+        "label": "Kích thước",
+        "zoom": {
+          "label": "Tỷ lệ",
+          "desc": "Thu nhỏ hoặc phóng to tỷ lệ hiển thị của toàn bộ trang"
+        }
+      },
+      "desc": "Cài đặt giao diện và hiển thị của ứng dụng, bao gồm các cấu hình liên quan đến hình thức như tỷ lệ giao diện và chủ đề."
+    },
+    "support": {
+      "label": "Ủng hộ",
+      "desc": "Mọi sự ủng hộ của bạn đều quan trọng với chúng tôi! Để giúp dự án mã nguồn mở này tốt hơn, bạn có thể tham gia theo những cách sau",
+      "github_star": "Gắn sao trên GitHub",
+      "github_star_desc": "Nếu bạn thích dự án này, hãy gắn sao cho chúng tôi trên GitHub, đó là sự khích lệ lớn nhất đối với chúng tôi!",
+      "github_issue": "Gửi Issue hoặc đề xuất",
+      "github_issue_desc": "Nếu bạn gặp sự cố hoặc có bất kỳ góp ý nào, hãy gửi Issue trên GitHub."
+    },
+    "copilot": {
+      "label": "Copilot",
+      "desc": "Cấu hình hỗ trợ viết bằng AI, chọn nhà cung cấp và mô hình AI mà bạn đã cấu hình. Nên chọn một mô hình nhỏ có khoảng 2B tham số trở xuống để tăng tốc độ phản hồi.",
+      "enable": {
+        "label": "Bật Copilot",
+        "desc": "Bật hỗ trợ viết bằng AI"
+      },
+      "provider": {
+        "label": "Nhà cung cấp",
+        "desc": "Chọn nhà cung cấp dịch vụ AI"
+      },
+      "model": {
+        "label": "Mô hình",
+        "desc": "Chọn mô hình AI sẽ sử dụng"
+      }
+    },
+    "themeStore": {
+      "controls": {
+        "retryPreview": "Thử xem trước lại",
+        "loadingPreview": "Đang tải bản xem trước chủ đề",
+        "reinstall": "Cài đặt lại",
+        "builtIn": "Chủ đề tích hợp sẵn",
+        "builtInDescription": "Đi kèm với MarkFlowy.",
+        "local": "Chủ đề trên máy",
+        "localDescription": "Các chủ đề bạn đã tạo hoặc nhập.",
+        "active": "Đang dùng",
+        "currentTheme": "Chủ đề hiện tại",
+        "tools": "Công cụ chủ đề",
+        "more": "Thêm thao tác",
+        "customization": "Kiểu chữ và CSS",
+        "unknownAuthor": "Chưa rõ tác giả",
+        "noInstalled": "Chưa cài đặt chủ đề cộng đồng nào.",
+        "installedOnly": "Chỉ đã cài đặt",
+        "title": "Chủ đề",
+        "create": "Tạo chủ đề",
+        "import": "Nhập JSON",
+        "export": "Xuất JSON",
+        "edit": "Chỉnh sửa",
+        "copy": "Sao chép và chỉnh sửa",
+        "remove": "Gỡ bỏ",
+        "apply": "Áp dụng",
+        "save": "Lưu và áp dụng",
+        "close": "Đóng",
+        "undo": "Hoàn tác",
+        "redo": "Làm lại",
+        "search": "Tìm token…",
+        "modified": "Chỉ đã sửa đổi",
+        "reset": "Đặt lại",
+        "link": "Liên kết đến token",
+        "value": "Giá trị",
+        "inspect": "Kiểm tra bản xem trước",
+        "snippets": "Đoạn CSS cá nhân",
+        "addCss": "Nhập CSS",
+        "createCss": "Đoạn mã mới",
+        "untitledCss": "Đoạn mã chưa đặt tên",
+        "disableAll": "Tắt tất cả",
+        "includeCss": "Bao gồm CSS cá nhân",
+        "up": "Di chuyển lên",
+        "down": "Di chuyển xuống",
+        "name": "Tên",
+        "author": "Tác giả",
+        "variant": "Biến thể",
+        "addLight": "Thêm biến thể sáng",
+        "addDark": "Thêm biến thể tối",
+        "advanced": "JSON / CSS nâng cao",
+        "options": "Tùy chọn chủ đề",
+        "previewOptions": "Tùy chọn xem trước",
+        "closeAdvanced": "Đóng trình chỉnh sửa nâng cao",
+        "noTokens": "Không có token phù hợp",
+        "css": "CSS chủ đề",
+        "json": "JSON chủ đề",
+        "applyJson": "Cập nhật từ JSON",
+        "revertJson": "Hủy bỏ chỉnh sửa JSON",
+        "pendingJson": "Hãy áp dụng hoặc hủy bỏ các chỉnh sửa JSON để tiếp tục chỉnh sửa trực quan và xuất.",
+        "catalog": "Chủ đề cộng đồng",
+        "install": "Cài đặt",
+        "emptyCatalog": "Chưa có chủ đề cộng đồng nào.",
+        "replace": "ID chủ đề này đã tồn tại. Thay thế nó?",
+        "replaceAction": "Thay thế",
+        "cancel": "Hủy",
+        "saveCopy": "Lưu một bản sao",
+        "draft": "Có một bản nháp trên máy.",
+        "resume": "Tiếp tục bản nháp",
+        "discard": "Hủy bỏ bản nháp",
+        "preview": "Xem trước chủ đề",
+        "loadError": "Không thể tải bản xem trước của trình soạn thảo.",
+        "retry": "Thử lại",
+        "linked": "Đã liên kết",
+        "inherited": "Mặc định",
+        "customCss": "CSS tùy chỉnh có thể ghi đè token đang kiểm tra.",
+        "preferences": "Bản xem trước chỉ hiển thị chủ đề. Các tùy chọn cá nhân bạn đã chọn cũng được áp dụng khi dùng chủ đề này.",
+        "personalTypography": "Dùng phông chữ, cỡ chữ và chiều cao dòng cá nhân",
+        "saved": "Đã lưu",
+        "error": "Lỗi",
+        "enabled": "Đã bật",
+        "editCss": "Chỉnh sửa CSS",
+        "saveCss": "Lưu đoạn mã",
+        "noSnippets": "Không có đoạn CSS cá nhân nào.",
+        "deleteConfirm": "Gỡ bỏ chủ đề này?",
+        "removeVariant": "Gỡ bỏ biến thể",
+        "schema": "Xuất JSON Schema",
+        "light": "Sáng",
+        "dark": "Tối",
+        "catalogMismatch": "ID chủ đề không khớp với danh mục cộng đồng.",
+        "previewNotes": "Ghi chú",
+        "previewIdeas": "Ý tưởng",
+        "previewWelcome": "Chào mừng",
+        "previewSearch": "Tìm kiếm trong bản xem trước",
+        "previewSearchPlaceholder": "Tìm kiếm…",
+        "previewNewNote": "Ghi chú mới",
+        "changeTheme": "Thay đổi",
+        "changeLight": "Thay đổi chủ đề sáng",
+        "changeDark": "Thay đổi chủ đề tối",
+        "useInLight": "Dùng trong chế độ sáng",
+        "useInDark": "Dùng trong chế độ tối",
+        "browseThemes": "Duyệt tất cả chủ đề",
+        "backToAppearance": "Quay lại giao diện",
+        "chooseLight": "Chọn một chủ đề sáng",
+        "chooseDark": "Chọn một chủ đề tối",
+        "preserveMode": "Chọn chủ đề sẽ giữ nguyên chế độ hiển thị hiện tại của bạn.",
+        "selected": "Đã chọn",
+        "setLight": "Đặt làm chủ đề sáng",
+        "setDark": "Đặt làm chủ đề tối",
+        "noLightVariant": "Không có biến thể sáng",
+        "noDarkVariant": "Không có biến thể tối",
+        "installAndSelect": "Cài đặt và chọn",
+        "noMatchingThemes": "Không có chủ đề cộng đồng nào cho chế độ này."
+      },
+      "label": "Cửa hàng chủ đề",
+      "desc": "Duyệt các chủ đề tích hợp sẵn và chủ đề cộng đồng, hoặc tùy chỉnh chủ đề của riêng bạn.",
+      "submit_theme": "Gửi chủ đề",
+      "name": "Tên",
+      "mode": "Chế độ",
+      "version": "Phiên bản",
+      "author": "Tác giả",
+      "description": "Mô tả",
+      "tags": "Nhãn",
+      "action": "Thao tác",
+      "official": "Chính thức",
+      "builtin": "Tích hợp sẵn",
+      "installed": "Đã cài đặt",
+      "download": "Tải xuống",
+      "uninstall": "Gỡ cài đặt",
+      "only_installed": "Chỉ xem đã cài đặt",
+      "no_local_themes": "Không có chủ đề trên máy",
+      "remove_local_theme": "Bạn có chắc muốn gỡ bỏ chủ đề trên máy “{{name}}” không? Thao tác này sẽ xóa các tệp trong thư mục đó.",
+      "online_themes": "Chủ đề trực tuyến",
+      "local_css_files": "Tệp CSS trên máy",
+      "install_theme": "Cài đặt chủ đề",
+      "install_theme_confirm": "Bạn có chắc muốn cài đặt {{name}} không?",
+      "uninstall_theme": "Gỡ cài đặt chủ đề",
+      "uninstall_theme_confirm": "Bạn có chắc muốn gỡ cài đặt {{name}} không?"
+    }
+  },
+  "updater": {
+    "install": "Cài đặt",
+    "download_and_install": "Tải xuống và cài đặt",
+    "downloading": "Đang tải xuống phiên bản mới…",
+    "install_success": "Đã cài đặt bản cập nhật thành công.",
+    "restart": "Khởi động lại",
+    "install_failed": "Không thể cài đặt bản cập nhật: {{error}}",
+    "check_failed": "Không thể kiểm tra bản cập nhật: {{error}}",
+    "interrupted_title": "Cập nhật chưa hoàn tất",
+    "interrupted_description": "Lần cập nhật trước lên {{version}} chưa hoàn tất. Tính năng tự động cài đặt đã tạm dừng. Bạn có thể thử lại, tắt tự động cập nhật hoặc hủy để tiếp tục dùng MarkFlowy.",
+    "disable_auto_update": "Tắt tự động cập nhật"
+  },
+  "workspace": {
+    "info": "Thông tin không gian làm việc",
+    "none": "Chưa mở không gian làm việc",
+    "searchPlaceholder": "Tìm kiếm không gian làm việc và tệp gần đây…",
+    "open": "Mở",
+    "openFileOrFolder": "Mở tệp hoặc thư mục",
+    "recentFiles": "Tệp gần đây",
+    "sync_mode": {
+      "git_local": {
+        "name": "Git cục bộ",
+        "description": "Đồng bộ với kho lưu trữ Git cục bộ"
+      },
+      "git_remote": {
+        "name": "Git từ xa",
+        "description": "Đồng bộ với kho lưu trữ Git từ xa"
+      },
+      "pure_local": {
+        "name": "Chỉ cục bộ",
+        "description": "Chỉ không gian làm việc cục bộ"
+      }
+    },
+    "label": "Không gian làm việc"
+  },
+  "request": {
+    "headers_config": {
+      "label": "Cấu hình header yêu cầu",
+      "desc": "Thêm header yêu cầu HTTP tùy chỉnh, hỗ trợ nhiều cặp khóa-giá trị."
+    }
+  },
+  "ai": {
+    "capabilities": "Chức năng",
+    "export_conversation": "Xuất cuộc trò chuyện",
+    "assistant": "Trò chuyện AI",
+    "you": "Bạn",
+    "sources": "Nguồn",
+    "response_interrupted": "Phản hồi đã dừng",
+    "error": "Lỗi",
+    "request_failed": "Yêu cầu thất bại",
+    "settings": "Cài đặt",
+    "new_chat": "Cuộc trò chuyện mới",
+    "welcome_title": "Hôm nay tôi có thể giúp gì cho bạn?",
+    "welcome_description": "Đặt câu hỏi, khám phá ý tưởng hoặc thêm tài liệu hiện tại làm ngữ cảnh.",
+    "try_asking": "Thử hỏi",
+    "prompt_document_title": "Tóm tắt tài liệu này",
+    "prompt_document_description": "Dùng tài liệu đang mở làm ngữ cảnh",
+    "prompt_document_value": "Tóm tắt tài liệu hiện tại và nêu bật các ý chính.",
+    "prompt_explain_title": "Giải thích một chủ đề",
+    "prompt_explain_description": "Giải thích rõ ràng một vấn đề phức tạp",
+    "prompt_explain_value": "Giải thích rõ ràng chủ đề này kèm một ví dụ thực tế: ",
+    "ask_placeholder": "Hỏi bất cứ điều gì… Dùng @ để thêm ngữ cảnh",
+    "current_document": "Tài liệu hiện tại",
+    "no_active_document": "Không có tài liệu đang mở",
+    "select_model": "Chọn mô hình",
+    "search_models": "Tìm kiếm mô hình…",
+    "no_models_found": "Không tìm thấy mô hình nào",
+    "no_models_configured": "Chưa cấu hình mô hình AI nào",
+    "model_unavailable": "Mô hình này không khả dụng",
+    "select_available_model": "Chọn một mô hình khả dụng để gửi",
+    "provider_not_configured": "{{provider}} chưa được cấu hình",
+    "configure_provider": "Cấu hình {{provider}}",
+    "provider_settings": "Cài đặt {{provider}}",
+    "manage_providers": "Quản lý nhà cung cấp AI",
+    "ollama_connecting": "Đang kết nối với Ollama…",
+    "ollama_offline": "Ollama đang ngoại tuyến",
+    "ollama_empty": "Không tìm thấy mô hình Ollama tương thích",
+    "ollama_retry": "Thử lại",
+    "add_context": "Thêm ngữ cảnh",
+    "add_active_file": "Thêm tệp đang mở",
+    "add_open_tabs": "Thêm các thẻ đang mở",
+    "search_open_tabs": "Tìm kiếm thẻ đang mở…",
+    "no_open_tabs": "Không có thẻ nào đang mở",
+    "no_context_files_available": "Không còn tệp đang mở nào để thêm",
+    "selected_context_files": "Tệp ngữ cảnh ({{count}}/8)",
+    "context_limit_reached": "Bạn có thể thêm tối đa 8 tệp",
+    "remove_attachment": "Gỡ bỏ {{name}}",
+    "attachment_missing": "Tệp không còn tồn tại",
+    "attachment_unreadable": "Không thể đọc tệp",
+    "attachment_binary": "Chỉ có thể dùng tệp văn bản làm ngữ cảnh",
+    "attachment_too_many": "Bạn có thể đính kèm tối đa 8 tệp",
+    "attachment_truncated": "Nội dung đã được cắt bớt cho vừa giới hạn ngữ cảnh",
+    "attachment_errors": "Hãy sửa lỗi tệp đính kèm trước khi gửi",
+    "send": "Gửi",
+    "stop": "Dừng",
+    "working": "Trợ lý đang xử lý",
+    "scroll_to_bottom": "Cuộn xuống cuối",
+    "edit": "Chỉnh sửa",
+    "save_edit": "Lưu thay đổi",
+    "cancel_edit": "Hủy chỉnh sửa",
+    "regenerate": "Tạo lại",
+    "previous_branch": "Nhánh trước",
+    "next_branch": "Nhánh tiếp theo",
+    "branch_position": "{{current}} / {{total}}",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép",
+    "delete": "Xóa",
+    "new_chat_confirm_title": "Bắt đầu cuộc trò chuyện mới?",
+    "new_chat_confirm_description": "Thao tác này sẽ xóa cuộc trò chuyện trong không gian làm việc hiện tại.",
+    "new_chat_confirm": "Bắt đầu cuộc trò chuyện mới",
+    "cancel": "Hủy",
+    "export_empty": "Không có cuộc trò chuyện nào để xuất"
+  },
+  "capricorn": {
+    "heading": {
+      "collapseSection": "Thu gọn phần",
+      "expandSection": "Mở rộng phần"
+    },
+    "blockTypeMenu": {
+      "title": "Chuyển thành",
+      "multiple": "Chuyển đổi {{count}} khối",
+      "search": "Tìm kiếm loại khối…",
+      "noResults": "Không có loại khối phù hợp",
+      "group": {
+        "text": "Văn bản",
+        "list": "Danh sách",
+        "source": "Mã nguồn"
+      },
+      "hint": "↑↓ Chọn · Enter Chuyển đổi · Esc Hủy",
+      "reason": {
+        "readOnly": "Không thể chỉnh sửa tài liệu này.",
+        "unsupported": "Vùng chọn chứa một khối không thể chuyển đổi.",
+        "containers": "Chọn các khối liên tiếp trong cùng một vùng chứa để kết hợp chúng.",
+        "html": "Nội dung phải là một khối mã nguồn HTML độc lập.",
+        "math": "Công thức không thể giữ nguyên dấu phân cách hoặc các dòng trống ở biên của mã nguồn này.",
+        "stale": "Các khối đã chọn đã thay đổi. Hãy mở lại menu."
+      }
+    },
+    "blockHandle": {
+      "convertOrMove": "Nhấp để chuyển đổi · Kéo để di chuyển",
+      "convert": "Chuyển đổi {{target}}",
+      "kind": {
+        "block": "khối",
+        "blockquote": "trích dẫn",
+        "code": "mã",
+        "footnote": "chú thích cuối trang",
+        "frontmatter": "front matter",
+        "heading1": "tiêu đề 1",
+        "heading2": "tiêu đề 2",
+        "heading3": "tiêu đề 3",
+        "heading4": "tiêu đề 4",
+        "heading5": "tiêu đề 5",
+        "heading6": "tiêu đề 6",
+        "horizontalRule": "đường phân cách",
+        "html": "HTML",
+        "listBullet": "mục danh sách dấu đầu dòng",
+        "listOrdered": "mục danh sách đánh số",
+        "listTask": "mục danh sách công việc",
+        "math": "công thức toán",
+        "mermaid": "sơ đồ Mermaid",
+        "paragraph": "đoạn văn",
+        "rawMarkdown": "Markdown thô",
+        "reference": "tham chiếu",
+        "table": "bảng"
+      },
+      "moveOrSelect": "Di chuyển hoặc chọn {{target}}",
+      "select": "Chọn {{target}}"
+    },
+    "selection": {
+      "selectAllHint": "Nhấn {{shortcut}} lần nữa để chọn toàn bộ tài liệu",
+      "selectAllTableHint": "Nhấn {{shortcut}} lần nữa để chọn toàn bộ bảng"
+    },
+    "selectionToolbar": {
+      "label": "Định dạng văn bản",
+      "bold": "In đậm",
+      "italic": "In nghiêng",
+      "strike": "Gạch ngang",
+      "highlight": "Tô sáng",
+      "link": "Chèn liên kết"
+    },
+    "placeholder": {
+      "default": "Gõ “/” để dùng lệnh"
+    },
+    "clipboard": {
+      "copied_markdown": "Đã sao chép dưới dạng Markdown",
+      "cut_markdown": "Đã cắt dưới dạng Markdown",
+      "retained": "Đã sao chép. Nội dung gốc vẫn được giữ lại.",
+      "failed": "Không thể ghi vào bộ nhớ tạm. Nội dung gốc vẫn được giữ lại."
+    },
+    "livePreview": {
+      "largeDeferred": "Bản xem trước lớn đã tạm dừng. Toàn bộ mã nguồn vẫn khả dụng.",
+      "renderLarge": "Hiển thị bản xem trước lớn (có thể mất một lúc)",
+      "actions": "Thao tác khối {{kind}}",
+      "copied": "Đã sao chép mã nguồn",
+      "copy": "Sao chép mã nguồn",
+      "copying": "Đang sao chép mã nguồn…",
+      "editSource": "Chỉnh sửa mã nguồn",
+      "editSourceForKind": "Chỉnh sửa mã nguồn {{kind}}",
+      "hideSource": "Ẩn mã nguồn",
+      "kind": {
+        "html": "HTML",
+        "math": "Công thức toán",
+        "mermaid": "Mermaid"
+      },
+      "preview": "Xem trước {{kind}}",
+      "retryCopy": "Thử sao chép mã nguồn lại",
+      "sourceEditor": "Trình chỉnh sửa mã nguồn {{kind}}"
+    },
+    "sourceFallback": {
+      "longLine": "Các dòng rất dài sẽ cuộn ngang để chế độ xem mã nguồn luôn phản hồi nhanh.",
+      "loading": "Đang chuẩn bị chế độ xem mã nguồn…",
+      "truncated": "Chỉ hiển thị đoạn trích đầu tiên trong khi chế độ xem mã nguồn đầy đủ đang tải."
+    },
+    "link": {
+      "title": "Tiêu đề",
+      "markdown": "Chỉnh sửa Markdown",
+      "remove": "Gỡ bỏ liên kết",
+      "copy": "Sao chép địa chỉ",
+      "copyFailed": "Không thể sao chép địa chỉ.",
+      "sharedReference": "Thay đổi địa chỉ và tiêu đề sẽ áp dụng cho mọi liên kết dùng tham chiếu này.",
+      "open": "Mở liên kết",
+      "actions": "Thao tác liên kết",
+      "edit": "Chỉnh sửa liên kết",
+      "text": "Văn bản",
+      "address": "Địa chỉ",
+      "save": "Lưu liên kết",
+      "cancel": "Hủy",
+      "invalidAddress": "Nhập địa chỉ liên kết hợp lệ."
+    },
+    "image": {
+      "unavailable": "Hình ảnh không khả dụng",
+      "loading": "Đang tải hình ảnh…",
+      "edit": "Chỉnh sửa địa chỉ",
+      "resetSize": "Khôi phục kích thước tự động"
+    },
+    "preview": {
+      "retry": "Thử lại"
+    },
+    "editor": {
+      "loading": "Đang tải trình soạn thảo Capricorn",
+      "opening": "Đang mở tài liệu",
+      "load_failed": "Không thể tải trình soạn thảo Capricorn",
+      "preparation_failed": "Chuẩn bị tài liệu trong nền thất bại. Vui lòng thử lại."
+    },
+    "snippets": {
+      "title": "Chèn đoạn mã",
+      "search": "Tìm kiếm đoạn mã…",
+      "manage": "Quản lý đoạn mã…",
+      "blank": "Khối trống mới",
+      "stale": "Vị trí chèn đã thay đổi. Vui lòng mở lại bộ chọn."
+    },
+    "table": {
+      "actions": "Thao tác bảng",
+      "alignment": "Căn chỉnh cột",
+      "copy": "Sao chép",
+      "cut": "Cắt",
+      "paste": "Dán",
+      "selectAll": "Chọn tất cả",
+      "action": {
+        "column": "Thao tác cột",
+        "columnAt": "Thao tác cho cột {{index}}",
+        "row": "Thao tác hàng",
+        "rowAt": "Thao tác cho hàng {{index}}"
+      },
+      "addColumnAfter": "Chèn cột bên phải",
+      "addColumnBefore": "Chèn cột bên trái",
+      "addRowAfter": "Chèn hàng bên dưới",
+      "addRowBefore": "Chèn hàng bên trên",
+      "alignCenter": "Căn giữa cột",
+      "alignLeft": "Căn trái cột",
+      "alignNone": "Xóa căn chỉnh cột",
+      "alignRight": "Căn phải cột",
+      "deleteColumn": "Xóa cột hiện tại",
+      "deleteRow": "Xóa hàng hiện tại",
+      "deleteTable": "Xóa bảng",
+      "duplicateRow": "Nhân bản hàng",
+      "duplicateColumn": "Nhân bản cột",
+      "moveRowUp": "Di chuyển hàng lên",
+      "moveRowDown": "Di chuyển hàng xuống",
+      "moveColumnLeft": "Di chuyển cột sang trái",
+      "moveColumnRight": "Di chuyển cột sang phải"
+    }
+  },
+  "inline_insert": {
+    "insert_link": "Chèn liên kết",
+    "edit_link": "Chỉnh sửa liên kết",
+    "insert_image": "Chèn hình ảnh",
+    "edit_image": "Chỉnh sửa hình ảnh",
+    "address": "Địa chỉ",
+    "text": "Văn bản",
+    "alt": "Mô tả",
+    "optional": "Tùy chọn",
+    "choose_image": "Chọn hình ảnh trên máy…",
+    "change": "Thay đổi",
+    "replace_image": "Thay thế hình ảnh",
+    "edit_alt": "Chỉnh sửa mô tả",
+    "remove": "Gỡ bỏ",
+    "unlink": "Gỡ bỏ liên kết",
+    "insert": "Chèn",
+    "save": "Lưu",
+    "close": "Đóng",
+    "inserting": "Đang chèn…",
+    "open": "Mở liên kết",
+    "copy": "Sao chép địa chỉ",
+    "invalid_address": "Nhập địa chỉ hoặc đường dẫn tệp hợp lệ.",
+    "local_error": "Không thể chọn hình ảnh này. Hãy thử lại.",
+    "insert_error": "Không thể chèn. Nội dung bạn nhập vẫn được giữ lại.",
+    "open_error": "Không thể mở liên kết này.",
+    "copy_error": "Không thể sao chép địa chỉ này.",
+    "single_block": "Chọn văn bản trong một đoạn văn hoặc một ô bảng."
+  },
+  "history": {
+    "title": "Lịch sử cục bộ",
+    "description": "Xem lại các thay đổi và khôi phục một phiên bản dưới dạng bản nháp chưa lưu.",
+    "enabled": "Bật lịch sử cục bộ",
+    "enabled_description": "Lưu giữ các phiên bản của tài liệu được mở trong MarkFlowy. Tính năng bảo vệ bản nháp chưa lưu vẫn hoạt động khi tắt tùy chọn này.",
+    "retention": "Lịch sử thông thường: 30 ngày, tối đa 100 phiên bản cho mỗi tài liệu, với ngân sách mục tiêu 1 GB. Các bản nháp chưa lưu và phiên chỉnh sửa đang hoạt động được bảo vệ.",
+    "count": "{{count}} phiên bản",
+    "clear_title": "Quản lý lịch sử đã lưu",
+    "clear_description": "Xóa lịch sử mà không xóa tệp hoặc bản nháp chưa lưu của bạn. Các thay đổi mới có thể tạo lịch sử mới khi tính năng này được bật.",
+    "clear_workspace": "Xóa lịch sử của không gian làm việc hiện tại",
+    "clear_loose": "Xóa lịch sử của tài liệu độc lập",
+    "clear_all": "Xóa lịch sử của tất cả không gian làm việc",
+    "clear_confirm": "Xóa vĩnh viễn {{count}} phiên bản? Có thể thu hồi tối đa {{size}} MB nội dung không dùng chung. Tệp và bản nháp chưa lưu vẫn được giữ lại.",
+    "all_workspaces": "Tất cả không gian làm việc và tài liệu độc lập",
+    "loose": "Tài liệu độc lập",
+    "delete": "Xóa lịch sử",
+    "empty": "Chưa có lịch sử.",
+    "previous": "Trước",
+    "next": "Tiếp",
+    "before": "Trước khi thay đổi",
+    "after": "Kết quả mới nhất",
+    "refresh": "Có thay đổi mới · làm mới so sánh",
+    "loading": "Đang tải so sánh…",
+    "compare_failed": "Không thể tải so sánh. Đang hiển thị văn bản gốc; bạn vẫn có thể khôi phục phiên bản này.",
+    "select": "Chọn một phiên bản để xem các thay đổi của nó.",
+    "restore_before": "Khôi phục trạng thái trước khi thay đổi",
+    "restore": "Khôi phục phiên bản này",
+    "merging": "Đang gộp các thay đổi",
+    "kind_save": "Đã lưu",
+    "kind_external": "Thay đổi từ bên ngoài",
+    "kind_ai": "Chỉnh sửa bằng AI",
+    "kind_checkpoint": "Điểm lưu bản nháp",
+    "kind_restore": "Trước khi khôi phục",
+    "kind_discard": "Trước khi hủy bỏ",
+    "kind_overwrite": "Trước khi ghi đè",
+    "kind_autosave": "Tự động lưu",
+    "kind_opened": "Phiên bản ban đầu",
+    "protected": "Bản nháp đã được bảo vệ",
+    "pending": "Đang bảo vệ bản nháp…",
+    "failed": "Bảo vệ bản nháp thất bại",
+    "paused": "Bản nháp đã khôi phục · hãy lưu thủ công",
+    "large": "Tài liệu lớn: đang hiển thị văn bản gốc.",
+    "compare_current": "So sánh với bản nháp hiện tại",
+    "compare_version": "So sánh với phiên bản khác",
+    "compare_batch": "So sánh trước / sau",
+    "snapshot": "Phiên bản đã chọn",
+    "current": "Bản nháp hiện tại",
+    "versions": "Phiên bản",
+    "split": "Xem song song",
+    "unified": "Xem hợp nhất",
+    "full_context": "Hiện toàn bộ ngữ cảnh",
+    "previous_change": "Thay đổi trước",
+    "next_change": "Thay đổi tiếp theo",
+    "no_changes": "Không có khác biệt",
+    "change_position": "{{current}} / {{total}} thay đổi",
+    "added_lines": "Dòng đã thêm: {{count}}",
+    "removed_lines": "Dòng đã gỡ bỏ: {{count}}",
+    "unchanged_lines": "$ dòng không thay đổi · nhấp để mở rộng",
+    "retry": "Thử bảo vệ lại",
+    "coarse": "Các khác biệt được đơn giản hóa trong giới hạn tính toán; toàn bộ văn bản vẫn được giữ nguyên.",
+    "compute_large": "Tính toán khác biệt cho tài liệu lớn",
+    "deleted": "Đã xóa {{count}} phiên bản lịch sử.",
+    "kind_write-pending": "Ghi tệp bị gián đoạn",
+    "budget_limited": "Bộ nhớ lịch sử đã đạt ngân sách mục tiêu. Điểm lưu tự động và phiên AI mới đã tạm dừng; tính năng bảo vệ bản nháp và bản sao an toàn vẫn hoạt động. Hãy xóa lịch sử không cần thiết để tiếp tục.",
+    "kind_recovered-save": "Bản lưu đã khôi phục"
+  },
+  "document_preview": {
+    "html_title": "Xem trước HTML",
+    "pdf_title": "Trình đọc PDF",
+    "refresh": "Làm mới",
+    "run_scripts": "Chạy script",
+    "loading": "Đang tải…",
+    "load_failed": "Không thể tải tệp này.",
+    "retry": "Thử lại",
+    "resources_blocked": "Tài nguyên chưa được tải",
+    "resource_folder_hint": "Hãy mở thư mục chứa tài liệu này và các tài nguyên của nó làm không gian làm việc, sau đó làm mới bản xem trước.",
+    "resource_errors": {
+      "not_found": "Không tìm thấy tệp.",
+      "permission_denied": "Bị từ chối quyền đọc tệp này.",
+      "outside_root": "Nằm ngoài thư mục hoặc không gian làm việc của tài liệu này.",
+      "too_large": "Tài nguyên hoặc bản xem trước mở rộng vượt quá giới hạn kích thước.",
+      "unsupported": "Loại tài nguyên hoặc URL không được hỗ trợ.",
+      "invalid_css": "Không thể phân tích biểu định kiểu này.",
+      "resource_limit": "Phát hiện nhập vòng tròn hoặc đã đạt giới hạn số lượng/độ sâu tài nguyên.",
+      "read_failed": "Không thể đọc tài nguyên này."
+    },
+    "previous_page": "Trang trước",
+    "next_page": "Trang sau",
+    "page": "Số trang",
+    "zoom_out": "Thu nhỏ",
+    "zoom_in": "Phóng to",
+    "fit_width": "Vừa chiều rộng",
+    "search": "Tìm kiếm trong PDF",
+    "previous_match": "Kết quả trước",
+    "next_match": "Kết quả tiếp theo",
+    "password_required": "Nhập mật khẩu PDF",
+    "password_incorrect": "Mật khẩu không đúng. Hãy thử lại.",
+    "unlock": "Mở khóa",
+    "cancel": "Hủy"
+  },
+  "snippets": {
+    "library": "Thư viện đoạn mã",
+    "description": "Dùng lại công thức, sơ đồ và mã giữa các không gian làm việc cục bộ.",
+    "kind": "Loại",
+    "kinds": {
+      "math": "Công thức toán",
+      "mermaid": "Mermaid",
+      "code": "Mã"
+    },
+    "search": "Tìm kiếm đoạn mã…",
+    "new": "Đoạn mã mới",
+    "copy": "Nhân bản",
+    "copyCustom": "Sao chép thành tùy chỉnh",
+    "copySuffix": "(bản sao)",
+    "show": "Hiện",
+    "hide": "Ẩn",
+    "hidden": "Đã ẩn",
+    "delete": "Xóa",
+    "deleteTitle": "Xóa “{{title}}”?",
+    "builtin": "Tích hợp sẵn",
+    "custom": "Tùy chỉnh",
+    "unsaved": "Thay đổi chưa lưu",
+    "name": "Tên",
+    "language": "Ngôn ngữ mã",
+    "languagePlaceholder": "ví dụ: typescript; để trống cho văn bản thuần",
+    "source": "Mã nguồn",
+    "sourceHelp": "Chỉ nhập mã nguồn, không kèm dấu phân cách ``` hoặc $$ bên ngoài. Văn bản và khoảng trắng được chèn nguyên văn; các biến không được mở rộng.",
+    "save": "Lưu",
+    "discard": "Hủy bỏ",
+    "unsavedTitle": "Lưu thay đổi của đoạn mã?",
+    "unsavedDescription": "Hãy lưu hoặc hủy bỏ các thay đổi trước khi rời khỏi đoạn mã này.",
+    "loadError": "Không thể tải đoạn mã",
+    "saveError": "Không thể lưu thay đổi",
+    "retry": "Thử lại",
+    "noResults": "Không có đoạn mã phù hợp",
+    "conflict": "Thư viện đã thay đổi trong một cửa sổ khác. Bản nháp của bạn vẫn được giữ lại. Hãy nhân bản nó thành một đoạn mã mới, hoặc hủy bỏ bản nháp và chọn lại bản gốc.",
+    "preview": "Xem trước",
+    "previewAgain": "Làm mới bản xem trước",
+    "previewStale": "Mã nguồn đã thay đổi. Hãy làm mới bản xem trước.",
+    "previewError": "Không thể xem trước. Bạn vẫn có thể lưu mã nguồn.",
+    "builtins": {
+      "math-fraction": "Phân số",
+      "math-root": "Căn bậc hai",
+      "math-sum": "Tổng sigma",
+      "math-matrix": "Ma trận",
+      "mermaid-flow": "Lưu đồ",
+      "mermaid-sequence": "Sơ đồ tuần tự",
+      "mermaid-class": "Sơ đồ lớp",
+      "mermaid-state": "Sơ đồ trạng thái",
+      "code-json": "Đối tượng JSON",
+      "code-typescript": "Hàm TypeScript",
+      "code-python": "Hàm Python",
+      "code-bash": "Script Bash"
+    }
+  },
+  "pdf_export": {
+    "title": "Xuất PDF",
+    "description": "Xuất PDF có thể tìm kiếm kèm dấu trang tiêu đề bằng trình duyệt Chrome, Chromium hoặc Edge trên máy.",
+    "paper_size": "Khổ giấy",
+    "orientation": "Hướng giấy",
+    "portrait": "Dọc",
+    "landscape": "Ngang",
+    "include_outline": "Kèm dấu trang tiêu đề",
+    "outline_hint": "Chuyển các tiêu đề trong tài liệu thành dàn ý PDF có thể điều hướng. Tài liệu không có tiêu đề sẽ không có dấu trang.",
+    "export": "Xuất PDF",
+    "print": "In…",
+    "exporting": "Đang xuất PDF…",
+    "success": "Đã lưu PDF vào {{path}}.",
+    "failed": "Xuất PDF thất bại. Tài liệu của bạn vẫn được giữ nguyên.",
+    "image_warning": "Không thể tải {{count}} hình ảnh. Hãy kiểm tra tệp PDF đã xuất.",
+    "browser_check_failed": "Không thể kiểm tra trình duyệt xuất PDF. Hãy thử lại trong Cài đặt → Xuất.",
+    "cancelled": "Đã hủy xuất PDF.",
+    "system_print": "In bằng hệ thống…",
+    "system_print_hint": "Bạn cũng có thể in bằng hệ thống. Lưu thành PDF qua hộp thoại in không đảm bảo có dấu trang tiêu đề.",
+    "browser": {
+      "error_details": "Chi tiết lỗi",
+      "checking": "Đang kiểm tra trình duyệt xuất PDF…",
+      "ready": "Trình duyệt {{version}} đã sẵn sàng.",
+      "not_found": "Không tìm thấy trình duyệt xuất PDF tương thích.",
+      "incompatible": "Phiên bản trình duyệt không hỗ trợ xuất PDF kèm dấu trang tiêu đề.",
+      "settings_hint": "Hãy cài đặt Chrome, Chromium hoặc Edge, hoặc chọn tệp thực thi của trình duyệt trong Cài đặt → Xuất."
+    }
+  },
+  "file_deletion": {
+    "permanent_title": "Xóa vĩnh viễn “{{name}}”?",
+    "trash_title": "Chuyển “{{name}}” vào thùng rác?",
+    "permanent_action": "Xóa vĩnh viễn",
+    "trash_action": "Chuyển vào thùng rác",
+    "counting": "Đang đếm…",
+    "counts": "{{files}} tệp · {{folders}} thư mục con",
+    "files_only": "{{files}} tệp",
+    "folders_only": "{{folders}} thư mục con",
+    "short_scope": "Bao gồm các mục ẩn và bị loại trừ",
+    "short_partial": "Ít nhất {{files}} tệp · {{folders}} thư mục con",
+    "partial_hint": "Chưa đếm xong. Có thể còn nhiều mục hơn.",
+    "empty": "Thư mục trống",
+    "symlink": "Chỉ liên kết bị gỡ bỏ. Đích của liên kết không bị ảnh hưởng.",
+    "count_failed": "Không thể đếm nội dung. Hãy thử lại.",
+    "permanent_warning": "Không thể hoàn tác thao tác xóa vĩnh viễn."
+  }
+}

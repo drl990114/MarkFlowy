@@ -1,0 +1,366 @@
+{
+  "common": {
+    "docs": "Tài liệu"
+  },
+  "docs": {
+    "tableOfContents": "Trên trang này",
+    "content": {
+      "description": "Bắt đầu với MarkFlowy: cài đặt ứng dụng, chỉnh sửa tệp Markdown trên máy, chuyển đổi giữa chỉnh sửa trực quan và chỉnh sửa mã nguồn, và thiết lập trợ lý AI tùy chọn."
+    },
+    "sidebar": {
+      "gettingStarted": "Bắt đầu"
+    }
+  },
+  "mock": {
+    "intro": {
+      "title": "Chào mừng bạn đến với MarkFlowy!",
+      "ai_label": "Tích hợp AI:",
+      "ai_desc": "Copilot tích hợp sẵn, dịch, tóm tắt, cùng hỗ trợ DeepSeek/ChatGPT và các mô hình phổ biến khác.",
+      "lightweight_label": "Nhẹ:",
+      "lightweight_desc": "Xây dựng bằng Tauri cho macOS, Windows và Linux. Kích thước gói thay đổi tùy theo nền tảng và trình cài đặt.",
+      "modes_label": "Chế độ chỉnh sửa:",
+      "modes_desc": "Chuyển đổi giữa WYSIWYG và mã nguồn.",
+      "files_label": "Hỗ trợ tệp:",
+      "files_desc": "Xử lý Markdown, JSON, TXT và nhiều định dạng khác.",
+      "themes_label": "Chủ đề tùy chỉnh:",
+      "themes_desc": "Thiết kế và chia sẻ kiểu dáng trình soạn thảo của riêng bạn.",
+      "hotkeys_label": "Phím tắt:",
+      "hotkeys_desc": "Phím tắt có thể tùy chỉnh hoàn toàn.",
+      "images_label": "Hình ảnh thông minh:",
+      "images_desc": "Dễ dàng quản lý đường dẫn hoặc chuyển đổi sang Base64.",
+      "manager_label": "Trình quản lý tệp:",
+      "manager_desc": "Chế độ xem dạng cây mạnh mẽ kèm tìm kiếm toàn cục.",
+      "multilingual_label": "Đa ngôn ngữ:",
+      "multilingual_desc": "Hỗ trợ sẵn hơn 5 ngôn ngữ chính.",
+      "footer": "Chúc bạn trải nghiệm trình soạn thảo vui vẻ!"
+    },
+    "config": {
+      "description": "Trình soạn thảo Markdown ưu tiên lưu trữ cục bộ, tập trung vào tài liệu lớn và AI tùy chọn."
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "MarkFlowy",
+      "subtitle": "Trình soạn thảo Markdown ưu tiên lưu trữ cục bộ, tập trung vào tài liệu lớn và AI tùy chọn.",
+      "description": "Tìm lại dòng chảy khi viết với MarkFlowy, trình soạn thảo Markdown ưu tiên lưu trữ cục bộ dành cho macOS, Windows và Linux. Chỉnh sửa trực quan và mã nguồn, kèm trợ lý AI tùy chọn.",
+      "download": "Tải xuống ngay",
+      "metaTitle": "MarkFlowy — Trình soạn thảo Markdown ưu tiên lưu trữ cục bộ"
+    },
+    "statRings": {
+      "platforms": "Nền tảng",
+      "files": "Tệp trên máy",
+      "optional": "Tùy chọn"
+    },
+    "features": {
+      "lead": "Trình soạn thảo tối giản nhưng mạnh mẽ, kết hợp trí tuệ AI với trải nghiệm viết tinh tế — dành cho những ai coi trọng sự tập trung và tay nghề.",
+      "feature1": {
+        "title": "Nhiều chế độ chỉnh sửa",
+        "description": "Hỗ trợ chế độ chỉnh sửa mã nguồn và WYSIWYG để đáp ứng nhu cầu ở các tình huống khác nhau, đồng thời hỗ trợ chỉnh sửa các tệp ngoài Markdown như JSON, TXT, v.v."
+      },
+      "feature2": {
+        "title": "Trợ lý AI tích hợp sẵn",
+        "description": "Tích hợp trợ lý AI mạnh mẽ hỗ trợ tạo văn bản, trò chuyện, dịch và các chức năng khác để nâng cao hiệu quả chỉnh sửa."
+      },
+      "feature3": {
+        "title": "Chủ đề tùy chỉnh",
+        "description": "Cung cấp sẵn chủ đề sáng và tối, đồng thời hỗ trợ chủ đề tùy chỉnh để đáp ứng nhu cầu cá nhân hóa."
+      },
+      "capability1": {
+        "tag": "Chỉnh sửa",
+        "title": "WYSIWYG và mã nguồn",
+        "body": "Chuyển đổi liền mạch giữa chế độ WYSIWYG (thấy gì được nấy) và chế độ mã nguồn. Chỉnh sửa Markdown, JSON, TXT và nhiều định dạng khác một cách linh hoạt."
+      },
+      "capability2": {
+        "tag": "AI",
+        "title": "Copilot và hỗ trợ thông minh",
+        "body": "Kết nối các nhà cung cấp AI tùy chọn để trò chuyện, dịch, tóm tắt và dùng Copilot. Chọn dịch vụ đám mây hoặc chạy mô hình cục bộ với Ollama."
+      },
+      "capability3": {
+        "tag": "Hiệu năng",
+        "title": "Chỉnh sửa tài liệu lớn",
+        "body": "Quá trình tải và hiển thị được tối ưu giúp mở, cuộn và chỉnh sửa tài liệu Markdown lớn mượt mà hơn."
+      },
+      "capability4": {
+        "tag": "Tùy biến",
+        "title": "Chủ đề và phím tắt",
+        "body": "Thiết kế chủ đề trình soạn thảo của riêng bạn và chia sẻ chúng. Phím tắt có thể tùy chỉnh hoàn toàn để phù hợp với quy trình làm việc của bạn."
+      }
+    },
+    "contributors": {
+      "title": "Được xây dựng bởi nhiều người đóng góp",
+      "titleLead": "Được xây dựng bởi nhiều",
+      "titleAccent": "người đóng góp",
+      "description": "Cảm ơn tất cả các nhà phát triển đã đóng góp cho MarkFlowy",
+      "count": "{{count}} người đóng góp trên quỹ đạo",
+      "viewAll": "Xem tất cả người đóng góp",
+      "globeLabel": "Quả địa cầu người đóng góp toàn cầu của MarkFlowy",
+      "orbitLabel": "Liên kết hồ sơ người đóng góp bay quanh quả địa cầu"
+    },
+    "guides": {
+      "ollamaLink": "Thiết lập AI cục bộ",
+      "introLink": "Đọc phần giới thiệu"
+    }
+  },
+  "releases": {
+    "title": "Bản phát hành",
+    "meta_description": "Khám phá các bản phát hành của MarkFlowy, tính năng chỉnh sửa mới, cải tiến và bản sửa lỗi. Tải xuống trình soạn thảo Markdown cho macOS, Windows và Linux.",
+    "description_before_link": "Đây là các bản phát hành mới nhất của MarkFlowy. Nhấp vào một phiên bản để xem chi tiết các thay đổi và cập nhật. Tải xuống từ",
+    "github_link": "GitHub Releases",
+    "description_after_link": ".",
+    "see_details": "Xem chi tiết"
+  },
+  "theme": {
+    "system": "Hệ thống",
+    "light": "Chế độ sáng",
+    "dark": "Chế độ tối"
+  },
+  "navigation": {
+    "home": "Trang chủ",
+    "docs": "Tài liệu",
+    "download": "Tải xuống",
+    "github": "GitHub",
+    "theme": "Chủ đề",
+    "language": "Ngôn ngữ",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "webApp": "Ứng dụng web",
+    "releases": "Bản phát hành"
+  },
+  "fileTitle": {
+    "Snippets": "Thư viện đoạn mã",
+    "intro": "Giới thiệu",
+    "CustomTheme": "Chủ đề tùy chỉnh",
+    "CODE_OF_CONDUCT": "CODE_OF_CONDUCT",
+    "CONTRIBUTING": "CONTRIBUTING",
+    "Community": "Nguyên tắc cộng đồng",
+    "Extension": "Hướng dẫn tiện ích mở rộng",
+    "License": "Giấy phép",
+    "UseCopilotWithOllama": "Dùng Copilot với Ollama"
+  },
+  "auth": {
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "email": "Email",
+    "emailPlaceholder": "Nhập email của bạn",
+    "displayName": "Tên hiển thị",
+    "displayNamePlaceholder": "Nhập tên hiển thị của bạn",
+    "verificationCode": "Mã xác minh",
+    "codePlaceholder": "Nhập mã 8 chữ số",
+    "sendCode": "Gửi mã",
+    "resend": "Gửi lại mã",
+    "resendCode": "Gửi lại sau {{seconds}} giây",
+    "signIn": "Đăng nhập",
+    "createAccount": "Tạo tài khoản",
+    "changeEmail": "Thay đổi",
+    "autoRegisterHint": "Email chưa đăng ký sẽ được tự động đăng ký",
+    "backToHome": "Quay lại trang chủ",
+    "continueWithGitHub": "Tiếp tục với GitHub",
+    "githubRedirecting": "Đang chuyển hướng đến GitHub...",
+    "githubLoginError": "Không thể bắt đầu đăng nhập bằng GitHub",
+    "orContinueWithEmail": "hoặc tiếp tục bằng email",
+    "githubCompleting": "Đang hoàn tất đăng nhập bằng GitHub",
+    "githubCallbackFailed": "Đăng nhập bằng GitHub thất bại",
+    "githubCallbackError": "Liên kết đăng nhập GitHub không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.",
+    "githubAccountLinkRequired": "Đã có tài khoản dùng email này. Hãy đăng nhập bằng email, sau đó liên kết GitHub trong Cài đặt.",
+    "backToSignIn": "Quay lại đăng nhập",
+    "welcomeBack": "Chào mừng bạn trở lại",
+    "welcomeDescription": "Đăng nhập vào không gian làm việc và tiếp tục từ chỗ bạn đã dừng."
+  },
+  "site": {
+    "nav": {
+      "features": "Tính năng",
+      "main": "Điều hướng chính",
+      "skip": "Chuyển đến nội dung",
+      "writing": "Viết và chỉnh sửa",
+      "editor": "Trình soạn thảo Markdown",
+      "editorDescription": "Chỉnh sửa trực quan kèm chế độ mã nguồn",
+      "demoDescription": "Bắt đầu viết mà không cần cài đặt",
+      "workspace": "Không gian làm việc của bạn",
+      "files": "Tệp trên máy và tài liệu lớn",
+      "filesDescription": "Định dạng mở, sắp xếp linh hoạt",
+      "assistant": "Trợ lý AI tùy chọn",
+      "assistantDescription": "Dịch vụ đám mây hoặc mô hình Ollama cục bộ",
+      "themes": "Chủ đề và cá nhân hóa",
+      "themesDescription": "Biến trình soạn thảo thành của riêng bạn",
+      "start": "Bắt đầu",
+      "downloadDescription": "Dành cho macOS, Windows và Linux",
+      "webDescription": "Không gian làm việc của bạn trên trình duyệt · Beta",
+      "featuresDescription": "Khám phá những gì MarkFlowy có thể làm",
+      "quickstart": "Bắt đầu nhanh",
+      "explore": "Khám phá thêm",
+      "support": "Trợ giúp và hỗ trợ",
+      "openSource": "Mã nguồn mở",
+      "buildTogether": "Cùng nhau xây dựng",
+      "githubDescription": "Xem mã nguồn và theo dõi quá trình phát triển",
+      "contributeDescription": "Bắt đầu với một issue hoặc một cải tiến",
+      "feedbackDescription": "Báo cáo sự cố và chia sẻ ý tưởng",
+      "contributors": "Người đóng góp",
+      "contributorsDescription": "Gặp gỡ những người xây dựng MarkFlowy",
+      "back": "Quay lại"
+    },
+    "hero": {
+      "eyebrow": "ƯU TIÊN CỤC BỘ. Ý TƯỞNG DẪN ĐƯỜNG.",
+      "title": "Ý tưởng của bạn, tuôn chảy trọn vẹn.",
+      "lead": "Trình soạn thảo Markdown được chế tác để chỉnh sửa mượt mà và viết tập trung.",
+      "description": "Ưu tiên lưu trữ cục bộ, với chỉnh sửa trực quan và mã nguồn. Trợ lý AI của bạn có thể dùng Skill chính thức để mở, lưu và xuất tài liệu trong MarkFlowy.",
+      "try": "Dùng thử trực tuyến",
+      "platforms": "Được tạo ra cho cách bạn làm việc"
+    },
+    "preview": {
+      "eyebrow": "KHÔNG GIAN LÀM VIỆC CỤC BỘ CỦA BẠN",
+      "title": "Một thư mục cho mọi thứ đang thành hình.",
+      "description": "Mở một thư mục trên máy để tập hợp ghi chú, bản nháp và tệp dự án lại với nhau. Duyệt tệp, theo dõi dàn ý tài liệu và tiếp tục viết trong cùng một cửa sổ.",
+      "note": "MarkFlowy Desktop · Không gian làm việc cục bộ",
+      "screenshotAlt": "MarkFlowy Desktop ở chế độ sáng, hiển thị tệp trên máy, trình soạn thảo trực quan và dàn ý tài liệu"
+    },
+    "singleFile": {
+      "eyebrow": "CHẾ ĐỘ TỆP ĐƠN",
+      "title": "Một tệp. Trọn vẹn sự chú ý của bạn.",
+      "description": "Mở một tệp Markdown và bắt đầu viết. Không cần thiết lập không gian làm việc, các công cụ soạn thảo quen thuộc vẫn sẵn sàng khi bạn cần.",
+      "open": {
+        "title": "Mở một tệp và bắt đầu",
+        "body": "Làm việc trực tiếp với tài liệu trên máy, hoặc tạo ghi chú mới và lưu vào đúng chỗ của nó."
+      },
+      "focus": {
+        "title": "Giữ trang viết yên tĩnh",
+        "body": "Thanh tiêu đề gọn gàng dành chỗ cho câu chữ của bạn. Nhấp vào tên tài liệu để đổi tên."
+      },
+      "grow": {
+        "title": "Thêm thư mục khi bạn cần",
+        "body": "Mở một thư mục trên máy khi một ghi chú trở thành dự án. Các công cụ viết quen thuộc vẫn đồng hành cùng bạn."
+      },
+      "link": "Khám phá chế độ viết tệp đơn",
+      "note": "MarkFlowy Desktop · Chế độ tệp đơn",
+      "screenshotAlt": "MarkFlowy Desktop ở chế độ tệp đơn, với một tài liệu Markdown và tên tệp trên thanh tiêu đề gọn gàng"
+    },
+    "features": {
+      "eyebrow": "KẾT NỐI CHU ĐÁO",
+      "title": "Mọi thứ việc viết cần. Không gì cản đường.",
+      "description": "Từ một ghi chú nhanh đến một tài liệu dài, hãy xây dựng dòng chảy viết mang dấu ấn của riêng bạn.",
+      "write": {
+        "title": "Markdown, theo cách bạn suy nghĩ.",
+        "body": "Viết trực quan hoặc làm việc gần hơn với mã nguồn. Làm việc với Markdown, JSON và văn bản thuần trong một không gian quen thuộc.",
+        "link": "Khám phá trình soạn thảo",
+        "alt": "Trình soạn thảo MarkFlowy Desktop hiển thị một bài viết mẫu"
+      },
+      "local": {
+        "title": "Hiệu năng cao cho bản nháp dài.",
+        "body": "Quá trình tải và hiển thị được tối ưu giúp mở, cuộn và chỉnh sửa tài liệu lớn mượt mà hơn. Làm việc trực tiếp với các tệp trong thư mục của riêng bạn."
+      },
+      "ai": {
+        "title": "Một chút trợ giúp, khi bạn cần.",
+        "body": "Dùng dịch vụ AI của riêng bạn để trò chuyện, tóm tắt và dịch, hoặc kết nối một mô hình cục bộ với Ollama.",
+        "alt": "Trình soạn thảo MarkFlowy Desktop với bảng trợ lý AI tùy chọn"
+      },
+      "personal": {
+        "title": "Thoải mái như ở nhà.",
+        "body": "Chọn chủ đề, đặt phím tắt và tận hưởng một không gian không xao nhãng phù hợp với bạn.",
+        "link": "Khám phá khả năng tùy biến"
+      },
+      "shortcuts": {
+        "write": "In đậm văn bản",
+        "focus": "Tập trung viết",
+        "command": "Tìm một lệnh"
+      }
+    },
+    "workflow": {
+      "eyebrow": "TỪ Ý TƯỞNG ĐẾN THÀNH PHẨM",
+      "title": "Một không gian. Trọn vẹn dòng chảy viết của bạn.",
+      "capture": {
+        "title": "Nắm bắt ý tưởng.",
+        "body": "Mở một tệp đơn cho một ý tưởng nhanh, hoặc một thư mục cho dự án lớn hơn. Bắt đầu viết mà không cần nhập ghi chú.",
+        "visual": "Ghi lại một ý tưởng"
+      },
+      "refine": {
+        "title": "Tìm đúng câu chữ.",
+        "body": "Dùng tiêu đề và dàn ý để định hình bản nháp. Chuyển đổi giữa chỉnh sửa trực quan và mã nguồn, kèm AI tùy chọn để tóm tắt và dịch.",
+        "visual": "Trau chuốt bản nháp"
+      },
+      "share": {
+        "title": "Mang theo bên mình.",
+        "body": "Giữ nguyên các tệp Markdown, xuất HTML hoặc hình ảnh, hoặc lưu PDF qua hộp thoại in của hệ thống. Mang bài viết của bạn đến bất cứ đâu cần đến.",
+        "visual": "Sẵn sàng chia sẻ"
+      }
+    },
+    "stats": {
+      "eyebrow": "Xây dựng công khai, cùng nhau phát triển",
+      "title": "Những đóng góp nhỏ. Tiến bộ lâu dài.",
+      "body": "Một ngôi sao, một lượt tải xuống, một đóng góp. MarkFlowy phát triển cùng những người quan tâm đến việc viết và mã nguồn mở.",
+      "stars": "Sao GitHub",
+      "forks": "Fork mã nguồn mở",
+      "downloads": "Lượt tải gói phát hành",
+      "source": "Dữ liệu GitHub công khai",
+      "updated": "Cập nhật",
+      "downloadNote": "Lượt tải xuống bao gồm trình cài đặt bản ổn định và gói cập nhật."
+    },
+    "community": {
+      "eyebrow": "XÂY DỰNG CÔNG KHAI",
+      "title": "Cùng nhau, tốt hơn.",
+      "body": "MarkFlowy phát triển cùng những người sử dụng nó. Đọc mã nguồn, chia sẻ ý tưởng, báo lỗi hoặc giúp định hình những gì sắp tới.",
+      "thanks": "Được hiện thực hóa nhờ những người đóng góp"
+    },
+    "cta": {
+      "title": "Ý tưởng tiếp theo của bạn bắt đầu từ đây.",
+      "body": "Tập trung hơn một chút. Trôi chảy hơn rất nhiều.",
+      "docs": "Đọc tài liệu"
+    },
+    "footer": {
+      "product": "Sản phẩm",
+      "resources": "Tài nguyên",
+      "community": "Cộng đồng",
+      "tagline": "Không gian ưu tiên cục bộ để ý tưởng trở thành câu chữ.",
+      "contribute": "Đóng góp",
+      "feedback": "Phản hồi và báo lỗi",
+      "privacy": "Chính sách quyền riêng tư",
+      "license": "Giấy phép",
+      "made": "Được tạo ra từ tình yêu với việc viết."
+    },
+    "releases": {
+      "eyebrow": "LUÔN TIẾN VỀ PHÍA TRƯỚC",
+      "latest": "Bản phát hành mới nhất",
+      "empty": "Ghi chú phát hành tạm thời không khả dụng. Bạn có thể tìm tất cả bản phát hành trên GitHub."
+    }
+  },
+  "workspace": {
+    "title": "Không gian làm việc",
+    "eyebrow": "KHÔNG GIAN VIẾT CỦA BẠN",
+    "description": "Tiếp tục từ chỗ bạn đã dừng, hoặc kết nối một kho lưu trữ GitHub để bắt đầu điều gì đó mới.",
+    "ready": "Sẵn sàng để viết",
+    "syncedCount": "{{count}} không gian làm việc đã đồng bộ",
+    "settings": "Cài đặt",
+    "import": "Nhập không gian làm việc",
+    "recent": "Bắt đầu viết",
+    "pinned": "Không cần tài khoản",
+    "demo": "Không gian làm việc mẫu",
+    "demoDescription": "Không gian để thử viết. Được lưu trong trình duyệt này.",
+    "local": "Cục bộ",
+    "shared": "Đã chia sẻ",
+    "synced": "Đã đồng bộ",
+    "signInRequired": "Đăng nhập để kết nối",
+    "connectTitle": "Đưa các kho lưu trữ của bạn vào MarkFlowy",
+    "connectDescription": "Kết nối GitHub, chọn một kho lưu trữ và giữ các tài liệu của bạn ở cùng một nơi.",
+    "localShared": "Cục bộ và đã chia sẻ",
+    "count": "{{count}} không gian làm việc",
+    "repositories": "{{count}} kho lưu trữ",
+    "loading": "Đang tải không gian làm việc…",
+    "emptyTitle": "Dự án tiếp theo của bạn bắt đầu từ đây.",
+    "emptyDescription": "Nhập một kho lưu trữ GitHub để tạo không gian làm việc đầu tiên của bạn.",
+    "files": "Tệp",
+    "editor": "Viết",
+    "outline": "Dàn ý",
+    "panels": "Bảng điều khiển không gian làm việc",
+    "staged": "Thay đổi",
+    "stagedEmpty": "Các chỉnh sửa của bạn sẽ xuất hiện ở đây.",
+    "source": "Mã nguồn",
+    "previewMode": "Xem trước",
+    "save": "Lưu",
+    "saving": "Đang lưu",
+    "saved": "Đã lưu",
+    "saveMessage": "Nội dung lưu",
+    "commitMessage": "Thông điệp commit",
+    "noFile": "Chọn một tài liệu để bắt đầu viết.",
+    "loadingFiles": "Đang tải tệp…",
+    "loadingFile": "Đang tải tài liệu…",
+    "headingCount": "{{count}} tiêu đề"
+  }
+}
