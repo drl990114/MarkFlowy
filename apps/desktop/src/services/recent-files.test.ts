@@ -29,7 +29,12 @@ beforeEach(() => {
     activeGroupId: 'group',
     editorLayout: { type: 'leaf', id: 'group', opened: [] },
   })
-  useRecentFilesStore.setState({ rootPath: '/workspace', entries: [], restoring: false })
+  useRecentFilesStore.setState({
+    rootPath: '/workspace',
+    entries: [],
+    restoring: false,
+    shared: false,
+  })
 })
 afterEach(() => {
   stopTracking?.()
@@ -179,7 +184,7 @@ describe('application-owned visit tracking', () => {
     expect(paths()).toEqual([])
   })
 
-  it('keeps Save As in place and clears session history when the workspace changes', () => {
+  it('keeps Save As in place and retains file history when the workspace changes', () => {
     const draft = createFile({ name: 'Draft.md' })
     const other = createFile({ path: '/workspace/other.md' })
     stopTracking = startRecentFileTracking()
@@ -188,12 +193,25 @@ describe('application-owned visit tracking', () => {
     setFileObject(draft.id, { ...draft, path: '/workspace/saved.md' })
     expect(paths()).toEqual([other.path, '/workspace/saved.md'])
     useEditorStore.getState().setFolderData([])
-    expect(paths()).toEqual([])
+    expect(paths()).toEqual([other.path, '/workspace/saved.md'])
     expect(useRecentFilesStore.getState().rootPath).toBeUndefined()
     stopTracking()
     stopTracking = undefined
     open(other.id)
+    expect(paths()).toEqual([other.path, '/workspace/saved.md'])
+  })
+
+  it('does not replace shared history with a restored workspace or window snapshot', () => {
+    useRecentFilesStore.setState({ shared: true })
+    visit('/elsewhere/announcements.md')
+    restoreRecentFileHistory(() => {
+      useEditorStore.getState().setFolderData([])
+    }, [{ path: '/old-session/only.md' }])
+    expect(paths()).toEqual(['/elsewhere/announcements.md'])
+    useRecentFilesStore.getState().clear()
+    restoreRecentFileHistory(() => {}, [{ path: '/old-session/only.md' }])
     expect(paths()).toEqual([])
+    useRecentFilesStore.setState({ shared: false })
   })
 
   it.each(['deleteNode', 'trashNode'] as const)(

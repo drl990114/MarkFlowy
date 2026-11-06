@@ -3,6 +3,7 @@ import { useTranslation } from 'next-i18next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { getDocumentLinkLocale } from '../../utils/publicContent'
 import { DOWNLOAD_URL } from '../../utils/website'
 import LanguageSwitcher from '../Nav/LanguageSwitcher'
 import { Logo } from '../Nav/Logo'
@@ -22,6 +23,7 @@ export interface SiteHeaderProps {
 
 function MenuColumns({ menu, onNavigate }: { menu: SiteMenu; onNavigate: () => void }) {
   const { t } = useTranslation()
+  const { locale } = useRouter()
   const present = useIsPresent()
   return (
     <div className='mf-menu-columns' data-columns={menu.sections.length} inert={!present}>
@@ -31,7 +33,12 @@ function MenuColumns({ menu, onNavigate }: { menu: SiteMenu; onNavigate: () => v
           <ul>
             {section.links.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} onClick={onNavigate} className='mf-menu-link'>
+                <Link
+                  href={link.href}
+                  locale={getDocumentLinkLocale(link.href, locale)}
+                  onClick={onNavigate}
+                  className='mf-menu-link'
+                >
                   <span className='mf-menu-link-title'>
                     {t(link.title)}
                     <SiteArrow />

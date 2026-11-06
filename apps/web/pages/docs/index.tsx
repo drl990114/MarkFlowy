@@ -14,6 +14,9 @@ export default function Documentation() {
   const currentLocale = router.locale || 'en'
   const sections = getSections(currentLocale)
   const keys = Object.keys(sections)
+  const usesFallback = Object.values(sections).some((section) =>
+    section.some((document) => document.locale !== currentLocale),
+  )
 
   return (
     <DocsLayout
@@ -21,6 +24,7 @@ export default function Documentation() {
       description={t('docs.content.description', { defaultValue: t('common.docs') })}
     >
       <Description>{t('docs.content.description', { defaultValue: t('common.docs') })}</Description>
+      {usesFallback && <Description>{t('docs.content.fallback')}</Description>}
       <Row>
         {keys.map((key) => {
           const section = sections[key]
@@ -29,10 +33,10 @@ export default function Documentation() {
               <SectionTitle>{t(`fileTitle.${key}`)}</SectionTitle>
 
               <DocumentList>
-                {section.map(({ slug, title }) => {
+                {section.map(({ slug, title, locale }) => {
                   return (
                     <DocumentItem key={slug}>
-                      <DocumentLink href={`/docs${slug}`} locale={currentLocale}>
+                      <DocumentLink href={`/docs${slug}`} locale={locale}>
                         <DocumentTitle>{t(`fileTitle.${title}`)}</DocumentTitle>
                         <span aria-hidden='true'>→</span>
                       </DocumentLink>

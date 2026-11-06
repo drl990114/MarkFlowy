@@ -27,10 +27,19 @@ export function restoreRecentFileHistory(
         file.path ? [[getPathIdentityKey(file.path), file.fileId] as const] : [],
       ),
     )
+    const openedIds = new Set(useEditorStore.getState().opened)
     useRecentFilesStore
       .getState()
       .replaceEntries(
-        entries?.map((entry) =>
+        (previous.shared
+          ? [
+              ...previous.entries.filter(
+                (entry) => entry.path || (entry.fileId && openedIds.has(entry.fileId)),
+              ),
+              ...opened.filter((entry) => !entry.path),
+            ]
+          : entries
+        )?.map((entry) =>
           entry.path
             ? { ...entry, fileId: fileIds.get(getPathIdentityKey(entry.path)) ?? entry.fileId }
             : entry,
@@ -54,7 +63,7 @@ export function restoreRecentFileHistory(
 export function startRecentFileTracking(): () => void {
   const initial = useEditorStore.getState()
   if (useRecentFilesStore.getState().rootPath !== initial.getRootPath()) {
-    useRecentFilesStore.setState({ rootPath: initial.getRootPath(), entries: [] })
+    useRecentFilesStore.setState({ rootPath: initial.getRootPath() })
   }
   const visitActive = () => {
     const file = getFileObject(useEditorStore.getState().activeId ?? '')
@@ -68,7 +77,7 @@ export function startRecentFileTracking(): () => void {
     if (useRecentFilesStore.getState().restoring) return
     const rootPath = state.getRootPath()
     if (rootPath !== useRecentFilesStore.getState().rootPath) {
-      useRecentFilesStore.setState({ rootPath, entries: [] })
+      useRecentFilesStore.setState({ rootPath })
     }
     if (state.opened !== previous.opened) {
       const opened = new Set(state.opened)
@@ -84,9 +93,14 @@ export function startRecentFileTracking(): () => void {
   const unsubscribeMetadata = useFileCacheStore.subscribe((state, previous) => {
     const history = useRecentFilesStore.getState()
     if (history.restoring || state.metadataRevision === previous.metadataRevision) return
+    for (const entry of history.entries) {
+      const file = entry.fileId ? state.entries[entry.fileId] : undefined
+      if (file?.kind !== 'file' || !file.path || file.path === entry.path) continue
+      history.updateFilePath(file.id, file.path)
+    }
     // Save As and cached file metadata changes keep the visit's original position.
     history.replaceEntries(
-      history.entries.map((entry) => {
+      useRecentFilesStore.getState().entries.map((entry) => {
         const file = entry.fileId ? state.entries[entry.fileId] : undefined
         return file?.kind === 'file' ? { path: file.path, fileId: file.id } : entry
       }),

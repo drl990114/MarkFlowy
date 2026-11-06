@@ -1878,6 +1878,8 @@ pub fn run() {
             app::window_manager::check_window_by_path,
             app::window_manager::is_file_in_workspace,
             app::window_manager::focus_window_by_label,
+            app::application_session::preserve_update_session,
+            app::application_session::release_update_session,
             app::application_session::cancel_app_quit,
             app::application_session::close_session_window,
             keybindings::cmd::get_keyboard_infos,
@@ -1885,6 +1887,7 @@ pub fn run() {
             opened_cache::cmd::get_opened_cache,
             opened_cache::cmd::add_recent_workspace,
             opened_cache::cmd::clear_recent_workspaces,
+            app::recent_files::recent_file_history,
             app::snippets::cmd::get_snippets,
             app::snippets::cmd::mutate_snippets,
             bookmarks::cmd::get_bookmark_library,
@@ -2072,6 +2075,13 @@ pub fn run() {
             let app = window.app_handle();
 
             match event {
+                tauri::WindowEvent::CloseRequested { api, .. }
+                    if application_session::is_update_owner(window.label()) =>
+                {
+                    // The requester can be the auxiliary settings window, which
+                    // has no editor close listener to wait for the update barrier.
+                    api.prevent_close();
+                }
                 tauri::WindowEvent::Focused(true) => {
                     window_manager::mark_window_recent(window.label());
                 }

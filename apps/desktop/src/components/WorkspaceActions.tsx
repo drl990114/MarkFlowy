@@ -29,7 +29,7 @@ export function WorkspaceActions({ location = 'titlebar' }: WorkspaceActionsProp
   const recentWorkspaces = useOpenedCacheStore((state) => state.recentWorkspaces)
   const clearRecentWorkspaces = useOpenedCacheStore((state) => state.clearRecentWorkspaces)
   const recentFiles = useRecentFilesStore((state) => state.entries)
-  const replaceRecentFiles = useRecentFilesStore((state) => state.replaceEntries)
+  const clearRecentFiles = useRecentFilesStore((state) => state.clear)
   const [isPickerOpen, setIsPickerOpen] = useState(false)
   const pickerLabel = t('workspace.openFileOrFolder')
   const workspaceLabel = (rootPath && (getFileNameFromPath(rootPath) || rootPath)) || t('file.openDir')
@@ -68,7 +68,7 @@ export function WorkspaceActions({ location = 'titlebar' }: WorkspaceActionsProp
 
   const handleClearRecent = () => {
     setIsPickerOpen(false)
-    replaceRecentFiles([])
+    clearRecentFiles()
     void clearRecentWorkspaces().catch((error) => toast.error(String(error)))
   }
 

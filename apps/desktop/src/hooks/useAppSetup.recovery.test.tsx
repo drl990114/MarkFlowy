@@ -2,6 +2,7 @@ import { act, cleanup, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as DraftRecoveryState from '@/services/draftRecoveryState'
 import type { switchWorkspaceInCurrentWindow } from '@/services/workspace-switch'
+import type { UpdateSessionPersistence } from '@/services/update-session'
 import type * as AppSetup from './useAppSetup'
 import { normalizeStartupAppearance } from '@/startup/appearance'
 
@@ -20,6 +21,9 @@ const mocks = vi.hoisted(() => ({
   syncSystemTheme: vi.fn(),
   stageRecovery: vi.fn(),
   readSession: vi.fn(),
+  startRecentHistory: vi.fn(),
+  recentHistory: { flush: vi.fn(), dispose: vi.fn() },
+  listenUpdateSession: vi.fn<(label: string, persistence: UpdateSessionPersistence) => Promise<() => void>>(),
   restoreDocuments: vi.fn(),
   restoreWorkspace: vi.fn(),
   sessionReload: vi.fn(),
@@ -66,7 +70,7 @@ vi.mock('@/stores', () => ({
   useEditorStore: { getState: () => ({ getRootPath: mocks.getRootPath, opened: mocks.opened }), subscribe: () => vi.fn() },
 }))
 vi.mock('@/stores/useAppSettingStore', () => ({
-  default: { getState: () => ({ settingData: mocks.settingData }) },
+  default: { getState: () => ({ settingData: mocks.settingData }), subscribe: () => vi.fn() },
 }))
 vi.mock('@/stores/useOpenedCacheStore', () => ({
   default: { getState: () => ({ setRecentWorkspaces: vi.fn() }) },
@@ -83,6 +87,8 @@ vi.mock('@/stores/useThemeStore', () => ({
     }),
   },
 }))
+vi.mock('@/services/update-session', () => ({ listenForUpdateSession: mocks.listenUpdateSession }))
+vi.mock('@/services/recent-file-history', () => ({ startSharedRecentFileHistory: mocks.startRecentHistory }))
 vi.mock('@/services/app-setting', () => ({ appSettingStoreSetup: async () => ({ theme_mode: 'system' }) }))
 vi.mock('@/services/draft-recovery', () => ({
   listenForDraftReload: () => vi.fn(), closeWithDraftRecovery: mocks.closeDrafts,
@@ -132,6 +138,10 @@ beforeEach(async () => {
   mocks.paths = {}
   mocks.stageRecovery.mockResolvedValue({ visibleReady: Promise.resolve(), finished: Promise.resolve(0) })
   mocks.sessionReload.mockReturnValue(false)
+  mocks.startRecentHistory.mockResolvedValue(mocks.recentHistory)
+  mocks.recentHistory.flush.mockResolvedValue(undefined)
+  mocks.recentHistory.dispose.mockResolvedValue(undefined)
+  mocks.listenUpdateSession.mockResolvedValue(vi.fn())
   mocks.closeDrafts.mockImplementation(async (_cache, _label, close) => { await close(); return true })
   mocks.afterInteractive.mockReturnValue(vi.fn())
   mocks.checkUpdate.mockResolvedValue(undefined)
@@ -185,6 +195,29 @@ function bootstrapSession(restoreSessionLabel: string | null) {
 }
 
 describe('application window restoration', () => {
+  it('restores documents and drafts and allows workspace switching when shared history is unreadable', async () => {
+    vi.resetModules()
+    bootstrapSession('main')
+    const error = new Error('Invalid recent_files.json')
+    const session = { windowLabel: 'main', rootPath: '/workspace' }
+    mocks.startRecentHistory.mockRejectedValueOnce(error)
+    mocks.readSession.mockResolvedValue(session)
+    const recentFiles = (await import('@/stores/useRecentFilesStore')).default
+    recentFiles.setState({ shared: true })
+    const restarted = await import('./useAppSetup')
+    await restarted.startAppSetup()
+
+    expect(recentFiles.getState().shared).toBe(false)
+    expect(mocks.restoreDocuments).toHaveBeenCalledWith(session)
+    expect(mocks.stageRecovery).toHaveBeenLastCalledWith(expect.objectContaining({ session }))
+    expect(mocks.error).toHaveBeenCalledWith(
+      'Failed to load shared recent files; using local session history', error,
+    )
+    const { switchWorkspaceInCurrentWindow } = await import('@/services/workspace-switch')
+    await expect(switchWorkspaceInCurrentWindow('/another-workspace')).resolves.toBe(true)
+    expect(mocks.switchSession).toHaveBeenCalledWith('/another-workspace', mocks.cache)
+  })
+
   it('restores the exact window snapshot before recovering its drafts', async () => {
     vi.resetModules()
     bootstrapSession('main_workspace')
@@ -236,7 +269,68 @@ describe('application window restoration', () => {
   })
 })
 
+describe('update session persistence', () => {
+  it('prepares recovery before flushing all persistent session stores', async () => {
+    await startRuntime()
+    const persistence = mocks.listenUpdateSession.mock.calls[0][1]
+    const draft = failedDraft()
+    let prepared = false
+    const preparing = persistence.prepare().then(() => { prepared = true })
+    await Promise.resolve()
+    expect(prepared).toBe(false)
+    expect(mocks.cache.flush).not.toHaveBeenCalled()
+    draft.release()
+    await preparing
+    await persistence.flush()
+    expect(mocks.cache.flush).toHaveBeenCalledOnce()
+    expect(mocks.flush).toHaveBeenCalledOnce()
+    expect(mocks.recentHistory.flush).toHaveBeenCalledOnce()
+    expect(mocks.cache.flush.mock.invocationCallOrder[0]).toBeLessThan(mocks.flush.mock.invocationCallOrder[0])
+    expect(mocks.flush.mock.invocationCallOrder[0]).toBeLessThan(mocks.recentHistory.flush.mock.invocationCallOrder[0])
+  })
+
+  it('allows updating after document persistence when optional recent history fails', async () => {
+    await startRuntime()
+    const persistence = mocks.listenUpdateSession.mock.calls[0][1]
+    const error = new Error('Invalid recent_files.json')
+    mocks.recentHistory.flush.mockRejectedValue(error)
+    await persistence.prepare()
+    await expect(persistence.flush()).resolves.toBeUndefined()
+    expect(mocks.cache.flush).toHaveBeenCalledOnce()
+    expect(mocks.flush).toHaveBeenCalledOnce()
+    expect(mocks.error).toHaveBeenCalledWith(
+      'Failed to persist recent files; continuing with the saved document session', error,
+    )
+  })
+
+  it.each(['workspace', 'window'])('reports a %s write failure so the updater cannot proceed', async (store) => {
+    await startRuntime()
+    const persistence = mocks.listenUpdateSession.mock.calls[0][1]
+    const error = new Error('Session disk full')
+    const flush = store === 'workspace' ? mocks.cache.flush : mocks.flush
+    flush.mockRejectedValueOnce(error)
+    await persistence.prepare()
+    await expect(persistence.flush()).rejects.toThrow(error)
+    expect(mocks.recentHistory.flush).not.toHaveBeenCalled()
+  })
+})
+
 describe('application quit cancellation', () => {
+  it('closes a durably saved window even when optional recent history stays unreadable', async () => {
+    await startRuntime()
+    const error = new Error('Invalid recent_files.json')
+    mocks.recentHistory.flush.mockRejectedValue(error)
+    await act(async () => { await mocks.closeRequested() })
+    expect(mocks.cache.flush).toHaveBeenCalledOnce()
+    expect(mocks.flush).toHaveBeenCalledOnce()
+    expect(mocks.closeNative).toHaveBeenCalledOnce()
+    expect(mocks.flush.mock.invocationCallOrder[0]).toBeLessThan(mocks.closeNative.mock.invocationCallOrder[0])
+    expect(mocks.invoke).not.toHaveBeenCalledWith('cancel_app_quit')
+    expect(mocks.error).toHaveBeenCalledWith(
+      'Failed to persist recent files; continuing with the saved document session', error,
+    )
+  })
+
   it('clears a pending app quit when a window cancels close, and allows another close', async () => {
     await startRuntime()
     mocks.closeDrafts.mockResolvedValueOnce(false)
@@ -247,9 +341,10 @@ describe('application quit cancellation', () => {
     expect(mocks.closeNative).toHaveBeenCalledOnce()
   })
 
-  it('clears pending quit and keeps the window when its final persistence fails', async () => {
+  it.each(['workspace', 'window'])('clears pending quit and keeps the window when its %s persistence fails', async (store) => {
     await startRuntime()
-    mocks.flush.mockRejectedValueOnce(new Error('disk full'))
+    const flush = store === 'workspace' ? mocks.cache.flush : mocks.flush
+    flush.mockRejectedValueOnce(new Error('disk full'))
     await act(async () => { await mocks.closeRequested() })
     expect(mocks.invoke).toHaveBeenCalledWith('cancel_app_quit')
     expect(mocks.closeNative).not.toHaveBeenCalled()
@@ -333,7 +428,7 @@ describe('deferred startup updates', () => {
     const first = await startRuntime()
     expect(mocks.checkUpdate).not.toHaveBeenCalled()
     await act(async () => { mocks.afterInteractive.mock.calls[0][0]() })
-    expect(mocks.checkUpdate).toHaveBeenCalledExactlyOnceWith({ install: automatic })
+    expect(mocks.checkUpdate).toHaveBeenCalledExactlyOnceWith()
     first.unmount()
 
     await startRuntime()

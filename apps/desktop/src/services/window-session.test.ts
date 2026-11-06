@@ -6,6 +6,7 @@ import useFileCacheStore, { getFileObject } from '@/helper/files'
 import { updateFile } from '@/helper/filesys'
 import useEditorStore, { type EditorLayoutNode } from '@/stores/useEditorStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
+import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import { addExistingMarkdownFileEdit, addNewMarkdownFileEdit, ensureDocument } from './editor-file'
 import { captureProtectedDraftSession } from './draft-recovery'
 import { stageDraftRecovery } from './staged-draft-recovery'
@@ -69,6 +70,28 @@ const disk = () => {
 }
 
 describe('document-first sessions', () => {
+  it('preserves closed recent files and the active file across an update restart', async () => {
+    const { store } = disk()
+    restoreWindowDocuments({
+      version: 1, windowLabel: 'main',
+      recentFilePaths: ['/closed.md', '/active.md'],
+      files: [{ id: 'active', name: 'active.md', path: '/active.md' }],
+      editorLayout: { type: 'leaf', id: 'group', opened: ['active'], activeId: 'active' },
+      drafts: { version: 1, documents: [] },
+    })
+    const persistence = createWindowSessionPersistence(store, 'main')
+    cleanups.push(persistence.dispose)
+    await persistence.flush()
+    const saved = await readWindowSession(store, 'main')
+    expect(saved?.recentFilePaths).toEqual(['/closed.md', '/active.md'])
+    resetEditor()
+    useRecentFilesStore.setState({ entries: [] })
+    restoreWindowDocuments(saved!)
+    expect(useRecentFilesStore.getState().entries.map((entry) => entry.path))
+      .toEqual(['/closed.md', '/active.md'])
+    expect(getFileObject(useEditorStore.getState().activeId!)?.path).toBe('/active.md')
+  })
+
   it('reads, restores and persists preview identity alongside its group and tab position', async () => {
     const { store } = disk()
     const layout: EditorLayoutNode = {

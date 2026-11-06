@@ -5,6 +5,8 @@ target
 *.tsbuildinfo
 
 .DS_Store
+.idea/
+.openidea/
 
 # dependencies
 node_modules

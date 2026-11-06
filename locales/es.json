@@ -899,6 +899,17 @@
       },
       "desc": "Configuración de apariencia y visualización de la aplicación, incluida la configuración relacionada con la visión, como el zoom de la interfaz y el tema."
     },
+    "updates": {
+      "label": "Actualizaciones",
+      "desc": "Buscar al iniciar. Descargar e instalar solo cuando lo decidas.",
+      "checks": "Búsqueda de actualizaciones",
+      "interval": "Buscar mientras la aplicación está abierta",
+      "interval_desc": "Solo se busca mientras MarkFlowy está abierto y en cada inicio.",
+      "interval_0": "Solo al iniciar",
+      "interval_60": "Cada hora",
+      "interval_120": "Cada 2 horas",
+      "interval_240": "Cada 4 horas"
+    },
     "support": {
       "label": "Apoyo",
       "desc": "¡Cada uno de sus apoyos es importante para nosotros! Para mejorar este proyecto de código abierto, puede participar en",

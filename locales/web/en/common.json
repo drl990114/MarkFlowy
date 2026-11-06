@@ -5,7 +5,8 @@
   "docs": {
     "tableOfContents": "On this page",
     "content": {
-      "description": "Get started with MarkFlowy: install the app, edit local Markdown files, switch between visual and source editing, and set up optional AI assistance."
+      "description": "Get started with MarkFlowy: install the app, edit local Markdown files, switch between visual and source editing, and set up optional AI assistance.",
+      "fallback": "These guides are currently available in English."
     },
     "sidebar": {
       "gettingStarted": "Getting Started"

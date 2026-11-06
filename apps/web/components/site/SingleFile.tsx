@@ -1,7 +1,9 @@
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import singleFileScreenshot from '../../public/screenshots/single-file.png'
+import { getDocumentLinkLocale } from '../../utils/publicContent'
 import SiteArrow from './Arrow'
 import Reveal from './Reveal'
 
@@ -13,6 +15,7 @@ const details = [
 
 export default function SingleFile() {
   const { t } = useTranslation()
+  const { locale } = useRouter()
 
   return (
     <section className='mf-single-file' id='single-file' aria-labelledby='single-file-title'>
@@ -34,7 +37,11 @@ export default function SingleFile() {
               </li>
             ))}
           </ul>
-          <Link className='mf-text-link' href='/docs/intro'>
+          <Link
+            className='mf-text-link'
+            href='/docs/intro'
+            locale={getDocumentLinkLocale('/docs/intro', locale)}
+          >
             {t('site.singleFile.link')}
             <SiteArrow />
           </Link>

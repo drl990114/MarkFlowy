@@ -17,6 +17,7 @@ function normalizeEditorLang(lng?: string) {
   if (lower.startsWith('ja')) return 'ja'
   if (lower.startsWith('fr')) return 'frFR'
   if (lower.startsWith('es')) return 'es'
+  if (lower.startsWith('ru')) return 'ru'
   return 'en'
 }
 

@@ -1,7 +1,10 @@
-import { allMarkdowns, Markdown } from 'contentlayer/generated'
+import { allMarkdowns, type Markdown } from 'contentlayer/generated'
 
 export const getSections = (locale?: string) => {
   const sections: Record<string, Markdown[]> = {}
+  const documentLocale = locale && allMarkdowns.some((markdown) => markdown.locale === locale)
+    ? locale
+    : locale ? 'en' : undefined
 
   allMarkdowns.forEach((markdown) => {
     const slug = markdown.slug
@@ -9,7 +12,7 @@ export const getSections = (locale?: string) => {
     const docLocale = markdown.locale 
 
     // Filter by locale if specified
-    if (locale && docLocale !== locale) {
+    if (documentLocale && docLocale !== documentLocale) {
       return
     }
 

@@ -22,6 +22,13 @@ test('canonical URLs use the production host, remove tracking, and preserve the 
   )
   assert.equal(getPageUrl('/en/docs/intro?ref=chat', 'en'), `${SITE_ORIGIN}/docs/intro`)
   assert.equal(getPageUrl('/', 'zh'), `${SITE_ORIGIN}/zh`)
+  assert.equal(getPageUrl('/', 'ru'), `${SITE_ORIGIN}/ru`)
+  assert.equal(getPageUrl('/ru/releases/?ref=chat#latest', 'ru'), `${SITE_ORIGIN}/ru/releases`)
+  assert.deepEqual(getLanguageAlternates('/ru/releases', ['en', 'ru']), [
+    { hrefLang: 'en', href: `${SITE_ORIGIN}/releases` },
+    { hrefLang: 'ru', href: `${SITE_ORIGIN}/ru/releases` },
+    { hrefLang: 'x-default', href: `${SITE_ORIGIN}/releases` },
+  ])
   assert.equal(getPageUrl('/'), `${SITE_ORIGIN}/`)
 })
 
@@ -87,6 +94,11 @@ test('sitemap publishes HTML destinations and only genuine update dates', () => 
   assert.equal(new Set(locations).size, locations.length)
   assert.ok(locations.includes(`${SITE_ORIGIN}/privacy`))
   assert.ok(!locations.includes(`${SITE_ORIGIN}/zh/privacy`))
+  assert.ok(!locations.includes(`${SITE_ORIGIN}/ru/privacy`))
+  assert.ok(locations.includes(`${SITE_ORIGIN}/ru`))
+  assert.ok(locations.includes(`${SITE_ORIGIN}/ru/docs`))
+  assert.ok(locations.includes(`${SITE_ORIGIN}/ru/releases`))
+  assert.ok(!locations.includes(`${SITE_ORIGIN}/ru/docs/intro`))
   assert.ok(
     locations.every(
       (url) =>
@@ -99,6 +111,7 @@ test('sitemap publishes HTML destinations and only genuine update dates', () => 
   )
   assert.match(sitemap, /xmlns:xhtml="http:\/\/www.w3.org\/1999\/xhtml"/)
   assert.match(sitemap, /hreflang="zh-CN"/)
+  assert.match(sitemap, /hreflang="ru"/)
 })
 
 test('sitemap escapes attribute values and preserves XML validity', () => {

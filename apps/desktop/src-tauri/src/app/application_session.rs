@@ -248,12 +248,73 @@ fn session_for_close(value: Option<serde_json::Value>) -> Option<ApplicationSess
 #[derive(Default)]
 struct QuitState {
     exit_code: Option<i32>,
+    building_windows: usize,
+    update_session: Option<UpdateSession>,
     restore_aliases: HashMap<String, String>,
     prepared_closes: HashSet<String>,
     unrestored_sources: HashSet<String>,
 }
 
+struct UpdateSession {
+    id: String,
+    owner: String,
+}
+
 impl QuitState {
+    fn begin_window_build(&mut self) -> Result<(), String> {
+        if self.exit_code.is_some() || self.update_session.is_some() {
+            return Err("Cannot create a window while MarkFlowy is quitting or installing an update".into());
+        }
+        self.building_windows += 1;
+        Ok(())
+    }
+
+    fn finish_window_build(&mut self) {
+        self.building_windows -= 1;
+    }
+
+    fn begin_update(
+        &mut self,
+        id: String,
+        owner: String,
+        mut labels: Vec<String>,
+        windows: Vec<String>,
+        save: impl FnOnce() -> Result<(), String>,
+    ) -> Result<(), String> {
+        if self.exit_code.is_some() || self.update_session.is_some() {
+            return Err("Application is already quitting or installing an update".into());
+        }
+        if self.building_windows > 0 {
+            return Err("An editor window is still being created".into());
+        }
+        if id.is_empty() || !windows.contains(&owner) {
+            return Err("The update requester is no longer available".into());
+        }
+        labels.sort();
+        labels.dedup();
+        let mut live: Vec<_> = windows.into_iter().filter(|label| is_editor_window(label)).collect();
+        live.sort();
+        if labels != live {
+            return Err("Editor windows changed while preserving the update session".into());
+        }
+        save()?;
+        self.update_session = Some(UpdateSession { id, owner });
+        Ok(())
+    }
+
+    fn release_update(&mut self, id: &str, owner: &str) -> bool {
+        if self.update_session.as_ref().is_some_and(|session| session.id == id && session.owner == owner) {
+            self.update_session = None;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn update_owned_by(&self, owner: &str) -> bool {
+        self.update_session.as_ref().is_some_and(|session| session.owner == owner)
+    }
+
     fn capture(
         &self,
         windows: impl IntoIterator<Item = String>,
@@ -275,6 +336,9 @@ impl QuitState {
     ) -> Result<bool, String> {
         if self.exit_code.is_some() {
             return Ok(false);
+        }
+        if self.update_session.is_some() {
+            return Err("Cannot quit while an update is being installed".into());
         }
         save()?;
         self.exit_code = Some(code);
@@ -312,6 +376,9 @@ impl QuitState {
         mut save: impl FnMut(Option<&ApplicationSession>) -> Result<(), String>,
         destroy: impl FnOnce() -> Result<(), String>,
     ) -> Result<(), String> {
+        if self.update_session.is_some() {
+            return Err("Cannot close an editor while an update is being installed".into());
+        }
         if self.exit_code.is_some() {
             return destroy();
         }
@@ -372,19 +439,55 @@ pub(crate) fn is_quitting() -> bool {
         .is_some()
 }
 
+/// Reserve a creation before releasing the state lock. Never hold that lock
+/// while WebviewWindowBuilder dispatches its build to the UI thread.
+pub(crate) struct WindowBuildTicket;
+
+impl Drop for WindowBuildTicket {
+    fn drop(&mut self) {
+        QUIT_STATE.lock().unwrap_or_else(|error| error.into_inner()).finish_window_build();
+    }
+}
+
+pub(crate) fn begin_window_build() -> Result<WindowBuildTicket, String> {
+    QUIT_STATE.lock().unwrap_or_else(|error| error.into_inner()).begin_window_build()?;
+    Ok(WindowBuildTicket)
+}
+
+pub(crate) fn is_update_owner(label: &str) -> bool {
+    QUIT_STATE.lock().unwrap_or_else(|error| error.into_inner()).update_owned_by(label)
+}
+
 /// Commit the complete live-window set before any renderer is asked to close.
 /// None means an existing quit already owns the close requests.
 pub(crate) fn begin_quit(app: &AppHandle, code: i32) -> Result<Option<Vec<String>>, String> {
+    // Focus getters can synchronously dispatch to the UI thread. Query before
+    // taking the state lock also used by CloseRequested and window creation.
+    let focused_label = super::window_manager::get_focused_editor_window(app)
+        .map(|window| window.label().to_string());
     let mut state = QUIT_STATE.lock().unwrap_or_else(|error| error.into_inner());
-    let session = state.capture(
-        app.webview_windows().into_keys(),
-        super::window_manager::get_focused_editor_window(app)
-            .map(|window| window.label().to_string()),
-    );
+    let session = state.capture(app.webview_windows().into_keys(), focused_label);
     if !state.begin(code, || save_session(app, Some(&session)))? {
         return Ok(None);
     }
     Ok(Some(session.windows))
+}
+
+/// Save the live manifest without closing windows; the updater exits directly.
+#[tauri::command]
+pub fn preserve_update_session(window: WebviewWindow, id: String, labels: Vec<String>) -> Result<(), String> {
+    let app = window.app_handle();
+    let focused_label = super::window_manager::get_focused_editor_window(app)
+        .map(|window| window.label().to_string());
+    let mut state = QUIT_STATE.lock().unwrap_or_else(|error| error.into_inner());
+    let windows: Vec<_> = app.webview_windows().into_keys().collect();
+    let session = state.capture(windows.clone(), focused_label);
+    state.begin_update(id, window.label().into(), labels, windows, || save_session(app, Some(&session)))
+}
+
+#[tauri::command]
+pub fn release_update_session(window: WebviewWindow, id: String) {
+    QUIT_STATE.lock().unwrap_or_else(|error| error.into_inner()).release_update(&id, window.label());
 }
 
 #[tauri::command]
@@ -425,6 +528,9 @@ pub fn close_session_window(window: WebviewWindow) -> Result<(), String> {
 /// Ordinary closes retire only that window. Quit-driven closes keep the frozen
 /// manifest while each renderer writes its final document/draft snapshot.
 pub(crate) fn window_destroyed(app: &AppHandle, label: &str) -> Result<Option<i32>, String> {
+    // A renderer disappearing does not cancel an already running native updater.
+    // Keep its update token fail-closed; only its completed operation may release
+    // it. Normal owner closes are prevented in the native CloseRequested handler.
     if !is_editor_window(label) {
         return Ok(None);
     }
@@ -457,6 +563,98 @@ mod tests {
     use super::*;
     use serde_json::json;
     use std::cell::RefCell;
+
+    fn begin_test_update(state: &mut QuitState, id: &str) -> Result<(), String> {
+        state.begin_update(
+            id.into(),
+            "conf".into(),
+            vec!["main".into()],
+            vec!["main".into(), "conf".into()],
+            || Ok(()),
+        )
+    }
+
+    #[test]
+    fn update_and_editor_creation_cannot_pass_each_other() {
+        let mut state = QuitState::default();
+        state.begin_window_build().unwrap();
+        assert!(begin_test_update(&mut state, "first").is_err());
+        assert!(state.update_session.is_none());
+        state.finish_window_build();
+        begin_test_update(&mut state, "first").unwrap();
+        assert!(state.begin_window_build().is_err());
+        assert_eq!(state.building_windows, 0);
+        assert!(state.release_update("first", "conf"));
+        state.begin_window_build().unwrap();
+        state.finish_window_build();
+    }
+
+    #[test]
+    fn update_requires_the_acknowledged_windows_and_a_live_owner() {
+        for windows in [vec!["main".into()], vec!["main".into(), "main_new".into(), "conf".into()]] {
+            let mut state = QuitState::default();
+            assert!(state.begin_update(
+                "update".into(), "conf".into(), vec!["main".into()], windows,
+                || panic!("must not save an unacknowledged session"),
+            ).is_err());
+            assert!(state.update_session.is_none());
+        }
+    }
+
+    #[test]
+    fn failed_update_manifest_does_not_block_future_windows_or_updates() {
+        let mut state = QuitState::default();
+        assert!(state.begin_update(
+            "failed".into(), "main".into(), vec!["main".into()], vec!["main".into()],
+            || Err("disk full".into()),
+        ).is_err());
+        assert!(state.update_session.is_none());
+        state.begin_window_build().unwrap();
+        state.finish_window_build();
+        begin_test_update(&mut state, "retry").unwrap();
+    }
+
+    #[test]
+    fn update_release_requires_both_the_token_and_its_owner() {
+        let mut state = QuitState::default();
+        begin_test_update(&mut state, "current").unwrap();
+        assert!(!state.release_update("previous", "conf"));
+        assert!(!state.release_update("current", "main"));
+        assert!(state.begin_window_build().is_err());
+        assert!(state.release_update("current", "conf"));
+        assert!(!state.release_update("current", "conf"));
+        begin_test_update(&mut state, "next").unwrap();
+        assert!(!state.release_update("current", "conf"));
+        assert!(state.update_owned_by("conf"));
+    }
+
+    #[test]
+    fn protected_updates_reject_quit_and_close_without_touching_the_manifest() {
+        let mut state = QuitState::default();
+        begin_test_update(&mut state, "current").unwrap();
+        assert!(state.begin(0, || panic!("must not begin quit")).is_err());
+        assert!(state.close_window(
+            "main", ["main".into()], true,
+            || panic!("must not read a closing session"),
+            |_| panic!("must not replace the update manifest"),
+            || panic!("must not destroy a protected editor"),
+        ).is_err());
+        assert!(state.update_owned_by("conf"));
+    }
+
+    #[test]
+    fn losing_windows_does_not_release_an_installation_that_may_still_be_running() {
+        let mut state = QuitState::default();
+        begin_test_update(&mut state, "current").unwrap();
+        // The native Destroyed path retires window snapshots and checks whether
+        // quit is finished. Neither proves that a dispatched installer stopped.
+        state.without_window(None, "conf");
+        assert_eq!(state.finish(false), None);
+        assert!(state.update_owned_by("conf"));
+        assert!(state.begin_window_build().is_err());
+        assert!(state.release_update("current", "conf"));
+        state.begin_window_build().unwrap();
+    }
 
     #[test]
     fn quit_manifest_includes_single_file_windows_and_excludes_auxiliary_windows() {

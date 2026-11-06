@@ -892,6 +892,17 @@
       "system_binding": "由系统管理",
       "no_results": "没有匹配的快捷键"
     },
+    "updates": {
+      "label": "更新",
+      "desc": "启动时检查更新。仅在您选择时下载并安装。",
+      "checks": "更新检查",
+      "interval": "运行时检查",
+      "interval_desc": "仅在 MarkFlowy 打开时检查，每次启动也会检查。",
+      "interval_0": "仅启动时",
+      "interval_60": "每小时",
+      "interval_120": "每 2 小时",
+      "interval_240": "每 4 小时"
+    },
     "support": {
       "label": "支持",
       "desc": "您的每一份支持对我们都很重要！让这个开源项目变得更好，您可以通过以下方式来参与",

@@ -1,3 +1,5 @@
+import { listenForUpdateSession } from '@/services/update-session'
+import { startSharedRecentFileHistory } from '@/services/recent-file-history'
 import { startThemeLibrary } from '@/themes/library'
 import { flushEditorResumeStates } from '@/stores/editorResumeStore'
 import { closeWithDraftRecovery, listenForDraftReload } from '@/services/draft-recovery'
@@ -16,6 +18,7 @@ import { getFileObject } from '@/helper/files'
 import { getFileNameFromPath, releaseSecurityScope } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
+import { startPeriodicUpdateChecks } from '@/services/update-checks'
 import { i18nInit, t } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
 import { openExternalPaths } from '@/services/open-external-paths'
@@ -62,6 +65,7 @@ import useAppSettingStore from '@/stores/useAppSettingStore'
 import useLayoutStore from '@/stores/useLayoutStore'
 import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
+import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { LazyStore } from '@tauri-apps/plugin-store'
@@ -88,11 +92,21 @@ interface CliCommandPayload {
 let workspaceCachePersistence: WorkspaceCachePersistence | undefined
 let workspaceCacheStore: LazyStore | undefined
 let windowSessionPersistence: ReturnType<typeof createWindowSessionPersistence> | undefined
+let recentFileHistory: Awaited<ReturnType<typeof startSharedRecentFileHistory>> | undefined
 let startupSession: WindowSession | undefined
 let isolateStartupDrafts = false
 let collectingStartupOpenedPaths = false
 let preserveStartupDocuments = false
 let freshStartupWindow = false
+
+const flushOptionalRecentFileHistory = async () => {
+  try {
+    await recentFileHistory?.flush()
+  } catch (error) {
+    // Document and draft persistence is required; the recent-file index is not.
+    logger.error('Failed to persist recent files; continuing with the saved document session', error)
+  }
+}
 
 const setupDraftRecovery = async (
   signal?: AbortSignal,
@@ -287,6 +301,17 @@ async function appWorkspaceSetup(signal: AbortSignal) {
 
     const recentWorkspaces = getOpenedCacheRes.recent_workspaces
     setRecentWorkspaces(recentWorkspaces)
+    const previousRecentFileHistory = recentFileHistory
+    recentFileHistory = undefined
+    try {
+      await previousRecentFileHistory?.dispose()
+      recentFileHistory = await startSharedRecentFileHistory()
+    } catch (error) {
+      // Recent-file history is optional. Keep the original history on disk and
+      // restore the workspace/session history locally if shared storage fails.
+      useRecentFilesStore.setState({ shared: false })
+      logger.error('Failed to load shared recent files; using local session history', error)
+    }
     await setupWorkspaceCachePersistence(cacheStore)
 
     let handledOpenedPaths = false
@@ -431,13 +456,12 @@ let themeLibrarySetupPromise: Promise<void> | undefined
 
 const startDeferredAppSetup = () => {
   if (!deferredAppSetupPromise) {
-    const { settingData } = useAppSettingStore.getState()
     deferredAppSetupPromise = Promise.all([
       useThemeStore.getState().syncSystemTheme(),
-      // Secondary windows must not repeat installation or recover an in-flight update.
+      // Only the main window checks for releases.
       window.__MARKFLOWY_E2E__ || currentWindow.label !== 'main'
         ? undefined
-        : checkUpdate({ install: settingData.auto_update }),
+        : checkUpdate(),
     ]).then(() => undefined)
   }
 
@@ -489,6 +513,20 @@ export const useAppRuntimeSetup = () => {
         toast.error(t('drafts.reload_failed'))
       },
     })
+    const updateSessionListener = listenForUpdateSession(currentWindow.label, {
+      prepare: async () => {
+        await appStartupCoordinator.start()
+        await waitForWorkspaceSwitches()
+        await waitForAllDraftRecovery()
+      },
+      flush: async () => {
+        if (!workspaceCachePersistence || !windowSessionPersistence) throw new Error('Session persistence is not ready')
+        flushEditorResumeStates()
+        await workspaceCachePersistence.flush()
+        await windowSessionPersistence.flush()
+        await flushOptionalRecentFileHistory()
+      },
+    })
     let closeWindowPromise: Promise<boolean> | undefined
     const closeRequest = currentWindow.listen('tauri://close-requested', async () => {
       if (closeWindowPromise) {
@@ -507,6 +545,7 @@ export const useAppRuntimeSetup = () => {
             // Keep persistence and the close listener alive if native teardown fails.
             await workspaceCachePersistence?.flush()
             await windowSessionPersistence?.flush()
+            await flushOptionalRecentFileHistory()
             await releaseDetachedWorkspaceScopes()
             await releaseSecurityScope(rootPath)
             await invoke('close_session_window')
@@ -603,6 +642,7 @@ export const useAppRuntimeSetup = () => {
     return () => {
       stopDraftReload()
       unListenMenu.then((fn) => fn())
+      updateSessionListener.then((fn) => fn())
       closeRequest.then((fn) => fn())
       unListenOpenedUrls.then((fn) => fn())
       unListenCliOpen.then((fn) => fn())
@@ -624,10 +664,18 @@ export const useAppRuntimeSetup = () => {
   useEffect(() => {
     // Load declarative themes after the application shell is available.
     if (!themeLibrarySetupPromise) themeLibrarySetupPromise = appThemeLibrarySetup()
-    return afterStartupInteractive(() => {
+    let stopChecks: (() => void) | undefined
+    const cancel = afterStartupInteractive(() => {
+      if (!window.__MARKFLOWY_E2E__ && currentWindow.label === 'main') {
+        stopChecks = startPeriodicUpdateChecks()
+      }
       markStartupStage('deferred-start')
       void startDeferredAppSetup().catch((error) => logger.error('Deferred startup failed', error))
     })
+    return () => {
+      cancel()
+      stopChecks?.()
+    }
   }, [])
 
   useEffect(() => {

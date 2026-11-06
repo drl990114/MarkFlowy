@@ -102,16 +102,6 @@ export const getSettingMap = (
           type: 'switch',
           defaultValue: true,
         },
-        auto_update: {
-          key: 'auto_update',
-          title: {
-            i18nKey: 'settings.general.app.automatic_updates.label',
-          },
-          desc: {
-            i18nKey: 'settings.general.app.automatic_updates.desc',
-          },
-          type: 'switch',
-        },
         error_reporting_enabled: {
           key: 'error_reporting_enabled',
           title: { i18nKey: 'settings.general.app.error_reporting.label' },
@@ -811,6 +801,25 @@ export const getSettingMap = (
       iconName: 'ri-keyboard-fill',
       desc: {
         i18nKey: 'settings.keyboard.desc',
+      },
+    },
+    updates: {
+      i18nKey: 'settings.updates.label',
+      iconName: 'ri-refresh-line',
+      desc: { i18nKey: 'settings.updates.desc' },
+      Checks: {
+        i18nKey: 'settings.updates.checks',
+        interval: {
+          key: 'update_check_interval',
+          type: 'select',
+          defaultValue: '60',
+          title: { i18nKey: 'settings.updates.interval' },
+          desc: { i18nKey: 'settings.updates.interval_desc' },
+          options: ['0', '60', '120', '240'].map((value) => ({
+            value,
+            title: translate(`settings.updates.interval_${value}`),
+          })),
+        },
       },
     },
     support: {

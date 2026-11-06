@@ -1,0 +1,89 @@
+{
+  "editor": {
+    "common": {
+      "loading": "Загрузка",
+      "accept": "Принять"
+    },
+    "image": {
+      "source": "Источник",
+      "sourcePlaceholder": "Введите адрес или путь к изображению",
+      "embeddedSource": "Встроенное изображение",
+      "replaceSource": "Заменить",
+      "replaceSourcePlaceholder": "Вставьте новый адрес, путь или URL данных",
+      "alt": "Альтернативный текст",
+      "altPlaceholder": "Опишите изображение",
+      "referenceLabel": "Метка ссылки",
+      "referenceLabelPlaceholder": "Введите метку ссылки",
+      "cancel": "Отмена",
+      "apply": "Применить",
+      "saving": "Сохранение…",
+      "updateError": "Не удалось обновить источник изображения. Повторите попытку.",
+      "emptyTitle": "Источник изображения не указан",
+      "emptyDescription": "Щёлкните, чтобы добавить",
+      "errorTitle": "Изображение недоступно",
+      "errorDescription": "Щёлкните, чтобы изменить источник"
+    },
+    "table": {
+      "insertColumnAfter": "Вставить столбец справа",
+      "insertColumnBefore": "Вставить столбец слева",
+      "insertRowAfter": "Вставить строку снизу",
+      "insertRowBefore": "Вставить строку сверху",
+      "alignLeft": "По левому краю",
+      "alignCenter": "По центру",
+      "alignRight": "По правому краю",
+      "deleteColumn": "Удалить столбец",
+      "deleteRow": "Удалить строку"
+    },
+    "codemirror": {
+      "searchInputPlaceholder": "Введите язык",
+      "frontMatterPlaceholder": "Введите метаданные YAML"
+    },
+    "ai": {
+      "generate": "Сгенерировать текст",
+      "stop": "Остановить",
+      "retry": "Повторить",
+      "regenerate": "Сгенерировать заново",
+      "preview": "Предварительный просмотр",
+      "error": "Произошла ошибка",
+      "prompt": "Запрос"
+    },
+    "toolbar": {
+      "undo": "Отмена",
+      "redo": "Повтор",
+      "separator": "Вставить разделитель",
+      "blockquote": "Цитата",
+      "bold": "Полужирный",
+      "italic": "Курсив",
+      "codeText": "Код в строке",
+      "codeBlock": "Блок кода",
+      "heading": "Заголовок",
+      "bulletList": "Маркированный список",
+      "orderedList": "Нумерованный список",
+      "taskList": "Список задач"
+    },
+    "slashMenu": {
+      "searchPlaceholder": "Поиск пунктов меню…",
+      "noResults": "Ничего не найдено",
+      "image": "Изображение",
+      "toNavigate": "для навигации",
+      "toSelect": "для выбора",
+      "toCancel": "для отмены"
+    },
+    "blockType": {
+      "delete": "Удалить",
+      "paragraph": "Абзац",
+      "heading": "Заголовок {{level}}",
+      "codeBlock": "Блок кода",
+      "blockquote": "Цитата",
+      "bulletList": "Маркированный список",
+      "orderedList": "Нумерованный список",
+      "taskList": "Список задач",
+      "transformTo": "Преобразовать в"
+    },
+    "blockTypeGroup": {
+      "text": "Текст",
+      "list": "Списки",
+      "other": "Другое"
+    }
+  }
+}

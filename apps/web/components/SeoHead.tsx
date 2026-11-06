@@ -5,7 +5,9 @@ import {
   getLanguageAlternates,
   getPageUrl,
   getSocialImage,
+  isSiteLocale,
   normalizePagePath,
+  OPEN_GRAPH_LOCALES,
   serializeStructuredData,
   SITE_DESCRIPTION,
   SITE_LOCALES,
@@ -35,7 +37,7 @@ export default function SeoHead({
   markdownUrl,
 }: React.PropsWithChildren<SeoHeadProps>) {
   const router = useRouter()
-  const locale = router.locale === 'zh' ? 'zh' : 'en'
+  const locale = router.locale && isSiteLocale(router.locale) ? router.locale : 'en'
   const pageUrl = canonical || url || getPageUrl(router.asPath, locale)
   const summary = description?.trim() || SITE_DESCRIPTION[locale]
   const alternates = getLanguageAlternates(router.asPath, availableLocales)
@@ -50,11 +52,11 @@ export default function SeoHead({
 
       <meta name='description' content={summary} key='description' />
 
-      <meta property='og:locale' content={locale === 'zh' ? 'zh_CN' : 'en_US'} key='og:locale' />
+      <meta property='og:locale' content={OPEN_GRAPH_LOCALES[locale]} key='og:locale' />
       {availableLocales.filter((alternate) => alternate !== locale).map((alternate) => (
         <meta
           property='og:locale:alternate'
-          content={alternate === 'zh' ? 'zh_CN' : 'en_US'}
+          content={OPEN_GRAPH_LOCALES[alternate]}
           key={`og:locale:alternate:${alternate}`}
         />
       ))}

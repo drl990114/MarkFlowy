@@ -80,7 +80,7 @@ export const DocsSidebarMenu = () => {
             <SectionTitle>{t(`fileTitle.${key}`)}</SectionTitle>
 
             <MenuList>
-              {section.map(({ slug, title }) => {
+              {section.map(({ slug, title, locale }) => {
                 const href = `/docs${slug}`
                 const isActive = currentPath === normalizePath(href)
                 const label = t(`fileTitle.${title}`)
@@ -89,7 +89,7 @@ export const DocsSidebarMenu = () => {
                   <MenuItem key={slug}>
                     <MenuLink
                       href={href}
-                      locale={currentLocale}
+                      locale={locale}
                       title={label}
                       aria-current={isActive ? 'page' : undefined}
                       $isActive={isActive}

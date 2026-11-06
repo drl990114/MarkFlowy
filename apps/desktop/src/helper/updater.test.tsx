@@ -1,10 +1,11 @@
-import { FileResultCode } from '@markflowy/interface'
 import type { Update } from '@tauri-apps/plugin-updater'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import useUpdaterStore from '@/stores/useUpdaterStore'
 import { checkUpdate, fetchUpdate, installUpdate } from './updater'
 
 const mocks = vi.hoisted(() => ({
+  preserveSession: vi.fn(),
+  info: vi.fn(),
   check: vi.fn(),
   confirm: vi.fn(),
   invoke: vi.fn(),
@@ -25,6 +26,13 @@ const mocks = vi.hoisted(() => ({
   savedAttempt: undefined as unknown,
 }))
 
+vi.mock('@/services/update-session', () => ({
+  withPreservedUpdateSession: async (label: string, operation: () => Promise<unknown>) => {
+    await mocks.preserveSession(label)
+    return operation()
+  },
+}))
+vi.mock('@/services/windows', () => ({ currentWindow: { label: 'main' } }))
 vi.mock('@tauri-apps/plugin-updater', () => ({ check: mocks.check }))
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
 vi.mock('@tauri-apps/api/app', () => ({ getVersion: mocks.getVersion }))
@@ -49,6 +57,7 @@ vi.mock('@/components/UpdateDialogContent', () => ({ UpdateDialogContent: () => 
 vi.mock('./logger', () => ({ logger: { error: mocks.logError } }))
 vi.mock('zens', () => ({
   toast: {
+    info: mocks.info,
     loading: mocks.loading,
     dismiss: mocks.dismiss,
     success: mocks.success,
@@ -79,6 +88,7 @@ function createUpdate(version = '1.0.0') {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mocks.preserveSession.mockReset().mockResolvedValue(undefined)
   mocks.check.mockReset()
   mocks.invoke.mockReset()
   mocks.confirm.mockReset().mockResolvedValue('cancel')
@@ -107,12 +117,6 @@ describe('Windows update recovery', () => {
     mocks.osType.mockReturnValue('windows')
   })
 
-  const previousAttempt = () => ({
-    fromVersion: '0.9.0',
-    targetVersion: '1.0.0',
-    startedAt: 1,
-  })
-
   it('downloads before recording the attempt and waits for disk before launching the installer', async () => {
     const update = createUpdate()
     const download = deferred<void>()
@@ -137,6 +141,28 @@ describe('Windows update recovery', () => {
     expect(update.install).toHaveBeenCalledOnce()
     expect(update.downloadAndInstall).not.toHaveBeenCalled()
     expect(mocks.deleteAttempt).not.toHaveBeenCalled()
+  })
+
+  it('waits for every window session before launching the installer', async () => {
+    const update = createUpdate()
+    const saved = deferred<void>()
+    mocks.preserveSession.mockReturnValue(saved.promise)
+    const installing = installUpdate(update)
+    await vi.waitFor(() => expect(mocks.preserveSession).toHaveBeenCalledWith('main'))
+    expect(update.install).not.toHaveBeenCalled()
+    expect(mocks.setAttempt).not.toHaveBeenCalled()
+    saved.resolve()
+    await installing
+    expect(update.install).toHaveBeenCalledOnce()
+  })
+
+  it('leaves the application running when session preservation fails', async () => {
+    const update = createUpdate()
+    mocks.preserveSession.mockRejectedValue(new Error('disk full'))
+    await installUpdate(update)
+    expect(update.install).not.toHaveBeenCalled()
+    expect(mocks.setAttempt).not.toHaveBeenCalled()
+    expect(mocks.error).toHaveBeenCalledWith('updater.install_failed')
   })
 
   it('does not create an install attempt when the download fails', async () => {
@@ -180,200 +206,6 @@ describe('Windows update recovery', () => {
     expect(mocks.saveAttempt).toHaveBeenCalledTimes(2)
   })
 
-  it('does not automatically retry after a new renderer starts at the old version', async () => {
-    const update = createUpdate()
-    await installUpdate(update)
-    expect(mocks.savedAttempt).toMatchObject({ fromVersion: '0.9.0' })
-
-    // Only the on-disk marker survives the app exiting inside the native installer.
-    mocks.attempt = structuredClone(mocks.savedAttempt)
-    vi.resetModules()
-    const restartedUpdater = await import('./updater')
-    const { default: restartedStore } = await import('@/stores/useUpdaterStore')
-    mocks.check.mockResolvedValue(createUpdate())
-
-    await restartedUpdater.checkUpdate({ install: true })
-
-    expect(mocks.check).not.toHaveBeenCalled()
-    expect(mocks.confirm).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'updater.interrupted_title',
-        actions: expect.arrayContaining([expect.objectContaining({ id: 'disable' })]),
-      }),
-    )
-    expect(restartedStore.getState().isInstalling).toBe(false)
-    expect(mocks.savedAttempt).toMatchObject({ targetVersion: '1.0.0' })
-  })
-
-  it('keeps recovery available across repeated cancelled startup prompts', async () => {
-    mocks.attempt = previousAttempt()
-    mocks.check.mockResolvedValue(createUpdate())
-
-    await checkUpdate({ install: true })
-    await checkUpdate({ install: true })
-
-    expect(mocks.confirm).toHaveBeenCalledTimes(2)
-    expect(mocks.check).not.toHaveBeenCalled()
-    expect(mocks.deleteAttempt).not.toHaveBeenCalled()
-    expect(mocks.writeSettingPatch).not.toHaveBeenCalled()
-  })
-
-  it('disables automatic updates before clearing recovery, without needing the network', async () => {
-    mocks.attempt = previousAttempt()
-    mocks.confirm.mockResolvedValue('disable')
-    const settingSaved = deferred<void>()
-    mocks.writeSettingPatch.mockReturnValue(settingSaved.promise)
-
-    const checking = checkUpdate({ install: true })
-    await vi.waitFor(() =>
-      expect(mocks.writeSettingPatch).toHaveBeenCalledWith({ auto_update: false }),
-    )
-    expect(mocks.deleteAttempt).not.toHaveBeenCalled()
-    settingSaved.resolve()
-    await checking
-
-    expect(mocks.savedAttempt).toBeUndefined()
-    expect(mocks.deleteAttempt).toHaveBeenCalledOnce()
-    expect(mocks.check).not.toHaveBeenCalled()
-  })
-
-  it('retains recovery when disabling automatic updates cannot be saved', async () => {
-    mocks.attempt = previousAttempt()
-    mocks.confirm.mockResolvedValue('disable')
-    mocks.writeSettingPatch.mockRejectedValue(new Error('disk full'))
-
-    await checkUpdate({ install: true })
-
-    expect(mocks.deleteAttempt).not.toHaveBeenCalled()
-    expect(mocks.check).not.toHaveBeenCalled()
-    expect(mocks.error).toHaveBeenCalledWith('updater.check_failed')
-  })
-
-  it('rechecks and installs only after an explicit retry', async () => {
-    mocks.attempt = previousAttempt()
-    mocks.confirm.mockResolvedValue('retry')
-    const update = createUpdate('1.1.0')
-    mocks.check.mockResolvedValue(update)
-
-    await checkUpdate({ install: true })
-
-    expect(update.install).toHaveBeenCalledOnce()
-    expect(mocks.savedAttempt).toMatchObject({ targetVersion: '1.1.0' })
-    expect(mocks.writeSettingPatch).not.toHaveBeenCalled()
-  })
-
-  it.each(['1.0.0', '1.1.0'])(
-    'clears the obsolete attempt after starting version %s',
-    async (version) => {
-      mocks.attempt = previousAttempt()
-      mocks.getVersion.mockResolvedValue(version)
-      mocks.check.mockResolvedValue(null)
-
-      await checkUpdate({ install: true })
-
-      expect(mocks.deleteAttempt).toHaveBeenCalledOnce()
-      expect(mocks.saveAttempt).toHaveBeenCalledOnce()
-      expect(mocks.check).toHaveBeenCalledOnce()
-      expect(mocks.confirm).not.toHaveBeenCalled()
-      expect(mocks.writeSettingPatch).not.toHaveBeenCalled()
-    },
-  )
-
-  it('fails closed when recovery cannot be read', async () => {
-    mocks.getAttempt.mockRejectedValue(new Error('store unavailable'))
-    mocks.check.mockResolvedValue(createUpdate())
-
-    await checkUpdate({ install: true })
-
-    expect(mocks.check).not.toHaveBeenCalled()
-    expect(mocks.error).toHaveBeenCalledWith('updater.check_failed')
-  })
-
-  it.each([FileResultCode.Success, FileResultCode.PermissionDenied, FileResultCode.UnknownError])(
-    'blocks automatic installation when strict recovery loading fails with file result %s',
-    async (code) => {
-      // Native initial loading can swallow the error and leave get() returning undefined.
-      mocks.reloadAttempt.mockRejectedValue(new Error('Failed to deserialize store'))
-      mocks.invoke.mockResolvedValue({ code, content: '{"pending_install":' })
-      const update = createUpdate()
-      mocks.check.mockResolvedValue(update)
-
-      await checkUpdate({ install: true })
-
-      expect(mocks.invoke).toHaveBeenCalledWith('get_file_content', {
-        filePath: '/app-data/.markflowy_updater.dat',
-      })
-      expect(mocks.getAttempt).not.toHaveBeenCalled()
-      expect(mocks.check).not.toHaveBeenCalled()
-      expect(update.download).not.toHaveBeenCalled()
-      expect(update.install).not.toHaveBeenCalled()
-      expect(mocks.saveAttempt).not.toHaveBeenCalled()
-      expect(mocks.error).toHaveBeenCalledWith('updater.check_failed')
-    },
-  )
-
-  it('allows the first automatic update when the recovery file does not exist', async () => {
-    mocks.reloadAttempt.mockRejectedValue(new Error('file not found'))
-    mocks.invoke.mockResolvedValue({ code: FileResultCode.NotFound, content: '' })
-    const update = createUpdate()
-    mocks.check.mockResolvedValue(update)
-
-    await checkUpdate({ install: true })
-
-    expect(mocks.check).toHaveBeenCalledOnce()
-    expect(update.install).toHaveBeenCalledOnce()
-    expect(mocks.savedAttempt).toMatchObject({ targetVersion: update.version })
-    expect(mocks.error).not.toHaveBeenCalled()
-  })
-
-  it('fails closed when the recovery file probe itself fails', async () => {
-    mocks.reloadAttempt.mockRejectedValue(new Error('store unavailable'))
-    mocks.invoke.mockRejectedValue(new Error('read unavailable'))
-    mocks.check.mockResolvedValue(createUpdate())
-
-    await checkUpdate({ install: true })
-
-    expect(mocks.getAttempt).not.toHaveBeenCalled()
-    expect(mocks.check).not.toHaveBeenCalled()
-    expect(mocks.error).toHaveBeenCalledWith('updater.check_failed')
-  })
-
-  it('restores the recovery record in memory if clearing it cannot be saved', async () => {
-    mocks.attempt = previousAttempt()
-    mocks.savedAttempt = structuredClone(mocks.attempt)
-    mocks.getVersion.mockResolvedValue('1.0.0')
-    mocks.saveAttempt.mockRejectedValueOnce(new Error('disk full'))
-
-    await checkUpdate({ install: true })
-
-    expect(mocks.attempt).toEqual(previousAttempt())
-    expect(mocks.savedAttempt).toEqual(previousAttempt())
-    expect(mocks.check).not.toHaveBeenCalled()
-    expect(mocks.error).toHaveBeenCalledWith('updater.check_failed')
-  })
-
-  it('fails closed when the stored recovery record is invalid', async () => {
-    mocks.attempt = { targetVersion: '1.0.0' }
-
-    await checkUpdate({ install: true })
-
-    expect(mocks.check).not.toHaveBeenCalled()
-    expect(mocks.deleteAttempt).not.toHaveBeenCalled()
-    expect(mocks.error).toHaveBeenCalledWith('updater.check_failed')
-  })
-
-  it.each(['macos', 'linux'])('preserves the existing %s installation flow', async (osType) => {
-    mocks.osType.mockReturnValue(osType)
-    const update = createUpdate()
-    mocks.check.mockResolvedValue(update)
-
-    await checkUpdate({ install: true })
-
-    expect(update.downloadAndInstall).toHaveBeenCalledOnce()
-    expect(update.install).not.toHaveBeenCalled()
-    expect(mocks.getAttempt).not.toHaveBeenCalled()
-    expect(mocks.setAttempt).not.toHaveBeenCalled()
-  })
 })
 
 describe('fetchUpdate', () => {
@@ -427,7 +259,7 @@ describe('fetchUpdate', () => {
     const installingUpdate = createUpdate()
     const extraUpdate = createUpdate()
     mocks.check.mockReturnValue(pendingCheck.promise)
-    vi.mocked(installingUpdate.downloadAndInstall).mockReturnValue(pendingInstall.promise)
+    vi.mocked(installingUpdate.install).mockReturnValue(pendingInstall.promise)
 
     const checking = fetchUpdate()
     const installing = installUpdate(installingUpdate)
@@ -459,10 +291,26 @@ describe('fetchUpdate', () => {
 })
 
 describe('installUpdate', () => {
+  it.each(['windows', 'macos', 'linux'])('finishes downloading on %s before protecting editors', async (os) => {
+    mocks.osType.mockReturnValue(os)
+    const update = createUpdate()
+    const downloaded = deferred<void>()
+    vi.mocked(update.download).mockReturnValue(downloaded.promise)
+    const installing = installUpdate(update)
+    await vi.waitFor(() => expect(update.download).toHaveBeenCalledOnce())
+    expect(mocks.preserveSession).not.toHaveBeenCalled()
+    expect(update.install).not.toHaveBeenCalled()
+    downloaded.resolve()
+    await installing
+    expect(mocks.preserveSession).toHaveBeenCalledWith('main')
+    expect(update.install).toHaveBeenCalledOnce()
+    expect(update.downloadAndInstall).not.toHaveBeenCalled()
+  })
+
   it('downloads once, clears the available update, and preserves the restart action', async () => {
     const update = createUpdate()
     const pendingInstall = deferred<void>()
-    vi.mocked(update.downloadAndInstall).mockReturnValue(pendingInstall.promise)
+    vi.mocked(update.install).mockReturnValue(pendingInstall.promise)
     useUpdaterStore.setState({ update })
 
     const first = installUpdate(update)
@@ -470,7 +318,7 @@ describe('installUpdate', () => {
     expect(second).toBe(first)
     expect(useUpdaterStore.getState().isInstalling).toBe(true)
     expect(await fetchUpdate()).toBe(update)
-    expect(update.downloadAndInstall).toHaveBeenCalledOnce()
+    await vi.waitFor(() => expect(update.install).toHaveBeenCalledOnce())
 
     pendingInstall.resolve()
     await first
@@ -483,18 +331,18 @@ describe('installUpdate', () => {
     expect(mocks.dismiss).toHaveBeenCalledWith('update-toast')
     expect(mocks.invoke).not.toHaveBeenCalled()
     const restartAction = mocks.success.mock.calls[0][1].action as { onClick: () => void }
-    restartAction.onClick()
+    await restartAction.onClick()
     expect(mocks.invoke).toHaveBeenCalledWith('app_restart')
 
     await installUpdate(update)
     expect(await fetchUpdate()).toBeNull()
-    expect(update.downloadAndInstall).toHaveBeenCalledOnce()
+    expect(update.install).toHaveBeenCalledOnce()
     expect(mocks.check).not.toHaveBeenCalled()
   })
 
   it('retains a failed update and permits retrying it', async () => {
     const update = createUpdate()
-    vi.mocked(update.downloadAndInstall).mockRejectedValueOnce(new Error('download interrupted'))
+    vi.mocked(update.install).mockRejectedValueOnce(new Error('download interrupted'))
 
     await installUpdate(update)
     expect(useUpdaterStore.getState()).toMatchObject({
@@ -506,7 +354,7 @@ describe('installUpdate', () => {
     expect(mocks.error).toHaveBeenCalledWith('updater.install_failed')
 
     await installUpdate(update)
-    expect(update.downloadAndInstall).toHaveBeenCalledTimes(2)
+    expect(update.install).toHaveBeenCalledTimes(2)
     expect(update.close).toHaveBeenCalledOnce()
     expect(useUpdaterStore.getState().update).toBeNull()
   })
@@ -521,85 +369,54 @@ describe('installUpdate', () => {
     expect(mocks.success).toHaveBeenCalledOnce()
     expect(mocks.error).not.toHaveBeenCalled()
   })
+
+  it('does not restart when acquiring a fresh session barrier fails', async () => {
+    await installUpdate(createUpdate())
+    mocks.preserveSession.mockRejectedValueOnce(new Error('window still saving'))
+    await mocks.success.mock.calls[0][1].action.onClick()
+    expect(mocks.invoke).not.toHaveBeenCalled()
+    expect(mocks.error).toHaveBeenCalledWith('updater.install_failed')
+  })
 })
 
 describe('checkUpdate', () => {
-  it('keeps a declined startup update available for the title bar', async () => {
+  it('offers an update without downloading or opening a modal', async () => {
     const update = createUpdate()
     mocks.check.mockResolvedValue(update)
-
     await checkUpdate()
-
-    expect(mocks.confirm).toHaveBeenCalledOnce()
-    expect(useUpdaterStore.getState().update).toBe(update)
-    expect(update.downloadAndInstall).not.toHaveBeenCalled()
-    expect(update.close).not.toHaveBeenCalled()
-  })
-
-  it('keeps automatic installation enabled when requested', async () => {
-    const update = createUpdate()
-    mocks.check.mockResolvedValue(update)
-
-    await checkUpdate({ install: true })
-
-    expect(update.downloadAndInstall).toHaveBeenCalledOnce()
     expect(mocks.confirm).not.toHaveBeenCalled()
-    expect(useUpdaterStore.getState().installedVersion).toBe(update.version)
-  })
-
-  it('does not reinstall a resource held by an earlier startup dialog', async () => {
-    const update = createUpdate()
-    const pendingDialog = deferred<string>()
-    mocks.check.mockResolvedValue(update)
-    mocks.confirm.mockReturnValue(pendingDialog.promise)
-
-    const checking = checkUpdate()
-    await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce())
-    await installUpdate(update)
-    pendingDialog.resolve('install')
-    await checking
-
-    expect(update.downloadAndInstall).toHaveBeenCalledOnce()
-    expect(update.close).toHaveBeenCalledOnce()
-  })
-
-  it('installs the refreshed version when an older startup dialog is accepted', async () => {
-    const oldUpdate = createUpdate('1.0.0')
-    const latestUpdate = createUpdate('1.1.0')
-    const pendingDialog = deferred<string>()
-    mocks.check.mockResolvedValueOnce(oldUpdate).mockResolvedValueOnce(latestUpdate)
-    mocks.confirm.mockReturnValue(pendingDialog.promise)
-
-    const checking = checkUpdate()
-    await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce())
-    expect(await fetchUpdate()).toBe(latestUpdate)
-    expect(useUpdaterStore.getState().update).toBe(latestUpdate)
-    expect(oldUpdate.close).toHaveBeenCalledOnce()
-
-    pendingDialog.resolve('install')
-    await checking
-
-    expect(oldUpdate.downloadAndInstall).not.toHaveBeenCalled()
-    expect(latestUpdate.downloadAndInstall).toHaveBeenCalledOnce()
-    expect(useUpdaterStore.getState().installedVersion).toBe('1.1.0')
-  })
-
-  it('does not use an old dialog resource after a refresh reports no update', async () => {
-    const update = createUpdate()
-    const pendingDialog = deferred<string>()
-    mocks.check.mockResolvedValueOnce(update).mockResolvedValueOnce(null)
-    mocks.confirm.mockReturnValue(pendingDialog.promise)
-
-    const checking = checkUpdate()
-    await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce())
-    expect(await fetchUpdate()).toBeNull()
-    expect(useUpdaterStore.getState().update).toBeNull()
-    expect(update.close).toHaveBeenCalledOnce()
-
-    pendingDialog.resolve('install')
-    await checking
-
+    expect(mocks.info).toHaveBeenCalledOnce()
     expect(update.downloadAndInstall).not.toHaveBeenCalled()
-    expect(useUpdaterStore.getState().installedVersion).toBeNull()
+    expect(update.download).not.toHaveBeenCalled()
+    expect(useUpdaterStore.getState().update).toBe(update)
+    const options = mocks.info.mock.calls[0][1]
+    options.action.onClick()
+    await vi.waitFor(() => expect(update.install).toHaveBeenCalledOnce())
+  })
+
+  it('does not repeat the offer for the same release', async () => {
+    mocks.check.mockResolvedValueOnce(createUpdate()).mockResolvedValueOnce(createUpdate())
+    await checkUpdate()
+    await checkUpdate()
+    expect(mocks.info).toHaveBeenCalledOnce()
+  })
+
+  it('offers a newer release after a later check', async () => {
+    mocks.check.mockResolvedValueOnce(createUpdate()).mockResolvedValueOnce(createUpdate('2.0.0'))
+    await checkUpdate()
+    await checkUpdate()
+    expect(mocks.info).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not install after an interrupted Windows attempt', async () => {
+    mocks.osType.mockReturnValue('windows')
+    mocks.attempt = { fromVersion: '0.9.0', targetVersion: '1.0.0', startedAt: 1 }
+    const update = createUpdate()
+    mocks.check.mockResolvedValue(update)
+    await checkUpdate()
+    expect(mocks.confirm).not.toHaveBeenCalled()
+    expect(update.download).not.toHaveBeenCalled()
+    expect(update.install).not.toHaveBeenCalled()
+    expect(mocks.info).toHaveBeenCalledOnce()
   })
 })

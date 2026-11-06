@@ -25,6 +25,7 @@ const TransIcon = () => {
 const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
   { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
 ]
 
 export default function LanguageSwitcher({ className, style }: LanguageSwitcherProps) {
@@ -36,6 +37,11 @@ export default function LanguageSwitcher({ className, style }: LanguageSwitcherP
     const { pathname, asPath, query } = router
     // Keep the explicit choice ahead of Accept-Language on later visits to /.
     document.cookie = `NEXT_LOCALE=${encodeURIComponent(locale)}; Path=/; Max-Age=31536000; SameSite=Lax`
+    // Russian guides are not translated yet; the localized index links to available guides.
+    if (locale === 'ru' && pathname === '/docs/[...slug]') {
+      void router.push('/docs', '/docs', { locale })
+      return
+    }
     void router.push({ pathname, query }, asPath, { locale })
   }
 

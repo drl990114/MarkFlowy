@@ -1,5 +1,6 @@
 export const locales = {
   en: 'English',
+  ru: 'Русский',
   cn: '简体中文',
   frFR: 'Français',
   es: 'Español',
