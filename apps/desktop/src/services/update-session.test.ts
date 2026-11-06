@@ -60,10 +60,11 @@ describe('update session coordinator', () => {
     expect(mocks.invoke).not.toHaveBeenCalled()
     receive(RESPONSE, { id, label: 'main_two' })
     await vi.waitFor(() => expect(operation).toHaveBeenCalledOnce())
-    expect(mocks.invoke).toHaveBeenCalledWith('preserve_update_session', { labels: ['main', 'main_two'] })
+    expect(mocks.invoke).toHaveBeenCalledWith('preserve_update_session', { id, labels: ['main', 'main_two'] })
     expect(mocks.emitTo.mock.calls.some(([, event]) => event === RELEASE)).toBe(false)
     installed.resolve()
     await saving
+    expect(mocks.invoke).toHaveBeenLastCalledWith('release_update_session', { id })
     expect(mocks.emitTo.mock.calls.filter(([, event]) => event === RELEASE).map(([label]) => label))
       .toEqual(['main', 'main_two'])
     expect(mocks.stop).toHaveBeenCalledOnce()
@@ -85,14 +86,49 @@ describe('update session coordinator', () => {
     const operation = vi.fn(async () => {
       if (failure === 'install') throw new Error('install failed')
     })
-    if (failure === 'manifest') mocks.invoke.mockRejectedValue(new Error('manifest failed'))
+    mocks.invoke.mockImplementation(async (command) => {
+      if (failure === 'manifest' && command === 'preserve_update_session') throw new Error('manifest failed')
+    })
     const saving = withPreservedUpdateSession('main', operation)
     const rejected = expect(saving).rejects.toThrow(`${failure} failed`)
     const { id } = await requestsSent()
     receive(RESPONSE, { id, label: 'main' })
     receive(RESPONSE, { id, label: 'main_two' })
     await rejected
+    expect(mocks.invoke).toHaveBeenLastCalledWith('release_update_session', { id })
     expect(mocks.emitTo.mock.calls.filter(([, event]) => event === RELEASE)).toHaveLength(2)
+  })
+
+  it('holds renderer barriers until the native window guard is released', async () => {
+    const releasing = deferred()
+    mocks.invoke.mockImplementation(async (command) => {
+      if (command === 'release_update_session') await releasing.promise
+    })
+    const operation = vi.fn(async () => {})
+    const saving = withPreservedUpdateSession('main', operation)
+    const { id } = await requestsSent()
+    receive(RESPONSE, { id, label: 'main' })
+    receive(RESPONSE, { id, label: 'main_two' })
+    await vi.waitFor(() => expect(mocks.invoke).toHaveBeenCalledWith('release_update_session', { id }))
+    expect(operation).toHaveBeenCalledOnce()
+    expect(mocks.emitTo.mock.calls.some(([, event]) => event === RELEASE)).toBe(false)
+    releasing.resolve()
+    await saving
+    expect(mocks.emitTo.mock.calls.filter(([, event]) => event === RELEASE)).toHaveLength(2)
+  })
+
+  it('still releases renderer barriers if native guard release fails', async () => {
+    mocks.invoke.mockImplementation(async (command) => {
+      if (command === 'release_update_session') throw new Error('release failed')
+    })
+    const saving = withPreservedUpdateSession('main', async () => {})
+    const rejected = expect(saving).rejects.toThrow('release failed')
+    const { id } = await requestsSent()
+    receive(RESPONSE, { id, label: 'main' })
+    receive(RESPONSE, { id, label: 'main_two' })
+    await rejected
+    expect(mocks.emitTo.mock.calls.filter(([, event]) => event === RELEASE)).toHaveLength(2)
+    expect(mocks.stop).toHaveBeenCalledOnce()
   })
 
   it('does not send late requests after listener registration times out', async () => {

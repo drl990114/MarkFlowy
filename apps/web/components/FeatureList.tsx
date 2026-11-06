@@ -1,14 +1,17 @@
 import { useTranslation } from 'next-i18next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import aiScreenshot from '../public/screenshots/ai.png'
 import sourcecodeScreenshot from '../public/screenshots/sourcecode.png'
+import { getDocumentLinkLocale } from '../utils/publicContent'
 import SiteArrow from './site/Arrow'
 import Reveal from './site/Reveal'
 import { MotionScene } from './site/HomeMotion'
 
 export default function FeatureList() {
   const { t } = useTranslation()
+  const { locale } = useRouter()
   return (
     <section className='mf-features' id='features'>
       <div className='mf-container'>
@@ -28,7 +31,11 @@ export default function FeatureList() {
               <i className='ri-quill-pen-line mf-feature-icon' aria-hidden='true' />
               <h3>{t('site.features.write.title')}</h3>
               <p>{t('site.features.write.body')}</p>
-              <Link className='mf-text-link' href='/docs/intro'>
+              <Link
+                className='mf-text-link'
+                href='/docs/intro'
+                locale={getDocumentLinkLocale('/docs/intro', locale)}
+              >
                 {t('site.features.write.link')}
                 <SiteArrow />
               </Link>
@@ -49,7 +56,11 @@ export default function FeatureList() {
               <i className='ri-folder-open-line mf-feature-icon' aria-hidden='true' />
               <h3>{t('site.features.local.title')}</h3>
               <p>{t('site.features.local.body')}</p>
-              <Link className='mf-text-link' href='/docs/intro'>
+              <Link
+                className='mf-text-link'
+                href='/docs/intro'
+                locale={getDocumentLinkLocale('/docs/intro', locale)}
+              >
                 {t('home.guides.introLink')}
                 <SiteArrow />
               </Link>
@@ -75,7 +86,11 @@ export default function FeatureList() {
               <i className='ri-sparkling-line mf-feature-icon' aria-hidden='true' />
               <h3>{t('site.features.ai.title')}</h3>
               <p>{t('site.features.ai.body')}</p>
-              <Link className='mf-text-link' href='/docs/Extension/UseCopilotWithOllama'>
+              <Link
+                className='mf-text-link'
+                href='/docs/Extension/UseCopilotWithOllama'
+                locale={getDocumentLinkLocale('/docs/Extension/UseCopilotWithOllama', locale)}
+              >
                 {t('home.guides.ollamaLink')}
                 <SiteArrow />
               </Link>
@@ -96,7 +111,11 @@ export default function FeatureList() {
               <i className='ri-command-line mf-feature-icon' aria-hidden='true' />
               <h3>{t('site.features.personal.title')}</h3>
               <p>{t('site.features.personal.body')}</p>
-              <Link className='mf-text-link' href='/docs/Extension/CustomTheme'>
+              <Link
+                className='mf-text-link'
+                href='/docs/Extension/CustomTheme'
+                locale={getDocumentLinkLocale('/docs/Extension/CustomTheme', locale)}
+              >
                 {t('site.features.personal.link')}
                 <SiteArrow />
               </Link>

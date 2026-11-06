@@ -111,6 +111,11 @@ export function getPageUrl(path: string, locale: SiteLocale = 'en'): string {
   return `${SITE_ORIGIN}${prefix}${pathname === '/' && prefix ? '' : pathname}`
 }
 
+/** Russian guide links must use the published English page during client navigation. */
+export function getDocumentLinkLocale(href: string, locale?: string): string | undefined {
+  return locale === 'ru' && /^\/docs\/[^?#]/.test(href) ? 'en' : locale
+}
+
 export function getLanguageAlternates(path: string, locales: readonly SiteLocale[]) {
   const alternates = locales.map((locale) => ({
     hrefLang: locale === 'zh' ? 'zh-CN' : locale,

@@ -1879,6 +1879,7 @@ pub fn run() {
             app::window_manager::is_file_in_workspace,
             app::window_manager::focus_window_by_label,
             app::application_session::preserve_update_session,
+            app::application_session::release_update_session,
             app::application_session::cancel_app_quit,
             app::application_session::close_session_window,
             keybindings::cmd::get_keyboard_infos,
@@ -2074,6 +2075,13 @@ pub fn run() {
             let app = window.app_handle();
 
             match event {
+                tauri::WindowEvent::CloseRequested { api, .. }
+                    if application_session::is_update_owner(window.label()) =>
+                {
+                    // The requester can be the auxiliary settings window, which
+                    // has no editor close listener to wait for the update barrier.
+                    api.prevent_close();
+                }
                 tauri::WindowEvent::Focused(true) => {
                     window_manager::mark_window_recent(window.label());
                 }

@@ -289,7 +289,10 @@
   "explorer": {
     "collapse_folders": "Свернуть папки",
     "refresh_folder_data": "Обновить содержимое папки",
-    "focus_active_file": "Перейти к текущему файлу"
+    "focus_active_file": "Перейти к текущему файлу",
+    "sort": "Сортировка файлов",
+    "sort_name_asc": "По имени: от А до Я",
+    "sort_name_desc": "По имени: от Я до А"
   },
   "file": {
     "save_dialog_title": "Сохранить файл",
@@ -410,6 +413,14 @@
   },
   "notification": {},
   "search": {
+    "mode": "Искать в",
+    "modeContent": "Содержимом файлов",
+    "modeFilename": "Именах файлов",
+    "filename": "Поиск по именам файлов",
+    "filenameReadyDesc": "Введите имя файла, затем нажмите Enter или кнопку поиска",
+    "filenameSearchingDesc": "Поиск по именам файлов в текущей рабочей области",
+    "filenameSummary": "Файлов: {{files}}. Запрос: {{keyword}}",
+    "filenameEmptyDesc": "Попробуйте другое имя файла или проверьте исключения поиска",
     "line": "Строка {{number}}:",
     "search_empty": "По вашему запросу ничего не найдено",
     "text": "Поиск",
@@ -1369,7 +1380,13 @@
       "resetSize": "Восстановить автоматический размер"
     },
     "preview": {
-      "retry": "Повторить"
+      "retry": "Повторить",
+      "mermaid": {
+        "size": "Размер диаграммы",
+        "autoSize": "Удобный для чтения размер",
+        "fitWidth": "По ширине",
+        "actualSize": "Исходный размер (100%)"
+      }
     },
     "editor": {
       "loading": "Загрузка редактора Capricorn",
@@ -1413,7 +1430,15 @@
       "moveRowUp": "Переместить строку вверх",
       "moveRowDown": "Переместить строку вниз",
       "moveColumnLeft": "Переместить столбец влево",
-      "moveColumnRight": "Переместить столбец вправо"
+      "moveColumnRight": "Переместить столбец вправо",
+      "selectRow": "Выделить строку",
+      "selectColumn": "Выделить столбец",
+      "dragRow": "Перетащите строку, чтобы изменить порядок",
+      "dragColumn": "Перетащите столбец, чтобы изменить порядок",
+      "dragRowPosition": "Переместить строку {{from}} на позицию {{to}}",
+      "dragColumnPosition": "Переместить столбец {{from}} на позицию {{to}}",
+      "movedRow": "Строка перемещена на позицию {{position}}",
+      "movedColumn": "Столбец перемещён на позицию {{position}}"
     }
   },
   "inline_insert": {

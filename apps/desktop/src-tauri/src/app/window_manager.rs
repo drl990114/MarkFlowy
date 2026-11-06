@@ -111,9 +111,7 @@ pub(crate) fn build_main_window(
     opened_urls: Vec<String>,
     restore_session_label: Option<Option<String>>,
 ) -> Result<WebviewWindow, String> {
-    if super::application_session::is_quitting() {
-        return Err("Cannot create a window while MarkFlowy is quitting".into());
-    }
+    let _build_ticket = super::application_session::begin_window_build()?;
     // Quit may arrive before the renderer installs its close listener. Ensure
     // the target snapshot already represents this restored or fresh window.
     super::application_session::prepare_window_session(

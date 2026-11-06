@@ -124,6 +124,7 @@ export async function withPreservedUpdateSession<T>(replyTo: string, operation: 
   let heartbeat: ReturnType<typeof setInterval> | undefined
   let stop: (() => void) | undefined
   let finished = false
+  let preserveRequested = false
   try {
     await new Promise<void>((resolve, reject) => {
       timeout = setTimeout(() => reject(new Error('Timed out preserving update session')), TIMEOUT_MS)
@@ -143,13 +144,20 @@ export async function withPreservedUpdateSession<T>(replyTo: string, operation: 
       }).catch(reject)
     })
     clearTimeout(timeout)
-    await invoke('preserve_update_session', { labels })
+    preserveRequested = true
+    await invoke('preserve_update_session', { id, labels })
     return await operation()
   } finally {
     finished = true
     clearTimeout(timeout)
     clearInterval(heartbeat)
     stop?.()
-    await Promise.allSettled(labels.map((label) => emitTo(label, RELEASE, { id, expiresAt })))
+    try {
+      // Also release when preserve itself rejects: the native write may have
+      // succeeded before its IPC response failed. Tokens cannot unlock another update.
+      if (preserveRequested) await invoke('release_update_session', { id })
+    } finally {
+      await Promise.allSettled(labels.map((label) => emitTo(label, RELEASE, { id, expiresAt })))
+    }
   }
 }

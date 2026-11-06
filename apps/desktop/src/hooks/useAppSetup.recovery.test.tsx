@@ -289,11 +289,26 @@ describe('update session persistence', () => {
     expect(mocks.flush.mock.invocationCallOrder[0]).toBeLessThan(mocks.recentHistory.flush.mock.invocationCallOrder[0])
   })
 
-  it('reports a session write failure so the updater cannot proceed', async () => {
+  it('allows updating after document persistence when optional recent history fails', async () => {
+    await startRuntime()
+    const persistence = mocks.listenUpdateSession.mock.calls[0][1]
+    const error = new Error('Invalid recent_files.json')
+    mocks.recentHistory.flush.mockRejectedValue(error)
+    await persistence.prepare()
+    await expect(persistence.flush()).resolves.toBeUndefined()
+    expect(mocks.cache.flush).toHaveBeenCalledOnce()
+    expect(mocks.flush).toHaveBeenCalledOnce()
+    expect(mocks.error).toHaveBeenCalledWith(
+      'Failed to persist recent files; continuing with the saved document session', error,
+    )
+  })
+
+  it.each(['workspace', 'window'])('reports a %s write failure so the updater cannot proceed', async (store) => {
     await startRuntime()
     const persistence = mocks.listenUpdateSession.mock.calls[0][1]
     const error = new Error('Session disk full')
-    mocks.flush.mockRejectedValueOnce(error)
+    const flush = store === 'workspace' ? mocks.cache.flush : mocks.flush
+    flush.mockRejectedValueOnce(error)
     await persistence.prepare()
     await expect(persistence.flush()).rejects.toThrow(error)
     expect(mocks.recentHistory.flush).not.toHaveBeenCalled()
@@ -301,6 +316,21 @@ describe('update session persistence', () => {
 })
 
 describe('application quit cancellation', () => {
+  it('closes a durably saved window even when optional recent history stays unreadable', async () => {
+    await startRuntime()
+    const error = new Error('Invalid recent_files.json')
+    mocks.recentHistory.flush.mockRejectedValue(error)
+    await act(async () => { await mocks.closeRequested() })
+    expect(mocks.cache.flush).toHaveBeenCalledOnce()
+    expect(mocks.flush).toHaveBeenCalledOnce()
+    expect(mocks.closeNative).toHaveBeenCalledOnce()
+    expect(mocks.flush.mock.invocationCallOrder[0]).toBeLessThan(mocks.closeNative.mock.invocationCallOrder[0])
+    expect(mocks.invoke).not.toHaveBeenCalledWith('cancel_app_quit')
+    expect(mocks.error).toHaveBeenCalledWith(
+      'Failed to persist recent files; continuing with the saved document session', error,
+    )
+  })
+
   it('clears a pending app quit when a window cancels close, and allows another close', async () => {
     await startRuntime()
     mocks.closeDrafts.mockResolvedValueOnce(false)
@@ -311,9 +341,10 @@ describe('application quit cancellation', () => {
     expect(mocks.closeNative).toHaveBeenCalledOnce()
   })
 
-  it('clears pending quit and keeps the window when its final persistence fails', async () => {
+  it.each(['workspace', 'window'])('clears pending quit and keeps the window when its %s persistence fails', async (store) => {
     await startRuntime()
-    mocks.flush.mockRejectedValueOnce(new Error('disk full'))
+    const flush = store === 'workspace' ? mocks.cache.flush : mocks.flush
+    flush.mockRejectedValueOnce(new Error('disk full'))
     await act(async () => { await mocks.closeRequested() })
     expect(mocks.invoke).toHaveBeenCalledWith('cancel_app_quit')
     expect(mocks.closeNative).not.toHaveBeenCalled()

@@ -99,6 +99,15 @@ let collectingStartupOpenedPaths = false
 let preserveStartupDocuments = false
 let freshStartupWindow = false
 
+const flushOptionalRecentFileHistory = async () => {
+  try {
+    await recentFileHistory?.flush()
+  } catch (error) {
+    // Document and draft persistence is required; the recent-file index is not.
+    logger.error('Failed to persist recent files; continuing with the saved document session', error)
+  }
+}
+
 const setupDraftRecovery = async (
   signal?: AbortSignal,
   reload = false,
@@ -515,7 +524,7 @@ export const useAppRuntimeSetup = () => {
         flushEditorResumeStates()
         await workspaceCachePersistence.flush()
         await windowSessionPersistence.flush()
-        await recentFileHistory?.flush()
+        await flushOptionalRecentFileHistory()
       },
     })
     let closeWindowPromise: Promise<boolean> | undefined
@@ -536,7 +545,7 @@ export const useAppRuntimeSetup = () => {
             // Keep persistence and the close listener alive if native teardown fails.
             await workspaceCachePersistence?.flush()
             await windowSessionPersistence?.flush()
-            await recentFileHistory?.flush()
+            await flushOptionalRecentFileHistory()
             await releaseDetachedWorkspaceScopes()
             await releaseSecurityScope(rootPath)
             await invoke('close_session_window')
