@@ -8,6 +8,7 @@ export function createSearchStore(workspace: string) {
   return create<SearchStore>()(
     persist(
       (set) => ({
+        searchMode: 'content',
         searchKeyword: '',
         resultQuery: '',
         resultCaseSensitive: false,
@@ -27,6 +28,7 @@ export function createSearchStore(workspace: string) {
         storage: jsonStateStorage(),
         // Results contain file content and can become stale while the app is closed.
         partialize: ({
+          searchMode,
           searchKeyword,
           caseSensitive,
           expandedPaths,
@@ -34,6 +36,7 @@ export function createSearchStore(workspace: string) {
           activeMatch,
           hasSearched,
         }) => ({
+          searchMode,
           searchKeyword,
           caseSensitive,
           expandedPaths,
@@ -45,6 +48,7 @@ export function createSearchStore(workspace: string) {
           const state = isRecord(saved) ? saved : {}
           return {
             ...current,
+            searchMode: state.searchMode === 'filename' ? 'filename' : 'content',
             searchKeyword: typeof state.searchKeyword === 'string' ? state.searchKeyword : '',
             caseSensitive: state.caseSensitive === true,
             hasSearched: state.hasSearched === true,
@@ -107,7 +111,10 @@ export interface SearchInfo {
   relative_path: string
 }
 
+export type SearchMode = 'content' | 'filename'
+
 export interface SearchStore {
+  searchMode: SearchMode
   expandedPaths: Record<string, boolean>
   hasSearched: boolean
   searchKeyword: string

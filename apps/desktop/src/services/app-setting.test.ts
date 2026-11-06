@@ -22,9 +22,11 @@ beforeEach(() => {
 })
 
 describe('settings transactions', () => {
-  it('opens single files in new windows by default when config loading fails', async () => {
+  it('uses application defaults when config loading fails', async () => {
     mocks.invoke.mockRejectedValueOnce(new Error('config unavailable'))
     const defaults = await appSettingStoreSetup()
+    expect(defaults.theme).toBe('dark')
+    expect(defaults.theme_mode).toBe('dark')
     expect(defaults.open_file_in_new_window).toBe(true)
     expect(defaults.editor_enable_preview_tabs).toBe(true)
     expect(useAppSettingStore.getState().settingData.open_file_in_new_window).toBe(true)

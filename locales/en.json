@@ -289,7 +289,10 @@
   "explorer": {
     "collapse_folders": "Collapse folders",
     "refresh_folder_data": "Refresh Folder Data",
-    "focus_active_file": "Focus on the current file"
+    "focus_active_file": "Focus on the current file",
+    "sort": "Sort files",
+    "sort_name_asc": "Name: A to Z",
+    "sort_name_desc": "Name: Z to A"
   },
   "file": {
     "save_dialog_title": "Save File",
@@ -410,6 +413,14 @@
   },
   "notification": {},
   "search": {
+    "mode": "Search in",
+    "modeContent": "Contents",
+    "modeFilename": "File names",
+    "filename": "Search file names",
+    "filenameReadyDesc": "Enter a file name, then press Enter or click search",
+    "filenameSearchingDesc": "Searching file names in the current workspace",
+    "filenameSummary": "{{files}} files: {{keyword}}",
+    "filenameEmptyDesc": "Try another file name or check your search exclusions",
     "line": "Line {{number}}:",
     "search_empty": "Nothing found matching these search terms",
     "text": "Search",
@@ -1369,7 +1380,13 @@
       "resetSize": "Restore automatic size"
     },
     "preview": {
-      "retry": "Retry"
+      "retry": "Retry",
+      "mermaid": {
+        "size": "Diagram size",
+        "autoSize": "Readable size",
+        "fitWidth": "Fit width",
+        "actualSize": "Actual size (100%)"
+      }
     },
     "editor": {
       "loading": "Loading Capricorn editor",
@@ -1413,7 +1430,15 @@
       "moveRowUp": "Move row up",
       "moveRowDown": "Move row down",
       "moveColumnLeft": "Move column left",
-      "moveColumnRight": "Move column right"
+      "moveColumnRight": "Move column right",
+      "selectRow": "Select row",
+      "selectColumn": "Select column",
+      "dragRow": "Drag row to reorder",
+      "dragColumn": "Drag column to reorder",
+      "dragRowPosition": "Move row {{from}} to position {{to}}",
+      "dragColumnPosition": "Move column {{from}} to position {{to}}",
+      "movedRow": "Row moved to position {{position}}",
+      "movedColumn": "Column moved to position {{position}}"
     }
   },
   "inline_insert": {

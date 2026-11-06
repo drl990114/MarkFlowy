@@ -30,6 +30,8 @@ vi.mock('@tauri-apps/api/window', () => ({
 
 import useThemeStore, { FALLBACK_DARK_THEME, FALLBACK_LIGHT_THEME } from './useThemeStore'
 import { STARTUP_APPEARANCE_SESSION_STORAGE_KEY } from '@/startup/appearance'
+import { resolveStartupTheme } from '@/startup/appearanceTheme'
+import { getThemeTokens } from '@/themes/runtime'
 
 describe('theme selection preview', () => {
   beforeEach(() => {
@@ -63,6 +65,37 @@ describe('theme selection preview', () => {
     useThemeStore.getState().restoreThemePreview()
     expect(useThemeStore.getState().curTheme.mode).toBe('light')
     expect(mocks.writeSettingData).not.toHaveBeenCalled()
+  })
+
+  it('persists Tokyo Night and restores its palette and syntax at startup', async () => {
+    await useThemeStore.getState().applyThemeSelection({
+      darkThemeName: 'Tokyo Night',
+      themeMode: 'dark',
+    })
+    expect(useThemeStore.getState().lightThemeName).toBe(FALLBACK_LIGHT_THEME)
+    expect(mocks.writeSettingPatch).toHaveBeenCalledWith({
+      dark_theme: 'Tokyo Night',
+      theme_mode: 'dark',
+    })
+    const appearance = JSON.parse(
+      window.sessionStorage.getItem(STARTUP_APPEARANCE_SESSION_STORAGE_KEY) ?? '{}',
+    )
+    expect(appearance).toMatchObject({
+      themeId: 'Tokyo Night',
+      resolvedMode: 'dark',
+      palette: {
+        surfaceApp: '#1a1b26',
+        surfacePanel: '#16161e',
+        surfaceToolbar: '#16161e',
+        foreground: '#a9b1d6',
+        mutedForeground: '#787c99',
+        border: '#101014',
+        accent: '#3d59a1dd',
+      },
+    })
+    const startup = resolveStartupTheme(appearance)
+    expect(startup.synthetic).toBe(false)
+    expect(getThemeTokens(startup.theme)['syntax.keyword']).toBe('#bb9af7ff')
   })
 
   it('commits the selected theme and mode together before persisting appearance', async () => {
@@ -117,10 +150,12 @@ describe('theme selection preview', () => {
     expect(useThemeStore.getState().curTheme.mode).toBe('light')
   })
 
-  it('uses the bootstrap system appearance during settings initialization without another theme query', async () => {
+  it('reads the system appearance when saved settings override the dark startup default', async () => {
     await useThemeStore.getState().initFromSettings({ theme_mode: 'system' })
-    expect(mocks.theme).not.toHaveBeenCalled()
+    expect(mocks.theme).toHaveBeenCalledOnce()
     expect(mocks.invoke).not.toHaveBeenCalledWith('get_system_theme')
+    expect(useThemeStore.getState().themeMode).toBe('system')
+    expect(useThemeStore.getState().curTheme.mode).toBe('light')
   })
 
   it('coalesces concurrent theme reads and does not overwrite a newer system event', async () => {

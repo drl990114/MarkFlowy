@@ -121,3 +121,59 @@ it.each([
     }
   },
 )
+
+it.each([
+  ['en', ['Select row', 'Select column', 'Drag row to reorder', 'Drag column to reorder']],
+  ['cn', ['选择整行', '选择整列', '拖动以调整行顺序', '拖动以调整列顺序']],
+  [
+    'frFR',
+    [
+      'Sélectionner la ligne',
+      'Sélectionner la colonne',
+      'Faire glisser pour réordonner la ligne',
+      'Faire glisser pour réordonner la colonne',
+    ],
+  ],
+  [
+    'es',
+    [
+      'Seleccionar fila',
+      'Seleccionar columna',
+      'Arrastrar para reordenar la fila',
+      'Arrastrar para reordenar la columna',
+    ],
+  ],
+  ['ja', ['行を選択', '列を選択', 'ドラッグして行を並べ替え', 'ドラッグして列を並べ替え']],
+] as const)(
+  'loads table reorder labels and interpolated announcements for %s',
+  async (language, labels) => {
+    await i18nInit({ lng: language })
+    const keys = ['selectRow', 'selectColumn', 'dragRow', 'dragColumn']
+    keys.forEach((key, index) => {
+      const translationKey = `capricorn.table.${key}`
+      expect(i18n.getResource(language, 'translation', translationKey)).toBe(labels[index])
+      expect(i18n.t(translationKey, { defaultValue: 'Missing translation' })).toBe(labels[index])
+    })
+
+    for (const key of ['dragRowPosition', 'dragColumnPosition']) {
+      const translationKey = `capricorn.table.${key}`
+      expect(i18n.getResource(language, 'translation', translationKey)).toContain('{{from}}')
+      expect(i18n.getResource(language, 'translation', translationKey)).toContain('{{to}}')
+      const message = i18n.t(translationKey, {
+        defaultValue: 'Missing translation',
+        from: 4,
+        to: 2,
+      })
+      expect(message).toContain('4')
+      expect(message).toContain('2')
+      expect(message).not.toMatch(/[{}]/)
+    }
+    for (const key of ['movedRow', 'movedColumn']) {
+      const translationKey = `capricorn.table.${key}`
+      expect(i18n.getResource(language, 'translation', translationKey)).toContain('{{position}}')
+      const message = i18n.t(translationKey, { defaultValue: 'Missing translation', position: 2 })
+      expect(message).toContain('2')
+      expect(message).not.toMatch(/[{}]/)
+    }
+  },
+)

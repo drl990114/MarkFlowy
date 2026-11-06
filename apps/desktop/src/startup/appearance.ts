@@ -178,7 +178,7 @@ export const normalizeStartupAppearance = (
   browserMode: ResolvedAppearanceMode = getBrowserResolvedMode(),
 ): StartupAppearance => {
   const appearance = isRecord(value) ? value : {}
-  const preference = isPreference(appearance.preference) ? appearance.preference : 'system'
+  const preference = isPreference(appearance.preference) ? appearance.preference : 'dark'
   const cachedResolvedMode = isResolvedMode(appearance.resolvedMode)
     ? appearance.resolvedMode
     : undefined

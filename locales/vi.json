@@ -289,7 +289,10 @@
   "explorer": {
     "collapse_folders": "Thu gọn thư mục",
     "refresh_folder_data": "Làm mới dữ liệu thư mục",
-    "focus_active_file": "Chuyển đến tệp hiện tại"
+    "focus_active_file": "Chuyển đến tệp hiện tại",
+    "sort": "Sắp xếp tệp",
+    "sort_name_asc": "Tên: A đến Z",
+    "sort_name_desc": "Tên: Z đến A"
   },
   "file": {
     "save_dialog_title": "Lưu tệp",
@@ -410,6 +413,14 @@
   },
   "notification": {},
   "search": {
+    "mode": "Tìm kiếm trong",
+    "modeContent": "Nội dung",
+    "modeFilename": "Tên tệp",
+    "filename": "Tìm kiếm tên tệp",
+    "filenameReadyDesc": "Nhập tên tệp, sau đó nhấn Enter hoặc nhấp vào tìm kiếm",
+    "filenameSearchingDesc": "Đang tìm kiếm tên tệp trong không gian làm việc hiện tại",
+    "filenameSummary": "{{files}} tệp: {{keyword}}",
+    "filenameEmptyDesc": "Hãy thử tên tệp khác hoặc kiểm tra các quy tắc loại trừ tìm kiếm",
     "line": "Dòng {{number}}:",
     "search_empty": "Không tìm thấy kết quả nào khớp với từ khóa tìm kiếm",
     "text": "Tìm kiếm",
@@ -1369,7 +1380,13 @@
       "resetSize": "Khôi phục kích thước tự động"
     },
     "preview": {
-      "retry": "Thử lại"
+      "retry": "Thử lại",
+      "mermaid": {
+        "size": "Kích thước sơ đồ",
+        "autoSize": "Kích thước dễ đọc",
+        "fitWidth": "Vừa chiều rộng",
+        "actualSize": "Kích thước thực (100%)"
+      }
     },
     "editor": {
       "loading": "Đang tải trình soạn thảo Capricorn",
@@ -1413,7 +1430,15 @@
       "moveRowUp": "Di chuyển hàng lên",
       "moveRowDown": "Di chuyển hàng xuống",
       "moveColumnLeft": "Di chuyển cột sang trái",
-      "moveColumnRight": "Di chuyển cột sang phải"
+      "moveColumnRight": "Di chuyển cột sang phải",
+      "selectRow": "Chọn hàng",
+      "selectColumn": "Chọn cột",
+      "dragRow": "Kéo để sắp xếp lại hàng",
+      "dragColumn": "Kéo để sắp xếp lại cột",
+      "dragRowPosition": "Di chuyển hàng {{from}} đến vị trí {{to}}",
+      "dragColumnPosition": "Di chuyển cột {{from}} đến vị trí {{to}}",
+      "movedRow": "Đã di chuyển hàng đến vị trí {{position}}",
+      "movedColumn": "Đã di chuyển cột đến vị trí {{position}}"
     }
   },
   "inline_insert": {

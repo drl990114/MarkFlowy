@@ -378,6 +378,14 @@
   },
   "notification": {},
   "search": {
+    "mode": "Rechercher dans",
+    "modeContent": "Contenu",
+    "modeFilename": "Noms de fichiers",
+    "filename": "Rechercher des noms de fichiers",
+    "filenameReadyDesc": "Saisissez un nom de fichier, puis appuyez sur Entrée ou cliquez sur Rechercher",
+    "filenameSearchingDesc": "Recherche des noms de fichiers dans l’espace de travail actuel",
+    "filenameSummary": "{{files}} fichiers : {{keyword}}",
+    "filenameEmptyDesc": "Essayez un autre nom de fichier ou vérifiez les exclusions de recherche",
     "line": "Ligne {{number}} :",
     "search_empty": "Pas de résultats avec ces termes",
     "text": "Chercher",
@@ -1079,7 +1087,10 @@
   "explorer": {
     "collapse_folders": "Dossiers d'effondrement",
     "refresh_folder_data": "Actualiser les données du dossier",
-    "focus_active_file": "Focus sur le fichier actuel"
+    "focus_active_file": "Focus sur le fichier actuel",
+    "sort": "Trier les fichiers",
+    "sort_name_asc": "Nom : A à Z",
+    "sort_name_desc": "Nom : Z à A"
   },
   "workspace": {
     "info": "Informations sur la zone de travail",
@@ -1375,7 +1386,13 @@
       "resetSize": "Rétablir la taille automatique"
     },
     "preview": {
-      "retry": "Retry"
+      "retry": "Retry",
+      "mermaid": {
+        "size": "Taille du diagramme",
+        "autoSize": "Taille lisible",
+        "fitWidth": "Ajuster à la largeur",
+        "actualSize": "Taille réelle (100 %)"
+      }
     },
     "snippets": {
       "title": "Insérer un extrait",
@@ -1413,7 +1430,15 @@
       "moveRowUp": "Déplacer la ligne vers le haut",
       "moveRowDown": "Déplacer la ligne vers le bas",
       "moveColumnLeft": "Déplacer la colonne vers la gauche",
-      "moveColumnRight": "Déplacer la colonne vers la droite"
+      "moveColumnRight": "Déplacer la colonne vers la droite",
+      "selectRow": "Sélectionner la ligne",
+      "selectColumn": "Sélectionner la colonne",
+      "dragRow": "Faire glisser pour réordonner la ligne",
+      "dragColumn": "Faire glisser pour réordonner la colonne",
+      "dragRowPosition": "Déplacer la ligne {{from}} à la position {{to}}",
+      "dragColumnPosition": "Déplacer la colonne {{from}} à la position {{to}}",
+      "movedRow": "Ligne déplacée à la position {{position}}",
+      "movedColumn": "Colonne déplacée à la position {{position}}"
     }
   },
   "inline_insert": {

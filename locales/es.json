@@ -378,6 +378,14 @@
   },
   "notification": {},
   "search": {
+    "mode": "Buscar en",
+    "modeContent": "Contenido",
+    "modeFilename": "Nombres de archivo",
+    "filename": "Buscar nombres de archivo",
+    "filenameReadyDesc": "Escribe un nombre de archivo y pulsa Intro o haz clic en Buscar",
+    "filenameSearchingDesc": "Buscando nombres de archivo en el espacio de trabajo actual",
+    "filenameSummary": "{{files}} archivos: {{keyword}}",
+    "filenameEmptyDesc": "Prueba otro nombre de archivo o revisa las exclusiones de búsqueda",
     "line": "Línea {{number}}:",
     "search_empty": "No se encontró ninguna coincidencia con los términos de búsqueda",
     "text": "Buscar",
@@ -1079,7 +1087,10 @@
   "explorer": {
     "collapse_folders": "Contraer carpetas",
     "refresh_folder_data": "Actualizar los datos de la carpeta",
-    "focus_active_file": "Centrarse en el archivo actual"
+    "focus_active_file": "Centrarse en el archivo actual",
+    "sort": "Ordenar archivos",
+    "sort_name_asc": "Nombre: A a Z",
+    "sort_name_desc": "Nombre: Z a A"
   },
   "workspace": {
     "info": "Información del área de trabajo",
@@ -1375,7 +1386,13 @@
       "resetSize": "Restaurar tamaño automático"
     },
     "preview": {
-      "retry": "Retry"
+      "retry": "Retry",
+      "mermaid": {
+        "size": "Tamaño del diagrama",
+        "autoSize": "Tamaño legible",
+        "fitWidth": "Ajustar al ancho",
+        "actualSize": "Tamaño real (100 %)"
+      }
     },
     "snippets": {
       "title": "Insertar fragmento",
@@ -1413,7 +1430,15 @@
       "moveRowUp": "Subir fila",
       "moveRowDown": "Bajar fila",
       "moveColumnLeft": "Mover columna a la izquierda",
-      "moveColumnRight": "Mover columna a la derecha"
+      "moveColumnRight": "Mover columna a la derecha",
+      "selectRow": "Seleccionar fila",
+      "selectColumn": "Seleccionar columna",
+      "dragRow": "Arrastrar para reordenar la fila",
+      "dragColumn": "Arrastrar para reordenar la columna",
+      "dragRowPosition": "Mover la fila {{from}} a la posición {{to}}",
+      "dragColumnPosition": "Mover la columna {{from}} a la posición {{to}}",
+      "movedRow": "Fila movida a la posición {{position}}",
+      "movedColumn": "Columna movida a la posición {{position}}"
     }
   },
   "inline_insert": {

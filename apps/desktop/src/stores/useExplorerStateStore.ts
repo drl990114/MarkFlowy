@@ -3,9 +3,13 @@ import { persist } from 'zustand/middleware'
 import { isRecord, jsonStateStorage } from './persistStorage'
 import { workspaceStorageKey } from './workspacePersistence'
 
+export type ExplorerSortDirection = 'asc' | 'desc'
+
 interface ExplorerState {
   expandedPaths: string[] | undefined
   setExpandedPaths: (paths: string[]) => void
+  sortDirection: ExplorerSortDirection
+  setSortDirection: (direction: ExplorerSortDirection) => void
 }
 
 export function createExplorerStateStore(workspace: string) {
@@ -14,14 +18,17 @@ export function createExplorerStateStore(workspace: string) {
       (set) => ({
         expandedPaths: undefined,
         setExpandedPaths: (expandedPaths) => set({ expandedPaths }),
+        sortDirection: 'asc',
+        setSortDirection: (sortDirection) => set({ sortDirection }),
       }),
       {
         name: workspaceStorageKey('explorer', workspace),
         version: 1,
         storage: jsonStateStorage(),
-        partialize: ({ expandedPaths }) => ({ expandedPaths }),
+        partialize: ({ expandedPaths, sortDirection }) => ({ expandedPaths, sortDirection }),
         merge: (saved, current) => ({
           ...current,
+          sortDirection: isRecord(saved) && saved.sortDirection === 'desc' ? 'desc' : 'asc',
           expandedPaths:
             isRecord(saved) && Array.isArray(saved.expandedPaths)
               ? [

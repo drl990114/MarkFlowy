@@ -494,7 +494,7 @@ const useThemeStore = create<ThemeStore>((set, get) => {
     },
 
     initFromSettings: async (settingData) => {
-      const themeMode = (settingData.theme_mode as ThemeMode) || 'system'
+      const themeMode = (settingData.theme_mode as ThemeMode) || 'dark'
       const lightThemeName = (settingData.light_theme as string) || FALLBACK_LIGHT_THEME
       const darkThemeName = (settingData.dark_theme as string) || FALLBACK_DARK_THEME
 

@@ -199,7 +199,7 @@ describe('startup appearance bootstrap', () => {
     delete window.__MARKFLOWY_BOOTSTRAP__
     Object.defineProperty(window, '__TAURI_INTERNALS__', { configurable: true, value: {} })
     expect(readWindowBootstrap(window)).toMatchObject({
-      preference: 'system',
+      preference: 'dark',
       resolvedMode: 'dark',
       themeId: 'MarkFlowy Dark',
     })
@@ -213,7 +213,7 @@ describe('startup appearance bootstrap', () => {
 
     expect(readWindowBootstrap(window)).toEqual({
       schemaVersion: 1,
-      preference: 'system',
+      preference: 'dark',
       resolvedMode: 'dark',
       themeId: 'MarkFlowy Dark',
       palette: DEFAULT_STARTUP_PALETTES.dark,

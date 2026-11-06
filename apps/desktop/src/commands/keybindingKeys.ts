@@ -122,7 +122,8 @@ export function keyMapsOverlap(
   return [left, right].some((keys, index) => {
     const normalized = normalizeKeyMap(keys)!
     const code = normalized.at(-1)!.slice(1, -1)
-    return (numpadValues[code] ?? []).some(
+    const aliases = /^Key[A-Z]$/.test(code) ? [code.at(-1)!.toLowerCase()] : (numpadValues[code] ?? [])
+    return aliases.some(
       (key) =>
         canonicalKeyMap([...normalized.slice(0, -1), key], platform) === (index === 0 ? b : a),
     )
@@ -188,6 +189,10 @@ export function formatKeyMap(keys: readonly string[], platform = keybindingPlatf
       ? { CommandOrCtrl: '⌘', Meta: '⌘', Ctrl: '⌃', Alt: '⌥', Shift: '⇧' }
       : { CommandOrCtrl: 'Ctrl', Meta: 'Meta' }
   return (normalizeKeyMap(keys) ?? keys)
-    .map((key) => symbols[key] ?? physicalLabels[key] ?? (key.length === 1 ? key.toUpperCase() : key))
+    .map((key) =>
+      symbols[key] ??
+      physicalLabels[key] ??
+      (/^\[Key[A-Z]\]$/.test(key) ? key[4] : key.length === 1 ? key.toUpperCase() : key),
+    )
     .join(platform === 'mac' ? '' : '+')
 }

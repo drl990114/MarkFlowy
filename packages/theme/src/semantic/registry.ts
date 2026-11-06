@@ -58,6 +58,12 @@ export const themeTokens = {
   'editor.selection.background': color(ref('accent.background')),
   'editor.selection.foreground': color(ref('accent.foreground')),
   'editor.selection.inactiveBackground': color('#8888884d'),
+  'editor.highlight.background': color(
+    '#edc34b',
+    '#e8c45a',
+    'Background of text marked with ==highlight==.',
+  ),
+  'editor.highlight.foreground': color('#2b2400', '#2b2400', 'Text on the highlight background.'),
   'editor.link': color(ref('accent.background')),
   'editor.code.background': color(ref('surface.subtle')),
   'editor.code.foreground': color(ref('editor.foreground')),

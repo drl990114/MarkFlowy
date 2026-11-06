@@ -22,6 +22,9 @@
       "@markflowy/theme/semantic": [
         "../../packages/theme/src/semantic/index.ts"
       ],
+      "@markflowy/theme": [
+        "../../packages/theme/src/index.ts"
+      ],
       "zens": [
         "../../packages/zens/src/index.ts"
       ],

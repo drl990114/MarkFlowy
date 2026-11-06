@@ -2,6 +2,7 @@ import type { RightBarItem } from '@/components/SideBar'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { RadioGroup } from '@/components/ui/radio-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { RIGHTBARITEMKEYS } from '@/constants'
 import { resolveFileExcludePatterns } from '@/helper/file-exclude'
@@ -31,7 +32,7 @@ import {
   SearchIcon,
   XIcon,
 } from 'lucide-react'
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useTranslation } from '@/i18n'
 import {
   SearchContainer,
@@ -40,7 +41,7 @@ import {
   SearchMeta,
   SearchStateBox,
 } from './styles'
-import type { SearchInfo } from './useSearchStore'
+import type { SearchInfo, SearchMode } from './useSearchStore'
 import { getSearchStore } from './useSearchStore'
 
 const SEARCH_ROW_HEIGHT = 26
@@ -175,6 +176,20 @@ const normalizeSearchResults = (
   })
 }
 
+function openSearchFile(searchInfo: SearchInfo, mode: 'preview' | 'permanent') {
+  const { path, name, ext } = searchInfo
+  const editor = useEditorStore.getState()
+  const knownFile = getFileObjectByPath(path) ?? editor.getFileNodeByPath(path)
+  if (searchInfo.is_folder || knownFile?.kind === 'dir') return
+  // Results can belong to a directory the lazy explorer has not loaded yet.
+  const file = knownFile
+    ? (getFileObject(knownFile.id) ?? createFile(knownFile))
+    : createFile({ path, name, ext })
+  if (!getFileObjectByPath(path)) setFileObjectByPath(path, file)
+  const group = editor.getActiveGroup()
+  return group && editor.openFileInGroup(group.id, file.id, { mode }) ? file : undefined
+}
+
 interface SearchMatchSnippetProps {
   content: string
   isActive: boolean
@@ -243,6 +258,7 @@ const SearchView = memo(() => {
 const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
   const useSearchStore = getSearchStore(workspace)
   const resultList = useSearchStore((state) => state.resultList)
+  const searchMode = useSearchStore((state) => state.searchMode)
   const addSearchResult = useSearchStore((state) => state.addSearchResult)
   const searchKeyword = useSearchStore((state) => state.searchKeyword)
   const caseSensitive = useSearchStore((state) => state.caseSensitive)
@@ -279,6 +295,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
   const [searchError, setSearchError] = useState('')
   const [focusedRowIndex, setFocusedRowIndex] = useState(0)
   const { t } = useTranslation()
+  const modeId = useId()
   const parentRef = useRef<HTMLDivElement>(null)
   const focusRequestFrameRef = useRef<number | null>(null)
   const searchRequestIdRef = useRef(0)
@@ -291,7 +308,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
 
   const flattenedData = useMemo(() => {
     const data: (
-      | { type: 'header'; searchInfo: NormalizedSearchInfo; id: string }
+      | { type: 'header' | 'file'; searchInfo: NormalizedSearchInfo; id: string }
       | {
           type: 'match'
           searchInfo: NormalizedSearchInfo
@@ -305,12 +322,12 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
 
     normalizedResultList.forEach((searchInfo) => {
       data.push({
-        type: 'header',
+        type: searchMode === 'filename' ? 'file' : 'header',
         searchInfo,
         id: `header-${searchInfo.id}`,
       })
 
-      if (expandIdMap[searchInfo.path]) {
+      if (searchMode === 'content' && expandIdMap[searchInfo.path]) {
         const isCurrentFileActive = getFileObjectByPath(searchInfo.path)?.id === activeId
         let fileIndexRef = 0
         searchInfo.matches.forEach((match) => {
@@ -335,7 +352,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
     })
 
     return data
-  }, [normalizedResultList, expandIdMap, activeId, activeIndex, activeMatch])
+  }, [normalizedResultList, expandIdMap, activeId, activeIndex, activeMatch, searchMode])
 
   const rowVirtualizer = useVirtualizer({
     count: flattenedData.length,
@@ -465,8 +482,10 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
         const res = await searchFiles<{ data: SearchInfo[] }>({
           query: {
             dir: workspace,
-            name_text: '.md',
-            contents_text: escapeRegExp(queryText),
+            name_text: searchMode === 'filename'
+              ? `${caseSensitive ? '(?-i:' : '(?i:'}${escapeRegExp(queryText)})`
+              : '.md',
+            contents_text: searchMode === 'content' ? escapeRegExp(queryText) : '',
           },
           options: {
             content_case_sensitive: caseSensitive,
@@ -476,9 +495,12 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
 
         if (searchRequestIdRef.current !== requestId) return
 
-        const previousMatch = restore ? useSearchStore.getState().activeMatch : undefined
+        const files = res.data.filter((file) => !file.is_folder)
+        const previousMatch = restore && searchMode === 'content'
+          ? useSearchStore.getState().activeMatch
+          : undefined
         const restoredFile = previousMatch
-          ? normalizeSearchResults(res.data, queryText, caseSensitive).find(
+          ? normalizeSearchResults(files, queryText, caseSensitive).find(
               (item) => item.path === previousMatch.path,
             )
           : undefined
@@ -493,7 +515,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
               )
           : -1
         setSearchState({
-          resultList: res.data,
+          resultList: files,
           resultQuery: queryText,
           resultCaseSensitive: caseSensitive,
           activeIndex: Math.max(0, restoredIndex),
@@ -502,7 +524,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
 
         const newExpandIdMap: Record<string, boolean> = {}
 
-        res.data.forEach((searchInfo) => {
+        files.forEach((searchInfo) => {
           newExpandIdMap[searchInfo.path] = restore
             ? (useSearchStore.getState().expandedPaths[searchInfo.path] ?? true)
             : true
@@ -528,6 +550,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
       setHasSearched,
       setExpandIdMap,
       searchKeyword,
+      searchMode,
       caseSensitive,
       fileExcludePatterns,
       setSearchState,
@@ -563,9 +586,30 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
     stopActiveFind()
   }, [caseSensitive, setSearchState, stopActiveFind, setExpandIdMap, setHasSearched])
 
+  const handleModeChange = useCallback((mode: SearchMode) => {
+    if (mode === searchMode) return
+    searchRequestIdRef.current += 1
+    searchAbortRef.current?.abort()
+    setIsSearching(false)
+    setSearchError('')
+    setFocusedRowIndex(0)
+    setSearchState({
+      searchMode: mode,
+      hasSearched: false,
+      resultList: [],
+      resultQuery: '',
+      activeIndex: 0,
+      activeMatch: undefined,
+      expandedPaths: {},
+    })
+    stopActiveFind()
+  }, [searchMode, setSearchState, stopActiveFind])
+
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') void handleSearch()
+      if (event.key === 'Enter' && !event.nativeEvent.isComposing && event.keyCode !== 229) {
+        void handleSearch()
+      }
     },
     [handleSearch],
   )
@@ -578,23 +622,14 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
       matchIndexInLine: number,
       mode: 'preview' | 'permanent' = 'preview',
     ) => {
-      const { path, name, ext } = searchInfo
+      const { path } = searchInfo
       const position = match.positions[matchIndexInLine]
-      const knownFile =
-        getFileObjectByPath(path) ?? useEditorStore.getState().getFileNodeByPath(path)
-      if (!position || searchInfo.is_folder || knownFile?.kind === 'dir') {
+      if (!position || searchInfo.is_folder) {
         setSearchError(t('find_replace.navigation_stale'))
         return
       }
-      // Search covers directories the lazy file tree has not loaded yet. Register
-      // metadata here; TextEditor still owns loading and validating the content.
-      const curFile = knownFile
-        ? (getFileObject(knownFile.id) ?? createFile(knownFile))
-        : createFile({ path, name, ext })
-      if (!getFileObjectByPath(path)) setFileObjectByPath(path, curFile)
-      const editor = useEditorStore.getState()
-      const group = editor.getActiveGroup()
-      if (!group || !editor.openFileInGroup(group.id, curFile.id, { mode })) return
+      const curFile = openSearchFile(searchInfo, mode)
+      if (!curFile) return
       requestSearchNavigation({
         fileId: curFile.id,
         path,
@@ -617,6 +652,12 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
     (id: string) => setExpandIdMap((prev) => ({ ...prev, [id]: !prev[id] })),
     [setExpandIdMap],
   )
+
+  const handleFilenameClick = useCallback((searchInfo: SearchInfo, mode: 'preview' | 'permanent' = 'preview') => {
+    if (!openSearchFile(searchInfo, mode)) return
+    stopActiveFind()
+    setSearchState({ activeMatch: undefined })
+  }, [setSearchState, stopActiveFind])
 
   const handleSearchTextChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -664,7 +705,9 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
             />
           </div>
           <div className='search-state__title'>{t('search.searching')}</div>
-          <div className='search-state__desc'>{t('search.searchingDesc')}</div>
+          <div className='search-state__desc'>
+            {t(searchMode === 'filename' ? 'search.filenameSearchingDesc' : 'search.searchingDesc')}
+          </div>
         </SearchStateBox>
       )
     }
@@ -698,7 +741,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
       )
     }
 
-    if (!trimmedKeyword) {
+    if (!trimmedKeyword || !hasSearched) {
       return (
         <Empty role='status'>
           <EmptyHeader>
@@ -706,7 +749,9 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
               <SearchIcon aria-hidden='true' size={18} strokeWidth={1.5} />
             </EmptyMedia>
             <EmptyTitle>{t('search.ready')}</EmptyTitle>
-            <EmptyDescription>{t('search.readyDesc')}</EmptyDescription>
+            <EmptyDescription>
+              {t(searchMode === 'filename' ? 'search.filenameReadyDesc' : 'search.readyDesc')}
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       )
@@ -720,7 +765,9 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
               <FileSearchIcon aria-hidden='true' size={18} strokeWidth={1.5} />
             </EmptyMedia>
             <EmptyTitle>{t('search.search_empty')}</EmptyTitle>
-            <EmptyDescription>{t('search.emptyDesc')}</EmptyDescription>
+            <EmptyDescription>
+              {t(searchMode === 'filename' ? 'search.filenameEmptyDesc' : 'search.emptyDesc')}
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       )
@@ -734,6 +781,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
     isSearching,
     resultList.length,
     searchError,
+    searchMode,
     t,
     trimmedKeyword,
   ])
@@ -744,14 +792,32 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
 
   return (
     <SearchContainer>
+      <RadioGroup.Root
+        aria-label={t('search.mode')}
+        className='flex shrink-0 gap-3 border-b border-border px-2 py-1.5'
+        orientation='horizontal'
+        value={searchMode}
+        onValueChange={(mode) => {
+          if (mode === 'content' || mode === 'filename') handleModeChange(mode)
+        }}
+      >
+        {(['content', 'filename'] as const).map((mode) => (
+          <div className='flex items-center gap-1.5' key={mode}>
+            <RadioGroup.Item id={`${modeId}-${mode}`} value={mode} />
+            <label className='text-ui-caption text-content-primary' htmlFor={`${modeId}-${mode}`}>
+              {t(mode === 'content' ? 'search.modeContent' : 'search.modeFilename')}
+            </label>
+          </div>
+        ))}
+      </RadioGroup.Root>
       <SearchInput>
         <Input
-          aria-label={t('search.text')}
+          aria-label={t(searchMode === 'filename' ? 'search.filename' : 'search.text')}
           className='search-input h-6'
           inputSize='sm'
           onKeyDown={handleKeyDown}
           value={searchKeyword}
-          placeholder={t('search.text')}
+          placeholder={t(searchMode === 'filename' ? 'search.filename' : 'search.text')}
           onChange={handleSearchTextChange}
         />
         {searchKeyword ? (
@@ -763,12 +829,14 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
           onClick={toggleCaseSensitive}
           pressed={caseSensitive}
         />
-        <SearchActionButton
-          icon={isAllExpand ? ChevronsDownUpIcon : ChevronsUpDownIcon}
-          label={t('search.toggleExpandAll')}
-          onClick={toggleAllExpand}
-          pressed={isAllExpand}
-        />
+        {searchMode === 'content' ? (
+          <SearchActionButton
+            icon={isAllExpand ? ChevronsDownUpIcon : ChevronsUpDownIcon}
+            label={t('search.toggleExpandAll')}
+            onClick={toggleAllExpand}
+            pressed={isAllExpand}
+          />
+        ) : null}
         <SearchActionButton
           icon={isSearching ? LoaderCircleIcon : SearchIcon}
           label={t('search.text')}
@@ -782,7 +850,7 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
           <div className='search-meta__content'>
             {isSearching
               ? t('search.searchingWithKeyword', { keyword: trimmedKeyword })
-              : t('search.resultSummary', {
+              : t(searchMode === 'filename' ? 'search.filenameSummary' : 'search.resultSummary', {
                   files: resultFileCount,
                   matches: resultMatchCount,
                   keyword: trimmedKeyword,
@@ -802,20 +870,33 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
             {virtualItems.map((virtualItem) => {
               const item = flattenedData[virtualItem.index]
 
-              if (item.type === 'header') {
+              if (item.type !== 'match') {
+                const filenameResult = item.type === 'file'
                 const isExpand = expandIdMap[item.searchInfo.path]
                 const directory = getFolderPathFromPath(item.searchInfo.relative_path)
 
                 return (
                   <Button
-                    aria-expanded={Boolean(isExpand)}
+                    aria-expanded={filenameResult ? undefined : Boolean(isExpand)}
+                    aria-current={filenameResult && Boolean(activeId) && getFileObjectByPath(item.searchInfo.path)?.id === activeId ? 'true' : undefined}
                     className='search-info__path absolute top-0 left-0 w-full justify-start gap-1.5 overflow-hidden rounded-none px-2 py-0 text-left text-content-primary transition-none'
                     data-search-row-index={virtualItem.index}
-                    data-slot='search-file'
+                    data-slot={filenameResult ? 'search-filename' : 'search-file'}
                     key={virtualItem.key}
-                    onClick={() => toggleSearchInfoExpand(item.searchInfo.path)}
+                    onClick={() => filenameResult
+                      ? handleFilenameClick(item.searchInfo)
+                      : toggleSearchInfoExpand(item.searchInfo.path)}
+                    onDoubleClick={filenameResult ? () => handleFilenameClick(item.searchInfo, 'permanent') : undefined}
                     onFocus={() => setFocusedRowIndex(virtualItem.index)}
-                    onKeyDown={(event) => handleSearchRowKeyDown(event, virtualItem.index)}
+                    onKeyDown={(event) => {
+                      if (filenameResult && (event.key === 'Enter' || event.key === ' ')) {
+                        if (event.nativeEvent.isComposing || event.keyCode === 229) return
+                        event.preventDefault()
+                        handleFilenameClick(item.searchInfo, event.key === 'Enter' ? 'permanent' : 'preview')
+                        return
+                      }
+                      handleSearchRowKeyDown(event, virtualItem.index)
+                    }}
                     size='sm'
                     style={{
                       height: `${virtualItem.size}px`,
@@ -825,11 +906,13 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
                     title={item.searchInfo.path}
                     variant='chrome'
                   >
-                    <ChevronRightIcon
-                      aria-hidden='true'
-                      className={cn('size-3.5 text-content-muted', isExpand && 'rotate-90')}
-                      strokeWidth={1.75}
-                    />
+                    {!filenameResult ? (
+                      <ChevronRightIcon
+                        aria-hidden='true'
+                        className={cn('size-3.5 text-content-muted', isExpand && 'rotate-90')}
+                        strokeWidth={1.75}
+                      />
+                    ) : null}
                     <FileTextIcon
                       aria-hidden='true'
                       className='size-3.5 text-content-muted'
@@ -845,9 +928,11 @@ const WorkspaceSearchView = memo(({ workspace }: { workspace: string }) => {
                         </span>
                       ) : null}
                     </span>
-                    <span className='shrink-0 text-ui-caption font-normal text-content-muted tabular-nums'>
-                      {item.searchInfo.matches.length}
-                    </span>
+                    {!filenameResult ? (
+                      <span className='shrink-0 text-ui-caption font-normal text-content-muted tabular-nums'>
+                        {item.searchInfo.matches.length}
+                      </span>
+                    ) : null}
                   </Button>
                 )
               }

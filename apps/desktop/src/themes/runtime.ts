@@ -86,7 +86,7 @@ function legacyOverrides(theme: MfTheme): ThemeOverrides {
     const value = theme.styledConstants[old as keyof typeof theme.styledConstants]
     if (value && overrides[name] === undefined) overrides[name] = value
   }
-  return overrides
+  return { ...overrides, ...theme.tokens }
 }
 export function getThemeTokens(theme: MfTheme, preferences: ThemeOverrides = {}): ResolvedTokens {
   if (isSemanticTheme(theme)) return resolveTheme(theme.document, theme.variant, preferences).tokens
@@ -122,7 +122,7 @@ export function copyTheme(theme: MfTheme): ThemeDocument {
         id: theme.mode,
         name: `${theme.name} copy`,
         mode: theme.mode,
-        tokens: legacyOverrides(theme),
+        tokens: structuredClone(legacyOverrides(theme)),
       },
     ],
   }
@@ -143,6 +143,8 @@ const capMap = {
   '--cap-selection': 'editor.selection.background',
   '--cap-selection-foreground': 'editor.selection.foreground',
   '--cap-inactive-selection': 'editor.selection.inactiveBackground',
+  '--cap-highlight-background': 'editor.highlight.background',
+  '--cap-highlight-foreground': 'editor.highlight.foreground',
   '--cap-caret': 'editor.caret',
   '--cap-link': 'editor.link',
   '--cap-control-hover': 'interaction.hover',

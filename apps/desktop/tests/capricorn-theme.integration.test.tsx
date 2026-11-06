@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { resolveThemeTokens, type ResolvedTokens } from '@markflowy/theme/semantic'
 import { SemanticThemeContext } from '@/themes/context'
@@ -87,6 +87,40 @@ function Host({
   )
 }
 describe('Capricorn instance themes', () => {
+  it('consumes independent highlight colors and updates them without changing the document', async () => {
+    const onEditor = vi.fn()
+    const markdown = 'Before ==marked **important**== after'
+    const light = resolveThemeTokens('light')
+    const dark = resolveThemeTokens('dark')
+    const content = (tokens: ResolvedTokens) => (
+      <Host tokens={tokens} markdown={markdown} onEditor={onEditor} />
+    )
+    const view = render(content(light))
+    await waitFor(() => expect(onEditor).toHaveBeenCalled(), { timeout: 15000 })
+    const adapter = onEditor.mock.calls.find((call) => call[0])![0] as CapricornRuntimeAdapter
+    const instance = view.container.querySelector<HTMLElement>('[data-cap-content]')!
+    // Each formatted leaf may own a separate <mark>; do not require a single wrapper.
+    const marks = Array.from(instance.querySelectorAll('mark'))
+    expect(marks.some((mark) => mark.textContent?.includes('important'))).toBe(true)
+    const mark = marks[0]
+    expect(mark).toBeTruthy()
+    for (const highlighted of marks) {
+      expectRuntimeBinding(highlighted, 'background', '--cap-highlight-background')
+      expectRuntimeBinding(highlighted, 'color', '--cap-highlight-foreground')
+    }
+    view.rerender(content(dark))
+    await waitFor(() => expect(instance.style.getPropertyValue('--cap-highlight-background')).toBe(
+      `var(--mf-theme-editor-highlight-background, ${dark['editor.highlight.background']})`,
+    ))
+    expect(instance.style.getPropertyValue('--cap-highlight-foreground')).toBe(
+      `var(--mf-theme-editor-highlight-foreground, ${dark['editor.highlight.foreground']})`,
+    )
+    expect(instance.querySelector('mark')).toBe(mark)
+    expect(adapter.getMarkdown()).toBe(markdown)
+    expect(onEditor.mock.calls.filter((call) => call[0])).toHaveLength(1)
+    expect(errors).not.toHaveBeenCalled()
+  }, 30000)
+
   it('renders and consumes semantic themes without replacing instances or documents', async () => {
     const first = vi.fn()
     const second = vi.fn()
@@ -170,6 +204,45 @@ describe('Capricorn instance themes', () => {
     expect(instance.querySelector('.cap-syntax-keyword')).toBe(keyword)
     expect(adapter.getMarkdown()).toBe(markdown)
     expect(first.mock.calls.filter((call) => call[0])).toHaveLength(1)
+    expect(errors).not.toHaveBeenCalled()
+  }, 30000)
+
+  it('binds live-preview math source tokens to the host dark palette', async () => {
+    const onEditor = vi.fn()
+    const dark = resolveThemeTokens('dark', {
+      'syntax.tag': '#88ccff',
+      'syntax.keyword': '#ffcc88',
+    })
+    const markdown = '$$\n\\begin{bmatrix}\n1 & 2 \\\\\n3 & 4\n\\end{bmatrix}\n$$'
+    const view = render(
+      <Host tokens={dark} colorScheme='dark' markdown={markdown} onEditor={onEditor} />,
+    )
+    await waitFor(() => {
+      expect(view.container.querySelector('.capricorn-live-preview-block--math button[aria-expanded]')).toBeTruthy()
+      expect(onEditor).toHaveBeenCalled()
+    }, { timeout: 15000 })
+    const adapter = onEditor.mock.calls.find((call) => call[0])![0] as CapricornRuntimeAdapter
+    const initialHistory = adapter.getUiState().canUndo
+    fireEvent.click(view.container.querySelector('.capricorn-live-preview-block--math button[aria-expanded]')!)
+    const tokenWithText = (role: string, text: string) =>
+      Array.from(view.container.querySelectorAll(`.capricorn-live-preview-block--math .cm-line .cap-syntax-${role}`))
+        .find((token) => token.textContent === text)
+    await waitFor(() => {
+      expect(tokenWithText('tag', '\\begin')).toBeTruthy()
+      expect(tokenWithText('keyword', 'bmatrix')).toBeTruthy()
+    }, { timeout: 15000 })
+    const instance = view.container.querySelector<HTMLElement>('[data-cap-content]')!
+    expect(instance.getAttribute('data-cap-color-scheme')).toBe('dark')
+    expect(instance.style.getPropertyValue('--cap-code-token-tag')).toBe(
+      'var(--mf-theme-syntax-tag, #88ccffff)',
+    )
+    expect(instance.style.getPropertyValue('--cap-code-token-keyword')).toBe(
+      'var(--mf-theme-syntax-keyword, #ffcc88ff)',
+    )
+    expectRuntimeBinding(tokenWithText('tag', '\\begin')!, 'color', '--cap-code-token-tag')
+    expectRuntimeBinding(tokenWithText('keyword', 'bmatrix')!, 'color', '--cap-code-token-keyword')
+    expect(adapter.getMarkdown()).toBe(markdown)
+    expect(adapter.getUiState().canUndo).toBe(initialHistory)
     expect(errors).not.toHaveBeenCalled()
   }, 30000)
 

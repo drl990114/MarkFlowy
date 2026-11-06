@@ -76,6 +76,10 @@ export const WysiwygThemeWrapper = styled.div
     color: ${(props) => props.theme.markFontColor};
   }
 
+  & mark :is(a, strong, code) {
+    color: inherit;
+  }
+
   & small {
     font-size: 0.9em;
   }

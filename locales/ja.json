@@ -262,7 +262,10 @@
   "explorer": {
     "collapse_folders": "フォルダーを折りたたむ",
     "refresh_folder_data": "フォルダーのデータを更新",
-    "focus_active_file": "現在のファイルにフォーカス"
+    "focus_active_file": "現在のファイルにフォーカス",
+    "sort": "ファイルの並べ替え",
+    "sort_name_asc": "名前の昇順",
+    "sort_name_desc": "名前の降順"
   },
   "file": {
     "save_dialog_title": "ファイルを保存",
@@ -383,6 +386,14 @@
   },
   "notification": {},
   "search": {
+    "mode": "検索対象",
+    "modeContent": "内容",
+    "modeFilename": "ファイル名",
+    "filename": "ファイル名を検索",
+    "filenameReadyDesc": "ファイル名を入力し、Enter キーを押すか検索ボタンをクリックしてください",
+    "filenameSearchingDesc": "現在のワークスペースでファイル名を検索しています",
+    "filenameSummary": "{{files}} 個のファイル：{{keyword}}",
+    "filenameEmptyDesc": "別のファイル名を試すか、検索の除外設定を確認してください",
     "line": "{{number}} 行目 :",
     "search_empty": "一致する検索結果が見つかりませんでした",
     "text": "検索",
@@ -1375,7 +1386,13 @@
       "resetSize": "自動サイズに戻す"
     },
     "preview": {
-      "retry": "再試行"
+      "retry": "再試行",
+      "mermaid": {
+        "size": "図のサイズ",
+        "autoSize": "読みやすいサイズ",
+        "fitWidth": "幅に合わせる",
+        "actualSize": "実際のサイズ（100%）"
+      }
     },
     "snippets": {
       "title": "スニペットを挿入",
@@ -1413,7 +1430,15 @@
       "moveRowUp": "行を上に移動",
       "moveRowDown": "行を下に移動",
       "moveColumnLeft": "列を左に移動",
-      "moveColumnRight": "列を右に移動"
+      "moveColumnRight": "列を右に移動",
+      "selectRow": "行を選択",
+      "selectColumn": "列を選択",
+      "dragRow": "ドラッグして行を並べ替え",
+      "dragColumn": "ドラッグして列を並べ替え",
+      "dragRowPosition": "{{from}} 行目を {{to}} 行目に移動",
+      "dragColumnPosition": "{{from}} 列目を {{to}} 列目に移動",
+      "movedRow": "{{position}} 行目に移動しました",
+      "movedColumn": "{{position}} 列目に移動しました"
     }
   },
   "inline_insert": {

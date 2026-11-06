@@ -165,9 +165,9 @@ pub struct StartupAppearance {
 impl ThemePreference {
     fn from_config(value: Option<&str>) -> Self {
         match value {
-            Some("dark") => Self::Dark,
             Some("light") => Self::Light,
-            _ => Self::System,
+            Some("system") => Self::System,
+            _ => Self::Dark,
         }
     }
 
@@ -659,10 +659,8 @@ impl AppConf {
 
     pub fn new() -> Self {
         Self {
-            theme: Some("light".to_string()),
-            theme_mode: Some(
-                if cfg!(feature = "e2e") { "light" } else { "system" }.to_string(),
-            ),
+            theme: Some("dark".to_string()),
+            theme_mode: Some("dark".to_string()),
             theme_accent_color: Some("system".to_string()),
             theme_use_personal_typography: Some(true),
             light_theme: Some("MarkFlowy Light".to_string()),
@@ -1082,12 +1080,10 @@ impl AppConf {
 
     pub fn theme_mode(app: &AppHandle) -> Theme {
         let conf = Self::read_with_app(app);
-        let mode = conf.theme_mode.unwrap_or_else(|| "system".to_string());
-
-        match mode.as_str() {
-            "system" => Self::system_theme(),
-            "dark" => Theme::Dark,
-            _ => Theme::Light,
+        match ThemePreference::from_config(conf.theme_mode.as_deref()) {
+            ThemePreference::System => Self::system_theme(),
+            ThemePreference::Dark => Theme::Dark,
+            ThemePreference::Light => Theme::Light,
         }
     }
 

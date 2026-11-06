@@ -92,7 +92,7 @@ export default defineConfig(async ({ command, mode }) => {
     optimizeDeps: {
       // Keep linked workspace modules live so warm starts can reuse the cache
       // without retaining an old copy of their components or theme contexts.
-      exclude: ['rme', 'zens'],
+      exclude: ['rme', 'zens', '@markflowy/theme'],
       // Discover the lazy history viewer before its first open, so loading a
       // version does not trigger dependency re-optimization mid-session.
       include: ['react-dom/server', '@codemirror/merge'],
@@ -162,6 +162,12 @@ export default defineConfig(async ({ command, mode }) => {
           ? [
               { find: /^zens\/esm\/(.*)$/, replacement: `${zensSourceRoot}/$1` },
               { find: /^zens$/, replacement: `${zensSourceRoot}/index.ts` },
+              {
+                find: /^@markflowy\/theme$/,
+                replacement: fileURLToPath(
+                  new URL('../../packages/theme/src/index.ts', import.meta.url),
+                ),
+              },
             ]
           : []),
         // Source alias keeps the authoring model available without rebuilding workspace packages.

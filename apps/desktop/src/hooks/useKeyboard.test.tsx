@@ -187,13 +187,27 @@ describe('application shortcut scope and persistence', () => {
   })
   it('persists a restored portable default even when the physical modifier is equivalent', async () => {
     await act(async () => {
-      await state.updateKeyBinding('app_save.default', ['CommandOrCtrl', 's'])
+      await state.updateKeyBinding('app_save.default', ['CommandOrCtrl', '[KeyS]'])
     })
     expect(invoke).toHaveBeenCalledWith('update_keybinding', {
       ruleId: 'app_save.default',
-      keys: ['CommandOrCtrl', 's'],
+      keys: ['CommandOrCtrl', '[KeyS]'],
     })
-    expect(stored[0].keys).toEqual(['CommandOrCtrl', 's'])
+    expect(stored[0].keys).toEqual(['CommandOrCtrl', '[KeyS]'])
+  })
+
+  it('dispatches a physical default with a Cyrillic key once, while character overrides stay semantic', async () => {
+    stored[0] = { ...stored[0], keys: stored[0].defaultKeys }
+    await act(async () => state.reload())
+    input.className = 'ProseMirror'
+    expect(press('ы', { code: 'KeyS' }).defaultPrevented).toBe(true)
+    expect(save).toHaveBeenCalledOnce()
+    expect(press('ы', { code: 'KeyS', isComposing: true }).defaultPrevented).toBe(false)
+    expect(save).toHaveBeenCalledOnce()
+    await act(async () => state.updateKeyBinding('app_save.default', ['Ctrl', 's']))
+    expect(press('ы', { code: 'KeyS' }).defaultPrevented).toBe(false)
+    expect(press('s', { code: 'KeyO' }).defaultPrevented).toBe(true)
+    expect(save).toHaveBeenCalledTimes(2)
   })
   it('refreshes dispatch and editor settings after another window saves', async () => {
     stored = stored.map((binding) => ({

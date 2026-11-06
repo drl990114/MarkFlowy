@@ -11,13 +11,64 @@ import {
 import { keybindingProblem } from './keybindingValidation'
 import { getDefaultKeybindings } from './keybindingCatalog'
 import { recordKey } from '@/router/Setting/KeyboardTable/record-key'
-import { createKeybindingsHandler } from '@/helper/bindkeys'
+import { createKeybindingsHandler, createShortcutMatcher } from '@/helper/bindkeys'
 
 afterEach(() => vi.restoreAllMocks())
 const press = (init: KeyboardEventInit) =>
   new KeyboardEvent('keydown', { cancelable: true, ...init })
 
 describe('shortcut recording and dispatch contract', () => {
+  it.each(['mac', 'windows', 'linux'] as const)(
+    'keeps built-in letter shortcuts available with Cyrillic keys on %s',
+    (platform) => {
+      const name = platform === 'mac' ? 'MacIntel' : platform === 'windows' ? 'Win32' : 'Linux x86_64'
+      vi.spyOn(navigator, 'platform', 'get').mockReturnValue(name)
+      vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(name)
+      const bindings = getDefaultKeybindings(platform)
+      const letters = bindings.filter((binding) => /^\[Key[A-Z]\]$/.test(binding.keys.at(-1) ?? ''))
+      expect(letters.length).toBeGreaterThan(10)
+      for (const binding of letters) {
+        const code = binding.keys.at(-1)!.slice(1, -1)
+        const matches = createShortcutMatcher(shortcutString(binding.keys))
+        const init = {
+          key: binding.keys.includes('Shift') ? 'Ы' : 'ы',
+          code,
+          ctrlKey: platform !== 'mac',
+          metaKey: platform === 'mac',
+          shiftKey: binding.keys.includes('Shift'),
+        }
+        expect(matches(press(init)), binding.command).toBe(true)
+        expect(matches(press({ ...init, code: 'KeyQ' })), binding.command).toBe(false)
+        expect(formatKeyMap(binding.keys, platform)).not.toContain('Key')
+        expect(matches(press({ ...init, isComposing: true })), binding.command).toBe(false)
+        expect(matches(press({ ...init, keyCode: 229 })), binding.command).toBe(false)
+        const altGraph = press(init)
+        Object.defineProperty(altGraph, 'getModifierState', { value: (key: string) => key === 'AltGraph' })
+        expect(matches(altGraph), binding.command).toBe(false)
+      }
+    },
+  )
+
+  it('keeps recorded character overrides separate from physical defaults', () => {
+    const dvorak = press({ key: 's', code: 'KeyO', ctrlKey: true })
+    const recorded = recordKey(dvorak)!
+    expect(recorded.at(-1)).toBe('s')
+    expect(createShortcutMatcher(shortcutString(recorded))(dvorak)).toBe(true)
+    expect(createShortcutMatcher('Ctrl-[KeyS]')(dvorak)).toBe(false)
+    const cyrillic = recordKey(press({ key: 'ы', code: 'KeyS', ctrlKey: true }))!
+    expect(cyrillic.at(-1)).toBe('ы')
+    expect(createShortcutMatcher(shortcutString(cyrillic))(press({ key: 's', code: 'KeyS', ctrlKey: true }))).toBe(false)
+  })
+
+  it('reports character bindings that overlap a built-in physical letter', () => {
+    expect(keyMapsOverlap(['Ctrl', '[KeyS]'], ['Ctrl', 's'])).toBe(true)
+    expect(keyMapsOverlap(['Ctrl', 'S'], ['Ctrl', '[KeyS]'])).toBe(true)
+    expect(keyMapsOverlap(['Ctrl', '[KeyS]'], ['Ctrl', '[KeyO]'])).toBe(false)
+    expect(keyMapsOverlap(['Ctrl', 'Shift', '[KeyS]'], ['Ctrl', 's'])).toBe(false)
+    expect(formatKeyMap(['CommandOrCtrl', '[KeyS]'], 'linux')).toBe('Ctrl+S')
+    expect(formatKeyMap(['CommandOrCtrl', '[KeyS]'], 'mac')).toBe('⌘S')
+  })
+
   it.each(['mac', 'windows', 'linux'] as const)('displays outline keys without changing physical identity on %s', (platform) => {
     const bindings = getDefaultKeybindings(platform)
     for (const [command, code, label] of [

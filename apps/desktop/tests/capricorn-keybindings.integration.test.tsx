@@ -17,8 +17,9 @@ import {
 import { getCapricornRuntimeInput } from '@/components/EditorArea/capricornRuntimeDom'
 import { createKeybindingsHandler } from '@/helper/bindkeys'
 import { shortcutString } from '@/commands/keybindingKeys'
-import { keybindingProblem } from '@/commands/keybindingValidation'
+import { editorKeymap, keybindingProblem } from '@/commands/keybindingValidation'
 import { getDefaultKeybindings } from '@/commands/keybindingCatalog'
+import type { EditorShortcutMap } from '@/commands/keybindingCatalog'
 
 let session: CapricornRuntimeSession | undefined
 let adapter: CapricornRuntimeAdapter | undefined
@@ -36,10 +37,10 @@ function platform(name: string) {
   vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(name)
   vi.stubGlobal('process', { ...process, platform: name === 'Win32' ? 'win32' : 'linux' })
 }
-async function mounted(keys: string | readonly string[]) {
+async function mounted(keys: string | readonly string[], additionalKeys: EditorShortcutMap = {}) {
   const host = document.createElement('div')
   document.body.append(host)
-  const configuration = createCapricornKeybindingConfiguration({ toggleH2: keys }, true)
+  const configuration = createCapricornKeybindingConfiguration({ toggleH2: keys, ...additionalKeys }, true)
   await act(async () => {
     adapter = createCapricornRuntimeAdapter({
       container: host,
@@ -59,6 +60,35 @@ async function mounted(keys: string | readonly string[]) {
 describe.skipIf(!isCapricornRuntimeAvailable).each(['Win32', 'Linux x86_64'])(
   'host shortcuts with the Capricorn runtime on %s',
   (name) => {
+    it('formats and undoes through the built-in physical keys with a Russian layout', async () => {
+      platform(name)
+      const input = await mounted('', editorKeymap(getDefaultKeybindings(name === 'Win32' ? 'windows' : 'linux')))
+      await act(async () => {
+        session!.find.search({ query: 'Body' })
+        await session!.find.next()
+        session!.find.close()
+        session!.focus()
+        await frame()
+      })
+      const press = async (key: string, code: string, extra: KeyboardEventInit = {}) => {
+        const event = createKeyboardEvent('keydown', { key, code, ctrlKey: true, bubbles: true, cancelable: true, ...extra })
+        await act(async () => {
+          input.dispatchEvent(event)
+          await frame()
+        })
+        return event
+      }
+      expect((await press('и', 'KeyB', { isComposing: true })).defaultPrevented).toBe(false)
+      expect((await press('и', 'KeyB', { modifierAltGraph: true })).defaultPrevented).toBe(false)
+      expect(session!.getMarkdown()).toBe('Body')
+      expect((await press('и', 'KeyB')).defaultPrevented).toBe(true)
+      expect(session!.getMarkdown()).toBe('**Body**')
+      expect((await press('я', 'KeyZ')).defaultPrevented).toBe(true)
+      expect(session!.getMarkdown()).toBe('Body')
+      expect((await press('Я', 'KeyZ', { shiftKey: true })).defaultPrevented).toBe(true)
+      expect(session!.getMarkdown()).toBe('**Body**')
+    })
+
     it('dispatches either alternative binding and leaves native copy untouched', async () => {
       platform(name)
       const input = await mounted(['Ctrl-2', 'Ctrl-3'])

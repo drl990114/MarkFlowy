@@ -434,6 +434,14 @@
     }
   },
   "search": {
+    "mode": "搜索范围",
+    "modeContent": "内容",
+    "modeFilename": "文件名",
+    "filename": "搜索文件名",
+    "filenameReadyDesc": "输入文件名后按 Enter 或点击搜索按钮",
+    "filenameSearchingDesc": "正在按名称搜索当前工作区的文件",
+    "filenameSummary": "{{files}} 个文件：{{keyword}}",
+    "filenameEmptyDesc": "换个文件名，或检查搜索排除规则",
     "line": "第 {{number}} 行：",
     "search_empty": "无法找到符合这些搜索词的任何内容",
     "text": "搜索",
@@ -1135,7 +1143,10 @@
   "explorer": {
     "refresh_folder_data": "刷新文件夹数据",
     "focus_active_file": "聚焦当前文件",
-    "collapse_folders": "折叠文件夹"
+    "collapse_folders": "折叠文件夹",
+    "sort": "文件排序",
+    "sort_name_asc": "名称升序",
+    "sort_name_desc": "名称降序"
   },
   "command": {
     "id_descriptions": {
@@ -1369,7 +1380,13 @@
       "resetSize": "恢复自动尺寸"
     },
     "preview": {
-      "retry": "重试"
+      "retry": "重试",
+      "mermaid": {
+        "size": "图表尺寸",
+        "autoSize": "可读尺寸",
+        "fitWidth": "适应宽度",
+        "actualSize": "原始尺寸（100%）"
+      }
     },
     "editor": {
       "loading": "正在加载 Capricorn 编辑器",
@@ -1413,7 +1430,15 @@
       "moveRowUp": "上移一行",
       "moveRowDown": "下移一行",
       "moveColumnLeft": "左移一列",
-      "moveColumnRight": "右移一列"
+      "moveColumnRight": "右移一列",
+      "selectRow": "选择整行",
+      "selectColumn": "选择整列",
+      "dragRow": "拖动以调整行顺序",
+      "dragColumn": "拖动以调整列顺序",
+      "dragRowPosition": "将第 {{from}} 行移动到第 {{to}} 行",
+      "dragColumnPosition": "将第 {{from}} 列移动到第 {{to}} 列",
+      "movedRow": "行已移动到第 {{position}} 行",
+      "movedColumn": "列已移动到第 {{position}} 列"
     }
   },
   "inline_insert": {
