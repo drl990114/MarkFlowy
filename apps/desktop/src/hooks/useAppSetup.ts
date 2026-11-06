@@ -65,6 +65,7 @@ import useAppSettingStore from '@/stores/useAppSettingStore'
 import useLayoutStore from '@/stores/useLayoutStore'
 import type { WorkspaceInfo } from '@/stores/useOpenedCacheStore'
 import useOpenedCacheStore from '@/stores/useOpenedCacheStore'
+import useRecentFilesStore from '@/stores/useRecentFilesStore'
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWebview } from '@tauri-apps/api/webview'
 import { LazyStore } from '@tauri-apps/plugin-store'
@@ -291,8 +292,17 @@ async function appWorkspaceSetup(signal: AbortSignal) {
 
     const recentWorkspaces = getOpenedCacheRes.recent_workspaces
     setRecentWorkspaces(recentWorkspaces)
-    await recentFileHistory?.dispose()
-    recentFileHistory = await startSharedRecentFileHistory()
+    const previousRecentFileHistory = recentFileHistory
+    recentFileHistory = undefined
+    try {
+      await previousRecentFileHistory?.dispose()
+      recentFileHistory = await startSharedRecentFileHistory()
+    } catch (error) {
+      // Recent-file history is optional. Keep the original history on disk and
+      // restore the workspace/session history locally if shared storage fails.
+      useRecentFilesStore.setState({ shared: false })
+      logger.error('Failed to load shared recent files; using local session history', error)
+    }
     await setupWorkspaceCachePersistence(cacheStore)
 
     let handledOpenedPaths = false
@@ -494,15 +504,19 @@ export const useAppRuntimeSetup = () => {
         toast.error(t('drafts.reload_failed'))
       },
     })
-    const updateSessionListener = listenForUpdateSession(currentWindow.label, async () => {
-      await appStartupCoordinator.start()
-      await waitForWorkspaceSwitches()
-      await waitForAllDraftRecovery()
-      if (!workspaceCachePersistence || !windowSessionPersistence) throw new Error('Session persistence is not ready')
-      flushEditorResumeStates()
-      await workspaceCachePersistence.flush()
-      await windowSessionPersistence.flush()
-      await recentFileHistory?.flush()
+    const updateSessionListener = listenForUpdateSession(currentWindow.label, {
+      prepare: async () => {
+        await appStartupCoordinator.start()
+        await waitForWorkspaceSwitches()
+        await waitForAllDraftRecovery()
+      },
+      flush: async () => {
+        if (!workspaceCachePersistence || !windowSessionPersistence) throw new Error('Session persistence is not ready')
+        flushEditorResumeStates()
+        await workspaceCachePersistence.flush()
+        await windowSessionPersistence.flush()
+        await recentFileHistory?.flush()
+      },
     })
     let closeWindowPromise: Promise<boolean> | undefined
     const closeRequest = currentWindow.listen('tauri://close-requested', async () => {

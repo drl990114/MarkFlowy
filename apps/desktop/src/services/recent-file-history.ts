@@ -4,8 +4,10 @@ import { getFileObjectByPath } from '@/helper/files'
 import { getPathIdentityKey } from '@/helper/pathIdentity'
 import { logger } from '@/helper/logger'
 import useRecentFilesStore, {
+  getRecentFileKey,
   parseRecentFilePaths,
   subscribeRecentFileMutations,
+  type RecentFile,
   type RecentFileMutation,
 } from '@/stores/useRecentFilesStore'
 
@@ -14,13 +16,47 @@ export interface RecentFileSnapshot {
   paths: string[]
 }
 
+function mergeLocalDrafts(current: readonly RecentFile[], next: RecentFile[], initial: boolean) {
+  const positions = new Map(current.flatMap((entry, index) =>
+    entry.path ? [[getRecentFileKey(entry), index] as const] : [],
+  ))
+  // Visits move saved paths towards the front. Retain anchors in their old
+  // relative order so a remotely revisited file cannot carry an older draft up.
+  const retained = new Set<string>()
+  let previous = current.length
+  for (let index = next.length - 1; index >= 0; index--) {
+    const key = getRecentFileKey(next[index])
+    const position = positions.get(key)
+    if (position !== undefined && position < previous) {
+      retained.add(key)
+      previous = position
+    }
+  }
+  const before = new Map<string, RecentFile[]>()
+  let drafts: RecentFile[] = []
+  for (const entry of current) {
+    if (!entry.path) drafts.push(entry)
+    else if (retained.has(getRecentFileKey(entry))) {
+      before.set(getRecentFileKey(entry), drafts)
+      drafts = []
+    }
+  }
+  const merged = next.flatMap((entry) => [...(before.get(getRecentFileKey(entry)) ?? []), entry])
+  // An initial read contains historical visits, older than an already open draft.
+  return initial && retained.size === 0 ? [...drafts, ...merged] : [...merged, ...drafts]
+}
+
 export async function startSharedRecentFileHistory() {
-  let revision = -1
+  let latest: RecentFileSnapshot | undefined
   let tail = Promise.resolve()
   const pending: RecentFileMutation[] = []
   const apply = (snapshot: RecentFileSnapshot) => {
-    if (snapshot.revision <= revision) return
-    revision = snapshot.revision
+    const initial = latest === undefined
+    if (!latest || snapshot.revision > latest.revision) latest = snapshot
+    // Native events can arrive before their command response. Keep the local
+    // optimistic order until every queued mutation is acknowledged, then apply
+    // the newest snapshot without replaying potentially committed mutations.
+    if (pending.length) return
     const state = useRecentFilesStore.getState()
     const fileIds = new Map(
       state.entries.flatMap((entry) =>
@@ -28,18 +64,16 @@ export async function startSharedRecentFileHistory() {
       ),
     )
     useRecentFilesStore.setState({ shared: true })
-    state.replaceEntries([
-      ...state.entries.filter((entry) => !entry.path),
-      ...parseRecentFilePaths(snapshot.paths).map((entry) =>
-        entry.path
-          ? {
-              ...entry,
-              fileId:
-                getFileObjectByPath(entry.path)?.id ?? fileIds.get(getPathIdentityKey(entry.path)),
-            }
-          : entry,
-      ),
-    ])
+    const entries = parseRecentFilePaths(latest.paths).map((entry) =>
+      entry.path
+        ? {
+            ...entry,
+            fileId:
+              getFileObjectByPath(entry.path)?.id ?? fileIds.get(getPathIdentityKey(entry.path)),
+          }
+        : entry,
+    )
+    state.replaceEntries(mergeLocalDrafts(state.entries, entries, initial))
   }
   // Subscribe before reading so another window cannot change history in the gap.
   const unlisten = await listen<RecentFileSnapshot>('recent-files-changed', ({ payload }) =>

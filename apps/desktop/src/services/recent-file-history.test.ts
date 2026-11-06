@@ -33,7 +33,7 @@ afterEach(async () => {
 })
 
 describe('shared recent file history', () => {
-  it('keeps local file identities when an earlier response temporarily omits a pending visit', async () => {
+  it('keeps pending visits visible and retains their local file identities across earlier responses', async () => {
     history = await startSharedRecentFileHistory()
     const first = createFile({ path: '/first.md' })
     const second = createFile({ path: '/second.md' })
@@ -42,11 +42,117 @@ describe('shared recent file history', () => {
       .mockResolvedValueOnce({ revision: 3, paths: ['/second.md', '/first.md'] })
     useRecentFilesStore.getState().visit({ path: first.path!, fileId: first.id })
     useRecentFilesStore.getState().visit({ path: second.path!, fileId: second.id })
+    const observed: (string | undefined)[] = []
+    const unsubscribe = useRecentFilesStore.subscribe((state) => observed.push(state.entries[0]?.path))
     await history.flush()
+    unsubscribe()
+    expect(observed.length).toBeGreaterThan(0)
+    expect(observed.every((path) => path === second.path)).toBe(true)
     expect(useRecentFilesStore.getState().entries[0]).toEqual({
       path: second.path,
       fileId: second.id,
     })
+  })
+
+  it('keeps drafts between saved files instead of moving them above each acknowledged visit', async () => {
+    history = await startSharedRecentFileHistory()
+    const store = useRecentFilesStore.getState()
+    store.visit({ fileId: 'older-draft' })
+    store.visit({ path: '/first.md' })
+    store.visit({ fileId: 'newer-draft' })
+    store.visit({ path: '/second.md' })
+    vi.mocked(invoke)
+      .mockResolvedValueOnce({ revision: 2, paths: ['/first.md', '/other-window/announcements.md'] })
+      .mockResolvedValueOnce({ revision: 3, paths: ['/second.md', '/first.md', '/other-window/announcements.md'] })
+    await history.flush()
+    expect(paths()).toEqual([
+      '/second.md', 'newer-draft', '/first.md', 'older-draft', '/other-window/announcements.md',
+    ])
+    receive({ payload: { revision: 4, paths: ['/second.md', '/first.md', '/other-window/announcements.md'] } })
+    expect(paths()).toEqual([
+      '/second.md', 'newer-draft', '/first.md', 'older-draft', '/other-window/announcements.md',
+    ])
+  })
+
+  it('places remote visits ahead of older local drafts while retaining the remaining anchors', async () => {
+    vi.mocked(invoke).mockResolvedValue({ revision: 1, paths: ['/first.md', '/older.md'] })
+    history = await startSharedRecentFileHistory()
+    useRecentFilesStore.getState().visit({ fileId: 'draft' })
+    receive({ payload: { revision: 2, paths: ['/remote.md', '/first.md', '/older.md'] } })
+    expect(paths()).toEqual(['/remote.md', 'draft', '/first.md', '/older.md'])
+    receive({ payload: { revision: 3, paths: ['/older.md', '/remote.md', '/first.md'] } })
+    expect(paths()).toEqual(['/older.md', '/remote.md', 'draft', '/first.md'])
+    receive({ payload: { revision: 4, paths: ['/first.md', '/older.md', '/remote.md'] } })
+    expect(paths()).toEqual(['/first.md', '/older.md', '/remote.md', 'draft'])
+  })
+
+  it('keeps a background Save As behind the more recently visited saved file and draft', async () => {
+    history = await startSharedRecentFileHistory()
+    const store = useRecentFilesStore.getState()
+    store.visit({ fileId: 'saved-draft' })
+    store.visit({ fileId: 'newer-draft' })
+    store.visit({ path: '/active.md' })
+    vi.mocked(invoke).mockResolvedValueOnce({
+      revision: 2, paths: ['/active.md', '/other-window/announcements.md'],
+    })
+    await history.flush()
+    store.updateFilePath('saved-draft', '/saved.md')
+    vi.mocked(invoke).mockResolvedValueOnce({
+      revision: 3, paths: ['/active.md', '/saved.md', '/other-window/announcements.md'],
+    })
+    await history.flush()
+    expect(paths()).toEqual(['/active.md', 'newer-draft', '/saved.md', '/other-window/announcements.md'])
+    expect(invoke).toHaveBeenLastCalledWith('recent_file_history', {
+      mutation: { type: 'visit', path: '/saved.md', afterPath: '/active.md' },
+    })
+  })
+
+  it('does not resurrect paths while a local rename and deletion wait for earlier writes', async () => {
+    vi.mocked(invoke).mockResolvedValue({ revision: 1, paths: ['/old/a.md', '/deleted.md'] })
+    history = await startSharedRecentFileHistory()
+    const store = useRecentFilesStore.getState()
+    store.visit({ path: '/first.md' })
+    store.rebasePaths('/old', '/new')
+    store.removePath('/deleted.md')
+    const observed: string[][] = []
+    const unsubscribe = useRecentFilesStore.subscribe(() => observed.push(paths()))
+    vi.mocked(invoke)
+      .mockResolvedValueOnce({ revision: 2, paths: ['/first.md', '/old/a.md', '/deleted.md'] })
+      .mockResolvedValueOnce({ revision: 3, paths: ['/first.md', '/new/a.md', '/deleted.md'] })
+      .mockResolvedValueOnce({ revision: 4, paths: ['/first.md', '/new/a.md'] })
+    await history.flush()
+    unsubscribe()
+    expect(observed.length).toBeGreaterThan(0)
+    expect(observed.every((entries) => entries.join(',') === '/first.md,/new/a.md')).toBe(true)
+  })
+
+  it('removes an acknowledged pending visit when a newer remote clear has already arrived', async () => {
+    history = await startSharedRecentFileHistory()
+    vi.mocked(invoke).mockImplementationOnce(async () => {
+      receive({ payload: { revision: 3, paths: [] } })
+      return { revision: 2, paths: ['/pending.md'] }
+    })
+    useRecentFilesStore.getState().visit({ path: '/pending.md' })
+    await history.flush()
+    expect(paths()).toEqual([])
+  })
+
+  it('does not reapply an in-flight nested rebase when its native event arrives before the response', async () => {
+    vi.mocked(invoke).mockResolvedValue({ revision: 1, paths: ['/old/a.md'] })
+    history = await startSharedRecentFileHistory()
+    const observed: string[][] = []
+    useRecentFilesStore.getState().rebasePaths('/old', '/old/nested')
+    const unsubscribe = useRecentFilesStore.subscribe(() => observed.push(paths()))
+    vi.mocked(invoke).mockImplementationOnce(async () => {
+      const snapshot = { revision: 2, paths: ['/old/nested/a.md'] }
+      receive({ payload: snapshot })
+      expect(paths()).toEqual(['/old/nested/a.md'])
+      return snapshot
+    })
+    await history.flush()
+    unsubscribe()
+    expect(observed.length).toBeGreaterThan(0)
+    expect(observed.every((entries) => entries.join(',') === '/old/nested/a.md')).toBe(true)
   })
 
   it('loads files from another window and propagates visits without publishing received snapshots', async () => {

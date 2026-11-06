@@ -1,10 +1,16 @@
 export const SITE_ORIGIN = 'https://www.markflowy.cc'
-export const SITE_LOCALES = ['en', 'zh'] as const
+export const SITE_LOCALES = ['en', 'zh', 'ru'] as const
 export type SiteLocale = (typeof SITE_LOCALES)[number]
+export const OPEN_GRAPH_LOCALES: Record<SiteLocale, string> = {
+  en: 'en_US',
+  zh: 'zh_CN',
+  ru: 'ru_RU',
+}
 
 export const SITE_DESCRIPTION: Record<SiteLocale, string> = {
   en: 'Find your writing flow with MarkFlowy, a local-first Markdown editor for macOS, Windows, and Linux. Visual and source editing, with optional AI assistance.',
   zh: '让想法流动，专注每一次写作。MarkFlowy 是适用于 macOS、Windows 和 Linux 的本地优先 Markdown 编辑器，支持所见即所得与源码编辑，可选接入云端 AI 或本地 Ollama 模型。',
+  ru: 'MarkFlowy — редактор Markdown для macOS, Windows и Linux с хранением файлов на вашем устройстве. Визуальное редактирование и исходный текст, ИИ-помощник по желанию.',
 }
 
 export interface SocialImage {
@@ -16,8 +22,9 @@ export interface SocialImage {
 }
 
 export function getSocialImage(locale: SiteLocale): SocialImage {
+  const imageLocale = locale === 'zh' ? 'zh' : 'en'
   return {
-    url: `${SITE_ORIGIN}/social/markflowy-${locale}.png`,
+    url: `${SITE_ORIGIN}/social/markflowy-${imageLocale}.png`,
     width: 1200,
     height: 630,
     type: 'image/png',
@@ -39,7 +46,7 @@ export function getHomeStructuredData(locale: SiteLocale, description: string) {
         '@id': `${SITE_ORIGIN}/#website`,
         name: 'MarkFlowy',
         url: `${SITE_ORIGIN}/`,
-        inLanguage: ['en', 'zh-CN'],
+        inLanguage: SITE_LOCALES.map((language) => language === 'zh' ? 'zh-CN' : language),
       },
       {
         '@type': 'SoftwareApplication',
@@ -90,22 +97,23 @@ export interface PublicDocument {
 }
 
 export function isSiteLocale(locale: string): locale is SiteLocale {
-  return locale === 'en' || locale === 'zh'
+  return SITE_LOCALES.some((language) => language === locale)
 }
 
 export function normalizePagePath(path: string): string {
   const pathname = path.split(/[?#]/, 1)[0]
-  return pathname.replace(/^\/(en|zh)(?=\/|$)/, '').replace(/\/+$/, '') || '/'
+  return pathname.replace(/^\/(en|zh|ru)(?=\/|$)/, '').replace(/\/+$/, '') || '/'
 }
 
 export function getPageUrl(path: string, locale: SiteLocale = 'en'): string {
   const pathname = normalizePagePath(path)
-  return `${SITE_ORIGIN}${locale === 'zh' ? '/zh' : ''}${pathname === '/' && locale === 'zh' ? '' : pathname}`
+  const prefix = locale === 'en' ? '' : `/${locale}`
+  return `${SITE_ORIGIN}${prefix}${pathname === '/' && prefix ? '' : pathname}`
 }
 
 export function getLanguageAlternates(path: string, locales: readonly SiteLocale[]) {
   const alternates = locales.map((locale) => ({
-    hrefLang: locale === 'zh' ? 'zh-CN' : 'en',
+    hrefLang: locale === 'zh' ? 'zh-CN' : locale,
     href: getPageUrl(path, locale),
   }))
   if (locales.includes('en')) {
@@ -209,8 +217,8 @@ export function renderLlmsIndex(documents: readonly PublicDocument[]): string {
     '- [Download](https://github.com/drl990114/MarkFlowy/releases/latest): Current desktop release and platform assets.',
     `- [Release notes](${SITE_ORIGIN}/releases): Version-specific changes.`,
     '',
-    ...SITE_LOCALES.flatMap((locale) => [
-      `## ${locale === 'en' ? 'English documentation' : '中文文档'}`,
+    ...SITE_LOCALES.filter((locale) => documents.some((document) => document.locale === locale)).flatMap((locale) => [
+      `## ${{ en: 'English documentation', zh: '中文文档', ru: 'Документация на русском' }[locale]}`,
       '',
       ...documents
         .filter((document) => document.locale === locale)

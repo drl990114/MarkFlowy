@@ -67,26 +67,32 @@ function links(head, rel) {
   return head.elements.filter(({ type, props }) => type === 'link' && props.rel === rel)
 }
 
-for (const locale of ['en', 'zh']) {
+for (const locale of ['en', 'zh', 'ru']) {
   test(`${locale} pages render localized large social cards with usable image metadata`, async () => {
     const head = renderHead({ locale })
-    const imageUrl = `https://www.markflowy.cc/social/markflowy-${locale}.png`
+    const imageLocale = locale === 'zh' ? 'zh' : 'en'
+    const imageUrl = `https://www.markflowy.cc/social/markflowy-${imageLocale}.png`
     assert.equal(metadata(head, 'twitter:card'), 'summary_large_image')
     assert.equal(metadata(head, 'twitter:image'), imageUrl)
     assert.equal(metadata(head, 'og:image'), imageUrl)
     assert.equal(metadata(head, 'og:image:type'), 'image/png')
     assert.equal(metadata(head, 'og:image:width'), '1200')
     assert.equal(metadata(head, 'og:image:height'), '630')
-    assert.equal(metadata(head, 'og:locale'), locale === 'zh' ? 'zh_CN' : 'en_US')
-    assert.equal(metadata(head, 'og:locale:alternate'), locale === 'zh' ? 'en_US' : 'zh_CN')
+    assert.equal(metadata(head, 'og:locale'), publicContent.OPEN_GRAPH_LOCALES[locale])
+    assert.deepEqual(
+      head.elements.filter(({ props }) => props.property === 'og:locale:alternate')
+        .map(({ props }) => props.content),
+      publicContent.SITE_LOCALES.filter((value) => value !== locale)
+        .map((value) => publicContent.OPEN_GRAPH_LOCALES[value]),
+    )
     assert.equal(metadata(head, 'twitter:image:alt'), metadata(head, 'og:image:alt'))
     assert.match(metadata(head, 'og:image:alt'), locale === 'zh' ? /蓝紫色丝带/ : /ribbons/i)
     assert.equal(metadata(head, 'twitter:description'), metadata(head, 'description'))
     assert.equal(metadata(head, 'og:description'), metadata(head, 'description'))
-    assert.match(metadata(head, 'description'), locale === 'zh' ? /本地优先/ : /local-first/)
+    assert.match(metadata(head, 'description'), locale === 'zh' ? /本地优先/ : locale === 'ru' ? /редактор Markdown/ : /local-first/)
 
     const png = await readFile(
-      new URL(`../apps/web/public/social/markflowy-${locale}.png`, import.meta.url),
+      new URL(`../apps/web/public/social/markflowy-${imageLocale}.png`, import.meta.url),
     )
     assert.deepEqual(png.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
     assert.equal(png.toString('ascii', 12, 16), 'IHDR')
@@ -96,14 +102,14 @@ for (const locale of ['en', 'zh']) {
   })
 }
 
-test('canonical and social page URLs exclude tracking and fragments for both languages', () => {
-  for (const locale of ['en', 'zh']) {
+test('canonical and social page URLs exclude tracking and fragments for all site languages', () => {
+  for (const locale of ['en', 'zh', 'ru']) {
     const head = renderHead({
       locale,
       pathname: '/docs/[...slug]',
       asPath: `/${locale}/docs/intro/?utm_source=twitter#download`,
     })
-    const expected = `https://www.markflowy.cc${locale === 'zh' ? '/zh' : ''}/docs/intro`
+    const expected = `https://www.markflowy.cc${locale === 'en' ? '' : `/${locale}`}/docs/intro`
     assert.deepEqual(
       links(head, 'canonical').map(({ props }) => props.href),
       [expected],
@@ -188,7 +194,7 @@ test('documentation retains its title and Markdown discovery without homepage st
 
 test('homepage structured data has stable brand URLs and escapes embedded closing script tags', () => {
   const description = 'Writer </script><script>alert("unsafe")</script> & notes'
-  for (const locale of ['en', 'zh']) {
+  for (const locale of ['en', 'zh', 'ru']) {
     const head = renderHead({ locale, description })
     const scripts = head.elements.filter(
       ({ type, props }) => type === 'script' && props.type === 'application/ld+json',
@@ -206,8 +212,9 @@ test('homepage structured data has stable brand URLs and escapes embedded closin
     assert.equal(website.url, 'https://www.markflowy.cc/')
     assert.equal(website['@id'], 'https://www.markflowy.cc/#website')
     assert.equal(application['@id'], 'https://www.markflowy.cc/#application')
-    assert.equal(application.url, `https://www.markflowy.cc${locale === 'zh' ? '/zh' : '/'}`)
-    assert.equal(application.image, `https://www.markflowy.cc/social/markflowy-${locale}.png`)
+    assert.equal(application.url, `https://www.markflowy.cc${locale === 'en' ? '/' : `/${locale}`}`)
+    assert.equal(application.image, `https://www.markflowy.cc/social/markflowy-${locale === 'zh' ? 'zh' : 'en'}.png`)
+    assert.deepEqual(website.inLanguage, ['en', 'zh-CN', 'ru'])
     assert.equal(application.description, description)
     assert.equal(application.downloadUrl, 'https://github.com/drl990114/MarkFlowy/releases')
     assert.deepEqual(application.sameAs, ['https://github.com/drl990114/MarkFlowy'])

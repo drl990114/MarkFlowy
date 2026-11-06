@@ -5,7 +5,8 @@
   "docs": {
     "tableOfContents": "本页目录",
     "content": {
-      "description": "从这里开始使用 MarkFlowy：安装应用、编辑本地 Markdown 文件、切换所见即所得与源码模式，以及配置可选的 AI 辅助。"
+      "description": "从这里开始使用 MarkFlowy：安装应用、编辑本地 Markdown 文件、切换所见即所得与源码模式，以及配置可选的 AI 辅助。",
+      "fallback": "这些指南目前提供英文版本。"
     },
     "sidebar": {
       "gettingStarted": "快速开始"

@@ -5,7 +5,8 @@
   "docs": {
     "tableOfContents": "このページの目次",
     "content": {
-      "description": "MarkFlowy のドキュメントを閲覧します。"
+      "description": "MarkFlowy のドキュメントを閲覧します。",
+      "fallback": "これらのガイドは現在、英語で提供されています。"
     },
     "sidebar": {
       "gettingStarted": "はじめに"

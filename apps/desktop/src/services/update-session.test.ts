@@ -1,51 +1,240 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { preserveUpdateSession, listenForUpdateSession } from './update-session'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { savePathCoordinator } from '@/components/EditorArea/savePathCoordinator'
+import { listenForUpdateSession, withPreservedUpdateSession } from './update-session'
+
 const mocks = vi.hoisted(() => ({
   invoke: vi.fn(), emitTo: vi.fn(), listen: vi.fn(), getAllWindows: vi.fn(), stop: vi.fn(),
+  getEditorContent: vi.fn(),
 }))
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
 vi.mock('@tauri-apps/api/event', () => ({ emitTo: mocks.emitTo, listen: mocks.listen }))
 vi.mock('@tauri-apps/api/window', () => ({ getAllWindows: mocks.getAllWindows }))
+vi.mock('@/stores/useEditorStore', () => ({
+  default: { getState: () => ({ opened: ['document'], getEditorContent: mocks.getEditorContent }) },
+}))
+
+const REQUEST = 'mf-update-session-request'
+const RESPONSE = 'mf-update-session-response'
+const RELEASE = 'mf-update-session-release'
+const HEARTBEAT = 'mf-update-session-heartbeat'
+const disposers: (() => void)[] = []
+function deferred() {
+  let resolve!: () => void
+  const promise = new Promise<void>((finish) => { resolve = finish })
+  return { promise, resolve }
+}
+function receive(event: string, payload: object): Promise<void> {
+  const callback = mocks.listen.mock.calls.find(([name]) => name === event)?.[1]
+  if (!callback) throw new Error(`No listener for ${event}`)
+  return callback({ payload })
+}
+function request(id = 'request') {
+  return { id, replyTo: 'main', expiresAt: Date.now() + 30_000 }
+}
+async function requestsSent() {
+  await vi.waitFor(() => expect(mocks.emitTo.mock.calls.filter(([, event]) => event === REQUEST)).toHaveLength(2))
+  return mocks.emitTo.mock.calls.find(([, event]) => event === REQUEST)![2]
+}
+
 beforeEach(() => {
   vi.resetAllMocks()
   mocks.getAllWindows.mockResolvedValue([{ label: 'main' }, { label: 'main_two' }, { label: 'settings' }])
   mocks.listen.mockResolvedValue(mocks.stop)
+  mocks.emitTo.mockResolvedValue(undefined)
 })
-describe('update session barrier', () => {
-  it('commits the manifest only after all editor windows saved', async () => {
-    const saving = preserveUpdateSession('main')
-    await vi.waitFor(() => expect(mocks.emitTo).toHaveBeenCalledTimes(2))
-    const receive = mocks.listen.mock.calls[0][1]
-    const { id } = mocks.emitTo.mock.calls[0][2]
-    receive({ payload: { id: 'old', label: 'main' } })
-    receive({ payload: { id, label: 'settings' } })
-    receive({ payload: { id, label: 'main' } })
+afterEach(async () => {
+  disposers.splice(0).forEach((dispose) => dispose())
+  await Promise.resolve()
+  vi.useRealTimers()
+})
+
+describe('update session coordinator', () => {
+  it('holds every editor until all have saved and the installation finishes', async () => {
+    const installed = deferred()
+    const operation = vi.fn(() => installed.promise)
+    const saving = withPreservedUpdateSession('main', operation)
+    const { id } = await requestsSent()
+    receive(RESPONSE, { id: 'old', label: 'main' })
+    receive(RESPONSE, { id, label: 'settings' })
+    receive(RESPONSE, { id, label: 'main' })
     expect(mocks.invoke).not.toHaveBeenCalled()
-    receive({ payload: { id, label: 'main_two' } })
-    await saving
+    receive(RESPONSE, { id, label: 'main_two' })
+    await vi.waitFor(() => expect(operation).toHaveBeenCalledOnce())
     expect(mocks.invoke).toHaveBeenCalledWith('preserve_update_session', { labels: ['main', 'main_two'] })
+    expect(mocks.emitTo.mock.calls.some(([, event]) => event === RELEASE)).toBe(false)
+    installed.resolve()
+    await saving
+    expect(mocks.emitTo.mock.calls.filter(([, event]) => event === RELEASE).map(([label]) => label))
+      .toEqual(['main', 'main_two'])
     expect(mocks.stop).toHaveBeenCalledOnce()
   })
-  it('rejects a failed window save without committing a restore manifest', async () => {
-    const saving = preserveUpdateSession('main')
+
+  it('releases all requested windows when one flush fails', async () => {
+    const operation = vi.fn()
+    const saving = withPreservedUpdateSession('main', operation)
     const rejected = expect(saving).rejects.toThrow('disk full')
-    await vi.waitFor(() => expect(mocks.emitTo).toHaveBeenCalledTimes(2))
-    const { id } = mocks.emitTo.mock.calls[0][2]
-    mocks.listen.mock.calls[0][1]({ payload: { id, label: 'main_two', error: 'disk full' } })
+    const { id } = await requestsSent()
+    receive(RESPONSE, { id, label: 'main_two', error: 'disk full' })
     await rejected
     expect(mocks.invoke).not.toHaveBeenCalled()
-    expect(mocks.stop).toHaveBeenCalledOnce()
+    expect(operation).not.toHaveBeenCalled()
+    expect(mocks.emitTo.mock.calls.filter(([, event]) => event === RELEASE)).toHaveLength(2)
   })
-  it('acknowledges only after the renderer flush completes', async () => {
-    let finish!: () => void
-    const flush = vi.fn(() => new Promise<void>((resolve) => { finish = resolve }))
-    await listenForUpdateSession('main_two', flush)
-    const response = mocks.listen.mock.calls[0][1]({ payload: { id: 'request', replyTo: 'main' } })
-    expect(mocks.emitTo).not.toHaveBeenCalled()
-    finish()
-    await response
-    expect(mocks.emitTo).toHaveBeenCalledWith('main', 'mf-update-session-response', {
-      id: 'request', label: 'main_two', error: undefined,
+
+  it.each(['manifest', 'install'])('releases held editors if %s fails', async (failure) => {
+    const operation = vi.fn(async () => {
+      if (failure === 'install') throw new Error('install failed')
     })
+    if (failure === 'manifest') mocks.invoke.mockRejectedValue(new Error('manifest failed'))
+    const saving = withPreservedUpdateSession('main', operation)
+    const rejected = expect(saving).rejects.toThrow(`${failure} failed`)
+    const { id } = await requestsSent()
+    receive(RESPONSE, { id, label: 'main' })
+    receive(RESPONSE, { id, label: 'main_two' })
+    await rejected
+    expect(mocks.emitTo.mock.calls.filter(([, event]) => event === RELEASE)).toHaveLength(2)
+  })
+
+  it('does not send late requests after listener registration times out', async () => {
+    vi.useFakeTimers()
+    const registration = deferred()
+    mocks.listen.mockImplementation(() => registration.promise.then(() => mocks.stop))
+    const operation = vi.fn()
+    const saving = withPreservedUpdateSession('main', operation)
+    const rejected = expect(saving).rejects.toThrow('Timed out')
+    await vi.advanceTimersByTimeAsync(30_000)
+    await rejected
+    registration.resolve()
+    await vi.advanceTimersByTimeAsync(0)
+    expect(mocks.emitTo.mock.calls.some(([, event]) => event === REQUEST)).toBe(false)
+    expect(mocks.stop).toHaveBeenCalledOnce()
+    expect(operation).not.toHaveBeenCalled()
+  })
+})
+
+describe('window update session barrier', () => {
+  it('flushes deferred input before locking and keeps edits and Save As blocked after ACK', async () => {
+    mocks.getEditorContent.mockImplementation(() => {
+      expect(savePathCoordinator.isFileReserved('document')).toBe(false)
+    })
+    const flush = vi.fn(async () => {
+      expect(savePathCoordinator.isFileReserved('document')).toBe(true)
+    })
+    disposers.push(await listenForUpdateSession('main_two', { prepare: async () => {}, flush }))
+    const payload = request()
+    const handling = receive(REQUEST, payload)
+    await vi.waitFor(() => expect(mocks.emitTo).toHaveBeenCalledWith('main', RESPONSE, {
+      id: payload.id, label: 'main_two',
+    }))
+    expect(mocks.getEditorContent).toHaveBeenCalledWith('document')
+    expect(savePathCoordinator.isFileReserved('new-document')).toBe(true)
+    const mutation = vi.fn(async () => {})
+    const queued = savePathCoordinator.runFileMutation(mutation)
+    await Promise.resolve()
+    expect(mutation).not.toHaveBeenCalled()
+    receive(RELEASE, payload)
+    await handling
+    await queued
+    expect(savePathCoordinator.isFileReserved('document')).toBe(false)
+    expect(mutation).toHaveBeenCalledOnce()
+  })
+
+  it('cancels an in-flight prepare without acquiring a late barrier', async () => {
+    const preparing = deferred()
+    const flush = vi.fn()
+    disposers.push(await listenForUpdateSession('main_two', { prepare: () => preparing.promise, flush }))
+    const payload = request()
+    const handling = receive(REQUEST, payload)
+    receive(RELEASE, payload)
+    await handling
+    preparing.resolve()
+    await Promise.resolve()
+    expect(flush).not.toHaveBeenCalled()
+    expect(savePathCoordinator.isFileReserved('document')).toBe(false)
+    expect(mocks.emitTo).not.toHaveBeenCalled()
+  })
+
+  it('ignores requests whose cancellation arrived first', async () => {
+    const prepare = vi.fn()
+    disposers.push(await listenForUpdateSession('main_two', { prepare, flush: vi.fn() }))
+    const payload = request()
+    receive(RELEASE, payload)
+    await receive(REQUEST, payload)
+    expect(prepare).not.toHaveBeenCalled()
+  })
+
+  it('does not acquire a canceled barrier after an earlier Save As completes', async () => {
+    const saving = deferred()
+    const priorSave = savePathCoordinator.runFileMutation(() => saving.promise)
+    const prepare = vi.fn(async () => {})
+    const flush = vi.fn()
+    disposers.push(await listenForUpdateSession('main_two', { prepare, flush }))
+    const payload = request()
+    const handling = receive(REQUEST, payload)
+    await vi.waitFor(() => expect(prepare).toHaveBeenCalledOnce())
+    receive(RELEASE, payload)
+    saving.resolve()
+    await priorSave
+    await handling
+    expect(flush).not.toHaveBeenCalled()
+    expect(savePathCoordinator.isFileReserved('document')).toBe(false)
+  })
+
+  it('releases the local barrier and reports persistence failures', async () => {
+    disposers.push(await listenForUpdateSession('main_two', {
+      prepare: async () => {}, flush: async () => { throw new Error('disk full') },
+    }))
+    const payload = request()
+    await receive(REQUEST, payload)
+    expect(savePathCoordinator.isFileReserved('document')).toBe(false)
+    expect(mocks.emitTo).toHaveBeenCalledWith('main', RESPONSE, {
+      id: payload.id, label: 'main_two', error: 'Error: disk full',
+    })
+  })
+
+  it('rejects concurrent request IDs instead of deadlocking on a second lock', async () => {
+    disposers.push(await listenForUpdateSession('main_two', { prepare: async () => {}, flush: async () => {} }))
+    const payload = request()
+    const handling = receive(REQUEST, payload)
+    await vi.waitFor(() => expect(mocks.emitTo).toHaveBeenCalledOnce())
+    await receive(REQUEST, request('other'))
+    expect(mocks.emitTo).toHaveBeenCalledWith('main', RESPONSE, {
+      id: 'other', label: 'main_two', error: 'Another update is already preserving this window',
+    })
+    receive(RELEASE, request('other'))
+    expect(savePathCoordinator.isFileReserved('document')).toBe(true)
+    receive(RELEASE, payload)
+    await handling
+  })
+
+  it('releases even a pending flush on abort and never acknowledges it later', async () => {
+    const flushing = deferred()
+    disposers.push(await listenForUpdateSession('main_two', {
+      prepare: async () => {}, flush: () => flushing.promise,
+    }))
+    const payload = request()
+    const handling = receive(REQUEST, payload)
+    await vi.waitFor(() => expect(savePathCoordinator.isFileReserved('document')).toBe(true))
+    receive(RELEASE, payload)
+    await handling
+    expect(savePathCoordinator.isFileReserved('document')).toBe(false)
+    flushing.resolve()
+    await Promise.resolve()
+    expect(mocks.emitTo).not.toHaveBeenCalled()
+  })
+
+  it('renews the lease while the requester is alive and releases after it disappears', async () => {
+    vi.useFakeTimers()
+    disposers.push(await listenForUpdateSession('main_two', { prepare: async () => {}, flush: async () => {} }))
+    const payload = request()
+    const handling = receive(REQUEST, payload)
+    await vi.advanceTimersByTimeAsync(20_000)
+    expect(savePathCoordinator.isFileReserved('document')).toBe(true)
+    receive(HEARTBEAT, { id: payload.id })
+    await vi.advanceTimersByTimeAsync(20_000)
+    expect(savePathCoordinator.isFileReserved('document')).toBe(true)
+    await vi.advanceTimersByTimeAsync(10_000)
+    await handling
+    expect(savePathCoordinator.isFileReserved('document')).toBe(false)
   })
 })

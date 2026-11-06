@@ -6,6 +6,7 @@ import { EditorViewType } from '@/constants/editorViewType'
 import { getMarkdownDefaultMode } from '@/helper/fileTypeHandler'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
+import { savePathCoordinator } from '@/components/EditorArea/savePathCoordinator'
 import { isPristineDocument, markPristineDocument } from './pristine-document'
 
 export function ensureDocument() {
@@ -35,7 +36,9 @@ interface AddNewMarkdownFileEditParams {
 }
 
 export const addNewMarkdownFileEdit = async (params: AddNewMarkdownFileEditParams) => {
-  await addMarkdownFileEdit(params)
+  // Programmatic content (for example Ask exports) must wait for an update snapshot's barrier.
+  // Existing-file opens can already own the workspace queue, so only new drafts enter it here.
+  await savePathCoordinator.runFileMutation(() => addMarkdownFileEdit(params))
 }
 
 interface AddExistingMarkdownFileEditParams {

@@ -104,7 +104,11 @@ fn rebase(path: &str, root: &str, target: &str) -> Option<String> {
     };
     Some(format!(
         "{}{separator}{}",
-        target.trim_end_matches(['/', '\\']),
+        if windows_path(target) {
+            target.trim_end_matches(['/', '\\'])
+        } else {
+            target.trim_end_matches('/')
+        },
         parts[root_parts..].join(separator)
     ))
 }
@@ -309,6 +313,10 @@ mod tests {
         assert_eq!(
             rebase("/old/a\\b.md", "/old", "/new"),
             Some("/new/a\\b.md".into())
+        );
+        assert_eq!(
+            rebase("/old/a.md", "/old", "/new\\"),
+            Some("/new\\/a.md".into())
         );
         assert_eq!(
             rebase("//old///nested/A.md", "/old/", "/new"),

@@ -26,7 +26,12 @@ const mocks = vi.hoisted(() => ({
   savedAttempt: undefined as unknown,
 }))
 
-vi.mock('@/services/update-session', () => ({ preserveUpdateSession: mocks.preserveSession }))
+vi.mock('@/services/update-session', () => ({
+  withPreservedUpdateSession: async (label: string, operation: () => Promise<unknown>) => {
+    await mocks.preserveSession(label)
+    return operation()
+  },
+}))
 vi.mock('@/services/windows', () => ({ currentWindow: { label: 'main' } }))
 vi.mock('@tauri-apps/plugin-updater', () => ({ check: mocks.check }))
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
@@ -254,7 +259,7 @@ describe('fetchUpdate', () => {
     const installingUpdate = createUpdate()
     const extraUpdate = createUpdate()
     mocks.check.mockReturnValue(pendingCheck.promise)
-    vi.mocked(installingUpdate.downloadAndInstall).mockReturnValue(pendingInstall.promise)
+    vi.mocked(installingUpdate.install).mockReturnValue(pendingInstall.promise)
 
     const checking = fetchUpdate()
     const installing = installUpdate(installingUpdate)
@@ -286,10 +291,26 @@ describe('fetchUpdate', () => {
 })
 
 describe('installUpdate', () => {
+  it.each(['windows', 'macos', 'linux'])('finishes downloading on %s before protecting editors', async (os) => {
+    mocks.osType.mockReturnValue(os)
+    const update = createUpdate()
+    const downloaded = deferred<void>()
+    vi.mocked(update.download).mockReturnValue(downloaded.promise)
+    const installing = installUpdate(update)
+    await vi.waitFor(() => expect(update.download).toHaveBeenCalledOnce())
+    expect(mocks.preserveSession).not.toHaveBeenCalled()
+    expect(update.install).not.toHaveBeenCalled()
+    downloaded.resolve()
+    await installing
+    expect(mocks.preserveSession).toHaveBeenCalledWith('main')
+    expect(update.install).toHaveBeenCalledOnce()
+    expect(update.downloadAndInstall).not.toHaveBeenCalled()
+  })
+
   it('downloads once, clears the available update, and preserves the restart action', async () => {
     const update = createUpdate()
     const pendingInstall = deferred<void>()
-    vi.mocked(update.downloadAndInstall).mockReturnValue(pendingInstall.promise)
+    vi.mocked(update.install).mockReturnValue(pendingInstall.promise)
     useUpdaterStore.setState({ update })
 
     const first = installUpdate(update)
@@ -297,7 +318,7 @@ describe('installUpdate', () => {
     expect(second).toBe(first)
     expect(useUpdaterStore.getState().isInstalling).toBe(true)
     expect(await fetchUpdate()).toBe(update)
-    await vi.waitFor(() => expect(update.downloadAndInstall).toHaveBeenCalledOnce())
+    await vi.waitFor(() => expect(update.install).toHaveBeenCalledOnce())
 
     pendingInstall.resolve()
     await first
@@ -315,13 +336,13 @@ describe('installUpdate', () => {
 
     await installUpdate(update)
     expect(await fetchUpdate()).toBeNull()
-    expect(update.downloadAndInstall).toHaveBeenCalledOnce()
+    expect(update.install).toHaveBeenCalledOnce()
     expect(mocks.check).not.toHaveBeenCalled()
   })
 
   it('retains a failed update and permits retrying it', async () => {
     const update = createUpdate()
-    vi.mocked(update.downloadAndInstall).mockRejectedValueOnce(new Error('download interrupted'))
+    vi.mocked(update.install).mockRejectedValueOnce(new Error('download interrupted'))
 
     await installUpdate(update)
     expect(useUpdaterStore.getState()).toMatchObject({
@@ -333,7 +354,7 @@ describe('installUpdate', () => {
     expect(mocks.error).toHaveBeenCalledWith('updater.install_failed')
 
     await installUpdate(update)
-    expect(update.downloadAndInstall).toHaveBeenCalledTimes(2)
+    expect(update.install).toHaveBeenCalledTimes(2)
     expect(update.close).toHaveBeenCalledOnce()
     expect(useUpdaterStore.getState().update).toBeNull()
   })
@@ -347,6 +368,14 @@ describe('installUpdate', () => {
     expect(useUpdaterStore.getState().installedVersion).toBe(update.version)
     expect(mocks.success).toHaveBeenCalledOnce()
     expect(mocks.error).not.toHaveBeenCalled()
+  })
+
+  it('does not restart when acquiring a fresh session barrier fails', async () => {
+    await installUpdate(createUpdate())
+    mocks.preserveSession.mockRejectedValueOnce(new Error('window still saving'))
+    await mocks.success.mock.calls[0][1].action.onClick()
+    expect(mocks.invoke).not.toHaveBeenCalled()
+    expect(mocks.error).toHaveBeenCalledWith('updater.install_failed')
   })
 })
 
@@ -362,7 +391,7 @@ describe('checkUpdate', () => {
     expect(useUpdaterStore.getState().update).toBe(update)
     const options = mocks.info.mock.calls[0][1]
     options.action.onClick()
-    await vi.waitFor(() => expect(update.downloadAndInstall).toHaveBeenCalledOnce())
+    await vi.waitFor(() => expect(update.install).toHaveBeenCalledOnce())
   })
 
   it('does not repeat the offer for the same release', async () => {

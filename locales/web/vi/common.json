@@ -5,7 +5,8 @@
   "docs": {
     "tableOfContents": "Trên trang này",
     "content": {
-      "description": "Bắt đầu với MarkFlowy: cài đặt ứng dụng, chỉnh sửa tệp Markdown trên máy, chuyển đổi giữa chỉnh sửa trực quan và chỉnh sửa mã nguồn, và thiết lập trợ lý AI tùy chọn."
+      "description": "Bắt đầu với MarkFlowy: cài đặt ứng dụng, chỉnh sửa tệp Markdown trên máy, chuyển đổi giữa chỉnh sửa trực quan và chỉnh sửa mã nguồn, và thiết lập trợ lý AI tùy chọn.",
+      "fallback": "Các hướng dẫn này hiện có bằng tiếng Anh."
     },
     "sidebar": {
       "gettingStarted": "Bắt đầu"

@@ -31,7 +31,12 @@ module.exports = withSvgr(
     transpilePackages: ['@markflowy/interface', 'zens'],
     turbopack: {},
     async redirects() {
-      return [{ source: '/zh/privacy', destination: '/privacy', permanent: true, locale: false }]
+      return [
+        { source: '/zh/privacy', destination: '/privacy', permanent: true, locale: false },
+        { source: '/ru/privacy', destination: '/privacy', permanent: true, locale: false },
+        // Keep untranslated guides at their actual language and canonical URL.
+        { source: '/ru/docs/:path+', destination: '/docs/:path+', permanent: false, locale: false },
+      ]
     },
     async rewrites() {
       return {

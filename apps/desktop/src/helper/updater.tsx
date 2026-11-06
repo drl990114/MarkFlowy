@@ -1,4 +1,4 @@
-import { preserveUpdateSession } from '@/services/update-session'
+import { withPreservedUpdateSession } from '@/services/update-session'
 import { currentWindow } from '@/services/windows'
 import { recordUpdateAttempt } from '@/services/update-recovery'
 import useUpdaterStore from '@/stores/useUpdaterStore'
@@ -36,15 +36,12 @@ export const installUpdate = (update: Update): Promise<void> => {
       const id = toast.loading(i18n.t('updater.downloading'))
 
       try {
-        if (type() === 'windows') {
-          await currentUpdate.download()
-          await preserveUpdateSession(currentWindow.label)
-          await recordUpdateAttempt(currentUpdate)
+        // Download while editing remains available; only installation needs the session barrier.
+        await currentUpdate.download()
+        await withPreservedUpdateSession(currentWindow.label, async () => {
+          if (type() === 'windows') await recordUpdateAttempt(currentUpdate)
           await currentUpdate.install()
-        } else {
-          await preserveUpdateSession(currentWindow.label)
-          await currentUpdate.downloadAndInstall()
-        }
+        })
         useUpdaterStore.setState({ update: null, installedVersion: currentUpdate.version })
         await closeUpdate(currentUpdate)
         toast.dismiss(id)
@@ -53,8 +50,7 @@ export const installUpdate = (update: Update): Promise<void> => {
             label: i18n.t('updater.restart'),
             onClick: async () => {
               try {
-                await preserveUpdateSession(currentWindow.label)
-                await invoke('app_restart')
+                await withPreservedUpdateSession(currentWindow.label, () => invoke('app_restart'))
               } catch (error) {
                 toast.error(i18n.t('updater.install_failed', { error: String(error) }))
               }
