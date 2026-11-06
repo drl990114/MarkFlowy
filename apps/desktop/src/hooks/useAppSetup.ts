@@ -1,4 +1,5 @@
 import { listenForUpdateSession } from '@/services/update-session'
+import { startSharedRecentFileHistory } from '@/services/recent-file-history'
 import { startThemeLibrary } from '@/themes/library'
 import { flushEditorResumeStates } from '@/stores/editorResumeStore'
 import { closeWithDraftRecovery, listenForDraftReload } from '@/services/draft-recovery'
@@ -90,6 +91,7 @@ interface CliCommandPayload {
 let workspaceCachePersistence: WorkspaceCachePersistence | undefined
 let workspaceCacheStore: LazyStore | undefined
 let windowSessionPersistence: ReturnType<typeof createWindowSessionPersistence> | undefined
+let recentFileHistory: Awaited<ReturnType<typeof startSharedRecentFileHistory>> | undefined
 let startupSession: WindowSession | undefined
 let isolateStartupDrafts = false
 let collectingStartupOpenedPaths = false
@@ -289,6 +291,8 @@ async function appWorkspaceSetup(signal: AbortSignal) {
 
     const recentWorkspaces = getOpenedCacheRes.recent_workspaces
     setRecentWorkspaces(recentWorkspaces)
+    await recentFileHistory?.dispose()
+    recentFileHistory = await startSharedRecentFileHistory()
     await setupWorkspaceCachePersistence(cacheStore)
 
     let handledOpenedPaths = false
@@ -498,6 +502,7 @@ export const useAppRuntimeSetup = () => {
       flushEditorResumeStates()
       await workspaceCachePersistence.flush()
       await windowSessionPersistence.flush()
+      await recentFileHistory?.flush()
     })
     let closeWindowPromise: Promise<boolean> | undefined
     const closeRequest = currentWindow.listen('tauri://close-requested', async () => {
@@ -517,6 +522,7 @@ export const useAppRuntimeSetup = () => {
             // Keep persistence and the close listener alive if native teardown fails.
             await workspaceCachePersistence?.flush()
             await windowSessionPersistence?.flush()
+            await recentFileHistory?.flush()
             await releaseDetachedWorkspaceScopes()
             await releaseSecurityScope(rootPath)
             await invoke('close_session_window')

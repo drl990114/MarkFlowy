@@ -44,7 +44,7 @@ export function getOpenedQuickOpenFiles(rootPath?: string): QuickOpenFile[] {
 
 export function getRecentQuickOpenFiles(rootPath?: string): QuickOpenFile[] {
   const history = useRecentFilesStore.getState()
-  if (history.rootPath !== rootPath) return []
+  if (!history.shared && history.rootPath !== rootPath) return []
   const opened = new Map(getOpenedQuickOpenFiles(rootPath).map((file) => [file.id, file]))
   return history.entries.flatMap((entry) => {
     const id = getRecentFileKey(entry)
