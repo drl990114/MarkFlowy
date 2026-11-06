@@ -5,11 +5,14 @@ import { createHash } from 'node:crypto'
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import glob from 'fast-glob'
 import { createServer, normalizePath, type ConfigEnv, type Plugin } from 'vite'
 import { describe, expect, it, vi } from 'vitest'
+import { configDefaults } from 'vitest/config'
 
 import * as runtimeResolver from './capricornRuntimeResolver'
 import desktopConfig from './vite.config'
+import publishedConfig from './vitest.capricorn-published.config'
 
 const desktopRoot = fileURLToPath(new URL('.', import.meta.url))
 const sourceRoot = normalizePath(fileURLToPath(new URL('../../packages/zens/src', import.meta.url)))
@@ -19,6 +22,57 @@ async function getConfig(command: ConfigEnv['command'], mode: string) {
 }
 
 describe('Desktop workspace development resolution', () => {
+  it('assigns every test to exactly one of the unit and published host suites', async () => {
+    // A readable entry is sufficient to resolve the config; do not require the
+    // private package just to verify test discovery in a public checkout.
+    const resolveRuntime = vi
+      .spyOn(runtimeResolver, 'resolvePrivateCapricornRuntime')
+      .mockReturnValue(fileURLToPath(import.meta.url))
+    try {
+      const unit = await getConfig('serve', 'test')
+      const published = await (typeof publishedConfig === 'function'
+        ? publishedConfig({ command: 'serve', mode: 'test' })
+        : publishedConfig)
+      const allFiles = glob.sync(configDefaults.include, {
+        cwd: desktopRoot,
+        ignore: configDefaults.exclude,
+      })
+      const collect = (test: typeof unit.test) =>
+        glob.sync(test?.include ?? configDefaults.include, {
+          cwd: desktopRoot,
+          ignore: test?.exclude ?? configDefaults.exclude,
+        })
+      const unitFiles = collect(unit.test)
+      const publishedFiles = collect(published.test)
+      expect(unitFiles.length).toBeGreaterThan(0)
+      expect(publishedFiles.length).toBeGreaterThan(0)
+      expect(unitFiles.filter((file) => publishedFiles.includes(file))).toEqual([])
+      expect([...unitFiles, ...publishedFiles].sort()).toEqual(allFiles.sort())
+      expect(publishedFiles).toContain('tests/capricorn-code-settings.integration.test.tsx')
+      expect(publishedFiles).toContain(
+        'src/components/EditorArea/CapricornEditor.publishedRuntime.test.tsx',
+      )
+    } finally {
+      resolveRuntime.mockRestore()
+    }
+  })
+
+  it('requires the pinned runtime for the dedicated host suite', async () => {
+    const resolveRuntime = vi
+      .spyOn(runtimeResolver, 'resolvePrivateCapricornRuntime')
+      .mockReturnValue(null)
+    try {
+      expect((await getConfig('serve', 'test')).test).toBeDefined()
+      await expect(
+        typeof publishedConfig === 'function'
+          ? publishedConfig({ command: 'serve', mode: 'test' })
+          : publishedConfig,
+      ).rejects.toThrow('Install the pinned Capricorn runtime')
+    } finally {
+      resolveRuntime.mockRestore()
+    }
+  })
+
   it('changes the private runtime URL when its bytes change at the same package path', async () => {
     const fixtureRoot = mkdtempSync(join(tmpdir(), 'markflowy-runtime-cache-'))
     const packageRoot = join(fixtureRoot, 'node_modules', 'runtime-cache-fixture')

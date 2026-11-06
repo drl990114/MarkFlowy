@@ -1,3 +1,5 @@
+// Keep source-module transformation outside the component's opening deadline.
+import 'virtual:markflowy-capricorn-runtime'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { enableMapSet } from 'immer'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

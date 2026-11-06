@@ -18,6 +18,21 @@ it('loads only the current language and English, adds switched languages and ret
 })
 
 it.each([
+  ['en', ['Readable size', 'Fit width', 'Actual size (100%)', 'Diagram size']],
+  ['cn', ['可读尺寸', '适应宽度', '原始尺寸（100%）', '图表尺寸']],
+  ['frFR', ['Taille lisible', 'Ajuster à la largeur', 'Taille réelle (100 %)', 'Taille du diagramme']],
+  ['es', ['Tamaño legible', 'Ajustar al ancho', 'Tamaño real (100 %)', 'Tamaño del diagrama']],
+  ['ja', ['読みやすいサイズ', '幅に合わせる', '実際のサイズ（100%）', '図のサイズ']],
+] as const)('loads Mermaid sizing labels for %s without a fallback', async (language, labels) => {
+  await i18nInit({ lng: language })
+  for (const [index, key] of ['autoSize', 'fitWidth', 'actualSize', 'size'].entries()) {
+    const translationKey = `capricorn.preview.mermaid.${key}`
+    expect(i18n.getResource(language, 'translation', translationKey)).toBe(labels[index])
+    expect(i18n.t(translationKey, { defaultValue: 'Missing translation' })).toBe(labels[index])
+  }
+})
+
+it.each([
   ['en', 'Duplicate row', 'Duplicate column'],
   ['cn', '复制当前行', '复制当前列'],
   ['frFR', 'Dupliquer la ligne', 'Dupliquer la colonne'],

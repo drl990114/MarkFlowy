@@ -39,6 +39,7 @@
   },
   "include": [
     "src",
+    "tests",
     "src/**/*.json",
     "src/types/*.d.ts"
   ],

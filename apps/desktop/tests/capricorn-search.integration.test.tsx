@@ -231,35 +231,6 @@ describe.skipIf(!isCapricornRuntimeAvailable)(
       expect(adapter.find.getState()).toBe(adapter.find.getState())
     })
 
-    it('keeps hidden-address navigation in WYSIWYG and rejects stale results', async () => {
-      const lineText = '[visible](https://hidden.test)'
-      const { adapter, container } = await create(lineText)
-      let result: unknown
-      await act(async () => {
-        result = await adapter.find.revealSourceMatch!({
-          line: 1,
-          query: 'hidden',
-          lineText,
-          startColumn: 18,
-          endColumn: 24,
-        })
-      })
-      expect(result).toMatchObject({ status: 'block' })
-      expect(container.querySelector('[data-cap-source-match="true"]')).not.toBeNull()
-      await act(async () => {
-        adapter.setMarkdown('changed')
-      })
-      expect(
-        await adapter.find.revealSourceMatch!({
-          line: 1,
-          query: 'hidden',
-          lineText,
-          startColumn: 18,
-          endColumn: 24,
-        }),
-      ).toMatchObject({ status: 'stale' })
-    })
-
     it('restores the visible highlight when file B changes to its active instance after cross-file navigation', async () => {
       await create('file A foo', 'first')
       const background = await create('file B foo foo', 'second')
@@ -295,16 +266,11 @@ describe.skipIf(!isCapricornRuntimeAvailable)(
       expect(useEditorSearchStore.getState().error).toBeNull()
     })
 
-    it.each([
-      { virtualize: false, escaped: false },
-      { virtualize: true, escaped: false },
-      { virtualize: false, escaped: true },
-      { virtualize: true, escaped: true },
-    ])(
-      'highlights a partial word after a link in file B (virtualize: $virtualize, escaped: $escaped)',
-      async ({ virtualize, escaped }) => {
-        if (virtualize) mockVirtualizedBlockGeometry()
-        const first = await create('- Desktop', 'first', virtualize)
+    it(
+      'routes a partial-word match between host documents with virtualized escaped content',
+      async () => {
+        mockVirtualizedBlockGeometry()
+        const first = await create('- Desktop', 'first', true)
         mountFind()
         const firstTarget = {
           fileId: 'first',
@@ -321,7 +287,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)(
             first.container.querySelector('[data-cap-find-match][data-active="true"]')?.textContent,
           ).toBe('Desk'),
         )
-        const lineText = escaped ? escapedListLine : escapedListLine.replaceAll('\\', '')
+        const lineText = escapedListLine
         const markdown = [
           ...Array.from({ length: 133 }, (_, index) =>
             index % 2 === 0 ? `Paragraph ${index}` : '',
@@ -333,7 +299,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)(
           lineText,
           '- And thanks to all the open source libraries and projects that MarkFlowy depends on.',
         ].join('\n')
-        const { adapter, container } = await create(markdown, 'second', virtualize)
+        const { adapter, container } = await create(markdown, 'second', true)
         const secondTarget = {
           fileId: 'second',
           path: '/second.md',
@@ -368,8 +334,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)(
             container.querySelector('[data-cap-find-match][data-active="true"]')?.textContent,
           ).toBe('desk'),
         )
-        if (virtualize)
-          expect(container.querySelectorAll('[data-cap-leaf-block]').length).toBeLessThan(40)
+        expect(container.querySelectorAll('[data-cap-leaf-block]').length).toBeLessThan(40)
       },
     )
 

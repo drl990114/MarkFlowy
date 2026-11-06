@@ -16,7 +16,7 @@
     },
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "test/**", "tests/**", "vitest.config.*", "jest.config.*"]
+      "inputs": ["src/**", "test/**", "tests/**", "package.json", "tsconfig*.json", "vite.config.*", "vitest*.config.*", "capricornIntegrationTests.ts", "jest.config.*"]
     },
     "typecheck": {
       "dependsOn": ["^build"],

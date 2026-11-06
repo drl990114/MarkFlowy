@@ -30,14 +30,27 @@ afterAll(() => {
   delete reactEnvironment.IS_REACT_ACT_ENVIRONMENT
 })
 
-describe('Quick Open global keybinding', () => {
+describe.each([
+  {
+    name: 'Command Palette',
+    command: EVENT.app_commandPalette,
+    shiftKey: true,
+    dialogAttribute: 'data-mf-command-palette',
+  },
+  {
+    name: 'Quick Open',
+    command: EVENT.app_quickOpen,
+    shiftKey: false,
+    dialogAttribute: 'data-mf-quick-open',
+  },
+])('$name global keybinding', ({ command, shiftKey, dialogAttribute }) => {
   let root: Root
   let target: HTMLInputElement
   const open = vi.fn()
 
   beforeEach(() => {
     vi.clearAllMocks()
-    commandRegistry.registerCommand({ id: EVENT.app_quickOpen, handler: open })
+    commandRegistry.registerCommand({ id: command, handler: open })
     target = document.createElement('input')
     document.body.append(target)
     root = createRoot(document.createElement('div'))
@@ -45,7 +58,7 @@ describe('Quick Open global keybinding', () => {
 
   afterEach(() => {
     act(() => root.unmount())
-    commandRegistry.unregisterCommand(EVENT.app_quickOpen)
+    commandRegistry.unregisterCommand(command)
     const dialog = target.closest('[role="dialog"]')
     target.remove()
     dialog?.remove()
@@ -55,7 +68,7 @@ describe('Quick Open global keybinding', () => {
     vi.mocked(invoke).mockResolvedValue({
       revision: 1,
       rules: getDefaultKeybindings('linux')
-        .filter((rule) => rule.command === EVENT.app_quickOpen)
+        .filter((rule) => rule.command === command)
         .map((rule) => ({ ...rule, keys: keyMap })),
     })
     await act(async () => root.render(<KeyboardHost />))
@@ -71,12 +84,12 @@ describe('Quick Open global keybinding', () => {
     { modifier: 'Ctrl', event: { ctrlKey: true } },
     { modifier: 'Meta', event: { metaKey: true } },
   ])(
-    'opens once before a nested editor consumes $modifier+P and prevents printing',
+    'captures the $modifier shortcut before a nested editor consumes it and prevents printing',
     async ({ modifier, event }) => {
-      await mount([modifier, 'p'])
+      await mount(shiftKey ? [modifier, 'Shift', 'p'] : [modifier, 'p'])
       const nested = vi.fn((nestedEvent: KeyboardEvent) => nestedEvent.stopPropagation())
       target.addEventListener('keydown', nested)
-      expect(press({ key: 'p', ...event }).defaultPrevented).toBe(true)
+      expect(press({ key: 'p', shiftKey, ...event }).defaultPrevented).toBe(true)
       expect(open).toHaveBeenCalledOnce()
       expect(nested).not.toHaveBeenCalled()
     },
@@ -84,29 +97,33 @@ describe('Quick Open global keybinding', () => {
 
   it('honors a customized or disabled shortcut', async () => {
     await mount(['Alt', 'o'])
-    expect(press({ key: 'p', ctrlKey: true }).defaultPrevented).toBe(false)
+    expect(press({ key: 'p', shiftKey, ctrlKey: true }).defaultPrevented).toBe(false)
     expect(press({ key: 'o', altKey: true }).defaultPrevented).toBe(true)
     expect(open).toHaveBeenCalledOnce()
 
     act(() => root.unmount())
     root = createRoot(document.createElement('div'))
     await mount([])
-    expect(press({ key: 'p', ctrlKey: true }).defaultPrevented).toBe(false)
+    expect(press({ key: 'p', shiftKey, ctrlKey: true }).defaultPrevented).toBe(false)
     expect(press({ key: 'o', altKey: true }).defaultPrevented).toBe(false)
     expect(open).toHaveBeenCalledOnce()
   })
 
-  it('ignores IME and other dialogs but captures the key within Quick Open', async () => {
-    await mount(['Ctrl', 'p'])
-    press({ key: 'p', ctrlKey: true, isComposing: true })
+  it('ignores IME and other dialogs but captures the key within its launcher', async () => {
+    await mount(shiftKey ? ['Ctrl', 'Shift', 'p'] : ['Ctrl', 'p'])
+    press({ key: 'p', shiftKey, ctrlKey: true, isComposing: true })
+    if (command === EVENT.app_commandPalette) {
+      press({ key: 'p', shiftKey, ctrlKey: true, repeat: true })
+      press({ key: 'p', shiftKey, ctrlKey: true, keyCode: 229 })
+    }
     const dialog = document.createElement('div')
     dialog.setAttribute('role', 'dialog')
     document.body.append(dialog)
     dialog.append(target)
-    press({ key: 'p', ctrlKey: true })
+    press({ key: 'p', shiftKey, ctrlKey: true })
     expect(open).not.toHaveBeenCalled()
-    dialog.setAttribute('data-mf-quick-open', '')
-    expect(press({ key: 'p', ctrlKey: true }).defaultPrevented).toBe(true)
+    dialog.setAttribute(dialogAttribute, '')
+    expect(press({ key: 'p', shiftKey, ctrlKey: true }).defaultPrevented).toBe(true)
     expect(open).toHaveBeenCalledOnce()
   })
 })

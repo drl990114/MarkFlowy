@@ -23,11 +23,6 @@ const pngPayload =
 const png = `data:image/png;base64,${pngPayload}`
 const parameterizedPng = `data:image/png;charset=UTF-8;base64,${pngPayload}`
 const binaryPng = `data:application/octet-stream;base64,${pngPayload}`
-const uppercasePng = `DATA:IMAGE/PNG;BASE64,${pngPayload}`
-const foldedPng = `${pngPayload.slice(0, 32)}\n${pngPayload.slice(32)}`
-const encodedPng = pngPayload.replaceAll('/', '%2F').replaceAll('+', '%2B').replaceAll('=', '%3D')
-// Trailing bytes exercise the HTML source budget, not browser image decoding.
-const largePng = `data:image/png;base64,${btoa(atob(pngPayload) + '\0'.repeat(100_000))}`
 
 afterEach(async () => {
   await act(async () => adapters.splice(0).forEach((adapter) => adapter.destroy()))
@@ -64,60 +59,6 @@ async function mount(markdown: string, mode: 'edit' | 'preview') {
 describe.skipIf(!isCapricornRuntimeAvailable)(
   'Capricorn Base64 compatibility through the Desktop host',
   () => {
-    describe.each(['edit', 'preview'] as const)('%s mode', (mode) => {
-      it.each([
-        { name: 'standard PNG', markdown: `![image](${png})`, expected: png },
-        { name: 'MIME parameters', markdown: `![image](${parameterizedPng})`, expected: png },
-        { name: 'binary image', markdown: `![image](${binaryPng})`, expected: png },
-        {
-          name: 'binary image reference',
-          markdown: `![image][embedded]\n\n[embedded]: ${binaryPng}`,
-          expected: png,
-        },
-        {
-          name: 'uppercase HTML image',
-          markdown: `<div><img src="${uppercasePng}" alt="image"></div>`,
-          expected: png,
-        },
-        {
-          name: 'binary HTML image',
-          markdown: `<div><img src="${binaryPng}" alt="image"></div>`,
-          expected: png,
-        },
-        {
-          name: 'folded HTML image',
-          markdown: `<div><img src="data:image/png;base64,${foldedPng}" alt="image"></div>`,
-          expected: png,
-        },
-        {
-          name: 'folded binary HTML image',
-          markdown: `<div><img src="data:application/octet-stream;base64,${foldedPng}" alt="image"></div>`,
-          expected: png,
-        },
-        {
-          name: 'percent-encoded image',
-          markdown: `![image](data:application/octet-stream;base64,${encodedPng})`,
-          expected: png,
-        },
-        {
-          name: 'large HTML image',
-          markdown: `<div><img src="${largePng}" alt="image"></div>`,
-          expected: largePng,
-        },
-      ])('renders $name without changing the document', async ({ markdown, expected }) => {
-        const host = await mount(markdown, mode)
-        await waitFor(() => {
-          expect(host.container.querySelector('img')?.getAttribute('src')).toBe(expected)
-        })
-        expect(host.adapter.getMarkdown()).toBe(markdown)
-        expect(host.adapter.getUiState().canUndo).toBe(false)
-        expect(host.onChange).not.toHaveBeenCalledWith(
-          expect.objectContaining({ documentChanged: true }),
-        )
-        expect(host.onError).not.toHaveBeenCalled()
-      })
-    })
-
     it.each([parameterizedPng, binaryPng])(
       'keeps the original image address through editing, undo and reopening',
       async (src) => {

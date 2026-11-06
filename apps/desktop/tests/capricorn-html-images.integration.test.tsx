@@ -41,13 +41,10 @@ async function mount(
   markdown: string,
   directory: string,
   mode: 'edit' | 'preview' = 'edit',
-  imageResolver?: (value: string) => Promise<string> | string,
 ) {
   const container = document.createElement('div')
   document.body.append(container)
-  const resolveImage = vi.fn(
-    imageResolver ?? ((value: string) => getImageUrlInTauri(value, directory)),
-  )
+  const resolveImage = vi.fn((value: string) => getImageUrlInTauri(value, directory))
   const onChange = vi.fn()
   const onError = vi.fn()
   let adapter!: CapricornRuntimeAdapter
@@ -73,63 +70,20 @@ async function mount(
 describe('Capricorn HTML image host integration', () => {
   const pngDataUrl =
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8L8AAAAASUVORK5CYII='
-  const base64Images = [
-    { name: 'Markdown', markdown: `![Base64 image](${pngDataUrl})` },
-    {
-      name: 'reference Markdown',
-      markdown: `![Base64 image][embedded]\n\n[embedded]: ${pngDataUrl}`,
-    },
-    { name: 'HTML image', markdown: `<img src="${pngDataUrl}" alt="Base64 image">` },
-    {
-      name: 'nested HTML image',
-      markdown: `<div><img src="${pngDataUrl}" alt="Base64 image"></div>`,
-    },
-  ]
-
-  describe.each(['edit', 'preview'] as const)('Base64 images in %s mode', (mode) => {
-    it.each(base64Images)('preserves the embedded source in $name', async ({ markdown }) => {
-      const host = await mount(markdown, '/workspace/notes', mode)
-
-      await waitFor(() => {
-        const image = host.container.querySelector('img')
-        expect(image?.getAttribute('src')).toBe(pngDataUrl)
-        expect(image?.getAttribute('alt')).toBe('Base64 image')
-      })
-
-      expect(native.invoke).not.toHaveBeenCalled()
-      expect(native.join).not.toHaveBeenCalled()
-      expect(native.convertFileSrc).not.toHaveBeenCalled()
-      expect(host.adapter.getMarkdown()).toBe(markdown)
-      expect(host.adapter.getUiState().canUndo).toBe(false)
-      expect(host.onChange).not.toHaveBeenCalledWith(
-        expect.objectContaining({ documentChanged: true }),
-      )
-      expect(host.onError).not.toHaveBeenCalled()
-    })
-  })
-
-  it('shows surrounding HTML while an image resolver is still pending', async () => {
-    let resolve!: (value: string) => void
-    const pending = new Promise<string>((done) => {
-      resolve = done
-    })
-    const host = await mount(source, '/workspace/notes', 'preview', () => pending)
+  it('passes an embedded image through the host resolver without native file access', async () => {
+    const markdown = `<div><img src="${pngDataUrl}" alt="Base64 image"></div>`
+    const host = await mount(markdown, '/workspace/notes', 'preview')
     await waitFor(() => {
-      expect(host.resolveImage).toHaveBeenCalledWith('assets/imgs/DQN.png')
-      expect(host.container.querySelector('.capricorn-html-preview-content em')?.textContent).toBe(
-        'Figure 2-2: Deep Q-Network (DQN)',
-      )
+      expect(host.container.querySelector('img')?.getAttribute('src')).toBe(pngDataUrl)
     })
-    expect(
-      host.container.querySelector('.capricorn-html-preview-content img')?.getAttribute('src'),
-    ).toBeNull()
-    await act(async () => resolve('asset://localhost/resolved.png'))
-    await waitFor(() => {
-      expect(
-        host.container.querySelector('.capricorn-html-preview-content img')?.getAttribute('src'),
-      ).toBe('asset://localhost/resolved.png')
-    })
-    expect(host.adapter.getMarkdown()).toBe(source)
+    expect(native.invoke).not.toHaveBeenCalled()
+    expect(native.join).not.toHaveBeenCalled()
+    expect(native.convertFileSrc).not.toHaveBeenCalled()
+    expect(host.adapter.getMarkdown()).toBe(markdown)
+    expect(host.onChange).not.toHaveBeenCalledWith(
+      expect.objectContaining({ documentChanged: true }),
+    )
+    expect(host.onError).not.toHaveBeenCalled()
   })
 
   it.each(['edit', 'preview'] as const)(

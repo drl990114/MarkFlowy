@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 import desktopConfig from './vite.config'
 import { capricornIntegrationTests } from './capricornIntegrationTests'
 
@@ -14,6 +14,10 @@ export default defineConfig(async (environment) => {
   }
   return {
     ...base,
-    test: { ...base.test, include: capricornIntegrationTests },
+    test: {
+      ...base.test,
+      include: capricornIntegrationTests,
+      exclude: configDefaults.exclude,
+    },
   }
 })

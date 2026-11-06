@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import 'virtual:markflowy-capricorn-runtime'
 import { EditorView } from '@codemirror/view'
-import { act } from '@testing-library/react'
+import { act, waitFor } from '@testing-library/react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { setCapricornEditor } from './capricornEditorRegistry'
@@ -52,9 +52,14 @@ async function mountEditor() {
   })
   cleanups.push(() => adapter.destroy())
   setCapricornEditor('focus-file', adapter)
-  const content = container.querySelector<HTMLElement>('.cm-content')!
-  const view = EditorView.findFromDOM(content)!
-  expect(view).not.toBeNull()
+  // Source development loads the code block module after the document mounts.
+  const view = await waitFor(() => {
+    const content = container.querySelector<HTMLElement>('.cm-content')
+    expect(content).not.toBeNull()
+    const editor = EditorView.findFromDOM(content!)
+    expect(editor).not.toBeNull()
+    return editor!
+  })
   await act(async () => {
     view.focus()
     view.dispatch({ selection: { anchor: 8, head: 2 } })

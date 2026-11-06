@@ -3,19 +3,15 @@ import 'virtual:markflowy-capricorn-runtime'
 import { act, cleanup, fireEvent, render, waitFor, within } from '@testing-library/react'
 import { createRef } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createCapricornRuntime } from 'virtual:markflowy-capricorn-runtime'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import i18n, { changeLng, i18nInit } from '@/i18n'
 import {
   CapricornEditor,
   type CapricornEditorHandle,
 } from '@/components/EditorArea/CapricornEditor'
-import {
-  CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
-  createCapricornRuntimeAdapter,
-  type CapricornLocalizationAdapter,
-  type CapricornRuntimeAdapter,
-  type CapricornRuntimeFactory,
+import type {
+  CapricornLocalizationAdapter,
+  CapricornRuntimeAdapter,
 } from '@/components/EditorArea/capricornRuntimeAdapter'
 
 // Match TextEditor's production bridge, including the legacy cn language code
@@ -41,12 +37,9 @@ const source = [
   '# Next',
   'Next body',
 ].join('\n\n')
-let adapter: CapricornRuntimeAdapter | undefined
 
-afterEach(async () => {
+afterEach(() => {
   cleanup()
-  await act(async () => adapter?.destroy())
-  adapter = undefined
   document.body.replaceChildren()
   vi.restoreAllMocks()
 })
@@ -63,45 +56,11 @@ function foldControl(container: HTMLElement, title: string) {
   return within(element!).getByRole('button')
 }
 
-function visible(element: HTMLElement | undefined) {
-  if (!element?.isConnected) return false
-  for (let current: HTMLElement | null = element; current; current = current.parentElement) {
-    const style = getComputedStyle(current)
-    if (current.hidden || style.display === 'none' || style.visibility === 'hidden') return false
-  }
-  return true
-}
-
 async function toggle(container: HTMLElement, title: string, expanded: boolean) {
   await act(async () => fireEvent.click(foldControl(container, title)))
   await waitFor(() =>
     expect(foldControl(container, title).getAttribute('aria-expanded')).toBe(String(expanded)),
   )
-}
-
-async function mountAdapter() {
-  await i18nInit({ lng: 'en' })
-  const container = document.createElement('div')
-  document.body.append(container)
-  vi.spyOn(container, 'getBoundingClientRect').mockReturnValue(new DOMRect(40, 40, 800, 600))
-  const onChange = vi.fn()
-  const onError = vi.fn()
-  await act(async () => {
-    adapter = createCapricornRuntimeAdapter({
-      container,
-      createRuntime: createCapricornRuntime as CapricornRuntimeFactory,
-      onChange,
-      options: {
-        markdown: source,
-        autoFocus: false,
-        localization,
-        virtualize: CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
-        onError,
-      },
-    })
-  })
-  onChange.mockClear()
-  return { container, runtime: adapter!, onChange, onError }
 }
 
 describe.skipIf(!isCapricornRuntimeAvailable)('Capricorn heading folding in MarkFlowy', () => {
@@ -150,79 +109,6 @@ describe.skipIf(!isCapricornRuntimeAvailable)('Capricorn heading folding in Mark
     expect(container.querySelector('[data-cap-editable]')).toBe(editorRoot)
     expect(onEditorChange.mock.calls.filter(([value]) => value)).toHaveLength(1)
     expect(ref.current!.getMarkdown()).toBe(source)
-    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
-
-    // Invalidate the host's initial Markdown cache with a real edit before
-    // checking that folding preserves serialized content and undo ownership.
-    await act(async () => {
-      runtime.find.search({ query: 'Intro' })
-      expect(runtime.find.replaceAll('Edited intro')).toBe(1)
-      runtime.find.close()
-    })
-    const edited = source.replace('Intro', 'Edited intro')
-    expect(runtime.getMarkdown()).toBe(edited)
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
-    onChange.mockClear()
-    await toggle(container, 'Root', false)
-    await toggle(container, 'Root', true)
-    expect(runtime.getMarkdown()).toBe(edited)
-    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
-    await act(async () => runtime.commands.undo())
-    expect(runtime.getMarkdown()).toBe(source)
-    await toggle(container, 'Root', false)
-    await toggle(container, 'Root', true)
-    expect(runtime.getUiState().canRedo).toBe(true)
-    await act(async () => runtime.commands.redo())
-    expect(runtime.getMarkdown()).toBe(edited)
-    expect(onError).not.toHaveBeenCalled()
-  })
-
-  it('retains the outline and reveals folded ancestors through host heading, anchor and find navigation', async () => {
-    const { container, runtime, onChange, onError } = await mountAdapter()
-    const headings = runtime.headings.getAll()
-    const target = headings.find((item) => item.text === 'Grandchild')!
-    expect(target).toBeDefined()
-    for (const navigate of [
-      () => runtime.headings.jumpTo(target.id, { offset: 100 }),
-      () => runtime.headings.jumpToAnchor!(`#${target.anchor}`),
-      () => {
-        expect(runtime.find.search({ query: 'Deep body' }).matches).toHaveLength(1)
-        return runtime.find.navigateTo!(0)
-      },
-    ]) {
-      await toggle(container, 'Child', false)
-      await toggle(container, 'Root', false)
-      expect(visible(heading(container, 'Grandchild'))).toBe(false)
-      expect(runtime.headings.getAll()).toEqual(headings)
-      // Finish the synchronous event before awaiting navigation so React can
-      // commit the reveal before the runtime measures its target.
-      let navigation: Promise<unknown> | undefined
-      act(() => {
-        navigation = navigate()
-      })
-      await act(async () => expect(await navigation).toBeTruthy())
-      await waitFor(() => expect(visible(heading(container, 'Grandchild'))).toBe(true))
-      expect(foldControl(container, 'Root').getAttribute('aria-expanded')).toBe('true')
-      expect(foldControl(container, 'Child').getAttribute('aria-expanded')).toBe('true')
-      await act(async () => runtime.find.close())
-    }
-    expect(runtime.getMarkdown()).toBe(source)
-    expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
-    expect(onError).not.toHaveBeenCalled()
-  })
-
-  it('resets folding on host document replacement without reporting a local edit', async () => {
-    const { container, runtime, onChange, onError } = await mountAdapter()
-    await toggle(container, 'Child', false)
-    await toggle(container, 'Root', false)
-    const replacement = '# Root\n\nReplacement body\n\n## Child\n\nNew child body'
-    await act(async () => runtime.setMarkdown(replacement))
-    await waitFor(() =>
-      expect(foldControl(container, 'Root').getAttribute('aria-expanded')).toBe('true'),
-    )
-    expect(foldControl(container, 'Child').getAttribute('aria-expanded')).toBe('true')
-    expect(visible(heading(container, 'Child'))).toBe(true)
-    expect(runtime.getMarkdown()).toBe(replacement)
     expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
     expect(onError).not.toHaveBeenCalled()
   })

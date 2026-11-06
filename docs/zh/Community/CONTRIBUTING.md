@@ -83,9 +83,11 @@ yarn dev:desktop
 
 启动脚本会检查 Rust 工具链，启动依赖监听，等待产物就绪后启动 Tauri。这些命令会编译开发代码，是环境搭建说明，不代表某次修改已完成原生构建验证。启动当前检出不需要执行 `cargo install`。
 
-### 公开检出与私有编辑器运行时
+### 公开仓库与尚未开源的 Capricorn
 
-未安装 Capricorn 时，公开检出支持 Markdown 源码和阅读模式。实时编辑模式需要私有包 `@drl990114/capricorn-runtime`，其包清单标记为 `UNLICENSED`，未包含在公开仓库中。`packages/editor` 仍保留 RME 及 ProseMirror/CodeMirror 集成；Capricorn 是独立运行时，并非 RME 源码更新。
+Capricorn 编辑器目前尚未开源，其源码仓库和运行时包均不包含在 MarkFlowy 的公开仓库中。克隆 MarkFlowy 不会获得 Capricorn 源码或私有包的访问权限。
+
+未安装 Capricorn 时，公开检出支持 Markdown 源码和阅读模式。实时编辑模式需要私有包 `@drl990114/capricorn-runtime`，其包清单标记为 `UNLICENSED`。`packages/editor` 仍保留 RME 及 ProseMirror/CodeMirror 集成；Capricorn 是独立运行时，并非 RME 源码更新。
 
 具有包访问权限的维护者，可以通过本地环境或根目录已忽略的 `.env` 提供 `GITHUB_PACKAGES_TOKEN` 或 `NODE_AUTH_TOKEN`，再运行：
 
@@ -97,12 +99,16 @@ yarn install:capricorn-runtime
 
 ### 提交 PR 前的验证
 
-针对修改行为运行相关单测，并执行桌面端的 `build:types`（实际为 `tsc --noEmit`）。桌面端全量测试和 `test:capricorn-published` 包含运行时集成检查，维护者需安装固定版本的运行时后执行；发布流程要求后者通过。公开检出的回退模式无法证明私有运行时的行为一致。
+公开仓库贡献者应针对修改行为运行相关单测，并执行桌面端的 `build:types`（实际为 `tsc --noEmit`，同时检查 `src` 和 `tests`）。普通 `test` 不要求安装 Capricorn 私有运行时。RME 仍用于源码模式、预览与导出，其测试继续保留在 `packages/editor`。
+
+涉及 Capricorn 接入的修改，由具备私有包访问权限的维护者安装固定版本运行时后执行 `test:capricorn-published`，验证 MarkFlowy 与真实运行时之间的宿主契约。这是发布流程的必需检查，与普通 `test` 的测试集合互斥，CI 各执行一次。公开检出的回退模式无法证明私有运行时的行为一致。
+
+`test:capricorn-source` 仅供具备 Capricorn 私有源码仓库访问权限的维护者本地联调，使用相同的宿主契约对接相邻的源码检出。私有包访问权限不等于源码访问权限。编辑器内部行为的回归测试由维护者在 Capricorn 私有仓库中维护，不属于公开仓库贡献者的验证要求。
 
 ```bash
 yarn workspace @markflowy/desktop build:types
 yarn workspace @markflowy/desktop test <path-to-test>
-# 已安装固定版本运行时的维护者：
+# 仅供具备私有包访问权限并已安装固定版本运行时的维护者：
 yarn workspace @markflowy/desktop test:capricorn-published
 ```
 

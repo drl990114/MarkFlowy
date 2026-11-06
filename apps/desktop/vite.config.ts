@@ -1,5 +1,3 @@
-/// <reference types="vitest/config" />
-
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath, URL } from 'url'
@@ -7,7 +5,9 @@ import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { defineConfig, normalizePath, type Plugin, type ResolverFunction } from 'vite'
 import svgr from 'vite-plugin-svgr'
+import { configDefaults } from 'vitest/config'
 
+import { capricornIntegrationTests } from './capricornIntegrationTests'
 import { CAPRICORN_VERSION, resolvePrivateCapricornRuntime } from './capricornRuntimeResolver'
 import { pdfPreviewAssets } from './pdfPreviewAssets'
 
@@ -198,6 +198,9 @@ export default defineConfig(async ({ command, mode }) => {
     test: {
       environment: 'happy-dom',
       reporters: ['verbose'],
+      // The dedicated runtime suite owns these contracts; CI runs it once after
+      // the workspace unit tests, with the pinned package required.
+      exclude: [...configDefaults.exclude, ...capricornIntegrationTests],
       // Use the theme's ESM entry so real RME tests share CodeMirror's classes
       // instead of mixing the externalized CommonJS and ESM state packages.
       server: { deps: { inline: ['rme', '@drl990114/codemirror-themes'] } },

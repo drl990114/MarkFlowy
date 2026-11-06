@@ -2,7 +2,7 @@ import { createRequire } from 'node:module'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { existsSync } from 'node:fs'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 import desktopConfig from './vite.config'
 import { capricornIntegrationTests } from './capricornIntegrationTests'
 
@@ -59,7 +59,8 @@ export default defineConfig(async (environment) => {
     },
     test: {
       ...base.test,
-      include: [...capricornIntegrationTests, 'tests/capricorn-*.source.test.tsx'],
+      include: capricornIntegrationTests,
+      exclude: configDefaults.exclude,
       // The source runtime imports its core stylesheet with ?inline. Vitest's
       // default CSS stub would hide its theme bindings from integration tests.
       css: { include: [/capricorn\.css/] },
@@ -67,7 +68,15 @@ export default defineConfig(async (environment) => {
       // dedupe. Transform both dependency trees so every hook uses the host React.
       server: {
         deps: {
-          inline: [/zustand/, /use-sync-external-store/, /@floating-ui\/react/, /lucide-react/],
+          inline: [
+            ...(Array.isArray(base.test?.server?.deps?.inline)
+              ? base.test.server.deps.inline
+              : []),
+            /zustand/,
+            /use-sync-external-store/,
+            /@floating-ui\/react/,
+            /lucide-react/,
+          ],
         },
       },
     },

@@ -17,8 +17,8 @@
     "test:e2e": "node e2e/run.mjs",
     "test:e2e:types": "tsc --noEmit -p e2e/tsconfig.json",
     "test:e2e:runner": "node --test e2e/runner-tests.mjs",
-    "test:capricorn-source": "tsc --noEmit -p tsconfig.capricorn-integration.json && vitest run --config vitest.capricorn-source.config.ts",
-    "test:capricorn-published": "tsc --noEmit -p tsconfig.capricorn-integration.json && vitest run --config vitest.capricorn-published.config.ts",
+    "test:capricorn-source": "vitest run --config vitest.capricorn-source.config.ts",
+    "test:capricorn-published": "vitest run --config vitest.capricorn-published.config.ts",
     "delete": "rimraf node_modules"
   },
   "dependencies": {

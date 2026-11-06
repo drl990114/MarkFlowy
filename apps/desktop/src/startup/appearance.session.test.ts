@@ -73,54 +73,47 @@ describe.each([
   },
   { name: 'legacy launch without a session field', fields: {}, expected: lastActiveSession },
 ])('window session bootstrap: $name', ({ fields, expected }) => {
-  it.each(['HTML', 'initialization', 'persistence', 'complete startup'] as const)(
-    'preserves the restore instruction through %s',
-    async (stage) => {
-      const bootstrap = {
-        appearance: normalizeStartupAppearance({ preference: 'light' }, 'light'),
-        openedUrls: ['file:///tmp/notes,2026.md'],
-        sessionId: 'native-session',
-        ...fields,
-      }
-      window.__MARKFLOWY_BOOTSTRAP__ = bootstrap
+  it('preserves the restore instruction through HTML, initialization and persistence', async () => {
+    const bootstrap = {
+      appearance: normalizeStartupAppearance({ preference: 'light' }, 'light'),
+      openedUrls: ['file:///tmp/notes,2026.md'],
+      sessionId: 'native-session',
+      ...fields,
+    }
+    window.__MARKFLOWY_BOOTSTRAP__ = bootstrap
 
-      if (stage === 'HTML' || stage === 'complete startup') {
-        expect(bootstrapScript).toBeTruthy()
-        // Execute the actual pre-module entry, not a copy of its normalization logic.
-        window.eval(bootstrapScript!)
-      }
-      if (stage === 'initialization' || stage === 'complete startup') {
-        readWindowBootstrap(window)
-      }
-      if (stage === 'persistence' || stage === 'complete startup') {
-        await persistStartupAppearance(bootstrap.appearance, window)
-        expect(invokeMock).toHaveBeenCalledWith('save_startup_appearance', {
-          appearance: bootstrap.appearance,
-        })
-      }
+    // Check every handoff in one startup instead of rerunning the same stages
+    // independently and again in a complete-startup case.
+    expect(bootstrapScript).toBeTruthy()
+    window.eval(bootstrapScript!)
+    expect(window.__MARKFLOWY_BOOTSTRAP__).toStrictEqual(bootstrap)
 
-      // Strict equality distinguishes a missing legacy field from an explicit null.
-      expect(window.__MARKFLOWY_BOOTSTRAP__).toStrictEqual(bootstrap)
+    readWindowBootstrap(window)
+    expect(window.__MARKFLOWY_BOOTSTRAP__).toStrictEqual(bootstrap)
 
-      if (stage === 'complete startup') {
-        const data = new Map<string, unknown>([
-          [LAST_WINDOW_SESSION_KEY, windowSessionKey(lastActiveSession.windowLabel)],
-          ...[mainSession, childSession, lastActiveSession].map(
-            (snapshot): [string, unknown] => [windowSessionKey(snapshot.windowLabel), snapshot],
-          ),
-        ])
-        const get = vi.fn(async (key: string) => data.get(key))
-        const store: Pick<LazyStore, 'get' | 'set' | 'save'> = {
-          get: async <T,>(key: string) => (await get(key)) as T | undefined,
-          set: vi.fn(),
-          save: vi.fn(),
-        }
+    await persistStartupAppearance(bootstrap.appearance, window)
+    expect(invokeMock).toHaveBeenCalledWith('save_startup_appearance', {
+      appearance: bootstrap.appearance,
+    })
+    // Strict equality distinguishes a missing legacy field from an explicit null.
+    expect(window.__MARKFLOWY_BOOTSTRAP__).toStrictEqual(bootstrap)
 
-        expect(
-          await readWindowSession(store, 'main', window.__MARKFLOWY_BOOTSTRAP__?.restoreSessionLabel),
-        ).toEqual(expected)
-        if (!expected) expect(get).not.toHaveBeenCalled()
-      }
-    },
-  )
+    const data = new Map<string, unknown>([
+      [LAST_WINDOW_SESSION_KEY, windowSessionKey(lastActiveSession.windowLabel)],
+      ...[mainSession, childSession, lastActiveSession].map(
+        (snapshot): [string, unknown] => [windowSessionKey(snapshot.windowLabel), snapshot],
+      ),
+    ])
+    const get = vi.fn(async (key: string) => data.get(key))
+    const store: Pick<LazyStore, 'get' | 'set' | 'save'> = {
+      get: async <T,>(key: string) => (await get(key)) as T | undefined,
+      set: vi.fn(),
+      save: vi.fn(),
+    }
+
+    expect(
+      await readWindowSession(store, 'main', window.__MARKFLOWY_BOOTSTRAP__?.restoreSessionLabel),
+    ).toEqual(expected)
+    if (!expected) expect(get).not.toHaveBeenCalled()
+  })
 })

@@ -85,7 +85,7 @@ The runner checks the Rust toolchain, starts dependency watchers, waits for thei
 
 ### Public checkout and private editor runtime
 
-The public checkout supports Markdown source and reading modes without Capricorn. The live editing mode requires `@drl990114/capricorn-runtime`, a private package whose manifest is marked `UNLICENSED`. It is not included in the public repository. RME and its ProseMirror/CodeMirror integration remain in `packages/editor`; Capricorn is a separate runtime, not an RME source update.
+Capricorn is currently not open source. Its source repository and runtime package are private and are not included in MarkFlowy's public repository. The public checkout supports Markdown source and reading modes without Capricorn. Live editing requires the private package `@drl990114/capricorn-runtime`, whose manifest is marked `UNLICENSED`. RME and its ProseMirror/CodeMirror integration remain in `packages/editor`.
 
 Maintainers with package access can provide `GITHUB_PACKAGES_TOKEN` or `NODE_AUTH_TOKEN` through their local environment or ignored root `.env`, then run:
 
@@ -97,12 +97,16 @@ The installer uses the exact version and tarball SHA-256 pinned in `scripts/inst
 
 ### Validation before a pull request
 
-Use focused tests for the changed behavior and Desktop's `build:types` script (`tsc --noEmit`). The full Desktop suite and `test:capricorn-published` include runtime integration checks; maintainers run these with the pinned runtime installed. The latter is required by the release workflow. A public checkout's fallback cannot establish parity with the private runtime.
+Public contributors can run focused tests for the changed behavior and Desktop's `build:types` script (`tsc --noEmit`, covering both `src` and `tests`) without access to Capricorn. RME still powers source mode, preview and export, so its tests remain in `packages/editor`.
+
+Maintainers with access to the private runtime run `test:capricorn-published` to check MarkFlowy's integration with the pinned package. This suite and the regular `test` suite are disjoint; CI runs each once, and the runtime suite remains a required release gate. A public checkout's fallback cannot establish parity with the private runtime.
+
+`test:capricorn-source` is for maintainers who also have access to Capricorn's private source repository and a local checkout. Package access alone does not grant source access. It runs the same host contracts against that checkout for local integration work. Editor-internal regressions are maintained and tested in Capricorn's private repository; public contributors do not need to obtain its source or run these private checks themselves.
 
 ```bash
 yarn workspace @markflowy/desktop build:types
 yarn workspace @markflowy/desktop test <path-to-test>
-# Maintainers with the pinned runtime:
+# Maintainers with private package access and the pinned runtime installed:
 yarn workspace @markflowy/desktop test:capricorn-published
 ```
 
