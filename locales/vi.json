@@ -928,8 +928,8 @@
           "not_found": "Không tìm thấy trình duyệt xuất PDF tương thích.",
           "save_failed": "Không thể lưu cài đặt trình duyệt. Hãy thử lại."
         },
-        "select": "Chọn tệp thực thi của trình duyệt",
-        "automatic": "Dùng tự động phát hiện",
+        "select": "Chọn trình duyệt…",
+        "automatic": "Tự động phát hiện",
         "check_again": "Kiểm tra lại"
       }
     },
@@ -1628,7 +1628,14 @@
   },
   "pdf_export": {
     "title": "Xuất PDF",
-    "description": "Xuất PDF có thể tìm kiếm kèm dấu trang tiêu đề bằng trình duyệt Chrome, Chromium hoặc Edge trên máy.",
+    "description": "Dùng Chrome, Chromium hoặc Edge trên máy.",
+    "method_description": "Chọn cách xuất tài liệu này thành PDF.",
+    "method": "Phương thức xuất",
+    "method_browser": "Xuất bằng trình duyệt",
+    "method_native": "Xuất trong ứng dụng",
+    "native_hint": "Không cần cài trình duyệt.",
+    "native_outline_unavailable": "Không cần cài trình duyệt. Chưa hỗ trợ dấu trang tiêu đề.",
+    "native_ready": "Sẵn sàng xuất trong ứng dụng.",
     "paper_size": "Khổ giấy",
     "orientation": "Hướng giấy",
     "portrait": "Dọc",
@@ -1641,7 +1648,7 @@
     "success": "Đã lưu PDF vào {{path}}.",
     "failed": "Xuất PDF thất bại. Tài liệu của bạn vẫn được giữ nguyên.",
     "image_warning": "Không thể tải {{count}} hình ảnh. Hãy kiểm tra tệp PDF đã xuất.",
-    "browser_check_failed": "Không thể kiểm tra trình duyệt xuất PDF. Hãy thử lại trong Cài đặt → Xuất.",
+    "browser_check_failed": "Không thể phát hiện trình duyệt. Vui lòng thử lại.",
     "cancelled": "Đã hủy xuất PDF.",
     "system_print": "In bằng hệ thống…",
     "system_print_hint": "Bạn cũng có thể in bằng hệ thống. Lưu thành PDF qua hộp thoại in không đảm bảo có dấu trang tiêu đề.",
@@ -1651,7 +1658,7 @@
       "ready": "Trình duyệt {{version}} đã sẵn sàng.",
       "not_found": "Không tìm thấy trình duyệt xuất PDF tương thích.",
       "incompatible": "Phiên bản trình duyệt không hỗ trợ xuất PDF kèm dấu trang tiêu đề.",
-      "settings_hint": "Hãy cài đặt Chrome, Chromium hoặc Edge, hoặc chọn tệp thực thi của trình duyệt trong Cài đặt → Xuất."
+      "settings_hint": "Chọn Chrome, Chromium hoặc Edge đã cài đặt tại đây."
     }
   },
   "file_deletion": {

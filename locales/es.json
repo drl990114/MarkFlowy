@@ -856,8 +856,8 @@
           "not_found": "No compatible PDF export browser was found.",
           "save_failed": "The browser setting could not be saved. Try again."
         },
-        "select": "Select browser executable",
-        "automatic": "Use automatic detection",
+        "select": "Elegir navegador…",
+        "automatic": "Detectar automáticamente",
         "check_again": "Check again"
       }
     },
@@ -1628,7 +1628,14 @@
   },
   "pdf_export": {
     "title": "Export PDF",
-    "description": "Export a searchable PDF with heading bookmarks using a local Chrome, Chromium, or Edge browser.",
+    "description": "Usa Chrome, Chromium o Edge en tu equipo.",
+    "method_description": "Elige cómo exportar este documento como PDF.",
+    "method": "Método de exportación",
+    "method_browser": "Exportar con el navegador",
+    "method_native": "Exportar desde la aplicación",
+    "native_hint": "No necesitas instalar un navegador.",
+    "native_outline_unavailable": "Sin instalar un navegador. No admite marcadores de encabezados.",
+    "native_ready": "Listo para exportar desde la aplicación.",
     "paper_size": "Paper size",
     "orientation": "Orientation",
     "portrait": "Portrait",
@@ -1641,7 +1648,7 @@
     "success": "PDF saved to {{path}}.",
     "failed": "PDF export failed. Your document has been preserved.",
     "image_warning": "{{count}} images could not be loaded. Check the exported PDF.",
-    "browser_check_failed": "The PDF export browser could not be checked. Try again in Settings → Export.",
+    "browser_check_failed": "No se pudo detectar el navegador. Inténtalo de nuevo.",
     "cancelled": "PDF export cancelled.",
     "system_print": "System print…",
     "system_print_hint": "System print is also available. Saving as PDF through the print dialog does not guarantee heading bookmarks.",
@@ -1651,7 +1658,7 @@
       "ready": "Browser {{version}} is ready.",
       "not_found": "No compatible PDF export browser was found.",
       "incompatible": "The browser version does not support PDF export with heading bookmarks.",
-      "settings_hint": "Install Chrome, Chromium, or Edge, or select its executable in Settings → Export."
+      "settings_hint": "Elige aquí Chrome, Chromium o Edge si está instalado."
     }
   },
   "file_deletion": {

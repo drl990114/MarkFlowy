@@ -1859,6 +1859,7 @@ pub fn run() {
             pandoc::export_markdown_with_pandoc,
             pdf_export::probe_pdf_browser,
             pdf_export::prepare_pdf_export,
+            pdf_export::prepare_native_pdf_export,
             pdf_export::commit_pdf_export,
             pdf_export::cancel_pdf_export,
             fc::cmd::is_dir,

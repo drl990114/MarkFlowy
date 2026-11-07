@@ -15,8 +15,16 @@ function renderDialog(overrides: Partial<PdfExportDialogProps> = {}) {
     onExport: vi.fn(),
     onPrint: vi.fn(),
     busy: false,
+    nativeOutlineSupported: true,
     checking: false,
     browserInfo: readyBrowser,
+    browserSettings: {
+      configuredPath: '',
+      busy: false,
+      onSelect: vi.fn(),
+      onReset: vi.fn(),
+      onCheck: vi.fn(),
+    },
     ...overrides,
   }
   return { props, ...render(<PdfExportDialog {...props} />) }
@@ -31,10 +39,109 @@ async function chooseOption(label: string, option: string) {
 }
 
 describe('PDF export dialog', () => {
-  it('provides accessible labels and exports A4 portrait with bookmarks by default', () => {
+  it('offers inline browser configuration only for browser export', () => {
+    const { props, rerender } = renderDialog()
+    expect(screen.queryByRole('group', { name: 'settings.export.pdf.executable.label' })).toBeNull()
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    fireEvent.click(screen.getByRole('button', { name: 'settings.export.pdf.select' }))
+    fireEvent.click(screen.getByRole('button', { name: 'settings.export.pdf.check_again' }))
+    expect(props.browserSettings.onSelect).toHaveBeenCalledOnce()
+    expect(props.browserSettings.onCheck).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('button', { name: 'settings.export.pdf.automatic' })).toBeNull()
+
+    rerender(
+      <PdfExportDialog
+        {...props}
+        browserSettings={{ ...props.browserSettings, configuredPath: '/custom/browser' }}
+      />,
+    )
+    expect(screen.getByText('/custom/browser').getAttribute('title')).toBe('/custom/browser')
+    fireEvent.click(screen.getByRole('button', { name: 'settings.export.pdf.automatic' }))
+    expect(props.browserSettings.onReset).toHaveBeenCalledOnce()
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_native' }))
+    expect(screen.queryByText('/custom/browser')).toBeNull()
+    expect(screen.queryByRole('group', { name: 'settings.export.pdf.executable.label' })).toBeNull()
+  })
+
+  it('keeps invalid browser configuration recoverable while checking', () => {
+    const { props } = renderDialog({ checking: true, browserInfo: undefined })
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'settings.export.pdf.check_again' })
+        .disabled,
+    ).toBe(true)
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'pdf_export.export' }).disabled,
+    ).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: 'settings.export.pdf.select' }))
+    expect(props.browserSettings.onSelect).toHaveBeenCalledOnce()
+  })
+
+  it('blocks browser export and configuration during a pending settings write', () => {
+    const { props, rerender } = renderDialog()
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    rerender(
+      <PdfExportDialog
+        {...props}
+        browserSettings={{
+          ...props.browserSettings,
+          configuredPath: '/custom/browser',
+          busy: true,
+        }}
+      />,
+    )
+    for (const name of [
+      'settings.export.pdf.select',
+      'settings.export.pdf.automatic',
+      'settings.export.pdf.check_again',
+      'pdf_export.export',
+    ]) {
+      expect(screen.getByRole<HTMLButtonElement>('button', { name }).disabled).toBe(true)
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'settings.export.pdf.select' }))
+    expect(props.browserSettings.onSelect).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_native' }))
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'pdf_export.export' }).disabled,
+    ).toBe(false)
+  })
+
+  it('shows a settings save failure without hiding the retry actions', () => {
+    const { props, rerender } = renderDialog()
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    rerender(
+      <PdfExportDialog
+        {...props}
+        browserSettings={{ ...props.browserSettings, error: 'Could not save browser' }}
+      />,
+    )
+    expect(screen.getByRole('alert').textContent).toBe('Could not save browser')
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'settings.export.pdf.select' })
+        .disabled,
+    ).toBe(false)
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_native' }))
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('provides accessible export choices and defaults to in-app A4 portrait export', () => {
     const { props } = renderDialog()
     const dialog = screen.getByRole('dialog', { name: 'pdf_export.title' })
     expect(dialog.getAttribute('aria-describedby')).toBeTruthy()
+    expect(screen.getByRole('radiogroup', { name: 'pdf_export.method' })).toBeTruthy()
+    const native = screen.getByRole('radio', { name: 'pdf_export.method_native' })
+    const browser = screen.getByRole('radio', { name: 'pdf_export.method_browser' })
+    expect(screen.getAllByRole('radio')).toEqual([native, browser])
+    expect(native.getAttribute('aria-checked')).toBe('true')
+    expect(browser.getAttribute('aria-checked')).toBe('false')
+    for (const [radio, description] of [
+      [native, 'pdf_export.native_hint'],
+      [browser, 'pdf_export.description'],
+    ] as const) {
+      const hint = screen.getByText(description)
+      expect(hint.id).toBeTruthy()
+      expect(radio.getAttribute('aria-describedby')?.split(/\s+/)).toContain(hint.id)
+    }
     expect(screen.getByRole('combobox', { name: 'pdf_export.paper_size' }).textContent).toContain(
       'A4',
     )
@@ -45,6 +152,7 @@ describe('PDF export dialog', () => {
     ).toBe('true')
     fireEvent.click(screen.getByRole('button', { name: 'pdf_export.export' }))
     expect(props.onExport).toHaveBeenCalledWith({
+      engine: 'native',
       paperSize: 'a4',
       landscape: false,
       includeOutline: true,
@@ -53,11 +161,18 @@ describe('PDF export dialog', () => {
 
   it('exports selected paper, orientation and bookmark preference', async () => {
     const { props } = renderDialog()
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    expect(
+      screen
+        .getByRole('checkbox', { name: 'pdf_export.include_outline' })
+        .getAttribute('aria-checked'),
+    ).toBe('true')
     await chooseOption('pdf_export.paper_size', 'Letter')
     await chooseOption('pdf_export.orientation', 'pdf_export.landscape')
     fireEvent.click(screen.getByRole('checkbox', { name: 'pdf_export.include_outline' }))
     fireEvent.click(screen.getByRole('button', { name: 'pdf_export.export' }))
     expect(props.onExport).toHaveBeenCalledWith({
+      engine: 'browser',
       paperSize: 'letter',
       landscape: true,
       includeOutline: false,
@@ -70,6 +185,7 @@ describe('PDF export dialog', () => {
     { available: true, compatible: false },
   ])('blocks export without a compatible browser and allows system print: %j', (browserInfo) => {
     const { props } = renderDialog({ browserInfo })
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
     expect(
       screen.getByRole<HTMLButtonElement>('button', { name: 'pdf_export.export' }).disabled,
     ).toBe(true)
@@ -81,6 +197,7 @@ describe('PDF export dialog', () => {
 
   it('blocks export while checking and keeps busy work cancellable', () => {
     const { props, rerender } = renderDialog({ checking: true })
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
     expect(
       screen.getByRole<HTMLButtonElement>('button', { name: 'pdf_export.export' }).disabled,
     ).toBe(true)
@@ -110,6 +227,7 @@ describe('PDF export dialog', () => {
           error: { code, message: 'The browser could not export.', detail: 'Browser stderr' },
         },
       })
+      fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
       const dialog = screen.getByRole('dialog', { name: 'pdf_export.title' })
       expect(screen.getByRole('status').textContent).toBe('pdf_export.browser_check_failed')
       expect(screen.queryByText('pdf_export.browser.not_found')).toBeNull()
@@ -137,6 +255,7 @@ describe('PDF export dialog', () => {
         error: { code, message: 'Browser check result' },
       },
     })
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
     expect(screen.getByRole('status').textContent).toBe(status)
     if (code === 'not_found') {
       expect(screen.queryByText('pdf_export.browser.error_details')).toBeNull()
@@ -144,8 +263,135 @@ describe('PDF export dialog', () => {
   })
 
   it('does not show a missing-browser status when the controller reports a probe error', () => {
-    renderDialog({ browserInfo: undefined, error: 'IPC channel closed' })
+    renderDialog({ browserInfo: undefined, browserCheckError: 'IPC channel closed' })
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
     expect(screen.getByRole('status').textContent).toBe('pdf_export.browser_check_failed')
     expect(screen.getByRole('alert').textContent).toBe('IPC channel closed')
+  })
+
+  it.each([true, false])('allows in-app export while browser checking is %s', (checking) => {
+    const { props } = renderDialog({
+      checking,
+      browserInfo: {
+        available: false,
+        compatible: false,
+        error: { code: 'browser_failed', message: 'Browser failed', detail: 'Browser stderr' },
+      },
+      browserCheckError: 'Browser unavailable',
+    })
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_native' }))
+    expect(screen.getByRole('status').textContent).toBe('pdf_export.native_ready')
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(screen.queryByText('pdf_export.browser.settings_hint')).toBeNull()
+    expect(screen.queryByText('pdf_export.browser.error_details')).toBeNull()
+    expect(
+      screen
+        .getByRole('checkbox', { name: 'pdf_export.include_outline' })
+        .getAttribute('aria-checked'),
+    ).toBe('true')
+    expect(screen.getByText('pdf_export.native_hint')).toBeTruthy()
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'pdf_export.export' }).disabled,
+    ).toBe(false)
+    fireEvent.click(screen.getByRole('button', { name: 'pdf_export.export' }))
+    expect(props.onExport).toHaveBeenCalledWith({
+      engine: 'native',
+      paperSize: 'a4',
+      landscape: false,
+      includeOutline: true,
+    })
+  })
+
+  it('preserves paper and bookmark choices for both export methods', async () => {
+    const { props } = renderDialog()
+    await chooseOption('pdf_export.paper_size', 'Letter')
+    await chooseOption('pdf_export.orientation', 'pdf_export.landscape')
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    fireEvent.click(screen.getByRole('checkbox', { name: 'pdf_export.include_outline' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_native' }))
+    expect(
+      screen
+        .getByRole('checkbox', { name: 'pdf_export.include_outline' })
+        .getAttribute('aria-checked'),
+    ).toBe('false')
+    fireEvent.click(screen.getByRole('button', { name: 'pdf_export.export' }))
+    expect(props.onExport).toHaveBeenLastCalledWith({
+      engine: 'native',
+      paperSize: 'letter',
+      landscape: true,
+      includeOutline: false,
+    })
+    fireEvent.click(screen.getByRole('checkbox', { name: 'pdf_export.include_outline' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    expect(
+      screen
+        .getByRole('checkbox', { name: 'pdf_export.include_outline' })
+        .getAttribute('aria-checked'),
+    ).toBe('true')
+    fireEvent.click(screen.getByRole('button', { name: 'pdf_export.export' }))
+    expect(props.onExport).toHaveBeenLastCalledWith({
+      engine: 'browser',
+      paperSize: 'letter',
+      landscape: true,
+      includeOutline: true,
+    })
+  })
+
+  it('allows native export without bookmarks on unsupported platforms and preserves the browser choice', () => {
+    const { props } = renderDialog({ nativeOutlineSupported: false })
+    expect(screen.queryByRole('checkbox', { name: 'pdf_export.include_outline' })).toBeNull()
+    expect(screen.queryByText('pdf_export.native_hint')).toBeNull()
+    const hint = screen.getByText('pdf_export.native_outline_unavailable')
+    expect(
+      screen
+        .getByRole('radio', { name: 'pdf_export.method_native' })
+        .getAttribute('aria-describedby'),
+    ).toBe(hint.id)
+    fireEvent.click(screen.getByRole('button', { name: 'pdf_export.export' }))
+    expect(props.onExport).toHaveBeenLastCalledWith({
+      engine: 'native',
+      paperSize: 'a4',
+      landscape: false,
+      includeOutline: false,
+    })
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    expect(
+      screen
+        .getByRole('checkbox', { name: 'pdf_export.include_outline' })
+        .getAttribute('aria-checked'),
+    ).toBe('true')
+    fireEvent.click(screen.getByRole('checkbox', { name: 'pdf_export.include_outline' }))
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_native' }))
+    expect(screen.queryByRole('checkbox', { name: 'pdf_export.include_outline' })).toBeNull()
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    expect(
+      screen
+        .getByRole('checkbox', { name: 'pdf_export.include_outline' })
+        .getAttribute('aria-checked'),
+    ).toBe('false')
+  })
+
+  it('keeps a busy in-app export cancellable and prevents changing methods', () => {
+    const { props, rerender } = renderDialog()
+    rerender(<PdfExportDialog {...props} busy error='Native export failed' />)
+    expect(screen.getByRole('status').textContent).toBe('pdf_export.exporting')
+    expect(screen.getByRole('alert').textContent).toBe('Native export failed')
+    for (const radio of screen.getAllByRole<HTMLButtonElement>('radio')) {
+      expect(radio.disabled).toBe(true)
+    }
+    expect(
+      screen.getByRole<HTMLButtonElement>('checkbox', { name: 'pdf_export.include_outline' })
+        .disabled,
+    ).toBe(true)
+    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    expect(
+      screen.getByRole('radio', { name: 'pdf_export.method_native' }).getAttribute('aria-checked'),
+    ).toBe('true')
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'pdf_export.export' }).disabled,
+    ).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: 'common.cancel' }))
+    expect(props.onOpenChange).toHaveBeenCalledWith(false)
   })
 })

@@ -1,8 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { invoke } from '@tauri-apps/api/core'
 import { inspectPdf } from './pdfExportValidation'
-import { exportPdfWithBrowser, getPdfExportFileName, probePdfBrowser } from './pdfExport'
-import type { PdfExportRequest } from './pdfExport'
+import {
+  exportPdfWithBrowser,
+  exportPdfWithNative,
+  getPdfExportFileName,
+  probePdfBrowser,
+} from './pdfExport'
+import type { NativePdfExportRequest, PdfExportRequest } from './pdfExport'
 import type * as PdfValidation from './pdfExportValidation'
 
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }))
@@ -171,4 +176,148 @@ describe('browser PDF export', () => {
     ['中文.markdown', '中文.pdf'],
     ['', 'document.pdf'],
   ])('names %s as %s', (name, expected) => expect(getPdfExportFileName(name)).toBe(expected))
+})
+
+describe('native PDF export', () => {
+  const nativeRequest: NativePdfExportRequest = {
+    jobId: 'native-export-job',
+    html: '<h1>Native document</h1>',
+    outputPath: '/docs/native.pdf',
+    sourcePath: '/docs/source.md',
+    paperSize: 'letter',
+    landscape: true,
+    includeOutline: true,
+  }
+  const nativePrepared = { jobId: nativeRequest.jobId, pdfBase64: 'native-pdf', headingCount: 1 }
+
+  beforeEach(() => {
+    vi.mocked(invoke).mockReset()
+    vi.mocked(inspectPdf).mockReset().mockResolvedValue(valid)
+  })
+
+  it('uses native preparation without a browser path and commits after inspection', async () => {
+    vi.mocked(invoke)
+      .mockResolvedValueOnce(nativePrepared)
+      .mockResolvedValueOnce({ outputPath: nativeRequest.outputPath })
+    await expect(exportPdfWithNative(nativeRequest, new AbortController().signal)).resolves.toEqual(
+      { outputPath: nativeRequest.outputPath },
+    )
+    expect(invoke).toHaveBeenNthCalledWith(1, 'prepare_native_pdf_export', {
+      request: nativeRequest,
+    })
+    expect(inspectPdf).toHaveBeenCalledWith('native-pdf', expect.any(AbortSignal))
+    expect(invoke).toHaveBeenNthCalledWith(2, 'commit_pdf_export', { jobId: nativeRequest.jobId })
+    expect(invoke).toHaveBeenCalledTimes(2)
+  })
+
+  it('exports native PDFs without bookmarks when disabled', async () => {
+    vi.mocked(inspectPdf).mockResolvedValue({ pages: 2, outline: [] })
+    vi.mocked(invoke)
+      .mockResolvedValueOnce(nativePrepared)
+      .mockResolvedValueOnce({ outputPath: nativeRequest.outputPath })
+    const withoutOutline = { ...nativeRequest, includeOutline: false }
+    await expect(
+      exportPdfWithNative(withoutOutline, new AbortController().signal),
+    ).resolves.toEqual({
+      outputPath: nativeRequest.outputPath,
+    })
+    expect(invoke).toHaveBeenNthCalledWith(1, 'prepare_native_pdf_export', {
+      request: withoutOutline,
+    })
+  })
+
+  it('allows native documents without headings when bookmarks are requested', async () => {
+    vi.mocked(inspectPdf).mockResolvedValue({ pages: 1, outline: [] })
+    vi.mocked(invoke)
+      .mockResolvedValueOnce({ ...nativePrepared, headingCount: 0 })
+      .mockResolvedValueOnce({ outputPath: nativeRequest.outputPath })
+    await expect(exportPdfWithNative(nativeRequest, new AbortController().signal)).resolves.toEqual(
+      {
+        outputPath: nativeRequest.outputPath,
+      },
+    )
+  })
+
+  it.each([undefined, -1, NaN, 1.5])(
+    'rejects invalid native heading count %s before inspecting or committing',
+    async (headingCount) => {
+      vi.mocked(invoke).mockResolvedValue({ ...nativePrepared, headingCount })
+      await expect(
+        exportPdfWithNative(nativeRequest, new AbortController().signal),
+      ).rejects.toThrow('printable heading count')
+      expect(inspectPdf).not.toHaveBeenCalled()
+      expect(invoke).not.toHaveBeenCalledWith('commit_pdf_export', expect.anything())
+      expect(invoke).toHaveBeenLastCalledWith('cancel_pdf_export', { jobId: nativeRequest.jobId })
+    },
+  )
+
+  it('does not commit a native PDF with missing requested bookmarks', async () => {
+    vi.mocked(invoke).mockResolvedValue(nativePrepared)
+    vi.mocked(inspectPdf).mockResolvedValue({ pages: 2, outline: [] })
+    await expect(exportPdfWithNative(nativeRequest, new AbortController().signal)).rejects.toThrow(
+      'requested heading bookmarks',
+    )
+    expect(invoke).not.toHaveBeenCalledWith('commit_pdf_export', expect.anything())
+    expect(invoke).toHaveBeenLastCalledWith('cancel_pdf_export', { jobId: nativeRequest.jobId })
+  })
+
+  it('does not commit a native PDF that includes bookmarks after they were disabled', async () => {
+    vi.mocked(invoke).mockResolvedValue(nativePrepared)
+    await expect(
+      exportPdfWithNative(
+        { ...nativeRequest, includeOutline: false },
+        new AbortController().signal,
+      ),
+    ).rejects.toThrow('requested heading bookmarks')
+    expect(invoke).not.toHaveBeenCalledWith('commit_pdf_export', expect.anything())
+    expect(invoke).toHaveBeenLastCalledWith('cancel_pdf_export', { jobId: nativeRequest.jobId })
+  })
+
+  it.each([0, -1, NaN, 1.5])('rejects invalid page count %s without committing', async (pages) => {
+    vi.mocked(invoke).mockResolvedValue(nativePrepared)
+    vi.mocked(inspectPdf).mockResolvedValue({ pages, outline: [] })
+    await expect(exportPdfWithNative(nativeRequest, new AbortController().signal)).rejects.toThrow(
+      'no valid pages',
+    )
+    expect(invoke).not.toHaveBeenCalledWith('commit_pdf_export', expect.anything())
+    expect(invoke).toHaveBeenLastCalledWith('cancel_pdf_export', { jobId: nativeRequest.jobId })
+  })
+
+  it('removes an unreadable native artifact without replacing the target', async () => {
+    vi.mocked(invoke).mockResolvedValue(nativePrepared)
+    vi.mocked(inspectPdf).mockRejectedValue(new Error('Invalid PDF'))
+    await expect(exportPdfWithNative(nativeRequest, new AbortController().signal)).rejects.toThrow(
+      'Invalid PDF',
+    )
+    expect(invoke).not.toHaveBeenCalledWith('commit_pdf_export', expect.anything())
+    expect(invoke).toHaveBeenLastCalledWith('cancel_pdf_export', { jobId: nativeRequest.jobId })
+  })
+
+  it('never commits a native renderer result that arrives after cancellation', async () => {
+    const controller = new AbortController()
+    let finish!: (value: typeof nativePrepared) => void
+    vi.mocked(invoke).mockImplementation((command) =>
+      command === 'prepare_native_pdf_export'
+        ? new Promise((resolve) => {
+            finish = resolve
+          })
+        : Promise.resolve(undefined),
+    )
+    const exporting = exportPdfWithNative(nativeRequest, controller.signal)
+    controller.abort()
+    finish(nativePrepared)
+    await expect(exporting).rejects.toMatchObject({ name: 'AbortError' })
+    expect(inspectPdf).not.toHaveBeenCalled()
+    expect(invoke).not.toHaveBeenCalledWith('commit_pdf_export', expect.anything())
+    expect(invoke).toHaveBeenLastCalledWith('cancel_pdf_export', { jobId: nativeRequest.jobId })
+  })
+
+  it('rejects a native result from another job before artifact inspection', async () => {
+    vi.mocked(invoke).mockResolvedValue({ ...nativePrepared, jobId: 'other-job' })
+    await expect(exportPdfWithNative(nativeRequest, new AbortController().signal)).rejects.toThrow(
+      'does not match',
+    )
+    expect(inspectPdf).not.toHaveBeenCalled()
+    expect(invoke).not.toHaveBeenCalledWith('commit_pdf_export', expect.anything())
+  })
 })

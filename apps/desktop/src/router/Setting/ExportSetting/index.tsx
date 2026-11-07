@@ -5,22 +5,16 @@ import {
   probePandoc,
   type PandocInfo,
 } from '@/components/EditorArea/pandoc-export/pandocExport'
-import {
-  PDF_BROWSER_EXECUTABLE_PATH_SETTING,
-  probePdfBrowser,
-  type PdfBrowserInfo,
-} from '@/components/EditorArea/pdf-export/pdfExport'
-import {
-  getPdfBrowserFailure,
-  normalizePdfBrowserError,
-} from '@/components/EditorArea/pdf-export/pdfBrowserDiagnostics'
+import { PDF_BROWSER_EXECUTABLE_PATH_SETTING } from '@/components/EditorArea/pdf-export/pdfExport'
+import { getPdfBrowserFailure } from '@/components/EditorArea/pdf-export/pdfBrowserDiagnostics'
+import { usePdfBrowserConfiguration } from '@/components/EditorArea/pdf-export/usePdfBrowserConfiguration'
 import { PdfBrowserErrorDetails } from '@/components/EditorArea/pdf-export/PdfBrowserErrorDetails'
 import { useTranslation } from '@/i18n'
 import appSettingService from '@/services/app-setting'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { open } from '@tauri-apps/plugin-dialog'
 import { openUrl } from '@tauri-apps/plugin-opener'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { SettingGroupContainer } from '../component/SettingGroup/styles'
 import { SettingItemContainer } from '../component/SettingItems/Container'
 import { SettingLabel } from '../component/SettingItems/Label'
@@ -40,72 +34,16 @@ const pdfBrowserSettingItem: Setting.BaseSettingItem = {
 
 function PdfBrowserSetting() {
   const { t } = useTranslation()
-  const configuredPath = useAppSettingStore((state) => {
-    const value = state.settingData[PDF_BROWSER_EXECUTABLE_PATH_SETTING]
-    return typeof value === 'string' ? value : ''
-  })
-  const [info, setInfo] = useState<PdfBrowserInfo>()
-  const [checking, setChecking] = useState(true)
-  const [saveError, setSaveError] = useState(false)
-  const requestRef = useRef(0)
-
-  const checkBrowser = useCallback(
-    async (refresh = false) => {
-      const request = ++requestRef.current
-      const path = configuredPath.trim()
-      const isCurrent = () => {
-        const value = useAppSettingStore.getState().settingData[PDF_BROWSER_EXECUTABLE_PATH_SETTING]
-        return (
-          request === requestRef.current && (typeof value === 'string' ? value.trim() : '') === path
-        )
-      }
-      setChecking(true)
-      setInfo(undefined)
-      try {
-        const result = await probePdfBrowser(path || undefined, refresh)
-        if (isCurrent()) setInfo(result)
-      } catch (error: unknown) {
-        if (isCurrent()) {
-          setInfo({ available: false, compatible: false, error: normalizePdfBrowserError(error) })
-        }
-      } finally {
-        if (isCurrent()) setChecking(false)
-      }
-    },
-    [configuredPath],
-  )
-
-  useEffect(() => {
-    void checkBrowser()
-    return () => {
-      requestRef.current += 1
-    }
-  }, [checkBrowser])
-
-  const selectExecutable = async () => {
-    setSaveError(false)
-    try {
-      const selected = await open({
-        directory: false,
-        multiple: false,
-        fileAccessMode: 'scoped',
-      })
-      if (typeof selected === 'string') {
-        await appSettingService.writeSettingData(pdfBrowserSettingItem, selected)
-      }
-    } catch {
-      setSaveError(true)
-    }
-  }
-
-  const resetToAutomatic = async () => {
-    setSaveError(false)
-    try {
-      await appSettingService.writeSettingData(pdfBrowserSettingItem, '')
-    } catch {
-      setSaveError(true)
-    }
-  }
+  const {
+    configuredPath,
+    info,
+    checking,
+    configuring,
+    saveError,
+    selectExecutable,
+    resetToAutomatic,
+    checkBrowser,
+  } = usePdfBrowserConfiguration()
 
   let status = t('settings.export.pdf.status.not_found')
   const failure = getPdfBrowserFailure(info)
@@ -139,16 +77,26 @@ function PdfBrowserSetting() {
               </span>
             ) : null}
             <div className='flex flex-wrap justify-end gap-2'>
-              <Button size='sm' variant='outline' onClick={() => void selectExecutable()}>
+              <Button
+                disabled={configuring}
+                size='sm'
+                variant='outline'
+                onClick={() => void selectExecutable()}
+              >
                 {t('settings.export.pdf.select')}
               </Button>
               {configuredPath ? (
-                <Button size='sm' variant='ghost' onClick={() => void resetToAutomatic()}>
+                <Button
+                  disabled={configuring}
+                  size='sm'
+                  variant='ghost'
+                  onClick={() => void resetToAutomatic()}
+                >
                   {t('settings.export.pdf.automatic')}
                 </Button>
               ) : null}
               <Button
-                disabled={checking}
+                disabled={checking || configuring}
                 size='sm'
                 variant='ghost'
                 onClick={() => void checkBrowser(true)}

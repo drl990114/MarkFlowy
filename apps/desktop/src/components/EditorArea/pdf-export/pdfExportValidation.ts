@@ -34,7 +34,7 @@ export async function inspectPdf(base64: string, signal?: AbortSignal): Promise<
   signal?.throwIfAborted()
   const bytes = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0))
   if (new TextDecoder().decode(bytes.subarray(0, 5)) !== '%PDF-') {
-    throw new Error('The browser did not generate a PDF document.')
+    throw new Error('The export did not generate a PDF document.')
   }
   const pdf = await import('pdfjs-dist/legacy/build/pdf.mjs')
   signal?.throwIfAborted()
@@ -81,12 +81,18 @@ export async function inspectPdf(base64: string, signal?: AbortSignal): Promise<
   }
 }
 
+export function verifyPdfPages(inspection: PdfInspection): void {
+  if (!Number.isInteger(inspection.pages) || inspection.pages < 1) {
+    throw new Error('The generated PDF has no valid pages.')
+  }
+}
+
 export function verifyPdfOutline(
   inspection: PdfInspection,
   headingCount: number,
   includeOutline: boolean,
 ): void {
-  if (inspection.pages < 1) throw new Error('The generated PDF has no pages.')
+  verifyPdfPages(inspection)
   const expected = includeOutline ? headingCount : 0
   if (inspection.outline.length !== expected) {
     throw new Error('The generated PDF does not contain the requested heading bookmarks.')

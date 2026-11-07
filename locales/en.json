@@ -928,8 +928,8 @@
           "not_found": "No compatible PDF export browser was found.",
           "save_failed": "The browser setting could not be saved. Try again."
         },
-        "select": "Select browser executable",
-        "automatic": "Use automatic detection",
+        "select": "Choose browser…",
+        "automatic": "Auto-detect",
         "check_again": "Check again"
       }
     },
@@ -1628,7 +1628,14 @@
   },
   "pdf_export": {
     "title": "Export PDF",
-    "description": "Export a searchable PDF with heading bookmarks using a local Chrome, Chromium, or Edge browser.",
+    "description": "Uses Chrome, Chromium, or Edge on your computer.",
+    "method_description": "Choose how to export this document as a PDF.",
+    "method": "Export method",
+    "method_browser": "Browser export",
+    "method_native": "In-app export",
+    "native_hint": "No browser installation needed.",
+    "native_outline_unavailable": "No browser installation needed. Heading bookmarks are unavailable.",
+    "native_ready": "Ready to export within the app.",
     "paper_size": "Paper size",
     "orientation": "Orientation",
     "portrait": "Portrait",
@@ -1641,7 +1648,7 @@
     "success": "PDF saved to {{path}}.",
     "failed": "PDF export failed. Your document has been preserved.",
     "image_warning": "{{count}} images could not be loaded. Check the exported PDF.",
-    "browser_check_failed": "The PDF export browser could not be checked. Try again in Settings → Export.",
+    "browser_check_failed": "Browser detection failed. Please try again.",
     "cancelled": "PDF export cancelled.",
     "system_print": "System print…",
     "system_print_hint": "System print is also available. Saving as PDF through the print dialog does not guarantee heading bookmarks.",
@@ -1651,7 +1658,7 @@
       "ready": "Browser {{version}} is ready.",
       "not_found": "No compatible PDF export browser was found.",
       "incompatible": "The browser version does not support PDF export with heading bookmarks.",
-      "settings_hint": "Install Chrome, Chromium, or Edge, or select its executable in Settings → Export."
+      "settings_hint": "Choose an installed Chrome, Chromium, or Edge browser here."
     }
   },
   "file_deletion": {

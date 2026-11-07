@@ -2,6 +2,7 @@ import { resolveAppThemeTokens } from '@/appThemeTokens'
 import bus from '@/helper/eventBus'
 import { getFolderPathFromPath } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
+import useGlobalOSInfo from '@/hooks/useOSInfo'
 import { useTranslation } from '@/i18n'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { editorLightTheme } from '@markflowy/theme'
@@ -24,14 +25,13 @@ import {
 import './pdf-print.css'
 import {
   exportPdfWithBrowser,
+  exportPdfWithNative,
   getPdfExportFileName,
   PDF_BROWSER_EXECUTABLE_PATH_SETTING,
-  probePdfBrowser,
-  type PdfBrowserInfo,
 } from '../pdf-export/pdfExport'
 import { PDF_EXPORT_EVENT } from '../pdf-export/pdfExportMenuItem'
 import type { PdfExportOptions } from '../pdf-export/PdfExportDialog'
-import { normalizePdfBrowserError } from '../pdf-export/pdfBrowserDiagnostics'
+import { usePdfBrowserConfiguration } from '../pdf-export/usePdfBrowserConfiguration'
 
 const PdfExportDialog = lazy(() =>
   import('../pdf-export/PdfExportDialog').then((module) => ({ default: module.PdfExportDialog })),
@@ -47,7 +47,7 @@ interface PdfDocumentSnapshot {
 interface PdfPrintJob extends PdfDocumentSnapshot {
   id: number
   runtime: RmeRuntime
-  exportOptions?: PdfExportOptions & { outputPath: string; executablePath: string }
+  exportOptions?: PdfExportOptions & { outputPath: string; executablePath?: string }
 }
 
 function getPreparedPreviewHtml(root: HTMLElement): string {
@@ -76,6 +76,8 @@ export function PdfPrintController({
   styleToken,
 }: PdfPrintControllerProps) {
   const { t } = useTranslation()
+  const { osType } = useGlobalOSInfo()
+  const nativeOutlineSupported = osType === 'macos' || osType === 'windows'
   const editorCodeFontFamily = useAppSettingStore(
     (state) => state.settingData.editor_code_font_family,
   )
@@ -95,14 +97,14 @@ export function PdfPrintController({
   )
   const [job, setJob] = useState<PdfPrintJob | null>(null)
   const [pendingExport, setPendingExport] = useState<PdfDocumentSnapshot | null>(null)
-  const [browserInfo, setBrowserInfo] = useState<PdfBrowserInfo>()
-  const [checkingBrowser, setCheckingBrowser] = useState(false)
+  const browserConfiguration = usePdfBrowserConfiguration(Boolean(pendingExport))
+  const {
+    info: browserInfo,
+    checking: checkingBrowser,
+    checkError: browserCheckError,
+  } = browserConfiguration
   const [exportBusy, setExportBusy] = useState(false)
   const [exportError, setExportError] = useState<string>()
-  const configuredBrowserPath = useAppSettingStore((state) => {
-    const path = state.settingData[PDF_BROWSER_EXECUTABLE_PATH_SETTING]
-    return typeof path === 'string' ? path.trim() || undefined : undefined
-  })
   const [hydration, setHydration] = useState<PreviewImageHydration | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const releaseTaskRef = useRef<(() => void) | null>(null)
@@ -161,7 +163,6 @@ export function PdfPrintController({
         }
         if (exportPdf) {
           setPendingExport(snapshot)
-          setBrowserInfo(undefined)
           setExportError(undefined)
           return
         }
@@ -192,43 +193,21 @@ export function PdfPrintController({
     }
   }, [active, enabled, fileName, filePath, finishTask, getContent])
 
-  useEffect(() => {
-    if (!pendingExport) return
-    let current = true
-    setCheckingBrowser(true)
-    setBrowserInfo(undefined)
-    setExportError(undefined)
-    void probePdfBrowser(configuredBrowserPath)
-      .then((info) => {
-        if (current) setBrowserInfo(info)
-      })
-      .catch((error: unknown) => {
-        if (current) {
-          setBrowserInfo({
-            available: false,
-            compatible: false,
-            error: normalizePdfBrowserError(error),
-          })
-          setExportError(
-            error instanceof Error ? error.message : t('pdf_export.browser_check_failed'),
-          )
-        }
-      })
-      .finally(() => {
-        if (current) setCheckingBrowser(false)
-      })
-    return () => {
-      current = false
-    }
-  }, [configuredBrowserPath, pendingExport, t])
-
   const startExport = async (options: PdfExportOptions) => {
     const abortController = taskAbortControllerRef.current
+    const configuredPath = useAppSettingStore.getState().settingData[PDF_BROWSER_EXECUTABLE_PATH_SETTING]
+    const browserPathChanged =
+      (typeof configuredPath === 'string' ? configuredPath.trim() : '') !==
+      browserConfiguration.configuredPath.trim()
     if (
       !pendingExport ||
-      !browserInfo?.available ||
-      !browserInfo.compatible ||
-      !browserInfo.executablePath ||
+      (options.engine === 'browser' &&
+        (checkingBrowser ||
+          browserConfiguration.configuring ||
+          browserPathChanged ||
+          !browserInfo?.available ||
+          !browserInfo.compatible ||
+          !browserInfo.executablePath)) ||
       !abortController ||
       exportStartingRef.current
     )
@@ -255,7 +234,13 @@ export function PdfPrintController({
         ...pendingExport,
         id: jobSequenceRef.current,
         runtime,
-        exportOptions: { ...options, outputPath, executablePath: browserInfo.executablePath },
+        exportOptions: {
+          ...options,
+          includeOutline:
+            options.includeOutline && (options.engine === 'browser' || nativeOutlineSupported),
+          outputPath,
+          ...(options.engine === 'browser' ? { executablePath: browserInfo?.executablePath } : {}),
+        },
       })
     } catch (error) {
       if (abortController.signal.aborted) return
@@ -352,15 +337,29 @@ export function PdfPrintController({
           if (preparationAbortController.signal.aborted) throw new DOMException('', 'AbortError')
           startedJobRef.current = job.id
           printWindowOpened = true
-          const result = await exportPdfWithBrowser(
-            {
-              ...job.exportOptions,
-              jobId: job.windowJobId,
-              html: document.html,
-              sourcePath: job.filePath,
-            },
-            taskAbortController.signal,
-          )
+          const request = {
+            jobId: job.windowJobId,
+            html: document.html,
+            outputPath: job.exportOptions.outputPath,
+            sourcePath: job.filePath,
+            paperSize: job.exportOptions.paperSize,
+            landscape: job.exportOptions.landscape,
+            includeOutline: job.exportOptions.includeOutline,
+          }
+          let result
+          if (job.exportOptions.engine === 'native') {
+            result = await exportPdfWithNative(request, taskAbortController.signal)
+          } else {
+            const executablePath = job.exportOptions.executablePath
+            if (!executablePath) throw new Error(t('pdf_export.browser.not_found'))
+            result = await exportPdfWithBrowser(
+              {
+                ...request,
+                executablePath,
+              },
+              taskAbortController.signal,
+            )
+          }
           toast.success(t('pdf_export.success', { path: result.outputPath }), {
             action: {
               label: t('contextmenu.explorer.show_in_folder'),
@@ -455,8 +454,32 @@ export function PdfPrintController({
               void printInstead()
             }}
             busy={exportBusy}
+            nativeOutlineSupported={nativeOutlineSupported}
             browserInfo={browserInfo}
             checking={checkingBrowser}
+            browserCheckError={browserCheckError}
+            browserSettings={{
+              configuredPath: browserConfiguration.configuredPath,
+              busy: browserConfiguration.configuring,
+              error: browserConfiguration.saveError
+                ? t('settings.export.pdf.status.save_failed')
+                : undefined,
+              onSelect: () => {
+                if (exportStartingRef.current) return
+                setExportError(undefined)
+                void browserConfiguration.selectExecutable()
+              },
+              onReset: () => {
+                if (exportStartingRef.current) return
+                setExportError(undefined)
+                void browserConfiguration.resetToAutomatic()
+              },
+              onCheck: () => {
+                if (exportStartingRef.current) return
+                setExportError(undefined)
+                void browserConfiguration.checkBrowser(true)
+              },
+            }}
             error={exportError}
           />
         </Suspense>

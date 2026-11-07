@@ -24,6 +24,7 @@ serde_json = "1.0"
 anyhow = "1.0.86"
 dark-light = "1.1.1"
 log = "0.4.21"
+lopdf = { version = "0.47", default-features = false }
 tauri-plugin-updater = "2.14.0"
 tauri-plugin-http = "2.8.3"
 tauri-plugin-window-state = "2.5.0"
@@ -139,9 +140,19 @@ path = "../../../crates/download_npm"
 [target.'cfg(target_os = "macos")'.dependencies]
 core-foundation = "0.10"
 core-foundation-sys = "0.8"
+objc2 = "=0.6.4"
+objc2-app-kit = { version = "=0.3.2", default-features = false, features = ["std", "NSPrintInfo", "NSPrintOperation", "NSResponder", "NSView", "NSWindow", "objc2-core-foundation"] }
+objc2-foundation = { version = "=0.3.2", default-features = false, features = ["std", "NSObject", "NSString", "NSURL", "NSDictionary", "NSGeometry", "NSValue", "objc2-core-foundation"] }
+objc2-web-kit = { version = "=0.3.2", default-features = false, features = ["std", "WKWebView", "objc2-app-kit"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+gtk = "=0.18.1"
+webkit2gtk = "=2.0.2"
 
 [target."cfg(windows)".dependencies]
 winreg = "0.52"
+webview2-com = "=0.39.1"
+windows = { version = "=0.62.2", features = ["Win32_Foundation"] }
 
 [target."cfg(windows)".dependencies.windows-sys]
 version = "0.59"

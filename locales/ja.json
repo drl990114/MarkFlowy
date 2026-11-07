@@ -864,8 +864,8 @@
           "not_found": "互換性のある PDF エクスポート用ブラウザが見つかりません。",
           "save_failed": "ブラウザ設定を保存できませんでした。再試行してください。"
         },
-        "select": "ブラウザの実行ファイルを選択",
-        "automatic": "自動検出を使用",
+        "select": "ブラウザーを選択…",
+        "automatic": "自動検出",
         "check_again": "再確認"
       }
     },
@@ -1628,7 +1628,14 @@
   },
   "pdf_export": {
     "title": "PDF をエクスポート",
-    "description": "ローカルの Chrome、Chromium、Edge ブラウザを使用して、検索可能で見出しブックマーク付きの PDF をエクスポートします。",
+    "description": "お使いの Chrome、Chromium、Edge を使用します。",
+    "method_description": "文書を PDF に書き出す方法を選択します。",
+    "method": "書き出し方法",
+    "method_browser": "ブラウザーで書き出す",
+    "method_native": "アプリ内で書き出す",
+    "native_hint": "ブラウザーのインストールは不要です。",
+    "native_outline_unavailable": "ブラウザーは不要です。見出しのしおりには未対応です。",
+    "native_ready": "アプリ内で書き出せます。",
     "paper_size": "用紙サイズ",
     "orientation": "向き",
     "portrait": "縦",
@@ -1641,7 +1648,7 @@
     "success": "PDF を {{path}} に保存しました。",
     "failed": "PDF のエクスポートに失敗しました。文書は保持されています。",
     "image_warning": "{{count}} 個の画像を読み込めませんでした。エクスポートした PDF を確認してください。",
-    "browser_check_failed": "PDF エクスポート用ブラウザを確認できませんでした。設定 → エクスポート で再試行してください。",
+    "browser_check_failed": "ブラウザーを検出できませんでした。再試行してください。",
     "cancelled": "PDF のエクスポートをキャンセルしました。",
     "system_print": "システム印刷…",
     "system_print_hint": "システム印刷も利用できます。印刷ダイアログから PDF として保存しても、見出しブックマークは保証されません。",
@@ -1651,7 +1658,7 @@
       "ready": "ブラウザ {{version}} を使用できます。",
       "not_found": "互換性のある PDF エクスポート用ブラウザが見つかりません。",
       "incompatible": "このブラウザのバージョンは、見出しブックマーク付き PDF のエクスポートに対応していません。",
-      "settings_hint": "Chrome、Chromium、Edge をインストールするか、設定 → エクスポート で実行ファイルを選択してください。"
+      "settings_hint": "インストール済みの Chrome、Chromium、Edge をここで選択できます。"
     }
   },
   "file_deletion": {

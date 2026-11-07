@@ -3,6 +3,8 @@ import { inspectPdf, verifyPdfOutline, verifyPdfProbe } from './pdfExportValidat
 
 export const PDF_BROWSER_EXECUTABLE_PATH_SETTING = 'pdf_browser_executable_path'
 
+export type PdfExportEngine = 'browser' | 'native'
+
 export interface PdfExportError {
   code: string
   message: string
@@ -31,6 +33,8 @@ export interface PdfExportRequest {
   landscape: boolean
   includeOutline: boolean
 }
+
+export type NativePdfExportRequest = Omit<PdfExportRequest, 'executablePath'>
 
 export interface PdfExportResult {
   outputPath: string
@@ -93,9 +97,16 @@ export async function probePdfBrowser(
   }
 }
 
-/** Commit only after the actual bytes and every bookmark destination are verified. */
-export async function exportPdfWithBrowser(
-  request: PdfExportRequest,
+interface PreparedPdfExport {
+  jobId: string
+  pdfBase64: string
+  headingCount: number
+}
+
+/** Both renderers stage their output before the shared validation and atomic commit. */
+async function exportPreparedPdf(
+  command: 'prepare_pdf_export' | 'prepare_native_pdf_export',
+  request: NativePdfExportRequest,
   signal: AbortSignal,
 ): Promise<PdfExportResult> {
   signal.throwIfAborted()
@@ -105,12 +116,7 @@ export async function exportPdfWithBrowser(
   signal.addEventListener('abort', cancel, { once: true })
   let committed = false
   try {
-    const prepared = await invoke<{ jobId: string; pdfBase64: string; headingCount: number }>(
-      'prepare_pdf_export',
-      {
-        request,
-      },
-    )
+    const prepared = await invoke<PreparedPdfExport>(command, { request })
     signal.throwIfAborted()
     if (prepared.jobId !== request.jobId) throw new Error('The PDF export job does not match.')
     if (!Number.isInteger(prepared.headingCount) || prepared.headingCount < 0) {
@@ -127,6 +133,22 @@ export async function exportPdfWithBrowser(
     signal.removeEventListener('abort', cancel)
     if (!committed) await invoke('cancel_pdf_export', { jobId: request.jobId }).catch(() => {})
   }
+}
+
+/** Browser export keeps its existing bookmark contract and selected executable. */
+export function exportPdfWithBrowser(
+  request: PdfExportRequest,
+  signal: AbortSignal,
+): Promise<PdfExportResult> {
+  return exportPreparedPdf('prepare_pdf_export', request, signal)
+}
+
+/** Native export uses the same verified heading bookmark contract before commit. */
+export function exportPdfWithNative(
+  request: NativePdfExportRequest,
+  signal: AbortSignal,
+): Promise<PdfExportResult> {
+  return exportPreparedPdf('prepare_native_pdf_export', request, signal)
 }
 
 export function getPdfExportFileName(fileName: string): string {

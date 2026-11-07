@@ -38,26 +38,35 @@ const toastMocks = vi.hoisted(() => ({
 const exportMocks = vi.hoisted(() => ({
   probeBrowser: vi.fn(),
   exportPdf: vi.fn(),
+  exportNativePdf: vi.fn(),
   buildDocument: vi.fn(),
   save: vi.fn(),
+  open: vi.fn(),
+  writeSetting: vi.fn(),
   reveal: vi.fn(),
 }))
 
 const exportUi = vi.hoisted(() => ({ props: undefined as PdfExportDialogProps | undefined }))
+const platform = vi.hoisted(() => ({ osType: 'macos' as string | undefined }))
 const translate = vi.hoisted(() => (key: string, values?: { count?: number; path?: string }) => {
   if (values?.count !== undefined) return `${key}:${values.count}`
   if (values?.path) return `${key}:${values.path}`
   return key
 })
 
-vi.mock('@tauri-apps/plugin-dialog', () => ({ save: exportMocks.save }))
+vi.mock('@tauri-apps/plugin-dialog', () => ({ save: exportMocks.save, open: exportMocks.open }))
+vi.mock('@/services/app-setting', () => ({
+  default: { writeSettingData: exportMocks.writeSetting },
+}))
 vi.mock('@tauri-apps/plugin-opener', () => ({ revealItemInDir: exportMocks.reveal }))
+vi.mock('@/hooks/useOSInfo', () => ({ default: () => platform }))
 vi.mock('../pdf-export/pdfExport', async (importOriginal) => {
   const original = await importOriginal<typeof PdfExportService>()
   return {
     ...original,
     probePdfBrowser: exportMocks.probeBrowser,
     exportPdfWithBrowser: exportMocks.exportPdf,
+    exportPdfWithNative: exportMocks.exportNativePdf,
   }
 })
 vi.mock('../pdf-export/pdfExportDocument', () => ({
@@ -75,22 +84,65 @@ vi.mock('../pdf-export/PdfExportDialog', () => ({
               ? 'Checking browser'
               : (props.browserInfo?.version ?? 'No browser')}
         </p>
-        {props.error ? <p role='alert'>{props.error}</p> : null}
+        {props.error || props.browserSettings.error || props.browserCheckError ? (
+          <p role='alert'>{props.error ?? props.browserSettings.error ?? props.browserCheckError}</p>
+        ) : null}
         <button
-          disabled={props.busy || props.checking || !props.browserInfo?.compatible}
+          disabled={props.busy || props.browserSettings.busy}
+          onClick={props.browserSettings.onSelect}
+        >
+          Select browser
+        </button>
+        <button
+          disabled={props.busy || props.browserSettings.busy}
+          onClick={props.browserSettings.onReset}
+        >
+          Detect automatically
+        </button>
+        <button
+          disabled={props.busy || props.browserSettings.busy || props.checking}
+          onClick={props.browserSettings.onCheck}
+        >
+          Check browser again
+        </button>
+        <button
+          disabled={props.busy || props.browserSettings.busy || props.checking || !props.browserInfo?.compatible}
           onClick={() =>
-            props.onExport({ paperSize: 'a4', landscape: false, includeOutline: true })
+            props.onExport({
+              engine: 'browser',
+              paperSize: 'a4',
+              landscape: false,
+              includeOutline: true,
+            })
           }
         >
           Export A4
         </button>
         <button
-          disabled={props.busy || props.checking || !props.browserInfo?.compatible}
+          disabled={props.busy || props.browserSettings.busy || props.checking || !props.browserInfo?.compatible}
           onClick={() =>
-            props.onExport({ paperSize: 'letter', landscape: true, includeOutline: false })
+            props.onExport({
+              engine: 'browser',
+              paperSize: 'letter',
+              landscape: true,
+              includeOutline: false,
+            })
           }
         >
           Export Letter
+        </button>
+        <button
+          disabled={props.busy}
+          onClick={() =>
+            props.onExport({
+              engine: 'native',
+              paperSize: 'letter',
+              landscape: true,
+              includeOutline: props.nativeOutlineSupported,
+            })
+          }
+        >
+          Export in app
         </button>
         <button disabled={props.busy} onClick={props.onPrint}>
           System print
@@ -170,6 +222,7 @@ describe('PdfPrintController', () => {
 
   beforeEach(() => {
     document.title = 'MarkFlowy'
+    platform.osType = 'macos'
     previewState.docs = []
     previewState.error = null
     previewState.hydration = { settled: Promise.resolve() }
@@ -192,7 +245,13 @@ describe('PdfPrintController', () => {
       headingCount: 2,
     })
     exportMocks.exportPdf.mockReset().mockResolvedValue({ outputPath: '/exports/draft.pdf' })
+    exportMocks.exportNativePdf.mockReset().mockResolvedValue({ outputPath: '/exports/draft.pdf' })
     exportMocks.save.mockReset().mockResolvedValue('/exports/draft.pdf')
+    exportMocks.open.mockReset().mockResolvedValue(null)
+    exportMocks.writeSetting.mockReset().mockImplementation(async ({ key }: { key: string }, value: string) => {
+      const store = useAppSettingStore.getState()
+      store.setSettingData({ ...store.settingData, [key]: value })
+    })
     exportMocks.reveal.mockReset().mockResolvedValue(undefined)
     printMocks.preparePrintDocument.mockReset().mockResolvedValue({ failedImageCount: 0 })
     printMocks.openPdfPrintWindow.mockReset().mockResolvedValue({
@@ -582,6 +641,123 @@ describe('PdfPrintController', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
   })
 
+  it('exports in app without an available browser and preserves the captured unsaved snapshot', async () => {
+    exportMocks.probeBrowser.mockRejectedValueOnce(new Error('Browser probe failed'))
+    const getContent = vi.fn(() => '# Unsaved native export')
+    await renderController(getContent, '/notes/draft.md')
+    await requestExport()
+    expect(exportUi.props?.error).toBeUndefined()
+    expect(exportUi.props?.browserCheckError).toBe('Browser probe failed')
+    getContent.mockReturnValue('# Later edit')
+    await clickExport('Export in app')
+    await waitFor(() => expect(exportMocks.exportNativePdf).toHaveBeenCalledOnce())
+    expect(getContent).toHaveBeenCalledOnce()
+    expect(previewState.docs).toContain('# Unsaved native export')
+    expect(previewState.docs).not.toContain('# Later edit')
+    expect(exportMocks.exportNativePdf).toHaveBeenCalledWith(
+      {
+        jobId: expect.any(String),
+        html: '<html><body>Prepared PDF snapshot</body></html>',
+        outputPath: '/exports/draft.pdf',
+        sourcePath: '/notes/draft.md',
+        paperSize: 'letter',
+        landscape: true,
+        includeOutline: true,
+      },
+      expect.any(AbortSignal),
+    )
+    expect(exportMocks.exportPdf).not.toHaveBeenCalled()
+    expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['macos', true],
+    ['windows', true],
+    ['linux', false],
+    [undefined, false],
+  ] as const)('supports native bookmarks on %s: %s', async (osType, supported) => {
+    platform.osType = osType
+    await renderController()
+    await requestExport()
+    expect(exportUi.props?.nativeOutlineSupported).toBe(supported)
+    // The controller also guards unsupported platforms if a stale dialog requests bookmarks.
+    await act(async () =>
+      exportUi.props?.onExport({
+        engine: 'native',
+        paperSize: 'a4',
+        landscape: false,
+        includeOutline: true,
+      }),
+    )
+    await waitFor(() => expect(exportMocks.exportNativePdf).toHaveBeenCalledOnce())
+    expect(exportMocks.exportNativePdf.mock.calls[0]![0]).toMatchObject({
+      includeOutline: supported,
+      paperSize: 'a4',
+      landscape: false,
+    })
+    expect(exportMocks.exportPdf).not.toHaveBeenCalled()
+  })
+
+  it('passes through a disabled native bookmark preference on a supported platform', async () => {
+    await renderController()
+    await requestExport()
+    await act(async () =>
+      exportUi.props?.onExport({
+        engine: 'native',
+        paperSize: 'a4',
+        landscape: false,
+        includeOutline: false,
+      }),
+    )
+    await waitFor(() => expect(exportMocks.exportNativePdf).toHaveBeenCalledOnce())
+    expect(exportMocks.exportNativePdf.mock.calls[0]![0]).toMatchObject({ includeOutline: false })
+  })
+
+  it('keeps browser bookmarks available when the native platform does not support them', async () => {
+    platform.osType = 'linux'
+    await renderController()
+    await requestExport()
+    expect(exportUi.props?.nativeOutlineSupported).toBe(false)
+    await clickExport('Export A4')
+    await waitFor(() => expect(exportMocks.exportPdf).toHaveBeenCalledOnce())
+    expect(exportMocks.exportPdf.mock.calls[0]![0]).toMatchObject({
+      executablePath: '/local/chromium',
+      includeOutline: true,
+    })
+    expect(exportMocks.exportNativePdf).not.toHaveBeenCalled()
+  })
+
+  it('can finish in-app export while the browser probe is still pending', async () => {
+    const probe = deferred<PdfExportService.PdfBrowserInfo>()
+    exportMocks.probeBrowser.mockReturnValueOnce(probe.promise)
+    await renderController()
+    await act(async () => bus.emit(PDF_EXPORT_EVENT))
+    await screen.findByRole('dialog', { name: 'PDF export' })
+    expect(exportUi.props?.checking).toBe(true)
+    await clickExport('Export in app')
+    await waitFor(() => expect(exportMocks.exportNativePdf).toHaveBeenCalledOnce())
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    await act(async () => probe.reject(new Error('Late browser failure')))
+    expect(toastMocks.error).not.toHaveBeenCalled()
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('cancels a running in-app export without falling back to the browser', async () => {
+    const pending = deferred<{ outputPath: string }>()
+    exportMocks.exportNativePdf.mockReturnValueOnce(pending.promise)
+    await renderController()
+    await requestExport()
+    await clickExport('Export in app')
+    await waitFor(() => expect(exportMocks.exportNativePdf).toHaveBeenCalledOnce())
+    const signal = exportMocks.exportNativePdf.mock.calls[0]![1] as AbortSignal
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Cancel export' })))
+    expect(signal.aborted).toBe(true)
+    await act(async () => pending.reject(new DOMException('Cancelled', 'AbortError')))
+    expect(exportMocks.exportPdf).not.toHaveBeenCalled()
+    expect(toastMocks.error).not.toHaveBeenCalled()
+    await requestPrint()
+  })
+
   it('does not render or prepare resources when the native save picker is cancelled', async () => {
     exportMocks.save.mockResolvedValueOnce(null)
     const load = vi.spyOn(rmeRuntime, 'loadRmeRuntime')
@@ -616,7 +792,12 @@ describe('PdfPrintController', () => {
       await requestExport()
       // Exercise the controller guard even if a caller invokes its callback.
       await act(async () =>
-        exportUi.props?.onExport({ paperSize: 'a4', landscape: false, includeOutline: true }),
+        exportUi.props?.onExport({
+          engine: 'browser',
+          paperSize: 'a4',
+          landscape: false,
+          includeOutline: true,
+        }),
       )
       expect(exportMocks.save).not.toHaveBeenCalled()
       expect(previewState.docs).toEqual([])
@@ -729,7 +910,12 @@ describe('PdfPrintController', () => {
     expect(exportMocks.probeBrowser).toHaveBeenCalledOnce()
     await clickExport()
     await act(async () => {
-      exportUi.props?.onExport({ paperSize: 'letter', landscape: true, includeOutline: false })
+      exportUi.props?.onExport({
+        engine: 'browser',
+        paperSize: 'letter',
+        landscape: true,
+        includeOutline: false,
+      })
       exportUi.props?.onPrint()
       bus.emit(PDF_PRINT_EVENT)
     })
@@ -755,6 +941,135 @@ describe('PdfPrintController', () => {
     await waitFor(() => expect(printMocks.openPdfPrintWindow).toHaveBeenCalledOnce())
   })
 
+  it('selects and persists a browser in the export dialog, then exports with its detected path', async () => {
+    await renderController()
+    await requestExport()
+    exportMocks.open.mockResolvedValueOnce('/custom/browser')
+    exportMocks.probeBrowser.mockResolvedValueOnce({
+      available: true,
+      compatible: true,
+      version: 'Custom Chromium',
+      executablePath: '/custom/browser',
+    })
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Select browser' })))
+    await waitFor(() => expect(exportUi.props?.browserInfo?.version).toBe('Custom Chromium'))
+    expect(exportMocks.writeSetting).toHaveBeenCalledWith(
+      expect.objectContaining({ key: 'pdf_browser_executable_path' }),
+      '/custom/browser',
+    )
+    expect(useAppSettingStore.getState().settingData.pdf_browser_executable_path).toBe('/custom/browser')
+    expect(exportUi.props?.browserSettings.configuredPath).toBe('/custom/browser')
+    await clickExport()
+    await waitFor(() => expect(exportMocks.exportPdf).toHaveBeenCalledOnce())
+    expect(exportMocks.exportPdf.mock.calls[0]?.[0].executablePath).toBe('/custom/browser')
+  })
+
+  it('keeps the selected browser and export available after cancelling the browser picker', async () => {
+    await renderController()
+    await requestExport()
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Select browser' })))
+    expect(exportMocks.open).toHaveBeenCalledOnce()
+    expect(exportMocks.writeSetting).not.toHaveBeenCalled()
+    expect(exportMocks.probeBrowser).toHaveBeenCalledOnce()
+    expect(exportUi.props?.browserInfo?.executablePath).toBe('/local/chromium')
+    expect(exportUi.props?.browserSettings.busy).toBe(false)
+    await clickExport()
+    await waitFor(() => expect(exportMocks.exportPdf).toHaveBeenCalledOnce())
+  })
+
+  it('resets to automatic detection and refreshes the detected browser without leaving export', async () => {
+    useAppSettingStore.setState({ settingData: { pdf_browser_executable_path: '/custom/browser' } })
+    await renderController()
+    await requestExport()
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Detect automatically' })))
+    await waitFor(() => expect(exportUi.props?.browserSettings.configuredPath).toBe(''))
+    expect(exportMocks.writeSetting).toHaveBeenCalledWith(
+      expect.objectContaining({ key: 'pdf_browser_executable_path' }),
+      '',
+    )
+    await waitFor(() => expect(exportUi.props?.checking).toBe(false))
+    exportMocks.probeBrowser.mockResolvedValueOnce({
+      available: true,
+      compatible: true,
+      version: 'Refreshed Chromium',
+      executablePath: '/refreshed/browser',
+    })
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Check browser again' })))
+    await waitFor(() => expect(exportUi.props?.browserInfo?.version).toBe('Refreshed Chromium'))
+    expect(exportMocks.probeBrowser).toHaveBeenLastCalledWith(undefined, true)
+    await clickExport()
+    await waitFor(() => expect(exportMocks.exportPdf).toHaveBeenCalledOnce())
+    expect(exportMocks.exportPdf.mock.calls[0]?.[0].executablePath).toBe('/refreshed/browser')
+  })
+
+  it('rejects browser export while selecting a browser or awaiting a fresh detection', async () => {
+    const picker = deferred<string | null>()
+    const probe = deferred<PdfExportService.PdfBrowserInfo>()
+    await renderController()
+    await requestExport()
+    exportMocks.open.mockReturnValueOnce(picker.promise)
+    await act(async () => exportUi.props?.browserSettings.onSelect())
+    expect(exportUi.props?.browserSettings.busy).toBe(true)
+    const options = { engine: 'browser', paperSize: 'a4', landscape: false, includeOutline: true } as const
+    await act(async () => exportUi.props?.onExport(options))
+    expect(exportMocks.save).not.toHaveBeenCalled()
+    await act(async () => picker.resolve(null))
+    exportMocks.probeBrowser.mockReturnValueOnce(probe.promise)
+    await act(async () => exportUi.props?.browserSettings.onCheck())
+    expect(exportUi.props?.checking).toBe(true)
+    await act(async () => exportUi.props?.onExport(options))
+    expect(exportMocks.save).not.toHaveBeenCalled()
+    await act(async () => probe.resolve({ available: false, compatible: false }))
+  })
+
+  it('prevents browser configuration actions after an export starts, including stale callbacks', async () => {
+    const picker = deferred<string | null>()
+    exportMocks.save.mockReturnValueOnce(picker.promise)
+    await renderController()
+    await requestExport()
+    const settings = exportUi.props!.browserSettings
+    await clickExport()
+    await act(async () => {
+      settings.onSelect()
+      settings.onReset()
+      settings.onCheck()
+    })
+    expect(exportMocks.open).not.toHaveBeenCalled()
+    expect(exportMocks.writeSetting).not.toHaveBeenCalled()
+    expect(exportMocks.probeBrowser).toHaveBeenCalledOnce()
+    await act(async () => picker.resolve(null))
+  })
+
+  it('does not save a late browser selection after the export dialog closes', async () => {
+    const picker = deferred<string | null>()
+    exportMocks.open.mockReturnValueOnce(picker.promise)
+    await renderController()
+    await requestExport()
+    await act(async () => exportUi.props?.browserSettings.onSelect())
+    await act(async () => exportUi.props?.onOpenChange(false))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    await act(async () => picker.resolve('/late/browser'))
+    expect(exportMocks.writeSetting).not.toHaveBeenCalled()
+    await requestExport()
+    expect(exportUi.props?.browserSettings.configuredPath).toBe('')
+    expect(exportUi.props?.browserSettings.busy).toBe(false)
+  })
+
+  it('shows browser-setting failures in the dialog and clears an earlier export error on retry', async () => {
+    exportMocks.save.mockRejectedValueOnce(new Error('Save picker failed'))
+    await renderController()
+    await requestExport()
+    await clickExport()
+    expect(screen.getByRole('alert').textContent).toBe('Save picker failed')
+    exportMocks.open.mockResolvedValueOnce('/custom/browser')
+    exportMocks.writeSetting.mockRejectedValueOnce(new Error('Settings write failed'))
+    await act(async () => exportUi.props?.browserSettings.onSelect())
+    await waitFor(() => expect(exportUi.props?.browserSettings.error).toBe('settings.export.pdf.status.save_failed'))
+    expect(screen.getByRole('alert').textContent).toBe('settings.export.pdf.status.save_failed')
+    expect(exportUi.props?.error).toBeUndefined()
+    expect(exportUi.props?.browserInfo?.executablePath).toBe('/local/chromium')
+  })
+
   it('discards an obsolete browser probe when settings change while the dialog is open', async () => {
     const first = deferred<PdfExportService.PdfBrowserInfo>()
     const current = deferred<PdfExportService.PdfBrowserInfo>()
@@ -768,7 +1083,7 @@ describe('PdfPrintController', () => {
     await act(async () =>
       useAppSettingStore.setState({ settingData: { pdf_browser_executable_path: '/new/browser' } }),
     )
-    await waitFor(() => expect(exportMocks.probeBrowser).toHaveBeenLastCalledWith('/new/browser'))
+    await waitFor(() => expect(exportMocks.probeBrowser).toHaveBeenLastCalledWith('/new/browser', false))
     await act(async () =>
       current.resolve({
         available: true,
@@ -873,9 +1188,7 @@ describe('PdfPrintController', () => {
       await act(async () => {
         await new Promise<void>((resolve) => setTimeout(resolve, 500))
       })
-      expect(document.querySelectorAll('[data-sonner-toast][data-type="loading"]')).toHaveLength(
-        0,
-      )
+      expect(document.querySelectorAll('[data-sonner-toast][data-type="loading"]')).toHaveLength(0)
       expect(screen.getByText('Existing notice')).toBeTruthy()
     }
 

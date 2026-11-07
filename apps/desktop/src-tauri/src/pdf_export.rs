@@ -1,5 +1,6 @@
-//! Local Chromium PDF export. Preparation never replaces the selected output:
-//! the caller first validates its PDF and then explicitly commits the job.
+//! Local browser and native WebView PDF export. Preparation never replaces the
+//! selected output: the caller validates the PDF before explicitly committing.
+mod native;
 use base64::{engine::general_purpose::STANDARD, Engine};
 use chromiumoxide::cdp::browser_protocol::{
     accessibility::GetFullAxTreeParams,
@@ -104,6 +105,21 @@ pub struct PdfExportRequest {
     executable_path: String,
     paper_size: PaperSize,
     landscape: bool,
+    include_outline: bool,
+}
+
+/// Native export uses the application's WebView runtime. Supported platforms
+/// locate headings in its paginated PDF before adding document bookmarks.
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NativePdfExportRequest {
+    job_id: String,
+    html: String,
+    output_path: String,
+    source_path: Option<String>,
+    paper_size: PaperSize,
+    landscape: bool,
+    #[serde(default)]
     include_outline: bool,
 }
 
@@ -951,6 +967,65 @@ pub async fn prepare_pdf_export(
     })
 }
 
+#[tauri::command]
+pub async fn prepare_native_pdf_export(
+    window: tauri::WebviewWindow,
+    request: NativePdfExportRequest,
+) -> Result<PreparedPdfExport, PdfExportError> {
+    require_editor_window(window.label())?;
+    if request.html.is_empty() || request.html.len() > MAX_HTML_BYTES {
+        return Err(PdfExportError::new(
+            "invalid_request",
+            "The document is empty or too large for PDF export.",
+        ));
+    }
+    let source = request.source_path.map(PathBuf::from);
+    let output = validate_output(Path::new(&request.output_path), source.as_deref())?;
+    // Share ownership, cancellation receipts and the per-window exclusion with
+    // browser exports. Neither renderer can race another export's commit.
+    let job = register_job(jobs(), &request.job_id, window.label())?;
+    let mut guard = PreparationGuard {
+        id: request.job_id.clone(),
+        job: job.clone(),
+        prepared: false,
+    };
+    let expiry_id = request.job_id.clone();
+    let expiring = Arc::downgrade(&job);
+    tokio::spawn(async move {
+        tokio::time::sleep(JOB_TTL).await;
+        if let Some(job) = expiring.upgrade() {
+            expire_job(jobs(), &expiry_id, &job);
+        }
+    });
+    let (bytes, heading_count) = native::render(
+        &window,
+        &request.html,
+        request.paper_size,
+        request.landscape,
+        request.include_outline,
+        &job,
+    )
+    .await?;
+    let prepared = prepare_output(&bytes, output, source)?;
+    {
+        let entries = jobs().lock().unwrap_or_else(|p| p.into_inner());
+        if job.cancelled.load(Ordering::Acquire)
+            || !entries
+                .get(&request.job_id)
+                .is_some_and(|current| Arc::ptr_eq(current, &job))
+        {
+            return Err(PdfExportError::new("cancelled", "PDF export was cancelled."));
+        }
+        *job.state.lock().unwrap_or_else(|p| p.into_inner()) = JobState::Prepared(prepared);
+        guard.prepared = true;
+    }
+    Ok(PreparedPdfExport {
+        job_id: request.job_id,
+        pdf_base64: STANDARD.encode(bytes),
+        heading_count,
+    })
+}
+
 fn commit_job(registry: &Jobs, id: &str, owner: &str) -> Result<PdfExportResult, PdfExportError> {
     // Serialize commit/cancel/expiry through the registry lock: after cancellation
     // returns, a late prepare or commit cannot recreate or replace an output.
@@ -1064,10 +1139,33 @@ mod tests {
         job
     }
     #[test]
+    fn native_request_accepts_outline_but_not_an_external_executable() {
+        let request = serde_json::json!({
+            "jobId": "native-job",
+            "html": "<h1>Document</h1>",
+            "outputPath": "/tmp/document.pdf",
+            "paperSize": "a4",
+            "landscape": false
+        });
+        assert!(serde_json::from_value::<NativePdfExportRequest>(request.clone()).is_ok());
+        let mut request = request;
+        request["includeOutline"] = serde_json::json!(true);
+        assert!(serde_json::from_value::<NativePdfExportRequest>(request.clone())
+            .unwrap()
+            .include_outline);
+        request["executablePath"] = serde_json::json!("/tmp/browser");
+        assert!(serde_json::from_value::<NativePdfExportRequest>(request).is_err());
+    }
+    #[test]
     fn restricts_commands_to_editor_windows() {
         assert!(require_editor_window("main").is_ok());
         assert!(require_editor_window("main_123").is_ok());
-        for label in ["conf", "mf-pdf-print-main-123", "untrusted"] {
+        for label in [
+            "conf",
+            "mf-pdf-print-main-123",
+            "mf-native-pdf-123",
+            "untrusted",
+        ] {
             assert_eq!(
                 require_editor_window(label).unwrap_err().code,
                 "access_denied"

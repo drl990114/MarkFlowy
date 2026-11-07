@@ -854,8 +854,8 @@
           "not_found": "未找到兼容的 PDF 导出浏览器。",
           "save_failed": "无法保存浏览器设置，请重试。"
         },
-        "select": "选择浏览器可执行文件",
-        "automatic": "使用自动检测",
+        "select": "选择浏览器…",
+        "automatic": "自动检测",
         "check_again": "重新检测"
       }
     },
@@ -1628,7 +1628,14 @@
   },
   "pdf_export": {
     "title": "导出 PDF",
-    "description": "使用本机 Chrome、Chromium 或 Edge 浏览器，导出可搜索并带有标题书签的 PDF。",
+    "description": "使用本机 Chrome、Chromium 或 Edge。",
+    "method_description": "选择将文档导出为 PDF 的方式。",
+    "method": "导出方式",
+    "method_browser": "浏览器导出",
+    "method_native": "应用内导出",
+    "native_hint": "无需安装浏览器。",
+    "native_outline_unavailable": "无需安装浏览器，暂不支持标题书签。",
+    "native_ready": "可直接在应用内导出。",
     "paper_size": "纸张尺寸",
     "orientation": "页面方向",
     "portrait": "纵向",
@@ -1641,7 +1648,7 @@
     "success": "PDF 已保存到 {{path}}。",
     "failed": "PDF 导出失败，文档内容已保留。",
     "image_warning": "{{count}} 张图片未能加载，请检查导出的 PDF。",
-    "browser_check_failed": "无法检测 PDF 导出浏览器，请在「设置 → 导出」中重新检测。",
+    "browser_check_failed": "浏览器检测失败，请重试。",
     "cancelled": "已取消 PDF 导出。",
     "system_print": "系统打印…",
     "system_print_hint": "也可以使用系统打印。通过打印对话框另存为 PDF 时，不保证包含标题目录书签。",
@@ -1651,7 +1658,7 @@
       "ready": "浏览器 {{version}} 已就绪。",
       "not_found": "未找到兼容的 PDF 导出浏览器。",
       "incompatible": "当前浏览器版本不支持带标题书签的 PDF 导出。",
-      "settings_hint": "请安装 Chrome、Chromium 或 Edge，或在「设置 → 导出」中选择其可执行文件。"
+      "settings_hint": "可在此选择已安装的 Chrome、Chromium 或 Edge。"
     }
   },
   "file_deletion": {
