@@ -1388,13 +1388,7 @@
       "resetSize": "Khôi phục kích thước tự động"
     },
     "preview": {
-      "retry": "Thử lại",
-      "mermaid": {
-        "size": "Kích thước sơ đồ",
-        "autoSize": "Kích thước dễ đọc",
-        "fitWidth": "Vừa chiều rộng",
-        "actualSize": "Kích thước thực (100%)"
-      }
+      "retry": "Thử lại"
     },
     "editor": {
       "loading": "Đang tải trình soạn thảo Capricorn",

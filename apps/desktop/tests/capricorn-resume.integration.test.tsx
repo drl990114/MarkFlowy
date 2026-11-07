@@ -100,4 +100,30 @@ describe('persistent Capricorn selection against the installed runtime', () => {
     expect(changes).toBeGreaterThan(0)
     unsubscribe()
   })
+
+  it('preserves exact UTF-16 offsets and undo around a long LTR paragraph tail', async () => {
+    const prefix = 'a'.repeat(64 * 1024)
+    const markdown = `${prefix}你😀tail`
+    const editor = await create(markdown, true)
+    const saved = {
+      kind: 'capricorn' as const,
+      anchor: { path: [0, 0], offset: prefix.length + 1 },
+      focus: { path: [0, 0], offset: prefix.length + 3 },
+    }
+    await act(async () => {
+      expect(editor.resume!.restore(saved)).toBe(true)
+    })
+    expect(editor.resume!.capture()).toEqual(saved)
+    expect(editor.getUiState().canUndo).toBe(false)
+    await act(async () => {
+      expect(editor.find.search({ query: '😀tail' }).matches).toHaveLength(1)
+      expect(await editor.find.replace('好😀')).toBe(true)
+    })
+    expect(editor.getMarkdown()).toBe(`${prefix}你好😀`)
+    await act(async () => editor.commands.undo())
+    expect(editor.getMarkdown()).toBe(markdown)
+    expect(editor.getUiState().canUndo).toBe(false)
+    await act(async () => editor.commands.redo())
+    expect(editor.getMarkdown()).toBe(`${prefix}你好😀`)
+  })
 })

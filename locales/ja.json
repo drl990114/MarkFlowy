@@ -1394,13 +1394,7 @@
       "resetSize": "自動サイズに戻す"
     },
     "preview": {
-      "retry": "再試行",
-      "mermaid": {
-        "size": "図のサイズ",
-        "autoSize": "読みやすいサイズ",
-        "fitWidth": "幅に合わせる",
-        "actualSize": "実際のサイズ（100%）"
-      }
+      "retry": "再試行"
     },
     "snippets": {
       "title": "スニペットを挿入",

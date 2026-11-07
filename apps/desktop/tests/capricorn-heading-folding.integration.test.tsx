@@ -13,6 +13,7 @@ import type {
   CapricornLocalizationAdapter,
   CapricornRuntimeAdapter,
 } from '@/components/EditorArea/capricornRuntimeAdapter'
+import { CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS } from '@/components/EditorArea/capricornRuntimeAdapter'
 
 // Match TextEditor's production bridge, including the legacy cn language code
 // and languageChanged subscription, instead of relying on runtime fallbacks.
@@ -112,4 +113,74 @@ describe.skipIf(!isCapricornRuntimeAvailable)('Capricorn heading folding in Mark
     expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ documentChanged: true }))
     expect(onError).not.toHaveBeenCalled()
   })
+
+  it('reveals a folded offscreen heading while keeping a long document virtualized', async () => {
+    await i18nInit({ lng: 'en' })
+    const paragraphs = (start: number) =>
+      Array.from({ length: 600 }, (_, index) => `Paragraph ${start + index}`)
+    const markdown = [
+      '# Root',
+      ...paragraphs(0),
+      '## Child',
+      ...paragraphs(600),
+      '# Next',
+      'Last body',
+    ].join('\n\n')
+    const scrollRoot = document.createElement('div')
+    document.body.append(scrollRoot)
+    Object.defineProperties(scrollRoot, {
+      clientHeight: { value: 800 },
+      clientWidth: { value: 1000 },
+    })
+    scrollRoot.getBoundingClientRect = () => new DOMRect(0, 0, 1000, 800)
+    const originalRect = HTMLElement.prototype.getBoundingClientRect
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      return this.hasAttribute('data-cap-leaf-block')
+        ? new DOMRect(0, 0, 1000, 40)
+        : originalRect.call(this)
+    })
+    const onChange = vi.fn()
+    const onError = vi.fn()
+    const onEditorChange = vi.fn()
+    const { container } = render(
+      <CapricornEditor
+        active
+        autoFocus={false}
+        initialMarkdown={markdown}
+        onChange={onChange}
+        onError={onError}
+        onUnavailable={onError}
+        onEditorChange={onEditorChange}
+        options={{
+          localization,
+          getScrollableContainer: () => scrollRoot,
+          virtualize: CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS,
+        }}
+      />,
+      { container: scrollRoot },
+    )
+    await waitFor(() => expect(heading(container, 'Root')).toBeDefined())
+    const runtime = onEditorChange.mock.calls.find(
+      ([value]) => value,
+    )?.[0] as CapricornRuntimeAdapter
+    const editorRoot = container.querySelector('[data-cap-editable]')
+    const child = runtime.headings.getAll().find((entry) => entry.text === 'Child')!
+    expect(child).toBeDefined()
+    expect(heading(container, 'Child')).toBeUndefined()
+    onChange.mockClear()
+    await toggle(container, 'Root', false)
+    await waitFor(() => expect(heading(container, 'Next')).toBeDefined())
+    expect(container.querySelectorAll('[data-cap-leaf-block]').length).toBeLessThan(10)
+    await act(async () => expect(await runtime.headings.jumpTo(child.id)).toBe(true))
+    await waitFor(() => expect(heading(container, 'Child')).toBeDefined())
+    expect(container.querySelectorAll('[data-cap-leaf-block]').length).toBeLessThan(300)
+    expect(container.querySelector('[data-cap-editable]')).toBe(editorRoot)
+    expect(runtime.getMarkdown()).toBe(markdown)
+    expect(runtime.getUiState().canUndo).toBe(false)
+    expect(onChange.mock.calls.some(([change]) => change.documentChanged)).toBe(false)
+    expect(onEditorChange.mock.calls.filter(([value]) => value)).toHaveLength(1)
+    expect(onError).not.toHaveBeenCalled()
+  }, 30000)
 })

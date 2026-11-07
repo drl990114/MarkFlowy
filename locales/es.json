@@ -1394,13 +1394,7 @@
       "resetSize": "Restaurar tamaño automático"
     },
     "preview": {
-      "retry": "Retry",
-      "mermaid": {
-        "size": "Tamaño del diagrama",
-        "autoSize": "Tamaño legible",
-        "fitWidth": "Ajustar al ancho",
-        "actualSize": "Tamaño real (100 %)"
-      }
+      "retry": "Retry"
     },
     "snippets": {
       "title": "Insertar fragmento",
