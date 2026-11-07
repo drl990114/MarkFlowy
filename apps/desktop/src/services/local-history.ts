@@ -183,22 +183,34 @@ function queue(fileId: string, run: () => Promise<void>): Promise<void> {
   return task
 }
 
-async function capture(fileId: string) {
+async function capture(fileId: string): Promise<void> {
   // The original recovery source still protects this content. Do not register
   // an unvalidated path or retire its writer before recovery has bound it.
   if (isDraftRecoveryPending(fileId)) return
-  const seq = ++sequence
-  const edit = edits.get(fileId)
-  const file = getFileObject(fileId)
+  let file = getFileObject(fileId)
   if (!file || file.kind === 'new_tab') return
+  if (isPristineDocument(fileId) && !file.path) {
+    useEditorStore.getState().getEditorContent(fileId)
+    if (isPristineDocument(fileId)) return
+  }
+  const path = file.path
+  const document = await historyDocument(fileId)
+  if (isDraftRecoveryPending(fileId)) return
+  file = getFileObject(fileId)
+  if (!file || file.kind === 'new_tab') return
+  if (file.path !== path) return capture(fileId)
+  const binding = bindings.get(fileId)
+  if (!binding) return
+  // Path migration can write a draft while registering the document. Snapshot
+  // current input afterward so its sequence and content both follow that write.
   const content = useEditorStore.getState().getEditorContent(fileId)
   if (isPristineDocument(fileId) && !file.path) return
+  const seq = ++sequence
+  const edit = edits.get(fileId)
   const format = fileSaveCoordinator.getPersistedFormat(fileId)
   const diskRevision = persistentDiskRevision(fileSaveCoordinator.getDiskRevision(fileId))
   const dirty =
     !file.path || useEditorStateStore.getState().idStateMap.get(fileId)?.hasUnsavedChanges
-  const document = await historyDocument(fileId)
-  const binding = bindings.get(fileId)!
   binding.sequence = seq
   const paused = Boolean(useHistoryProtection.getState().paused[fileId])
   if (!dirty) {

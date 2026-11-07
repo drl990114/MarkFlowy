@@ -117,6 +117,45 @@ describe('background draft protection', () => {
     expect(mocks.diskRevision).toBe(revision)
   })
 
+  it('protects the latest input with a newer sequence after a dirty path migration', async () => {
+    const renamed = { ...doc, id: 'renamed-document', path: '/workspace/renamed.md' }
+    const persisted = new Map<string, { sequence: number; content?: string }>()
+    let completeRegistration!: (document: typeof doc) => void
+    const registration = new Promise<typeof doc>((resolve) => { completeRegistration = resolve })
+    let registrationStarted!: () => void
+    const registering = new Promise<void>((resolve) => { registrationStarted = resolve })
+    mocks.invoke.mockImplementation(async (_command, { operation, payload }) => {
+      if (operation === 'register') {
+        if (payload.path !== renamed.path) return doc
+        registrationStarted()
+        return registration
+      }
+      if (operation === 'draft') {
+        const key = `${payload.document.id}:${payload.writer}`
+        if (payload.sequence <= (persisted.get(key)?.sequence ?? -1)) return { persisted: false }
+        persisted.set(key, { sequence: payload.sequence, content: payload.content })
+      } else if (operation === 'finishDraft') {
+        const key = `${payload.documentId}:${payload.writer}`
+        if (payload.sequence >= (persisted.get(key)?.sequence ?? -1))
+          persisted.set(key, { sequence: payload.sequence })
+      }
+      return { persisted: true }
+    })
+    await history.flushDraftProtection('file')
+    mocks.path = renamed.path
+    mocks.content = 'before migration'
+    const flushing = history.flushDraftProtection('file')
+    await registering
+    mocks.content = 'edited while migrating'
+    completeRegistration(renamed)
+    await expect(flushing).resolves.toBeUndefined()
+    const migrated = calls('draft').filter((draft) => draft.document.id === renamed.id)
+    expect(migrated).toHaveLength(2)
+    expect(migrated[1].sequence).toBeGreaterThan(migrated[0].sequence)
+    expect(persisted.get(`${renamed.id}:main:file`)?.content).toBe('edited while migrating')
+    expect(history.useHistoryProtection.getState().status.file).toBe('protected')
+  })
+
   it('returns only the descriptor of the acknowledged writer and refuses stale exit references', async () => {
     await history.flushDraftProtection('file')
     const persisted = calls('draft').at(-1)
