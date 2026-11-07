@@ -1,5 +1,85 @@
 # UPDATE LOG
 
+## v1.3.0
+
+Features:
+
+- **Export PDFs directly in the app.** PDF export now defaults to **In-app export**, without requiring a separate browser installation. You can still choose **Browser export** and select or check Chrome, Chromium, or Edge from the export dialog. Native heading bookmarks are supported on macOS and Windows; on Linux, use browser export when you need bookmarks.
+
+- **Find workspace files by name and choose their order.** Switch between content and filename search in the Search panel. The file tree now supports ascending and descending name order, keeps folders first, and remembers the choice for each workspace.
+
+- **Preview and customize personal CSS snippets.** Added templates for completed-task strikethrough, heading dividers, compact tables, and quote accents, with a selector reference and live preview before saving. **Open CSS directory** lets you manage `.css` files in an external editor: new files are discovered automatically and start disabled; changes to enabled files apply automatically.
+
+- **Insert code and math blocks more quickly.** WYSIWYG and Source Code toolbars now include an **Insert** menu for code blocks and math blocks. The same actions are available in the command palette and through configurable shortcuts, defaulting to **Cmd/Ctrl + Alt + C** and **Cmd/Ctrl + Alt + M**.
+
+- **Control app zoom from the keyboard.** Use **Cmd/Ctrl + =** to zoom in, **Cmd/Ctrl + -** to zoom out, and **Cmd/Ctrl + 0** to reset to 100%. These actions are also available in the command palette, and the zoom level is remembered.
+
+- **Optional first-line paragraph indentation.** Added **Settings → Editor → Style → First-line indent** to indent body paragraphs by two characters in the editor, preview, and exports. This changes presentation without inserting spaces into Markdown.
+
+- **Share recent files across windows.** Recently opened saved files now stay in sync across editor windows and remain available after restarting the app.
+
+- **More languages and a new theme.** Added Russian and Vietnamese localization and the **Tokyo Night** theme. New installations default to **MarkFlowy Dark**, while existing appearance preferences are retained.
+
+- **Choose when to install updates.** Update notifications let you choose when to download and install, and you can keep editing during the download. Configure automatic update-check frequency in Settings; the title bar and command palette also provide update actions.
+
+Improvements and Fixes:
+
+- Improved session protection before installing an update or restarting, including multi-window tabs, split layouts, and drafts. Failed installation attempts release editing protection so you can continue working and retry.
+
+- Fixed restoration of unnamed drafts into existing tabs after a window reload, and preserved the latest draft when saving an unnamed document or moving it to a new path.
+
+- Improved virtualized editing and Mermaid previews. Small diagrams are enlarged for readability, while wide diagrams retain readable sizing with horizontal scrolling. Diagram layout changes leave the Markdown source unchanged.
+
+- Fixed pasting code into table cells affecting neighboring cells. Improved highlighted-text contrast in light and dark themes and theme colors in the math source editor.
+
+- The outline now displays inline heading formatting, including bold, italic, code, and strikethrough. Heading-numbering controls clearly distinguish adding and removing numbering and explain that they modify document headings in Markdown.
+
+- Improved default shortcuts on non-Latin keyboard layouts. Language changes now synchronize across open windows, and website text refreshes correctly after switching languages.
+
+- Fixed CLI requests without an explicit window target being handled by other editor windows. File opening, saving, and exporting now stay scoped to the selected window.
+
+- Fixed an extra blank trailing page in native macOS PDF exports caused by spacing after the final paragraph.
+
+---
+
+新功能：
+
+- **直接在应用内导出 PDF。** PDF 导出现在默认使用**应用内导出**，无需另外安装浏览器。也可选择**浏览器导出**，直接在导出对话框中选择或检测 Chrome、Chromium、Edge。macOS 和 Windows 的应用内导出支持标题书签；Linux 下需要书签时，请使用浏览器导出。
+
+- **按文件名搜索工作区，并自定义文件排序。** 搜索面板可切换内容搜索与文件名搜索。文件树新增按名称升序、降序排列，文件夹始终靠前，并按工作区记住排序选择。
+
+- **预览和自定义个人 CSS 片段。** 新增已完成任务删除线、标题分隔线、紧凑表格、引用强调四种模板，提供选择器参考和保存前实时预览。通过**打开 CSS 目录**，可使用外部编辑器管理 `.css` 文件：新文件会自动发现，默认停用；已启用文件的修改会自动生效。
+
+- **更快捷地插入代码块和公式块。** 所见即所得与源码工具栏新增**插入**菜单，也可通过命令面板或自定义快捷键执行。默认快捷键分别为 **Cmd/Ctrl + Alt + C** 和 **Cmd/Ctrl + Alt + M**。
+
+- **通过键盘调整应用缩放。** 按 **Cmd/Ctrl + =** 放大、**Cmd/Ctrl + -** 缩小、**Cmd/Ctrl + 0** 恢复到 100%。命令面板也提供对应操作，应用会记住缩放比例。
+
+- **可选的段落首行缩进。** 新增**设置 → 编辑器 → 样式 → 首行缩进**，让正文段落首行缩进两个字符，编辑器、预览与导出同步生效。仅调整显示排版，不向 Markdown 插入空格。
+
+- **跨窗口共享最近打开的文件。** 已保存文件的最近打开记录在各编辑器窗口之间同步，重启应用后仍可继续访问。
+
+- **新增语言和主题。** 增加俄语、越南语本地化，以及 **Tokyo Night** 主题。全新安装默认使用 **MarkFlowy Dark**，已有用户保留原有外观偏好。
+
+- **自主选择更新时机。** 更新通知允许自行选择下载安装时机，下载期间可以继续编辑。设置中可调整自动检查更新的频率，标题栏和命令面板也提供更新入口。
+
+改进与修复：
+
+- 改进安装更新或重启前的会话保护，覆盖多窗口标签页、分栏布局和草稿。安装失败后解除编辑保护，可继续工作并重试。
+
+- 修复窗口重新加载后，未命名草稿可能重复生成标签页或未正确恢复正文的问题；保存未命名文档或迁移文件路径后，保留最新草稿。
+
+- 优化虚拟化编辑与 Mermaid 预览。小图适度放大以提高可读性，宽图保留可读尺寸并支持横向滚动，图表布局调整不改变 Markdown 源码。
+
+- 修复向表格单元格粘贴代码时影响相邻单元格的问题。改进浅色、深色主题下高亮文字的对比度，以及公式源码编辑器的主题配色。
+
+- 目录现在可显示标题中的粗体、斜体、行内代码和删除线。标题编号按钮明确区分添加与移除操作，并提示编号会修改 Markdown 中的正文标题。
+
+- 改进非拉丁键盘布局下的默认快捷键识别。语言设置在已打开的窗口之间同步，网站切换语言后也会正确刷新文字。
+
+- 修复未指定窗口的 CLI 请求被其他编辑器窗口重复处理的问题，打开文件、保存和导出操作仅作用于选定窗口。
+
+- 修复 macOS 应用内导出 PDF 时，末段间距导致多出空白尾页的问题。
+
 ## v1.2.3
 
 Features:
