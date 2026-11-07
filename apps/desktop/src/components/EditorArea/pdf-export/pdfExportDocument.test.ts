@@ -72,6 +72,26 @@ async function prepare(
 const parse = (html: string) => new DOMParser().parseFromString(html, 'text/html')
 
 describe('standalone PDF document', () => {
+  it('removes only the final block margin without discarding content or an authored page break', async () => {
+    const root = createRoot(
+      '<p>First paragraph</p><pre><code>  preserved\n\n</code></pre><p style="break-after:page">Final paragraph</p>',
+    )
+    createSheet(['.mf-preview-content p { margin-bottom: 8px; }'])
+    const before = root.innerHTML
+    const exported = parse((await prepare(root)).html)
+    const surface = document.createElement('div')
+    surface.innerHTML = exported.head.querySelector('style')!.outerHTML + exported.body.innerHTML
+    document.body.append(surface)
+    cleanups.push(() => surface.remove())
+    const paragraphs = surface.querySelectorAll('p')
+
+    expect(window.getComputedStyle(paragraphs[0]).marginBottom).toBe('8px')
+    expect(window.getComputedStyle(paragraphs[1]).marginBottom).toBe('0px')
+    expect(window.getComputedStyle(paragraphs[1]).breakAfter).toBe('page')
+    expect(surface.querySelector('code')!.textContent).toBe('  preserved\n\n')
+    expect(root.innerHTML).toBe(before)
+  })
+
   it.each(['0', '2em'])('preserves paragraph indentation in the portable PDF HTML (%s)', async (indent) => {
     const root = createRoot('<p>Body</p><blockquote><p>Quote</p></blockquote><ul><li><p>List</p></li></ul>')
     root.style.setProperty('--mf-paragraph-first-line-indent', indent)

@@ -625,6 +625,19 @@ pub fn dispatch_args(app: &tauri::AppHandle, args: &[String]) -> bool {
     true
 }
 
+fn emit_request_to_window<R: tauri::Runtime>(
+    window: &tauri::WebviewWindow<R>,
+    request: &Request,
+) -> tauri::Result<()> {
+    // Routing may resolve an implicit target or create a new window. Bind the
+    // payload too, so the renderer's wrong-window guard remains a second barrier.
+    let mut request = request.clone();
+    request.window_id = Some(window.label().to_owned());
+    // Emitter::emit broadcasts even when called on a window. Use the label to
+    // reach getCurrentWindow().listen without invoking other editors' handlers.
+    window.emit_to(window.label(), "cli:request", &request)
+}
+
 async fn dispatch(app: tauri::AppHandle, id: &str) -> Result<(), Receipt> {
     let dir = request_dir(id).map_err(|error| Receipt::error(id, "invalid_request", error))?;
     let bytes = fs::read(dir.join("request.json"))
@@ -735,7 +748,7 @@ async fn dispatch(app: tauri::AppHandle, id: &str) -> Result<(), Receipt> {
                             },
                         );
                     }
-                    if let Err(error) = window.emit("cli:request", &request) {
+                    if let Err(error) = emit_request_to_window(&window, &request) {
                         bridge().lock().unwrap().pending.remove(id);
                         return Err(Receipt::error(id, "delivery_failed", error));
                     }
@@ -866,6 +879,57 @@ mod tests {
         )
         .unwrap()
     }
+
+    #[test]
+    fn cli_request_delivery_only_reaches_the_selected_window_with_resolved_identity() {
+        use std::sync::Arc;
+        use tauri::{Listener, WebviewWindowBuilder};
+
+        let app = tauri::test::mock_builder()
+            .build(tauri::test::mock_context(tauri::test::noop_assets()))
+            .unwrap();
+        let target = WebviewWindowBuilder::new(&app, "main_new_file", Default::default())
+            .build()
+            .unwrap();
+        WebviewWindowBuilder::new(&app, "main", Default::default())
+            .build()
+            .unwrap();
+        let received = Arc::new(Mutex::new(Vec::new()));
+        for label in ["main_new_file", "main"] {
+            let received = received.clone();
+            // Match getCurrentWindow().listen: it registers a Window target.
+            app.get_webview_window(label)
+                .unwrap()
+                .as_ref()
+                .window()
+                .listen("cli:request", move |event| {
+                    received.lock().unwrap().push((
+                        label,
+                        serde_json::from_str::<Value>(event.payload()).unwrap(),
+                    ));
+                });
+        }
+
+        for args in [
+            vec!["file", "open", "other-window.md"],
+            vec!["command", "execute", "app_save"],
+            vec!["file", "open", "explicit.md", "--window", "main_new_file"],
+        ] {
+            let original = request(&args);
+            let mut expected = serde_json::to_value(&original).unwrap();
+            expected["windowId"] = json!("main_new_file");
+            received.lock().unwrap().clear();
+
+            emit_request_to_window(&target, &original).unwrap();
+
+            assert_eq!(
+                *received.lock().unwrap(),
+                vec![("main_new_file", expected)],
+                "CLI operation must not mutate another editor window: {args:?}",
+            );
+        }
+    }
+
     #[test]
     fn history_and_save_parser_separate_session_and_transport_identity() {
         let r = request(&["history", "begin", "a.md", "--request-id", "edit-1"]);

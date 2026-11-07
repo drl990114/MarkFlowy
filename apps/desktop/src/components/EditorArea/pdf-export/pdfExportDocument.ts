@@ -232,9 +232,12 @@ function normalizePrintStyles(css: string): string {
 }
 
 function printLayout(paperSize: 'a4' | 'letter', landscape: boolean): string {
+  // Trailing paragraph spacing is not another printable block. WKWebView can
+  // paginate that margin onto an otherwise empty final page near the paper edge.
   return `@page{size:${paperSize.toUpperCase()} ${landscape ? 'landscape' : 'portrait'};margin:16mm}
 html,body{margin:0!important;padding:0!important;height:auto!important;min-height:0!important;overflow:visible!important}
 .mf-pdf-export,.mf-pdf-export-wrapper,.mf-pdf-export .mf-preview-content{position:static!important;inset:auto!important;z-index:auto!important;display:block!important;width:auto!important;height:auto!important;min-height:0!important;max-height:none!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:visible!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;content-visibility:visible!important;transform:none!important;clip:auto!important;clip-path:none!important;print-color-adjust:exact;-webkit-print-color-adjust:exact;overflow-wrap:anywhere}
+.mf-pdf-export .mf-preview-content > :last-child{margin-bottom:0!important}
 .mf-pdf-export h1,.mf-pdf-export h2,.mf-pdf-export h3,.mf-pdf-export h4,.mf-pdf-export h5,.mf-pdf-export h6{break-after:avoid-page;page-break-after:avoid}
 .mf-pdf-export img,.mf-pdf-export svg,.mf-pdf-export figure,.mf-pdf-export tr,.mf-pdf-export .mf-pdf-media-placeholder{break-inside:avoid;page-break-inside:avoid}
 .mf-pdf-export img,.mf-pdf-export svg{max-width:100%!important;max-height:100vh!important;height:auto!important}

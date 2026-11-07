@@ -377,13 +377,23 @@ describe('targeted CLI operations', () => {
     expect(mocks.add).not.toHaveBeenCalled()
   })
 
-  it('rejects another window without falling back to the active target', async () => {
-    await expect(runCliRequest(await request({ windowId: 'missing' }))).rejects.toMatchObject({
-      code: 'wrong_window',
-    })
-    expect(mocks.activate).not.toHaveBeenCalled()
-    expect(mocks.render).not.toHaveBeenCalled()
-  })
+  it.each(['open', 'command', 'export'] as const)(
+    'rejects %s for another window before any editor side effects',
+    async (operation) => {
+      await expect(runCliRequest(await request({
+        operation,
+        windowId: 'main_new_file',
+        commandId: operation === 'command' ? 'app_save' : null,
+      }))).rejects.toMatchObject({
+        code: 'wrong_window',
+      })
+      expect(mocks.activate).not.toHaveBeenCalled()
+      expect(mocks.add).not.toHaveBeenCalled()
+      expect(mocks.execute).not.toHaveBeenCalled()
+      expect(mocks.render).not.toHaveBeenCalled()
+      expect(mocks.invoke).not.toHaveBeenCalled()
+    },
+  )
 
   it('distinguishes GUI dispatch from operation completion and reports unknown commands', async () => {
     const req = await request({ operation: 'command', commandId: 'app_save' })

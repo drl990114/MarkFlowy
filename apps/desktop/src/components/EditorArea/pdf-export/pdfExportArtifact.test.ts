@@ -79,7 +79,12 @@ describe('actual browser PDF artifacts', () => {
         const texts: string[] = []
         for (let page = 1; page <= document.numPages; page += 1) {
           const content = await (await document.getPage(page)).getTextContent()
-          texts.push(content.items.map((item) => ('str' in item ? item.str : '')).join(''))
+          const pageText = content.items.map((item) => ('str' in item ? item.str : '')).join('')
+          // This fixture has no intentional blank or image-only pages. Checking
+          // each page catches trailing blank pages that whole-document text misses.
+          expect(pageText.trim(), `Rich PDF fixture page ${page} must contain selectable text`)
+            .not.toBe('')
+          texts.push(pageText)
         }
         // Some CJK fonts map glyphs to Unicode compatibility characters.
         const text = texts.join('\n').normalize('NFKC')
