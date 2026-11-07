@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { savePathCoordinator } from '@/components/EditorArea/savePathCoordinator'
+import type { EventCallback, Options } from '@tauri-apps/api/event'
+import { SavePathCoordinator, savePathCoordinator } from '@/components/EditorArea/savePathCoordinator'
 import { listenForUpdateSession, withPreservedUpdateSession } from './update-session'
 
 const mocks = vi.hoisted(() => ({
@@ -49,6 +50,62 @@ afterEach(async () => {
 })
 
 describe('update session coordinator', () => {
+  it('routes requests to each window once with Tauri global-listener semantics', async () => {
+    const listeners = new Set<{ event: string; callback: EventCallback<object>; options?: Options }>()
+    const handlers: Promise<void>[] = []
+    mocks.listen.mockImplementation(async (event: string, callback: EventCallback<object>, options?: Options) => {
+      const listener = { event, callback, options }
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    })
+    mocks.emitTo.mockImplementation(async (label: string, event: string, payload: object) => {
+      for (const listener of listeners) {
+        const target = listener.options?.target
+        // Tauri's default Any listeners receive emitTo events for every window.
+        const matchesTarget = !target || (typeof target === 'string'
+          ? target === label
+          : target.kind === 'Any' || ('label' in target && target.label === label))
+        if (listener.event === event && matchesTarget) {
+          handlers.push(Promise.resolve(listener.callback({ event, id: 0, payload })))
+        }
+      }
+    })
+    // Each real webview has its own module instance and file-mutation queue.
+    const coordinators: SavePathCoordinator[] = []
+    const exclusive = vi.spyOn(savePathCoordinator, 'runExclusive').mockImplementation((queue, owner, operation) => {
+      const coordinator = new SavePathCoordinator()
+      coordinators.push(coordinator)
+      return coordinator.runExclusive(queue, owner, operation)
+    })
+    const prepare = vi.fn(async () => {})
+    const flush = vi.fn(async () => {})
+    for (const label of ['main', 'main_two']) {
+      disposers.push(await listenForUpdateSession(label, { prepare, flush }))
+    }
+    const operation = vi.fn(async () => {
+      expect(coordinators).toHaveLength(2)
+      expect(coordinators.every((coordinator) => coordinator.isFileReserved('document'))).toBe(true)
+      return 'installed'
+    })
+    try {
+      await expect(withPreservedUpdateSession('main', operation)).resolves.toBe('installed')
+      await Promise.all(handlers)
+      expect(prepare).toHaveBeenCalledTimes(2)
+      expect(flush).toHaveBeenCalledTimes(2)
+      expect(operation).toHaveBeenCalledOnce()
+      expect(coordinators.every((coordinator) => !coordinator.isFileReserved('document'))).toBe(true)
+      expect(mocks.emitTo.mock.calls.filter(([, event]) => event === RESPONSE))
+        .toEqual([
+          ['main', RESPONSE, { id: expect.any(String), label: 'main' }],
+          ['main', RESPONSE, { id: expect.any(String), label: 'main_two' }],
+        ])
+    } finally {
+      disposers.splice(0).forEach((dispose) => dispose())
+      await Promise.all(handlers)
+      exclusive.mockRestore()
+    }
+  })
+
   it('holds every editor until all have saved and the installation finishes', async () => {
     const installed = deferred()
     const operation = vi.fn(() => installed.promise)

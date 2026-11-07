@@ -41,10 +41,11 @@ export async function listenForUpdateSession(label: string, persistence: UpdateS
     stops.forEach((stop) => stop())
   }
   try {
-    stops.push(await listen<Release>(RELEASE, ({ payload }) => cancel(payload)))
+    // Global (Any) listeners also receive emitTo events addressed to other windows.
+    stops.push(await listen<Release>(RELEASE, ({ payload }) => cancel(payload), { target: label }))
     stops.push(await listen<{ id: string }>(HEARTBEAT, ({ payload }) => {
       if (active?.id === payload.id) active.renew()
-    }))
+    }, { target: label }))
     stops.push(await listen<Request>(REQUEST, async ({ payload }) => {
       if (disposed || cancelled.has(payload.id) || payload.expiresAt < Date.now()) return
       if (active) {
@@ -106,7 +107,7 @@ export async function listenForUpdateSession(label: string, persistence: UpdateS
         release()
         if (active === request) active = undefined
       }
-    }))
+    }, { target: label }))
     return dispose
   } catch (error) {
     dispose()
@@ -133,7 +134,7 @@ export async function withPreservedUpdateSession<T>(replyTo: string, operation: 
         if (payload.error) { reject(new Error(payload.error)); return }
         pending.delete(payload.label)
         if (!pending.size) resolve()
-      }).then(async (unlisten) => {
+      }, { target: replyTo }).then(async (unlisten) => {
         if (finished) { unlisten(); return }
         stop = unlisten
         if (!pending.size) { resolve(); return }
