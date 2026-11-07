@@ -31,7 +31,7 @@ const langMap = {
   es: { desktop: esDesktop, editor: esEditor },
   ja: { desktop: jaDesktop, editor: jaEditor },
   vi: { desktop: viDesktop, editor: viEditor },
-  ptBR: { desktop: viDesktop, editor: viEditor },
+  ptBR: { desktop: ptBRDesktop, editor: ptBREditor },
 } as const
 
 export const desktopResources = Object.fromEntries(
