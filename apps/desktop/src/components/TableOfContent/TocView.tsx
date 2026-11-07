@@ -31,6 +31,7 @@ import {
 import { getCapricornRuntimeInput } from '../EditorArea/capricornRuntimeDom'
 import SideBarHeader from '../SideBar/SideBarHeader'
 import { CapricornHeadingNumberingButton } from './HeadingNumberingButton'
+import { renderHeadingTitle } from './HeadingTitle'
 import { TocViewContainer } from './styles'
 import { scheduleOutlineAfterPaint } from './scheduleOutlineAfterPaint'
 import { subscribeOutlineScrollIntent, subscribeSourceOutline } from './outlineTracking'
@@ -907,6 +908,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       >
         <TableOfContents
           ref={tocRef}
+          renderTitle={renderHeadingTitle}
           containerEl={editorPanelEl ?? undefined}
           scrollEl={editorPanelEl ?? undefined}
           variant={variant}

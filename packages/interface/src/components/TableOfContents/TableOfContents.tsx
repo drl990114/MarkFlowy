@@ -71,6 +71,8 @@ export interface TableOfContentsProps {
   onCollapsedHeadingIdsChange?: (ids: ReadonlySet<string>) => void
   collapseLabel?: string
   expandLabel?: string
+  /** Optional inline title renderer. The enclosing link still owns navigation. */
+  renderTitle?: (title: string) => React.ReactNode
 }
 
 const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((props, ref) => {
@@ -91,6 +93,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     onCollapsedHeadingIdsChange,
     collapseLabel = 'Collapse',
     expandLabel = 'Expand',
+    renderTitle,
     Empty = null,
   } = props;
   const [headings, setHeadings] = useState(headingsData);
@@ -457,7 +460,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
             {showChapter && h.h.chapter !== null ? (
               <span className="toc-link__chapter">{h.h.chapter ?? h.chapter}</span>
             ) : null}
-            <span className="toc-link__title">{h.title}</span>
+            <span className="toc-link__title">{renderTitle ? renderTitle(h.title) : h.title}</span>
           </TocLink>
         </TocListItem>
       );
