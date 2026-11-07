@@ -121,7 +121,99 @@ function richEditor() {
   return { editor, state }
 }
 
+function headingEditor() {
+  const { editor, state } = richEditor()
+  const numbering = { complete: false, hasHeadings: true }
+  Object.assign(editor, {
+    headings: {
+      getNumbering: vi.fn(() => ({ ...numbering })),
+      applyNumbering: vi.fn(() => {
+        numbering.complete = true
+        return { ...numbering }
+      }),
+      removeNumbering: vi.fn(() => {
+        numbering.complete = false
+        return { ...numbering }
+      }),
+    },
+  })
+  return { editor, state, numbering }
+}
+
 describe('palette editor execution', () => {
+  it.each(['missing', 'invalid'] as const)('toggles document heading numbering with a selection that is %s through the palette', async (selection) => {
+    const { editor, numbering } = headingEditor()
+    if (selection === 'missing') vi.mocked(editor.selection!.capture).mockReturnValue(null)
+    else vi.mocked(editor.selection!.isValid).mockReturnValue(false)
+    const context = { target: captureEditorCommandTarget(), platform: 'mac' as const }
+    const command = paletteCommands.find((item) => item.id === 'editor_toggleHeadingNumbering')!
+    expect(command.labelKey).toBe('toolbar.headingNumbering')
+    expect(command.keywords).toEqual(expect.arrayContaining(['正文', '标题', '编号']))
+    expect(command.getUnavailableReason(context)).toBeUndefined()
+    expect(editorCommandUnavailable(context.target, 'editor_toggleStrong')).toBe('selection_unavailable')
+
+    expect(await command.execute(context)).toBe(true)
+    expect(numbering.complete).toBe(true)
+    expect(editor.headings.applyNumbering).toHaveBeenCalledOnce()
+    expect(await command.execute(context)).toBe(true)
+    expect(numbering.complete).toBe(false)
+    expect(editor.headings.removeNumbering).toHaveBeenCalledOnce()
+    expect(editor.selection!.restore).not.toHaveBeenCalled()
+    expect(editor.focus).toHaveBeenCalledTimes(2)
+  })
+
+  it('guards heading numbering against missing documents, stale targets, readonly, no headings and other file types', async () => {
+    const command = 'editor_toggleHeadingNumbering'
+    const { editor, state, numbering } = headingEditor()
+    const target = captureEditorCommandTarget()
+    expect(editorCommandUnavailable(null, command)).toBe('no_document')
+    expect(await executeEditorPaletteCommand(null, command)).toBe(false)
+    for (const active of [{ activeId: 'other' }, { activeGroupId: 'right' }]) {
+      useEditorStore.setState(active)
+      expect(editorCommandUnavailable(target, command)).toBe('stale_target')
+      expect(await executeEditorPaletteCommand(target, command)).toBe(false)
+      useEditorStore.setState({ activeId: 'file', activeGroupId: 'left' })
+    }
+    setCapricornEditor('file', { ...editor })
+    expect(editorCommandUnavailable(target, command)).toBe('stale_target')
+    expect(await executeEditorPaletteCommand(target, command)).toBe(false)
+    setCapricornEditor('file', editor)
+    state.readOnly = true
+    expect(editorCommandUnavailable(target, command)).toBe('read_only')
+    expect(await executeEditorPaletteCommand(target, command)).toBe(false)
+    state.readOnly = false
+    numbering.hasHeadings = false
+    expect(editorCommandUnavailable(target, command)).toBe('no_headings')
+    expect(await executeEditorPaletteCommand(target, command)).toBe(false)
+    numbering.hasHeadings = true
+    useFileTypeConfigStore.getState().setFileTypeConfig('file', {
+      type: 'text', defaultMode: EditorViewType.SOURCECODE,
+      supportedModes: [EditorViewType.SOURCECODE],
+    })
+    expect(editorCommandUnavailable(target, command)).toBe('markdown_only')
+    expect(await executeEditorPaletteCommand(target, command)).toBe(false)
+    expect(editor.headings.applyNumbering).not.toHaveBeenCalled()
+    expect(editor.headings.removeNumbering).not.toHaveBeenCalled()
+  })
+
+  it('keeps heading numbering unavailable in source and preview modes', async () => {
+    const cm = source()
+    const sourceTarget = captureEditorCommandTarget()
+    expect(editorCommandUnavailable(sourceTarget, 'editor_toggleHeadingNumbering')).toBe('wysiwyg_only')
+    expect(await executeEditorPaletteCommand(sourceTarget, 'editor_toggleHeadingNumbering')).toBe(false)
+    expect(cm.state.doc.toString()).toBe('hello world')
+    useEditorViewTypeStore.getState().setEditorViewType('file', EditorViewType.PREVIEW)
+    const previewTarget = captureEditorCommandTarget()
+    expect(editorCommandUnavailable(previewTarget, 'editor_toggleHeadingNumbering')).toBe('preview')
+    expect(await executeEditorPaletteCommand(previewTarget, 'editor_toggleHeadingNumbering')).toBe(false)
+  })
+
+  it('does not report successful numbering when the editor leaves the document unchanged', async () => {
+    const { editor } = headingEditor()
+    vi.mocked(editor.headings.applyNumbering).mockReturnValue({ complete: false, hasHeadings: true })
+    expect(await executeEditorPaletteCommand(captureEditorCommandTarget(), 'editor_toggleHeadingNumbering')).toBe(false)
+  })
+
   it('keeps a toolbar block insertion in its explicit source pane when the compatibility alias changes', async () => {
     const left = source()
     sourceCodeViewRegistry.register('file', 'left-source', { cm: left } as MfCodemirrorView, 'left')

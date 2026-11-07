@@ -39,6 +39,8 @@
       "no_undo": "元に戻す操作がありません",
       "no_redo": "やり直す操作がありません",
       "markdown_only": "Markdown ドキュメントで使用できます",
+      "wysiwyg_only": "WYSIWYG モードでのみ使用できます",
+      "no_headings": "文書に見出しがありません",
       "zen_mode": "先に Zen モードを終了してください"
     }
   },
@@ -139,7 +141,8 @@
     "taskList": "タスクリスト",
     "insert": "挿入",
     "codeBlock": "コードブロック",
-    "mathBlock": "数式ブロック"
+    "mathBlock": "数式ブロック",
+    "headingNumbering": "本文の見出し番号を切り替え"
   },
   "image_insert": {
     "title": "画像を挿入",
@@ -227,7 +230,10 @@
     "leftDock": "左ドック",
     "rightDock": "右ドック",
     "table_of_contents": "目次",
-    "heading_numbering": "見出し番号を切り替え",
+    "heading_numbering": "本文の見出し番号を切り替え",
+    "heading_numbering_add": "本文の見出しに番号を追加",
+    "heading_numbering_remove": "本文の見出し番号を削除",
+    "heading_numbering_description": "番号は Markdown に書き込まれます。",
     "no_heading_lines": "見出し行が見つかりません"
   },
   "bookmarks": {

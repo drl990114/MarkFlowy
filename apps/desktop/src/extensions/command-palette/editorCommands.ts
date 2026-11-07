@@ -25,6 +25,8 @@ export type CommandUnavailableReason =
   | 'no_undo'
   | 'no_redo'
   | 'markdown_only'
+  | 'wysiwyg_only'
+  | 'no_headings'
   | 'zen_mode'
 
 export const EDITOR_COMMANDS = [
@@ -36,6 +38,7 @@ export const EDITOR_COMMANDS = [
   ['editor_toggleH1', 'h1'],
   ['editor_toggleH2', 'h2'],
   ['editor_toggleH3', 'h3'],
+  ['editor_toggleHeadingNumbering', 'headingNumbering'],
   ['editor_toggleBlockquote', 'quote'],
   ['editor_toggleBulletList', 'bulletList'],
   ['editor_toggleOrderedList', 'orderedList'],
@@ -59,6 +62,8 @@ function richCommandUnavailable(
   if (getCapricornEditor(fileId, target.resourceGroupId) !== rich) return 'stale_target'
   const state = rich.getUiState()
   if (state.readOnly) return 'read_only'
+  if (command === 'editor_toggleHeadingNumbering')
+    return rich.headings.getNumbering().hasHeadings ? undefined : 'no_headings'
   if (!bookmark || !rich.selection?.isValid(bookmark.id)) return 'selection_unavailable'
   if (command === 'editor_toggleDelete') return 'unavailable'
   if ((command === 'editor_insertCodeBlock' || command === 'editor_insertMathBlock') &&
@@ -95,6 +100,8 @@ export function editorCommandUnavailable(
   if (!target) return 'no_document'
   if (!isCurrentCommandTarget(target)) return 'stale_target'
   if (target.mode === EditorViewType.PREVIEW) return 'preview'
+  if (command === 'editor_toggleHeadingNumbering' && target.mode !== EditorViewType.WYSIWYG)
+    return 'wysiwyg_only'
   const { fileId } = target
   const reason = target.rich
     ? richCommandUnavailable(target, command)
@@ -137,9 +144,17 @@ export async function executeEditorPaletteCommand(
   target: EditorCommandTarget | null,
   command: EditorPaletteCommand,
 ) {
-  if (!target || editorCommandUnavailable(target, command) || !restoreEditorCommandTarget(target))
-    return false
+  if (!target || editorCommandUnavailable(target, command)) return false
   const { rich, source, fileId } = target
+  // Numbering applies to the whole document, including when no text selection is available.
+  if (command === 'editor_toggleHeadingNumbering') {
+    if (!rich) return false
+    const numbered = rich.headings.getNumbering().complete
+    const result = numbered ? rich.headings.removeNumbering() : rich.headings.applyNumbering()
+    rich.focus()
+    return result.hasHeadings && result.complete !== numbered
+  }
+  if (!restoreEditorCommandTarget(target)) return false
   if (rich) {
     switch (command) {
       case 'editor_undo':

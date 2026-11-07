@@ -39,6 +39,8 @@
       "no_undo": "没有可撤销的操作",
       "no_redo": "没有可重做的操作",
       "markdown_only": "仅适用于 Markdown 文档",
+      "wysiwyg_only": "仅支持所见即所得模式",
+      "no_headings": "文档中没有标题",
       "zen_mode": "请先退出 Zen 模式"
     }
   },
@@ -139,7 +141,8 @@
     "taskList": "任务列表",
     "insert": "插入",
     "codeBlock": "代码块",
-    "mathBlock": "公式块"
+    "mathBlock": "公式块",
+    "headingNumbering": "切换正文标题编号"
   },
   "image_insert": {
     "title": "插入图片",
@@ -233,7 +236,10 @@
     "leftDock": "左侧面板",
     "rightDock": "右侧面板",
     "table_of_contents": "目录",
-    "heading_numbering": "切换标题序号",
+    "heading_numbering": "切换正文标题编号",
+    "heading_numbering_add": "添加正文标题编号",
+    "heading_numbering_remove": "移除正文标题编号",
+    "heading_numbering_description": "编号会写入 Markdown。",
     "no_heading_lines": "未找到小标题行"
   },
   "bookmarks": {

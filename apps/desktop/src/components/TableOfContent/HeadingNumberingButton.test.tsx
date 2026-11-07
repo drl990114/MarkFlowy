@@ -38,7 +38,7 @@ describe('HeadingNumberingButton', () => {
       </TooltipProvider>,
     )
 
-    expect(screen.queryByRole('button', { name: 'sidebar.heading_numbering' })).toBeNull()
+    expect(screen.queryByRole('button')).toBeNull()
     expect(editorCtx.addHandler).not.toHaveBeenCalled()
   })
 
@@ -72,16 +72,18 @@ describe('HeadingNumberingButton', () => {
       </TooltipProvider>,
     )
 
-    const button = screen.getByRole('button', { name: 'sidebar.heading_numbering' })
+    const button = screen.getByRole('button', { name: 'sidebar.heading_numbering_add' })
     expect(button.getAttribute('aria-pressed')).toBe('false')
 
     complete = true
     act(() => handleEditorUpdate?.())
     expect(button.getAttribute('aria-pressed')).toBe('true')
+    expect(button.getAttribute('aria-label')).toBe('sidebar.heading_numbering_remove')
 
     complete = false
     act(() => handleEditorUpdate?.())
     expect(button.getAttribute('aria-pressed')).toBe('false')
+    expect(button.getAttribute('aria-label')).toBe('sidebar.heading_numbering_add')
 
     fireEvent.click(button)
     expect(applyHeadingNumbering).toHaveBeenCalledTimes(1)
@@ -95,7 +97,7 @@ describe('HeadingNumberingButton', () => {
 })
 
 describe('CapricornHeadingNumberingButton', () => {
-  it('uses published numbering snapshots and retains current command and editor state', () => {
+  it('uses published numbering snapshots and retains current command and editor state', async () => {
     let notify: ((headings: CapricornHeading[]) => void) | undefined
     let complete = false
     const getNumbering = vi.fn(() => ({ complete, hasHeadings: true }))
@@ -131,19 +133,25 @@ describe('CapricornHeadingNumberingButton', () => {
         <CapricornHeadingNumberingButton editor={editor} />
       </TooltipProvider>,
     )
-    const button = screen.getByRole('button', { name: 'sidebar.heading_numbering' })
+    const button = screen.getByRole('button', { name: 'sidebar.heading_numbering_add' })
     expect(button.getAttribute('aria-pressed')).toBe('false')
+    fireEvent.focus(button)
+    const tooltip = await screen.findByRole('tooltip')
+    expect(tooltip.textContent).toContain('sidebar.heading_numbering_description')
+    fireEvent.blur(button)
     getNumbering.mockClear()
     act(() => {
       complete = true
       notify!(sample('1'))
     })
     expect(button.getAttribute('aria-pressed')).toBe('true')
+    expect(button.getAttribute('aria-label')).toBe('sidebar.heading_numbering_remove')
     act(() => {
       complete = false
       notify!(sample(null))
     })
     expect(button.getAttribute('aria-pressed')).toBe('false')
+    expect(button.getAttribute('aria-label')).toBe('sidebar.heading_numbering_add')
     expect(getNumbering).not.toHaveBeenCalled()
     fireEvent.click(button)
     expect(applyNumbering).toHaveBeenCalledOnce()

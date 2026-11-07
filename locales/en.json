@@ -39,6 +39,8 @@
       "no_undo": "Nothing to undo",
       "no_redo": "Nothing to redo",
       "markdown_only": "Available for Markdown documents",
+      "wysiwyg_only": "Available only in WYSIWYG mode",
+      "no_headings": "The document has no headings",
       "zen_mode": "Exit Zen Mode first"
     }
   },
@@ -139,7 +141,8 @@
     "taskList": "Task List",
     "insert": "Insert",
     "codeBlock": "Code block",
-    "mathBlock": "Math block"
+    "mathBlock": "Math block",
+    "headingNumbering": "Toggle document heading numbering"
   },
   "image_insert": {
     "title": "Insert Image",
@@ -227,7 +230,10 @@
     "leftDock": "Left Dock",
     "rightDock": "Right Dock",
     "table_of_contents": "Table of Contents",
-    "heading_numbering": "Toggle heading numbering",
+    "heading_numbering": "Toggle document heading numbering",
+    "heading_numbering_add": "Add document heading numbering",
+    "heading_numbering_remove": "Remove document heading numbering",
+    "heading_numbering_description": "Numbering is written to Markdown.",
     "no_heading_lines": "No heading lines found"
   },
   "bookmarks": {

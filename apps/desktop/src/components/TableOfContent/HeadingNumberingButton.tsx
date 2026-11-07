@@ -56,10 +56,10 @@ export function HeadingNumberingButton(props: { editorCtx: EditorContext }) {
 export function CapricornHeadingNumberingButton(props: { editor: CapricornRuntimeAdapter }) {
   const { editor } = props
   const { t } = useTranslation()
-  const label = t('sidebar.heading_numbering') || 'Heading numbering'
   const [numberingEnabled, setNumberingEnabled] = useState(
     () => editor.headings.getNumbering().complete,
   )
+  const label = t(numberingEnabled ? 'sidebar.heading_numbering_remove' : 'sidebar.heading_numbering_add')
 
   useEffect(() => {
     const syncNumberingState = () => {
@@ -95,7 +95,10 @@ export function CapricornHeadingNumberingButton(props: { editor: CapricornRuntim
           <ListOrderedIcon aria-hidden='true' strokeWidth={1.75} />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
+      <TooltipContent>
+        <div>{label}</div>
+        <div className='text-muted-foreground'>{t('sidebar.heading_numbering_description')}</div>
+      </TooltipContent>
     </Tooltip>
   )
 }
@@ -103,10 +106,10 @@ export function CapricornHeadingNumberingButton(props: { editor: CapricornRuntim
 function HeadingNumberingButtonReady(props: { editorCtx: EditorContext }) {
   const { editorCtx } = props
   const { t } = useTranslation()
-  const label = t('sidebar.heading_numbering') || 'Heading numbering'
   const [numberingEnabled, setNumberingEnabled] = useState(
     () => getHeadingNumberingApi(editorCtx)!.getAnalysis().complete,
   )
+  const label = t(numberingEnabled ? 'sidebar.heading_numbering_remove' : 'sidebar.heading_numbering_add')
 
   useEffect(() => {
     const syncNumberingState = () => {
@@ -142,7 +145,10 @@ function HeadingNumberingButtonReady(props: { editorCtx: EditorContext }) {
           <ListOrderedIcon aria-hidden='true' strokeWidth={1.75} />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
+      <TooltipContent>
+        <div>{label}</div>
+        <div className='text-muted-foreground'>{t('sidebar.heading_numbering_description')}</div>
+      </TooltipContent>
     </Tooltip>
   )
 }

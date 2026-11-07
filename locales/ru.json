@@ -39,6 +39,8 @@
       "no_undo": "Нечего отменять",
       "no_redo": "Нечего повторять",
       "markdown_only": "Доступно для документов Markdown",
+      "wysiwyg_only": "Доступно только в режиме WYSIWYG",
+      "no_headings": "В документе нет заголовков",
       "zen_mode": "Сначала выйдите из режима «Дзен»"
     }
   },
@@ -139,7 +141,8 @@
     "taskList": "Список задач",
     "insert": "Вставить",
     "codeBlock": "Блок кода",
-    "mathBlock": "Блок формулы"
+    "mathBlock": "Блок формулы",
+    "headingNumbering": "Включить или отключить нумерацию заголовков документа"
   },
   "image_insert": {
     "title": "Вставить изображение",
@@ -227,7 +230,10 @@
     "leftDock": "Левая панель",
     "rightDock": "Правая панель",
     "table_of_contents": "Оглавление",
-    "heading_numbering": "Включить или отключить нумерацию заголовков",
+    "heading_numbering": "Включить или отключить нумерацию заголовков документа",
+    "heading_numbering_add": "Добавить нумерацию заголовков документа",
+    "heading_numbering_remove": "Удалить нумерацию заголовков документа",
+    "heading_numbering_description": "Номера записываются в Markdown.",
     "no_heading_lines": "Заголовки не найдены"
   },
   "bookmarks": {

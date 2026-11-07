@@ -39,6 +39,8 @@
       "no_undo": "Rien à annuler",
       "no_redo": "Rien à refaire",
       "markdown_only": "Disponible pour les documents Markdown",
+      "wysiwyg_only": "Disponible uniquement en mode WYSIWYG",
+      "no_headings": "Le document ne contient aucun titre",
       "zen_mode": "Quittez d’abord le mode Zen"
     }
   },
@@ -139,7 +141,8 @@
     "taskList": "Liste de tâches",
     "insert": "Insérer",
     "codeBlock": "Bloc de code",
-    "mathBlock": "Bloc de formule"
+    "mathBlock": "Bloc de formule",
+    "headingNumbering": "Activer/désactiver la numérotation des titres du document"
   },
   "image_insert": {
     "title": "Insérer une image",
@@ -227,7 +230,10 @@
     "leftDock": "Panneau gauche",
     "rightDock": "Panneau droit",
     "table_of_contents": "sommaire",
-    "heading_numbering": "Activer la numérotation des titres",
+    "heading_numbering": "Activer/désactiver la numérotation des titres du document",
+    "heading_numbering_add": "Numéroter les titres du document",
+    "heading_numbering_remove": "Supprimer la numérotation des titres du document",
+    "heading_numbering_description": "La numérotation est inscrite dans le Markdown.",
     "no_heading_lines": "Aucune ligne de titre trouvée"
   },
   "bookmarks": {

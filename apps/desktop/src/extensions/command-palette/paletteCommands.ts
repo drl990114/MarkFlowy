@@ -73,6 +73,7 @@ const EDITOR_ALIASES: Readonly<Record<string, readonly string[]>> = {
   editor_insertMathBlock: ['math', 'formula', 'equation', 'latex', '公式块'],
   editor_toggleBulletList: ['unordered list', '无序列表'],
   editor_toggleOrderedList: ['numbered list'],
+  editor_toggleHeadingNumbering: ['heading numbering', 'document', '正文', '标题', '编号'],
   editor_toggleTaskList: ['checklist', 'todo', '待办'],
   editor_toggleDelete: ['strikethrough', 'strike'],
 }

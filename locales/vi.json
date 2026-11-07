@@ -39,6 +39,8 @@
       "no_undo": "Không có gì để hoàn tác",
       "no_redo": "Không có gì để làm lại",
       "markdown_only": "Khả dụng cho tài liệu Markdown",
+      "wysiwyg_only": "Chỉ hỗ trợ chế độ WYSIWYG",
+      "no_headings": "Tài liệu không có tiêu đề",
       "zen_mode": "Hãy thoát Chế độ Zen trước"
     }
   },
@@ -139,7 +141,8 @@
     "taskList": "Danh sách công việc",
     "insert": "Chèn",
     "codeBlock": "Khối mã",
-    "mathBlock": "Khối công thức"
+    "mathBlock": "Khối công thức",
+    "headingNumbering": "Bật/tắt đánh số tiêu đề trong tài liệu"
   },
   "image_insert": {
     "title": "Chèn hình ảnh",
@@ -227,7 +230,10 @@
     "leftDock": "Thanh bên trái",
     "rightDock": "Thanh bên phải",
     "table_of_contents": "Mục lục",
-    "heading_numbering": "Bật/tắt đánh số tiêu đề",
+    "heading_numbering": "Bật/tắt đánh số tiêu đề trong tài liệu",
+    "heading_numbering_add": "Thêm số cho tiêu đề trong tài liệu",
+    "heading_numbering_remove": "Bỏ đánh số tiêu đề trong tài liệu",
+    "heading_numbering_description": "Số thứ tự sẽ được ghi vào Markdown.",
     "no_heading_lines": "Không tìm thấy tiêu đề nào"
   },
   "bookmarks": {
