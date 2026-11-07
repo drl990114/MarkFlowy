@@ -1067,7 +1067,11 @@
         "noLightVariant": "ライト版なし",
         "noDarkVariant": "ダーク版なし",
         "installAndSelect": "インストールして選択",
-        "noMatchingThemes": "このモードで利用できるコミュニティテーマはありません。"
+        "noMatchingThemes": "このモードで利用できるコミュニティテーマはありません。",
+        "openCssDirectory": "CSSフォルダを開く",
+        "cssDirectoryHint": "このフォルダのCSSは自動同期されます。新規ファイルは無効です。編集・削除はフォルダ内で行ってください。",
+        "externalCssFile": "外部ファイル",
+        "revealCssFile": "フォルダに表示"
       },
       "label": "テーマストア",
       "desc": "組み込みテーマやコミュニティテーマを探したり、自分のテーマをカスタマイズできます。",

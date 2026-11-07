@@ -2,7 +2,12 @@
 use super::conf;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::{io::Write, path::Path, sync::Mutex};
+use std::{
+    collections::BTreeMap,
+    io::{Read, Write},
+    path::Path,
+    sync::Mutex,
+};
 static THEME_LOCK: Mutex<()> = Mutex::new(());
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -12,12 +17,35 @@ pub struct ThemeLibrary {
     pub documents: Vec<Value>,
     pub snippets: Vec<CssSnippet>,
 }
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CssSnippet {
     pub id: String,
     pub name: String,
     pub css: String,
     pub enabled: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_file: Option<String>,
+}
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ThemeLibraryResponse {
+    #[serde(flatten)]
+    library: ThemeLibrary,
+    snippet_directory: String,
+    snippet_errors: Vec<String>,
+    transient_snippets: bool,
+}
+const EXTERNAL_SNIPPET_PREFIX: &str = "css-file:";
+const MAX_SNIPPET_BYTES: u64 = 1024 * 1024;
+
+fn external_snippet_id(name: &str) -> String {
+    let suffix: String = name
+        .as_bytes()
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect();
+    format!("{EXTERNAL_SNIPPET_PREFIX}{suffix}")
 }
 #[derive(Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
@@ -89,6 +117,105 @@ fn validate_document(document: &Value) -> Result<(), String> {
     Ok(())
 }
 impl ThemeLibrary {
+    fn refresh_for_read(&mut self, directory: &Path, path: &Path) -> (Vec<String>, bool) {
+        let persisted_revision = self.revision;
+        let (changed, mut errors) = self.refresh_snippets(directory);
+        if changed {
+            if let Err(error) = self.write(path) {
+                // Return the discovered CSS without inventing a persisted revision.
+                // The client can refresh subsequent temporary snapshots at this revision.
+                self.revision = persisted_revision;
+                errors.push(format!("Could not save discovered CSS snippets: {error}"));
+                return (errors, true);
+            }
+        }
+        (errors, false)
+    }
+    fn refresh_snippets(&mut self, directory: &Path) -> (bool, Vec<String>) {
+        // An unavailable CSS directory must not prevent theme loading or edits.
+        // The scanner commits only after a complete listing, preserving saved
+        // external identities, enable state and ordering when listing fails.
+        self.sync_snippet_directory(directory)
+            .unwrap_or_else(|error| (false, vec![format!("{}: {error}", directory.display())]))
+    }
+    // File names are identities, not display labels. This preserves ordering and
+    // enable state across external edits without colliding with imported snippets.
+    fn sync_snippet_directory(&mut self, directory: &Path) -> Result<(bool, Vec<String>), String> {
+        std::fs::create_dir_all(directory).map_err(|error| error.to_string())?;
+        let mut files = BTreeMap::new();
+        let mut errors = Vec::new();
+        for entry in std::fs::read_dir(directory).map_err(|error| error.to_string())? {
+            let entry = entry.map_err(|error| error.to_string())?;
+            let path = entry.path();
+            if !path
+                .extension()
+                .and_then(|value| value.to_str())
+                .is_some_and(|extension| extension.eq_ignore_ascii_case("css"))
+            {
+                continue;
+            }
+            // Do not follow symlinks or read directories/special files.
+            if !entry
+                .file_type()
+                .map_err(|error| error.to_string())?
+                .is_file()
+            {
+                continue;
+            }
+            let Some(name) = entry.file_name().to_str().map(str::to_owned) else {
+                errors.push(format!("{}: file name is not UTF-8", path.display()));
+                continue;
+            };
+            let read_css = || -> Result<String, String> {
+                let file = std::fs::File::open(&path).map_err(|error| error.to_string())?;
+                let mut bytes = Vec::new();
+                file.take(MAX_SNIPPET_BYTES + 1)
+                    .read_to_end(&mut bytes)
+                    .map_err(|error| error.to_string())?;
+                if bytes.len() as u64 > MAX_SNIPPET_BYTES {
+                    return Err("CSS file exceeds 1 MiB".into());
+                }
+                if bytes.contains(&0) {
+                    return Err("CSS file contains binary data".into());
+                }
+                String::from_utf8(bytes).map_err(|_| "CSS file is not UTF-8".into())
+            };
+            let css = match read_css() {
+                Ok(css) => css,
+                Err(error) => {
+                    errors.push(format!("{name}: {error}"));
+                    // Keep the saved identity/order but remove stale styling while invalid.
+                    String::new()
+                }
+            };
+            files.insert(
+                external_snippet_id(&name),
+                CssSnippet {
+                    id: external_snippet_id(&name),
+                    name,
+                    css,
+                    enabled: false,
+                    source_file: Some(path.to_string_lossy().into_owned()),
+                },
+            );
+        }
+        let mut snippets = Vec::new();
+        for previous in &self.snippets {
+            if previous.source_file.is_none() {
+                snippets.push(previous.clone());
+            } else if let Some(mut current) = files.remove(&previous.id) {
+                current.enabled = previous.enabled;
+                snippets.push(current);
+            }
+        }
+        snippets.extend(files.into_values());
+        let changed = snippets != self.snippets;
+        if changed {
+            self.snippets = snippets;
+            self.revision += 1;
+        }
+        Ok((changed, errors))
+    }
     fn read(path: &Path) -> Result<Self, String> {
         match std::fs::read_to_string(path) {
             Ok(text) => serde_json::from_str(&text).map_err(|error| error.to_string()),
@@ -138,12 +265,33 @@ impl ThemeLibrary {
                     return Err("Missing snippet id or name".into());
                 }
                 if let Some(index) = self.snippets.iter().position(|old| old.id == snippet.id) {
-                    self.snippets[index] = snippet;
+                    if self.snippets[index].source_file.is_some() {
+                        // The disk is authoritative. A stale UI toggle must not overwrite a file edit.
+                        self.snippets[index].enabled = snippet.enabled;
+                    } else if snippet.source_file.is_some() {
+                        return Err("Cannot change a snippet's file source".into());
+                    } else {
+                        self.snippets[index] = snippet;
+                    }
                 } else {
+                    if snippet.source_file.is_some()
+                        || snippet.id.starts_with(EXTERNAL_SNIPPET_PREFIX)
+                    {
+                        return Err("External CSS file is no longer available".into());
+                    }
                     self.snippets.push(snippet);
                 }
             }
-            ThemeMutation::RemoveSnippet { id } => self.snippets.retain(|snippet| snippet.id != id),
+            ThemeMutation::RemoveSnippet { id } => {
+                if self
+                    .snippets
+                    .iter()
+                    .any(|snippet| snippet.id == id && snippet.source_file.is_some())
+                {
+                    return Err("Delete external CSS files in the snippets directory".into());
+                }
+                self.snippets.retain(|snippet| snippet.id != id);
+            }
             ThemeMutation::MoveSnippet { id, offset } => {
                 if let Some(index) = self.snippets.iter().position(|snippet| snippet.id == id) {
                     let target = (index as i64 + i64::from(offset))
@@ -167,10 +315,19 @@ pub mod cmd {
     use super::*;
     use tauri::Emitter;
     #[tauri::command]
-    pub async fn get_theme_library() -> Result<ThemeLibrary, String> {
+    pub async fn get_theme_library() -> Result<ThemeLibraryResponse, String> {
         super::super::startup_io::run(|| {
             let _guard = THEME_LOCK.lock().map_err(|error| error.to_string())?;
-            ThemeLibrary::read(&conf::app_root().join("themes-v1.json"))
+            let path = conf::app_root().join("themes-v1.json");
+            let directory = conf::app_root().join("css-snippets");
+            let mut library = ThemeLibrary::read(&path)?;
+            let (snippet_errors, transient_snippets) = library.refresh_for_read(&directory, &path);
+            Ok::<_, String>(ThemeLibraryResponse {
+                library,
+                snippet_directory: directory.to_string_lossy().into_owned(),
+                snippet_errors,
+                transient_snippets,
+            })
         })
         .await
         .map_err(|error| error.to_string())?
@@ -179,19 +336,40 @@ pub mod cmd {
     pub async fn mutate_theme_library(
         app: tauri::AppHandle,
         mutation: ThemeMutation,
-    ) -> Result<ThemeLibrary, String> {
+    ) -> Result<ThemeLibraryResponse, String> {
         let library = super::super::startup_io::run(move || {
             let _guard = THEME_LOCK.lock().map_err(|error| error.to_string())?;
             let path = conf::app_root().join("themes-v1.json");
             let mut library = ThemeLibrary::read(&path)?;
+            let directory = conf::app_root().join("css-snippets");
+            let (_, snippet_errors) = library.refresh_snippets(&directory);
             library.apply(mutation)?;
             library.write(&path)?;
-            Ok::<_, String>(library)
+            Ok::<_, String>(ThemeLibraryResponse {
+                library,
+                snippet_directory: directory.to_string_lossy().into_owned(),
+                snippet_errors,
+                transient_snippets: false,
+            })
         })
         .await
         .map_err(|error| error.to_string())??;
-        let _ = app.emit("themes-changed", library.revision);
+        let _ = app.emit("themes-changed", library.library.revision);
         Ok(library)
+    }
+    #[tauri::command]
+    pub async fn open_css_snippets_directory(app: tauri::AppHandle) -> Result<(), String> {
+        use tauri_plugin_opener::OpenerExt;
+        let directory = super::super::startup_io::run(|| {
+            let directory = conf::app_root().join("css-snippets");
+            std::fs::create_dir_all(&directory).map_err(|error| error.to_string())?;
+            Ok::<_, String>(directory.to_string_lossy().into_owned())
+        })
+        .await
+        .map_err(|error| error.to_string())??;
+        app.opener()
+            .open_path(directory, None::<&str>)
+            .map_err(|error| error.to_string())
     }
 }
 #[cfg(test)]
@@ -338,6 +516,7 @@ mod tests {
                         name: id.into(),
                         css: String::new(),
                         enabled: true,
+                        source_file: None,
                     },
                 })
                 .unwrap();
@@ -351,5 +530,234 @@ mod tests {
         assert_eq!(library.snippets[0].id, "b");
         library.apply(ThemeMutation::DisableSnippets).unwrap();
         assert!(library.snippets.iter().all(|snippet| !snippet.enabled));
+    }
+
+    #[test]
+    fn external_files_refresh_without_losing_order_or_enable_state() {
+        let dir = tempfile::tempdir().unwrap();
+        let a = dir.path().join("same.css");
+        let b = dir.path().join("second.CSS");
+        std::fs::write(&a, "p { color: red }").unwrap();
+        std::fs::write(&b, "h1 { color: blue }").unwrap();
+        let mut library = ThemeLibrary::default();
+        library.snippets.push(CssSnippet {
+            id: "imported".into(),
+            name: "same.css".into(),
+            css: "a{}".into(),
+            enabled: true,
+            source_file: None,
+        });
+        assert!(library.sync_snippet_directory(dir.path()).unwrap().0);
+        assert_eq!(library.snippets.len(), 3);
+        assert!(!library.snippets[1].enabled);
+        let id = external_snippet_id("same.css");
+        let mut old = library
+            .snippets
+            .iter()
+            .find(|item| item.id == id)
+            .unwrap()
+            .clone();
+        old.enabled = true;
+        library
+            .apply(ThemeMutation::SaveSnippet {
+                snippet: old.clone(),
+            })
+            .unwrap();
+        library
+            .apply(ThemeMutation::MoveSnippet {
+                id: id.clone(),
+                offset: -2,
+            })
+            .unwrap();
+        let revision = library.revision;
+        assert!(!library.sync_snippet_directory(dir.path()).unwrap().0);
+        assert_eq!(library.revision, revision);
+        std::fs::write(&a, "p { color: green }").unwrap();
+        library.sync_snippet_directory(dir.path()).unwrap();
+        // A delayed UI toggle carries old text; disk contents must still win.
+        library
+            .apply(ThemeMutation::SaveSnippet { snippet: old })
+            .unwrap();
+        assert_eq!(library.snippets[0].id, id);
+        assert_eq!(library.snippets[0].css, "p { color: green }");
+        assert!(library.snippets[0].enabled);
+        std::fs::remove_file(a).unwrap();
+        library.sync_snippet_directory(dir.path()).unwrap();
+        assert_eq!(library.snippets.len(), 2);
+        assert_eq!(library.snippets[0].id, "imported");
+        assert!(library
+            .apply(ThemeMutation::RemoveSnippet {
+                id: external_snippet_id("second.CSS")
+            })
+            .is_err());
+    }
+
+    #[test]
+    fn invalid_files_clear_stale_styles_and_recover_without_resetting_preferences() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("valid.css");
+        std::fs::write(&path, "p{}").unwrap();
+        std::fs::write(dir.path().join("notes.txt"), "ignored").unwrap();
+        std::fs::create_dir(dir.path().join("folder.css")).unwrap();
+        let mut library = ThemeLibrary::default();
+        library.sync_snippet_directory(dir.path()).unwrap();
+        library.snippets[0].enabled = true;
+        let id = library.snippets[0].id.clone();
+        for bytes in [
+            vec![0xff, 0xfe],
+            vec![0],
+            vec![b' '; MAX_SNIPPET_BYTES as usize + 1],
+        ] {
+            std::fs::write(&path, bytes).unwrap();
+            let (_, errors) = library.sync_snippet_directory(dir.path()).unwrap();
+            assert_eq!(errors.len(), 1);
+            assert_eq!(library.snippets.len(), 1);
+            assert_eq!(library.snippets[0].id, id);
+            assert!(library.snippets[0].css.is_empty());
+            assert!(library.snippets[0].enabled);
+        }
+        std::fs::write(&path, "h1{}").unwrap();
+        assert!(library
+            .sync_snippet_directory(dir.path())
+            .unwrap()
+            .1
+            .is_empty());
+        assert_eq!(library.snippets[0].css, "h1{}");
+        assert!(library.snippets[0].enabled);
+    }
+
+    #[test]
+    fn external_ids_survive_reload_and_cannot_be_forged_by_mutations() {
+        let dir = tempfile::tempdir().unwrap();
+        let directory = dir.path().join("css-snippets");
+        std::fs::create_dir(&directory).unwrap();
+        std::fs::write(directory.join("中文.css"), "p{}").unwrap();
+        let mut library = ThemeLibrary::default();
+        library.sync_snippet_directory(&directory).unwrap();
+        library.snippets[0].enabled = true;
+        let path = dir.path().join("themes.json");
+        library.write(&path).unwrap();
+        let mut loaded = ThemeLibrary::read(&path).unwrap();
+        assert!(!loaded.sync_snippet_directory(&directory).unwrap().0);
+        assert_eq!(loaded.snippets, library.snippets);
+        let forged = CssSnippet {
+            id: "forged".into(),
+            name: "fake".into(),
+            css: "body{}".into(),
+            enabled: true,
+            source_file: Some("/outside.css".into()),
+        };
+        assert!(loaded
+            .apply(ThemeMutation::SaveSnippet { snippet: forged })
+            .is_err());
+        std::fs::rename(directory.join("中文.css"), directory.join("renamed.css")).unwrap();
+        loaded.sync_snippet_directory(&directory).unwrap();
+        assert_eq!(loaded.snippets.len(), 1);
+        assert!(!loaded.snippets[0].enabled);
+        assert_ne!(loaded.snippets[0].id, library.snippets[0].id);
+        let legacy: CssSnippet =
+            serde_json::from_str(r#"{"id":"legacy","name":"Old","css":"p{}","enabled":true}"#)
+                .unwrap();
+        assert!(legacy.source_file.is_none());
+    }
+
+    #[test]
+    fn unavailable_directory_preserves_library_and_does_not_block_mutations() {
+        let dir = tempfile::tempdir().unwrap();
+        let directory = dir.path().join("css-snippets");
+        std::fs::create_dir(&directory).unwrap();
+        std::fs::write(directory.join("external.css"), "h1{}").unwrap();
+        let mut library = ThemeLibrary::default();
+        library
+            .apply(ThemeMutation::Save {
+                document: document(),
+                replace: false,
+            })
+            .unwrap();
+        library.refresh_snippets(&directory);
+        library.snippets[0].enabled = true;
+        let original = library.snippets.clone();
+        let revision = library.revision;
+        // Replacing the directory with an ordinary file reproduces creation and
+        // enumeration failures without depending on OS privilege or chmod semantics.
+        std::fs::rename(&directory, dir.path().join("backup")).unwrap();
+        std::fs::write(&directory, "not a directory").unwrap();
+        let (changed, errors) = library.refresh_snippets(&directory);
+        assert!(!changed);
+        assert_eq!(errors.len(), 1);
+        assert_eq!(library.revision, revision);
+        assert_eq!(library.snippets, original);
+        assert_eq!(library.documents.len(), 1);
+        library
+            .apply(ThemeMutation::SaveSnippet {
+                snippet: CssSnippet {
+                    id: "internal".into(),
+                    name: "Internal".into(),
+                    css: "p{}".into(),
+                    enabled: true,
+                    source_file: None,
+                },
+            })
+            .unwrap();
+        library
+            .apply(ThemeMutation::Save {
+                document: document(),
+                replace: true,
+            })
+            .unwrap();
+        let path = dir.path().join("themes.json");
+        library.write(&path).unwrap();
+        let mut loaded = ThemeLibrary::read(&path).unwrap();
+        assert_eq!(loaded.snippets[0], original[0]);
+        assert_eq!(loaded.snippets[1].id, "internal");
+        std::fs::remove_file(&directory).unwrap();
+        std::fs::rename(dir.path().join("backup"), &directory).unwrap();
+        let (changed, errors) = loaded.refresh_snippets(&directory);
+        assert!(!changed);
+        assert!(errors.is_empty());
+        assert_eq!(loaded.snippets[0], original[0]);
+    }
+
+    #[test]
+    fn failed_automatic_persistence_keeps_themes_and_fresh_css_until_retry_succeeds() {
+        let dir = tempfile::tempdir().unwrap();
+        let directory = dir.path().join("css-snippets");
+        let path = dir.path().join("themes.json");
+        let blocked = dir.path().join("blocked.json");
+        std::fs::create_dir(&directory).unwrap();
+        std::fs::create_dir(&blocked).unwrap();
+        let css_path = directory.join("external.css");
+        std::fs::write(&css_path, "p{}").unwrap();
+        let mut saved = ThemeLibrary::default();
+        saved
+            .apply(ThemeMutation::Save {
+                document: document(),
+                replace: false,
+            })
+            .unwrap();
+        saved.refresh_snippets(&directory);
+        saved.snippets[0].enabled = true;
+        saved.write(&path).unwrap();
+        for css in ["h1{}", "h2{}"] {
+            std::fs::write(&css_path, css).unwrap();
+            let mut loaded = ThemeLibrary::read(&path).unwrap();
+            let (errors, transient) = loaded.refresh_for_read(&directory, &blocked);
+            assert!(transient);
+            assert_eq!(errors.len(), 1);
+            assert_eq!(loaded.documents, saved.documents);
+            assert_eq!(loaded.revision, saved.revision);
+            assert_eq!(loaded.snippets[0].css, css);
+            assert!(loaded.snippets[0].enabled);
+            assert_eq!(ThemeLibrary::read(&path).unwrap().snippets, saved.snippets);
+        }
+        let mut recovered = ThemeLibrary::read(&path).unwrap();
+        let (errors, transient) = recovered.refresh_for_read(&directory, &path);
+        assert!(!transient);
+        assert!(errors.is_empty());
+        assert!(recovered.revision > saved.revision);
+        assert_eq!(ThemeLibrary::read(&path).unwrap().snippets[0].css, "h2{}");
+        // Explicit saves still receive the persistence error.
+        recovered.apply(ThemeMutation::DisableSnippets).unwrap();
+        assert!(recovered.write(&blocked).is_err());
     }
 }

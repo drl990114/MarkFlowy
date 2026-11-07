@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   applyThemeSelection: vi.fn(),
   setState: vi.fn(),
   css: vi.fn(),
+  watch: vi.fn(),
   themeState: {
     themes: [] as MfTheme[],
     curTheme: undefined as MfTheme | undefined,
@@ -17,6 +18,7 @@ const mocks = vi.hoisted(() => ({
 }))
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
 vi.mock('@tauri-apps/api/event', () => ({ listen: vi.fn() }))
+vi.mock('./snippetDirectory', () => ({ watchSnippetDirectory: mocks.watch }))
 vi.mock('@/stores/useThemeStore', () => ({
   FALLBACK_LIGHT_THEME: 'MarkFlowy Light',
   FALLBACK_DARK_THEME: 'MarkFlowy Dark',
@@ -39,6 +41,7 @@ const paper = {
 }
 beforeEach(() => {
   vi.clearAllMocks()
+  mocks.watch.mockResolvedValue(vi.fn())
   Object.assign(mocks.themeState, {
     themes: [...builtInThemes],
     curTheme: builtInThemes.find((theme) => theme.name === 'MarkFlowy Light'),
@@ -70,6 +73,93 @@ beforeEach(() => {
   })
 })
 describe('theme library', () => {
+  it('applies changing temporary CSS snapshots at the persisted revision and restores saved content', async () => {
+    const snippet = { id: 'external', name: 'a.css', css: 'p{}', enabled: true, sourceFile: '/config/css-snippets/a.css' }
+    const saved = { revision: 1, documents: [paper], snippets: [snippet], transientSnippets: false, snippetErrors: [] }
+    mocks.invoke.mockResolvedValueOnce(saved)
+    await useThemeLibrary.getState().reload()
+    for (const css of ['h1{}', 'h2{}']) {
+      mocks.invoke.mockResolvedValueOnce({ ...saved, snippets: [{ ...snippet, css }], transientSnippets: true, snippetErrors: ['Could not save discovered CSS snippets: disk full'] })
+      await useThemeLibrary.getState().reload()
+      expect(useThemeLibrary.getState().revision).toBe(1)
+      expect(useThemeLibrary.getState().documents).toEqual([paper])
+      expect(useThemeLibrary.getState().error).toContain('disk full')
+      expect(mocks.css).toHaveBeenLastCalledWith([css])
+    }
+    // An external edit can return to the original bytes without a new disk revision.
+    mocks.invoke.mockResolvedValueOnce(saved)
+    await useThemeLibrary.getState().reload()
+    expect(mocks.css).toHaveBeenLastCalledWith(['p{}'])
+    expect(useThemeLibrary.getState().transientSnippets).toBe(false)
+    expect(useThemeLibrary.getState().error).toBeUndefined()
+    expect(mocks.applyTheme).toHaveBeenCalledOnce()
+  })
+  it('retries failed watcher registration through the same reload used by the Retry button', async () => {
+    const base = { revision: 1, documents: [paper], snippets: [], snippetDirectory: '/retry/css-snippets' }
+    mocks.invoke.mockResolvedValue(base)
+    mocks.watch.mockRejectedValueOnce(new Error('watch unavailable'))
+    mocks.watch.mockImplementationOnce(async (_directory, reload) => {
+      // The real watcher rereads after registration to close the initial scan gap.
+      // That nested reload must not register again or wait on its own registration.
+      await reload()
+      return vi.fn()
+    })
+    await useThemeLibrary.getState().reload()
+    expect(useThemeLibrary.getState().loaded).toBe(true)
+    expect(useThemeLibrary.getState().documents).toEqual([paper])
+    expect(useThemeLibrary.getState().error).toContain('watch unavailable')
+    await useThemeLibrary.getState().reload()
+    expect(mocks.watch).toHaveBeenCalledTimes(2)
+    expect(useThemeLibrary.getState().error).toBeUndefined()
+    mocks.invoke.mockResolvedValue({ ...base, revision: 2, snippets: [
+      { id: 'external', name: 'a.css', css: 'h1{}', enabled: true, sourceFile: '/retry/css-snippets/a.css' },
+    ] })
+    await mocks.watch.mock.calls[1][1]()
+    expect(mocks.css).toHaveBeenLastCalledWith(['h1{}'])
+    expect(mocks.watch).toHaveBeenCalledTimes(2)
+  })
+  it('recovers a failed initial watcher on window focus without requiring an app restart', async () => {
+    mocks.invoke.mockResolvedValue({ revision: 1, documents: [paper], snippets: [], snippetDirectory: '/focus/css-snippets' })
+    mocks.watch.mockRejectedValueOnce(new Error('permission denied'))
+    await useThemeLibrary.getState().reload()
+    expect(useThemeLibrary.getState().error).toContain('permission denied')
+    window.dispatchEvent(new Event('focus'))
+    await vi.waitFor(() => expect(mocks.watch).toHaveBeenCalledTimes(2))
+    await vi.waitFor(() => expect(useThemeLibrary.getState().error).toBeUndefined())
+  })
+  it('keeps theme and snippet mutations usable when the native directory scan reports an error', async () => {
+    const snippet = { id: 'saved', name: 'Saved CSS', css: 'p{}', enabled: true }
+    const base = { revision: 1, documents: [paper], snippets: [snippet], snippetErrors: ['css-snippets: not a directory'] }
+    mocks.invoke.mockResolvedValue(base)
+    await useThemeLibrary.getState().reload()
+    expect(useThemeLibrary.getState().loaded).toBe(true)
+    expect(useThemeLibrary.getState().documents).toEqual([paper])
+    expect(useThemeLibrary.getState().error).toContain('not a directory')
+    mocks.invoke.mockResolvedValue({ ...base, revision: 2, snippets: [{ ...snippet, enabled: false }] })
+    await useThemeLibrary.getState().mutate({ type: 'saveSnippet', snippet: { ...snippet, enabled: false } })
+    expect(useThemeLibrary.getState().snippets[0].enabled).toBe(false)
+    expect(useThemeLibrary.getState().documents).toEqual([paper])
+  })
+  it('refreshes external CSS and file errors without rebuilding the selected theme', async () => {
+    const base = { revision: 1, documents: [paper], snippetDirectory: '/config/css-snippets' }
+    const external = {
+      id: 'css-file:61', name: 'a.css', css: 'p{}', enabled: true, sourceFile: '/config/css-snippets/a.css',
+    }
+    mocks.invoke.mockResolvedValueOnce({ ...base, snippets: [external], snippetErrors: [] })
+    await useThemeLibrary.getState().reload()
+    mocks.invoke.mockResolvedValueOnce({
+      ...base, revision: 2, snippets: [{ ...external, css: '' }], snippetErrors: ['a.css: CSS file is not UTF-8'],
+    })
+    await useThemeLibrary.getState().reload()
+    expect(useThemeLibrary.getState().error).toContain('a.css')
+    expect(useThemeLibrary.getState().snippetDirectory).toBe('/config/css-snippets')
+    expect(mocks.css).toHaveBeenLastCalledWith([''])
+    mocks.invoke.mockResolvedValueOnce({ ...base, revision: 3, snippets: [{ ...external, css: 'h1{}' }], snippetErrors: [] })
+    await useThemeLibrary.getState().reload()
+    expect(useThemeLibrary.getState().error).toBeUndefined()
+    expect(mocks.css).toHaveBeenLastCalledWith(['h1{}'])
+    expect(mocks.applyTheme).toHaveBeenCalledOnce()
+  })
   it('loads declarative themes and only enabled CSS in stored order', async () => {
     mocks.invoke.mockResolvedValue({
       revision: 1,

@@ -21,13 +21,16 @@ const mocks = vi.hoisted(() => ({
   save: vi.fn(),
   write: vi.fn(),
   openUrl: vi.fn(),
+  invoke: vi.fn(),
+  reveal: vi.fn(),
   preview: vi.fn(),
 }))
 vi.mock('@/i18n', async () => import('../../../../../../packages/i18n/src/desktop'))
 vi.mock('@tauri-apps/plugin-dialog', () => ({ open: mocks.open, save: mocks.save }))
 vi.mock('@tauri-apps/plugin-fs', () => ({ readTextFile: mocks.read, writeTextFile: mocks.write }))
 vi.mock('@tauri-apps/plugin-http', () => ({ fetch: mocks.fetch }))
-vi.mock('@tauri-apps/plugin-opener', () => ({ openUrl: mocks.openUrl }))
+vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
+vi.mock('@tauri-apps/plugin-opener', () => ({ openUrl: mocks.openUrl, revealItemInDir: mocks.reveal }))
 vi.mock('../../../../../../community-themes.json', () => ({
   default: [
     {
@@ -114,6 +117,8 @@ beforeEach(async () => {
   sessionStorage.clear()
   useAppSettingStore.setState({ settingData: {} })
   mocks.mutate.mockResolvedValue(undefined)
+  mocks.invoke.mockResolvedValue(undefined)
+  mocks.reveal.mockResolvedValue(undefined)
   mocks.fetch.mockResolvedValue({ ok: true, json: async () => ocean })
   useThemeLibrary.setState({
     documents: [],
@@ -138,6 +143,36 @@ afterEach(() => {
   queryClient.clear()
 })
 describe('declarative theme manager', () => {
+  it('opens the fixed CSS directory without importing or changing snippets', async () => {
+    useThemeLibrary.setState({ snippetDirectory: '/config/css-snippets' })
+    renderStore()
+    openCustomization()
+    fireEvent.click(screen.getByRole('button', { name: 'Open CSS folder' }))
+    await waitFor(() => expect(mocks.invoke).toHaveBeenCalledWith('open_css_snippets_directory'))
+    expect(mocks.mutate).not.toHaveBeenCalled()
+  })
+
+  it('labels external CSS files, keeps their controls, and reveals them instead of editing/deleting', async () => {
+    const external = {
+      id: 'css-file:657874', name: 'external.css', css: 'p{}', enabled: false,
+      sourceFile: '/config/css-snippets/external.css',
+    }
+    useThemeLibrary.setState({ snippets: [
+      ...useThemeLibrary.getState().snippets, external,
+    ] })
+    renderStore()
+    openCustomization()
+    expect(screen.getByText('External file')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Show in folder' }))
+    await waitFor(() => expect(mocks.reveal).toHaveBeenCalledWith(external.sourceFile))
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Enabled: external.css' }))
+    await waitFor(() => expect(mocks.mutate).toHaveBeenCalledWith({
+      type: 'saveSnippet', snippet: { ...external, enabled: true },
+    }))
+    const menu = await openMenu('More actions: external.css')
+    expect(within(menu).queryByRole('menuitem', { name: 'Remove' })).toBeNull()
+    expect(within(menu).getByRole('menuitem', { name: 'Move up' })).toBeTruthy()
+  })
   it.each([
     ['en', 'Create theme', 'Theme tools', 'Typography & CSS', 'Personal CSS snippets', 'Light'],
     ['cn', '创建主题', '主题工具', '字体与 CSS', '个人 CSS 片段', '浅色'],

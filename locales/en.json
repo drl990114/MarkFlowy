@@ -1136,7 +1136,11 @@
         "noLightVariant": "No light variant",
         "noDarkVariant": "No dark variant",
         "installAndSelect": "Install and select",
-        "noMatchingThemes": "No community themes available for this mode."
+        "noMatchingThemes": "No community themes available for this mode.",
+        "openCssDirectory": "Open CSS folder",
+        "cssDirectoryHint": "CSS files in this folder sync automatically. New files start disabled; edit or delete them in the folder.",
+        "externalCssFile": "External file",
+        "revealCssFile": "Show in folder"
       },
       "label": "Theme Store",
       "desc": "Browse built-in and community themes, or customize your own.",

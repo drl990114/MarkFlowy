@@ -1136,7 +1136,11 @@
         "noLightVariant": "Không có biến thể sáng",
         "noDarkVariant": "Không có biến thể tối",
         "installAndSelect": "Cài đặt và chọn",
-        "noMatchingThemes": "Không có chủ đề cộng đồng nào cho chế độ này."
+        "noMatchingThemes": "Không có chủ đề cộng đồng nào cho chế độ này.",
+        "openCssDirectory": "Mở thư mục CSS",
+        "cssDirectoryHint": "Các tệp CSS trong thư mục này tự đồng bộ. Tệp mới mặc định bị tắt; sửa hoặc xóa chúng trong thư mục.",
+        "externalCssFile": "Tệp bên ngoài",
+        "revealCssFile": "Hiển thị trong thư mục"
       },
       "label": "Cửa hàng chủ đề",
       "desc": "Duyệt các chủ đề tích hợp sẵn và chủ đề cộng đồng, hoặc tùy chỉnh chủ đề của riêng bạn.",

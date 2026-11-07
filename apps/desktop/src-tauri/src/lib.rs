@@ -1900,6 +1900,7 @@ pub fn run() {
             process::app_restart,
             themes::cmd::get_theme_library,
             themes::cmd::mutate_theme_library,
+            themes::cmd::open_css_snippets_directory,
             font::cmd::font_list,
             workspace::cmd::is_git_repository,
             app::clipboard::get_clipboard_html,

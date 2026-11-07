@@ -1059,7 +1059,11 @@
         "noLightVariant": "Sin variante clara",
         "noDarkVariant": "Sin variante oscura",
         "installAndSelect": "Instalar y seleccionar",
-        "noMatchingThemes": "No hay temas de la comunidad disponibles para este modo."
+        "noMatchingThemes": "No hay temas de la comunidad disponibles para este modo.",
+        "openCssDirectory": "Abrir carpeta CSS",
+        "cssDirectoryHint": "Los archivos CSS de esta carpeta se sincronizan automáticamente. Los nuevos están desactivados; edítalos o elimínalos en la carpeta.",
+        "externalCssFile": "Archivo externo",
+        "revealCssFile": "Mostrar en carpeta"
       },
       "label": "Tienda de temas",
       "desc": "Explora temas integrados y de la comunidad, o personaliza el tuyo.",

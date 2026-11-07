@@ -6,16 +6,21 @@ import { parseThemeDocument, type ThemeDocument } from '@markflowy/theme/semanti
 import useThemeStore, { FALLBACK_DARK_THEME, FALLBACK_LIGHT_THEME } from '@/stores/useThemeStore'
 import { loadLocalThemeCss } from '@/helper/extensions'
 import { toAppTheme } from './runtime'
+import { watchSnippetDirectory } from './snippetDirectory'
 export interface CssSnippet {
   id: string
   name: string
   css: string
   enabled: boolean
+  sourceFile?: string
 }
 export interface ThemeLibrary {
   revision: number
   documents: ThemeDocument[]
   snippets: CssSnippet[]
+  snippetDirectory?: string
+  snippetErrors?: string[]
+  transientSnippets?: boolean
 }
 type ThemeLibraryPayload = Omit<ThemeLibrary, 'documents'> & { documents: unknown[] }
 export type ThemeMutation =
@@ -58,7 +63,7 @@ export const useThemeLibrary = create<LibraryState>((set, get) => {
   let documentErrors: string[] = []
   const libraryError = () => {
     const store = useThemeStore.getState()
-    const errors = [...documentErrors]
+    const errors = [...documentErrors, ...(get().snippetErrors ?? [])]
     for (const [name, mode] of [
       [store.lightThemeName, 'light'],
       [store.darkThemeName, 'dark'],
@@ -71,6 +76,11 @@ export const useThemeLibrary = create<LibraryState>((set, get) => {
   }
   const apply = async (data: ThemeLibraryPayload, sequence: number) => {
     const previous = get()
+    set({
+      snippetDirectory: data.snippetDirectory,
+      snippetErrors: data.snippetErrors,
+      transientSnippets: data.transientSnippets,
+    })
     // Snippet edits should not rebuild editors, reapply the native theme or rewrite appearance.
     if (previous.loaded && JSON.stringify(data.documents) === JSON.stringify(previous.documents)) {
       loadLocalThemeCss(
@@ -141,8 +151,11 @@ export const useThemeLibrary = create<LibraryState>((set, get) => {
   const accept = (data: ThemeLibraryPayload): Promise<void> => {
     if (data.revision < Math.max(get().revision, pendingAcceptance?.revision ?? -1))
       return Promise.resolve()
-    if (pendingAcceptance?.revision === data.revision) return pendingAcceptance.promise
-    if (get().loaded && data.revision === get().revision) {
+    const temporarySnippets = data.transientSnippets || get().transientSnippets
+    if (pendingAcceptance?.revision === data.revision && !temporarySnippets)
+      return pendingAcceptance.promise
+    if (get().loaded && data.revision === get().revision && !temporarySnippets) {
+      set({ snippetDirectory: data.snippetDirectory, snippetErrors: data.snippetErrors })
       set({ error: libraryError() })
       return Promise.resolve()
     }
@@ -162,7 +175,10 @@ export const useThemeLibrary = create<LibraryState>((set, get) => {
       const sequence = ++loadSequence
       try {
         const data = await invoke<ThemeLibraryPayload>('get_theme_library')
-        if (sequence === loadSequence) await accept(data)
+        if (sequence === loadSequence) {
+          await accept(data)
+          await ensureDirectoryWatcher()
+        }
       } catch (error) {
         if (sequence === loadSequence) set({ error: String(error) })
         throw error
@@ -194,6 +210,38 @@ export const useThemeLibrary = create<LibraryState>((set, get) => {
   }
 })
 let syncStarted = false
+let watchedDirectory: string | undefined
+let directoryWatcher: Promise<() => void> | undefined
+let focusFallbackStarted = false
+const retryMissingDirectoryWatcher = () => {
+  if (!directoryWatcher) void useThemeLibrary.getState().reload().catch(() => undefined)
+}
+async function ensureDirectoryWatcher() {
+  const directory = useThemeLibrary.getState().snippetDirectory
+  if (!directory) return
+  // Keep recovery available even if the native watcher could not be registered.
+  if (!focusFallbackStarted) {
+    focusFallbackStarted = true
+    window.addEventListener('focus', retryMissingDirectoryWatcher)
+  }
+  if (directory === watchedDirectory) return
+  const previous = directoryWatcher
+  watchedDirectory = directory
+  const registration = (async () => {
+    const stop = await previous?.catch(() => undefined)
+    stop?.()
+    return watchSnippetDirectory(directory, () => useThemeLibrary.getState().reload())
+  })()
+  directoryWatcher = registration
+  try {
+    await registration
+  } catch (error) {
+    if (directoryWatcher !== registration) return
+    watchedDirectory = undefined
+    directoryWatcher = undefined
+    useThemeLibrary.setState({ error: String(error) })
+  }
+}
 export async function startThemeLibrary() {
   if (!syncStarted) {
     syncStarted = true
@@ -210,4 +258,10 @@ export async function startThemeLibrary() {
     }
   }
   await useThemeLibrary.getState().reload()
+}
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    window.removeEventListener('focus', retryMissingDirectoryWatcher)
+    void directoryWatcher?.then((stop) => stop()).catch(() => undefined)
+  })
 }

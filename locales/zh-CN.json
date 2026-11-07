@@ -1052,7 +1052,11 @@
         "noLightVariant": "无浅色版本",
         "noDarkVariant": "无深色版本",
         "installAndSelect": "安装并选用",
-        "noMatchingThemes": "该模式下暂无可用的社区主题。"
+        "noMatchingThemes": "该模式下暂无可用的社区主题。",
+        "openCssDirectory": "打开 CSS 目录",
+        "cssDirectoryHint": "此目录中的 CSS 会自动同步。新文件默认停用；在文件夹中编辑或删除。",
+        "externalCssFile": "外部文件",
+        "revealCssFile": "在文件夹中显示"
       },
       "label": "主题商店",
       "desc": "浏览官方内置与社区主题，也可以定制自己的主题。",

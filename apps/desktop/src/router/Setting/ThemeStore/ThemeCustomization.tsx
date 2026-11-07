@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronRight, Plus } from 'lucide-react'
-import { openUrl } from '@tauri-apps/plugin-opener'
+import { ChevronRight, FolderOpen, Plus } from 'lucide-react'
+import { invoke } from '@tauri-apps/api/core'
+import { openUrl, revealItemInDir } from '@tauri-apps/plugin-opener'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -83,6 +84,16 @@ export function ThemeCustomization() {
                 size='sm'
                 variant='outline'
                 disabled={pending}
+                title={library.snippetDirectory}
+                onClick={() => void run(() => invoke('open_css_snippets_directory'))}
+              >
+                <FolderOpen aria-hidden className='size-3.5' />
+                {labels.openCssDirectory}
+              </Button>
+              <Button
+                size='sm'
+                variant='outline'
+                disabled={pending}
                 onClick={() =>
                   setSnippet({
                     id: crypto.randomUUID(),
@@ -123,6 +134,7 @@ export function ThemeCustomization() {
                 </MenuItem>
               </ThemeMenu>
             </div>
+            <p className='m-0 text-ui-caption text-muted-foreground'>{labels.cssDirectoryHint}</p>
             {!library.snippets.length && (
               <p className='text-muted-foreground'>{labels.noSnippets}</p>
             )}
@@ -144,14 +156,25 @@ export function ThemeCustomization() {
                     )
                   }
                 />
-                <span className='min-w-0 flex-1 truncate'>{item.name}</span>
+                <span className='min-w-0 flex-1 truncate' title={item.sourceFile ?? item.name}>
+                  {item.name}
+                  {item.sourceFile && (
+                    <span className='ml-2 text-ui-caption text-muted-foreground'>
+                      {labels.externalCssFile}
+                    </span>
+                  )}
+                </span>
                 <Button
                   size='sm'
                   variant='ghost'
                   disabled={pending}
-                  onClick={() => setSnippet({ ...item })}
+                  onClick={() =>
+                    item.sourceFile
+                      ? void run(() => revealItemInDir(item.sourceFile!))
+                      : setSnippet({ ...item })
+                  }
                 >
-                  {labels.editCss}
+                  {item.sourceFile ? labels.revealCssFile : labels.editCss}
                 </Button>
                 <ThemeMenu label={`${labels.more}: ${item.name}`} disabled={pending}>
                   <MenuItem
@@ -174,15 +197,19 @@ export function ThemeCustomization() {
                   >
                     {labels.down}
                   </MenuItem>
-                  <DropdownMenuSeparator />
-                  <MenuItem
-                    className='text-destructive'
-                    onSelect={() =>
-                      void run(() => library.mutate({ type: 'removeSnippet', id: item.id }))
-                    }
-                  >
-                    {labels.remove}
-                  </MenuItem>
+                  {!item.sourceFile && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <MenuItem
+                        className='text-destructive'
+                        onSelect={() =>
+                          void run(() => library.mutate({ type: 'removeSnippet', id: item.id }))
+                        }
+                      >
+                        {labels.remove}
+                      </MenuItem>
+                    </>
+                  )}
                 </ThemeMenu>
               </div>
             ))}

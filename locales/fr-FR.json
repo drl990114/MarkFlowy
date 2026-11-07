@@ -1059,7 +1059,11 @@
         "noLightVariant": "Aucune variante claire",
         "noDarkVariant": "Aucune variante sombre",
         "installAndSelect": "Installer et sélectionner",
-        "noMatchingThemes": "Aucun thème communautaire disponible pour ce mode."
+        "noMatchingThemes": "Aucun thème communautaire disponible pour ce mode.",
+        "openCssDirectory": "Ouvrir le dossier CSS",
+        "cssDirectoryHint": "Les fichiers CSS de ce dossier sont synchronisés automatiquement. Les nouveaux sont désactivés ; modifiez-les ou supprimez-les dans le dossier.",
+        "externalCssFile": "Fichier externe",
+        "revealCssFile": "Afficher dans le dossier"
       },
       "label": "Magasin à thème",
       "desc": "Parcourez les thèmes intégrés et communautaires, ou personnalisez le vôtre.",
