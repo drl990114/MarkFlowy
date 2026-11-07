@@ -1,7 +1,7 @@
 import { isCurrentCommandTarget, type EditorCommandTarget } from './editorCommandTarget'
 import { getCapricornEditor } from '@/components/EditorArea/capricornEditorRegistry'
-import { sourceCodeCodemirrorViewMap } from '@/components/EditorArea/sourceCodeEditorRegistry'
-import { insertSourceImage, insertSourceLink } from '@/components/EditorArea/sourceInsertCommands'
+import { getSourceCodeEditor } from '@/components/EditorArea/sourceCodeEditorRegistry'
+import { insertSourceBlock, insertSourceImage, insertSourceLink } from '@/components/EditorArea/sourceInsertCommands'
 import { EditorViewType } from '@/constants/editorViewType'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { redoDepth, undoDepth } from '@codemirror/commands'
@@ -42,6 +42,8 @@ export const EDITOR_COMMANDS = [
   ['editor_toggleTaskList', 'taskList'],
   ['editor_insertLink', 'link'],
   ['editor_insertImage', 'image'],
+  ['editor_insertCodeBlock', 'codeBlock'],
+  ['editor_insertMathBlock', 'mathBlock'],
   ['editor_toggleDelete', 'strike'],
 ] as const
 export type EditorPaletteCommand = (typeof EDITOR_COMMANDS)[number][0]
@@ -54,11 +56,13 @@ function richCommandUnavailable(
 ): CommandUnavailableReason | undefined {
   const { rich, bookmark, fileId } = target
   if (!rich) return 'unavailable'
-  if (getCapricornEditor(fileId) !== rich) return 'stale_target'
+  if (getCapricornEditor(fileId, target.resourceGroupId) !== rich) return 'stale_target'
   const state = rich.getUiState()
   if (state.readOnly) return 'read_only'
   if (!bookmark || !rich.selection?.isValid(bookmark.id)) return 'selection_unavailable'
   if (command === 'editor_toggleDelete') return 'unavailable'
+  if ((command === 'editor_insertCodeBlock' || command === 'editor_insertMathBlock') &&
+    (!rich.insertBlock || !rich.canInsertBlock?.())) return 'unavailable'
   if (command === 'editor_undo' && !state.canUndo) return 'no_undo'
   if (command === 'editor_redo' && !state.canRedo) return 'no_redo'
   if (
@@ -75,7 +79,7 @@ function sourceCommandUnavailable(
   const { source, sourceState, fileId } = target
   if (!source || !sourceState) return 'unavailable'
   if (
-    sourceCodeCodemirrorViewMap.get(fileId)?.cm !== source ||
+    getSourceCodeEditor(fileId, target.resourceGroupId)?.cm !== source ||
     source.state.doc !== sourceState.doc
   )
     return 'stale_target'
@@ -108,14 +112,14 @@ export function restoreEditorCommandTarget(target: EditorCommandTarget): boolean
   if (!isCurrentCommandTarget(target)) return false
   const { rich, bookmark, source, sourceState, fileId } = target
   if (rich && bookmark) {
-    if (getCapricornEditor(fileId) !== rich) return false
+    if (getCapricornEditor(fileId, target.resourceGroupId) !== rich) return false
     rich.focus()
     return rich.selection?.restore(bookmark.id) ?? false
   }
   if (
     source &&
     sourceState &&
-    sourceCodeCodemirrorViewMap.get(fileId)?.cm === source &&
+    getSourceCodeEditor(fileId, target.resourceGroupId)?.cm === source &&
     source.state.doc === sourceState.doc &&
     !source.state.readOnly
   ) {
@@ -178,6 +182,12 @@ export async function executeEditorPaletteCommand(
         return rich.requestInlineEdit?.('link') ?? false
       case 'editor_insertImage':
         return rich.requestInlineEdit?.('image') ?? false
+      case 'editor_insertCodeBlock':
+        return rich.insertBlock?.('code', target.bookmark?.text ?? '',
+          () => !editorCommandUnavailable(target, command)) ?? false
+      case 'editor_insertMathBlock':
+        return rich.insertBlock?.('math', target.bookmark?.text ?? '',
+          () => !editorCommandUnavailable(target, command)) ?? false
       default:
         return false
     }
@@ -187,6 +197,8 @@ export async function executeEditorPaletteCommand(
   const isCurrent = () => !editorCommandUnavailable(target, command)
   if (command === 'editor_insertLink') return insertSourceLink(source, fileId, isCurrent)
   if (command === 'editor_insertImage') return insertSourceImage(source, fileId, isCurrent)
+  if (command === 'editor_insertCodeBlock') return insertSourceBlock(source, 'code')
+  if (command === 'editor_insertMathBlock') return insertSourceBlock(source, 'math')
   if (/^editor_toggleH[123]$/.test(command))
     return sourceCommands.toggleHeading(source, { level: Number(command.at(-1)) })
   return sourceCommands[command.replace('editor_', '')]?.(source) ?? false

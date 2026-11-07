@@ -136,7 +136,10 @@
     "quote": "Cita",
     "bulletList": "Lista de viñetas",
     "orderedList": "Lista numerada",
-    "taskList": "Lista de tareas"
+    "taskList": "Lista de tareas",
+    "insert": "Insertar",
+    "codeBlock": "Bloque de código",
+    "mathBlock": "Bloque matemático"
   },
   "image_insert": {
     "title": "Insertar imagen",
@@ -1157,7 +1160,12 @@
       "editor_toggleH4": "Alternar a H4",
       "editor_toggleH5": "Alternar a H5",
       "editor_toggleH6": "Alternar a H6",
-      "app_keepEditorOpen": "Mantener abierto"
+      "app_keepEditorOpen": "Mantener abierto",
+      "editor_insertCodeBlock": "Insertar bloque de código",
+      "editor_insertMathBlock": "Insertar bloque matemático",
+      "app_zoomIn": "Acercar",
+      "app_zoomOut": "Alejar",
+      "app_zoomReset": "Restablecer zoom al 100 %"
     }
   },
   "request": {

@@ -9,6 +9,15 @@ import { KeybindingRegistry } from './KeybindingRegistry'
 import { editorKeymap, keybindingProblem } from './keybindingValidation'
 
 describe('command and binding contracts', () => {
+  it.each(['mac', 'windows', 'linux'] as const)('exposes the common commands as configurable conflict-free shortcuts on %s', (platform) => {
+    const bindings = getDefaultKeybindings(platform)
+    for (const command of ['editor_insertCodeBlock', 'editor_insertMathBlock', 'app_zoomIn', 'app_zoomOut', 'app_zoomReset']) {
+      const binding = bindings.find((rule) => rule.command === command)!
+      expect(binding.configurable).toBe(true)
+      expect(binding.when).toBe(command.startsWith('editor_') ? 'editor_focus' : 'always')
+      expect(keybindingProblem(bindings, binding.id, binding.keys)).toBeUndefined()
+    }
+  })
   it.each(['mac', 'windows', 'linux'] as const)('allows binding Keep Open without a default on %s', (platform) => {
     expect(getDefaultKeybindings(platform).find((rule) => rule.command === 'app_keepEditorOpen')).toMatchObject({
       configurable: true,

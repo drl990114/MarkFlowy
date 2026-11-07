@@ -12,10 +12,11 @@ import { keybindingProblem } from './keybindingValidation'
 import { getDefaultKeybindings } from './keybindingCatalog'
 import { recordKey } from '@/router/Setting/KeyboardTable/record-key'
 import { createKeybindingsHandler, createShortcutMatcher } from '@/helper/bindkeys'
+import { createKeyboardEvent } from '../../tests/helpers/keyboard'
 
 afterEach(() => vi.restoreAllMocks())
 const press = (init: KeyboardEventInit) =>
-  new KeyboardEvent('keydown', { cancelable: true, ...init })
+  createKeyboardEvent('keydown', { cancelable: true, ...init })
 
 describe('shortcut recording and dispatch contract', () => {
   it.each(['mac', 'windows', 'linux'] as const)(
@@ -35,6 +36,7 @@ describe('shortcut recording and dispatch contract', () => {
           code,
           ctrlKey: platform !== 'mac',
           metaKey: platform === 'mac',
+          altKey: binding.keys.includes('Alt'),
           shiftKey: binding.keys.includes('Shift'),
         }
         expect(matches(press(init)), binding.command).toBe(true)
@@ -80,6 +82,15 @@ describe('shortcut recording and dispatch contract', () => {
       expect(formatKeyMap(binding.keys, platform)).toBe(platform === 'mac' ? `⌘⌥${label}` : `Ctrl+Alt+${label}`)
       expect(keybindingProblem(bindings, binding.id, binding.keys)).toBeUndefined()
       expect(shortcutString(binding.keys)).toBe(`mod-Alt-[${code}]`)
+    }
+  })
+
+  it.each(['mac', 'windows', 'linux'] as const)('displays zoom keys as readable symbols on %s without changing dispatch', (platform) => {
+    for (const [code, label] of [['Equal', '='], ['Minus', '-'], ['Digit0', '0'], ['Digit9', '9']]) {
+      const keys = ['CommandOrCtrl', `[${code}]`]
+      expect(formatKeyMap(keys, platform)).toBe(platform === 'mac' ? `⌘${label}` : `Ctrl+${label}`)
+      expect(shortcutString(keys)).toBe(`mod-[${code}]`)
+      expect(keys).toEqual(['CommandOrCtrl', `[${code}]`])
     }
   })
 

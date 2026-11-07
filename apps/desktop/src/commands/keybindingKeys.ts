@@ -183,7 +183,12 @@ export function validateKeyMap(
 }
 
 export function formatKeyMap(keys: readonly string[], platform = keybindingPlatform()): string {
-  const physicalLabels: Record<string, string> = { '[BracketLeft]': '[', '[BracketRight]': ']' }
+  const physicalLabels: Record<string, string> = {
+    '[BracketLeft]': '[',
+    '[BracketRight]': ']',
+    '[Equal]': '=',
+    '[Minus]': '-',
+  }
   const symbols: Record<string, string> =
     platform === 'mac'
       ? { CommandOrCtrl: '⌘', Meta: '⌘', Ctrl: '⌃', Alt: '⌥', Shift: '⇧' }
@@ -192,7 +197,11 @@ export function formatKeyMap(keys: readonly string[], platform = keybindingPlatf
     .map((key) =>
       symbols[key] ??
       physicalLabels[key] ??
-      (/^\[Key[A-Z]\]$/.test(key) ? key[4] : key.length === 1 ? key.toUpperCase() : key),
+      (/^\[Key[A-Z]\]$/.test(key)
+        ? key[4]
+        : /^\[Digit\d\]$/.test(key)
+          ? key[6]
+          : key.length === 1 ? key.toUpperCase() : key),
     )
     .join(platform === 'mac' ? '' : '+')
 }

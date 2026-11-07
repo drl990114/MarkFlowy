@@ -11,7 +11,7 @@ import type {
   CapricornRuntimeAdapter,
   CapricornUiState,
 } from '@/components/EditorArea/capricornRuntimeAdapter'
-import { sourceCodeCodemirrorViewMap } from '@/components/EditorArea/sourceCodeEditorRegistry'
+import { sourceCodeCodemirrorViewMap, sourceCodeViewRegistry } from '@/components/EditorArea/sourceCodeEditorRegistry'
 import { requestImageInsert } from '@/components/EditorArea/requestImageInsert'
 import { clipboardRead } from '@/helper/clipboard'
 import useEditorStore from '@/stores/useEditorStore'
@@ -19,6 +19,7 @@ import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
 import { EditorViewType } from '@/constants/editorViewType'
 import { commandRegistry } from '@/commands'
+import { registerCommonEditorCommands } from '@/commands/commonEditorCommands'
 import useLayoutStore from '@/stores/useLayoutStore'
 import { paletteCommands } from './paletteCommands'
 import {
@@ -65,6 +66,7 @@ beforeEach(() => {
 afterEach(() => {
   setCapricornEditor('file', undefined)
   sourceCodeCodemirrorViewMap.clear()
+  sourceCodeViewRegistry.remove('file', 'left-source')
   view?.destroy()
   view = undefined
   document.body.replaceChildren()
@@ -98,6 +100,8 @@ function richEditor() {
     getUiState: () => state,
     focus: vi.fn(),
     commands: { toggleMark: vi.fn(), undo: vi.fn(), redo: vi.fn() },
+    insertBlock: vi.fn(async () => true),
+    canInsertBlock: vi.fn(() => true),
     selection: {
       capture: vi.fn(() => ({
         id: 'selection',
@@ -118,6 +122,64 @@ function richEditor() {
 }
 
 describe('palette editor execution', () => {
+  it('keeps a toolbar block insertion in its explicit source pane when the compatibility alias changes', async () => {
+    const left = source()
+    sourceCodeViewRegistry.register('file', 'left-source', { cm: left } as MfCodemirrorView, 'left')
+    const target = captureEditorCommandTarget({ fileId: 'file', groupId: 'left' })
+    const right = new EditorView({ parent: document.body, state: EditorState.create({ doc: 'sibling' }) })
+    try {
+      sourceCodeCodemirrorViewMap.set('file', { cm: right } as MfCodemirrorView)
+      expect(await executeEditorPaletteCommand(target, 'editor_insertCodeBlock')).toBe(true)
+      expect(left.state.doc.toString()).toBe('```\nhello\n```\n\n world')
+      expect(right.state.doc.toString()).toBe('sibling')
+    } finally {
+      right.destroy()
+    }
+  })
+
+  it.each(['editor_insertCodeBlock', 'editor_insertMathBlock'] as const)('runs %s through the shared registry and releases its selection', async (command) => {
+    const { editor } = richEditor()
+    const dispose = registerCommonEditorCommands()
+    try {
+      expect(await commandRegistry.execute(command)).toBe(true)
+      const insert = editor.insertBlock
+      expect(insert).toHaveBeenCalledExactlyOnceWith(
+        command === 'editor_insertCodeBlock' ? 'code' : 'math', 'hello', expect.any(Function),
+      )
+      expect(editor.selection?.restore).toHaveBeenCalledWith('selection')
+      expect(editor.selection?.release).toHaveBeenCalledWith('selection')
+      useEditorViewTypeStore.getState().setEditorViewType('file', EditorViewType.PREVIEW)
+      expect(await commandRegistry.execute(command)).toBe(false)
+      expect(insert).toHaveBeenCalledTimes(1)
+    } finally {
+      dispose()
+    }
+    expect(commandRegistry.hasCommand(command)).toBe(false)
+  })
+
+  it.each(['editor_insertCodeBlock', 'editor_insertMathBlock'] as const)('inserts %s at the captured source selection and rejects stale targets', async (command) => {
+    const cm = source()
+    const target = captureEditorCommandTarget()
+    cm.dispatch({ selection: { anchor: 11 } })
+    expect(await executeEditorPaletteCommand(target, command)).toBe(true)
+    const fence = command === 'editor_insertCodeBlock' ? '```' : '$$'
+    expect(cm.state.doc.toString()).toBe(`${fence}\nhello\n${fence}\n\n world`)
+    expect(await executeEditorPaletteCommand(target, command)).toBe(false)
+  })
+
+  it('disables block commands when the runtime lacks their insertion capability', () => {
+    const { editor } = richEditor()
+    Object.assign(editor, { insertBlock: undefined })
+    expect(editorCommandUnavailable(captureEditorCommandTarget(), 'editor_insertMathBlock')).toBe('unavailable')
+  })
+
+  it('disables block insertion in unsupported nested cells', () => {
+    const { editor } = richEditor()
+    vi.mocked(editor.canInsertBlock!).mockReturnValue(false)
+    expect(editorCommandUnavailable(captureEditorCommandTarget(), 'editor_insertCodeBlock')).toBe('unavailable')
+    expect(editorCommandUnavailable(captureEditorCommandTarget(), 'editor_insertMathBlock')).toBe('unavailable')
+  })
+
   it('offers Keep Open only for the captured preview tab and rejects another active group', async () => {
     source()
     useEditorStore.setState({

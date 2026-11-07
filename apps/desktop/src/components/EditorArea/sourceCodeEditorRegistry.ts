@@ -1,16 +1,7 @@
 import type { MfCodemirrorView } from 'rme'
 import { SourceFind } from './sourceCodeFind'
-import { sourceCodeCodemirrorViewMap } from './sourceCodeEditorInstances'
-import { InstanceResourceRegistry } from './instanceResourceRegistry'
-export { sourceCodeCodemirrorViewMap } from './sourceCodeEditorInstances'
-
-export const sourceCodeViewRegistry = new InstanceResourceRegistry<MfCodemirrorView>()
-
-export function getSourceCodeEditor(fileId: string, groupId?: string): MfCodemirrorView | undefined {
-  return groupId === undefined
-    ? sourceCodeCodemirrorViewMap.get(fileId)
-    : sourceCodeViewRegistry.getForGroup(fileId, groupId)
-}
+import { sourceCodeCodemirrorViewMap, sourceCodeViewRegistry } from './sourceCodeEditorInstances'
+export { sourceCodeCodemirrorViewMap, sourceCodeViewRegistry, getSourceCodeEditor } from './sourceCodeEditorInstances'
 
 const findApis = new WeakMap<MfCodemirrorView, SourceFind>()
 export function getSourceCodeFind(editor: MfCodemirrorView) {

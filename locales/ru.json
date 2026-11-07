@@ -136,7 +136,10 @@
     "quote": "Цитата",
     "bulletList": "Маркированный список",
     "orderedList": "Нумерованный список",
-    "taskList": "Список задач"
+    "taskList": "Список задач",
+    "insert": "Вставить",
+    "codeBlock": "Блок кода",
+    "mathBlock": "Блок формулы"
   },
   "image_insert": {
     "title": "Вставить изображение",
@@ -469,7 +472,12 @@
       "editor_toggleH4": "Применить заголовок 4",
       "editor_toggleH5": "Применить заголовок 5",
       "editor_toggleH6": "Применить заголовок 6",
-      "app_keepEditorOpen": "Закрепить вкладку"
+      "app_keepEditorOpen": "Закрепить вкладку",
+      "editor_insertCodeBlock": "Вставить блок кода",
+      "editor_insertMathBlock": "Вставить блок формулы",
+      "app_zoomIn": "Увеличить масштаб",
+      "app_zoomOut": "Уменьшить масштаб",
+      "app_zoomReset": "Сбросить масштаб до 100%"
     }
   },
   "text_encoding": {

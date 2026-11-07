@@ -211,3 +211,15 @@ it('retains the originating pane when a More-menu view command is selected', () 
     editorId: 'pane', groupId: 'right',
   })
 })
+
+it('offers window zoom commands in the existing View submenu', async () => {
+  const viewMenu = openMenu('pane', 'view_switcher')
+  if (!viewMenu || !('children' in viewMenu)) throw new Error('View menu missing')
+  vi.mocked(commandRegistry.execute).mockResolvedValue(undefined)
+  for (const command of ['app_zoomIn', 'app_zoomOut', 'app_zoomReset']) {
+    const item = viewMenu.children?.find((entry) => 'value' in entry && entry.value === command)
+    if (!item || !('handler' in item)) throw new Error(`Zoom command missing: ${command}`)
+    await act(async () => item.handler?.())
+    expect(commandRegistry.execute).toHaveBeenCalledWith(command)
+  }
+})

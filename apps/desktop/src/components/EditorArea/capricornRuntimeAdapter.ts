@@ -7,6 +7,7 @@ export type {
 } from '@/features/snippets/types'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { createCapricornResumeApi } from './capricornResume'
+import { canInsertCapricornBlock, createCapricornBlockInsertApi } from './capricornBlockInsert'
 import { createCapricornMarkdownSelectionApi } from './capricornMarkdownSelection'
 import {
   getCapricornActiveHeadingId,
@@ -297,6 +298,7 @@ export interface CapricornInlineEditRequest {
 }
 
 export interface CapricornRuntimeSession {
+  execute?: (command: string, ...args: unknown[]) => void
   query?: <Result = unknown>(query: string, ...args: unknown[]) => Result
   keybindings: {
     validateConfiguration: (configuration: CapricornKeybindingConfiguration) => {
@@ -393,6 +395,8 @@ export function getCapricornFirstPaintBlockSize(viewportHeight: number): number 
 }
 
 export interface CapricornRuntimeAdapter {
+  readonly insertBlock?: ReturnType<typeof createCapricornBlockInsertApi>
+  canInsertBlock?: () => boolean
   readonly resume?: ReturnType<typeof createCapricornResumeApi>
   readonly markdownSelection?: ReturnType<typeof createCapricornMarkdownSelectionApi>
   captureEmbeddedCodeFocus?: () => EmbeddedCodeFocusSnapshot | null
@@ -560,6 +564,8 @@ export function createCapricornRuntimeAdapter({
     validateKeybindings: (configuration) =>
       session.keybindings.validateConfiguration(configuration),
     resume: createCapricornResumeApi(session),
+    insertBlock: createCapricornBlockInsertApi(session, container, () => !destroyed),
+    canInsertBlock: () => !destroyed && canInsertCapricornBlock(session),
     markdownSelection: createCapricornMarkdownSelectionApi(session, getMarkdown),
     captureEmbeddedCodeFocus: embeddedCodeFocus.capture,
     selection: session.selection,

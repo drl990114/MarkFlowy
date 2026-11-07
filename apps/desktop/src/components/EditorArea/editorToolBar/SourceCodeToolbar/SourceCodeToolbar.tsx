@@ -37,6 +37,7 @@ import {
 import { getSourceCodeEditor } from '../../sourceCodeEditorRegistry'
 import { insertSourceImage, insertSourceLink } from '../../sourceInsertCommands'
 import { ViewSwitcher } from '../WysiwygToolbar/components/ViewSwitcher'
+import { InsertBlockMenu } from '../components/InsertBlockMenu'
 
 interface SourceCodeToolbarProps {
   editorId?: string
@@ -238,6 +239,7 @@ export const SourceCodeToolbar: FC<SourceCodeToolbarProps> = (props) => {
     <ToolbarWrapper className='mf-editor-toolbar' ref={containerRef}>
       <ToolbarSection id='common' registerWidth={registerItemWidth} hidden={false}>
         <ViewSwitcher editorId={targetEditorId} groupId={groupId} />
+        <InsertBlockMenu editorId={targetEditorId} groupId={groupId} />
         <MenuList
           editorId={targetEditorId}
           groupId={groupId}

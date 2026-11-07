@@ -136,7 +136,10 @@
     "quote": "引用",
     "bulletList": "符号列表",
     "orderedList": "有序列表",
-    "taskList": "任务列表"
+    "taskList": "任务列表",
+    "insert": "插入",
+    "codeBlock": "代码块",
+    "mathBlock": "公式块"
   },
   "image_insert": {
     "title": "插入图片",
@@ -1190,7 +1193,12 @@
       "editor_toggleH4": "切换到H4",
       "editor_toggleH5": "切换到H5",
       "editor_toggleH6": "切换到H6",
-      "app_keepEditorOpen": "保持打开"
+      "app_keepEditorOpen": "保持打开",
+      "editor_insertCodeBlock": "插入代码块",
+      "editor_insertMathBlock": "插入公式块",
+      "app_zoomIn": "放大",
+      "app_zoomOut": "缩小",
+      "app_zoomReset": "恢复 100%"
     }
   },
   "ai": {

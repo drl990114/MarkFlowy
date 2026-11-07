@@ -1,8 +1,38 @@
 import { clipboardRead } from '@/helper/clipboard'
 import { EditorSelection, Transaction } from '@codemirror/state'
+import { isolateHistory } from '@codemirror/commands'
 import type { EditorView } from '@codemirror/view'
 import { requestImageInsert } from './requestImageInsert'
 import { getSourceCodeEditor } from './sourceCodeEditorRegistry'
+
+export type InsertBlockKind = 'code' | 'math'
+
+/** Insert one Markdown block and retain the selected content in a single undo step. */
+export function insertSourceBlock(view: EditorView, kind: InsertBlockKind): boolean {
+  if (view.state.readOnly) return false
+  const { from, to } = view.state.selection.main
+  const content = view.state.sliceDoc(from, to)
+  const before = view.state.sliceDoc(Math.max(0, from - 2), from)
+  const after = view.state.sliceDoc(to, Math.min(view.state.doc.length, to + 2))
+  const prefix = before ? '\n'.repeat(Math.max(0, 2 - (before.match(/\n*$/)?.[0].length ?? 0))) : ''
+  const suffix = after ? '\n'.repeat(Math.max(0, 2 - (after.match(/^\n*/)?.[0].length ?? 0))) : '\n'
+  // A longer fence keeps selected Markdown examples inside the new code block.
+  let fenceLength = 3
+  if (kind === 'code') {
+    for (const match of content.matchAll(/`+/g)) fenceLength = Math.max(fenceLength, match[0].length + 1)
+  }
+  const fence = kind === 'math' ? '$$' : '`'.repeat(fenceLength)
+  const start = from + prefix.length + fence.length + 1
+  view.dispatch({
+    changes: { from, to, insert: `${prefix}${fence}\n${content}${content.endsWith('\n') ? '' : '\n'}${fence}${suffix}` },
+    selection: EditorSelection.range(start, start + content.length),
+    userEvent: 'input',
+    annotations: isolateHistory.of('full'),
+    scrollIntoView: true,
+  })
+  view.focus()
+  return true
+}
 
 /** Keep asynchronous clipboard/image requests bound to their original document and selection. */
 function selectionRestorer(

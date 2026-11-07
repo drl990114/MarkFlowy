@@ -49,6 +49,9 @@ const APPLICATION_COMMANDS = [
   ['app_splitEditorDown', 'view', 'split down vertical'],
   ['app_outlineCollapseAll', 'view', 'outline headings collapse 大纲 折叠'],
   ['app_outlineExpandAll', 'view', 'outline headings expand 大纲 展开'],
+  ['app_zoomIn', 'view', 'zoom in 放大'],
+  ['app_zoomOut', 'view', 'zoom out 缩小'],
+  ['app_zoomReset', 'view', 'zoom reset 100% 缩放 恢复'],
   ['app_openSetting', 'app', 'settings preferences configure'],
   ['app_hide', 'app', 'hide window'],
 ] as const
@@ -66,6 +69,8 @@ const DOCUMENT_COMMANDS = new Set([
 const EDITOR_ALIASES: Readonly<Record<string, readonly string[]>> = {
   editor_toggleStrong: ['strong', '加粗'],
   editor_toggleCodeText: ['inline code', '代码'],
+  editor_insertCodeBlock: ['code block', 'fence', '代码块'],
+  editor_insertMathBlock: ['math', 'formula', 'equation', 'latex', '公式块'],
   editor_toggleBulletList: ['unordered list', '无序列表'],
   editor_toggleOrderedList: ['numbered list'],
   editor_toggleTaskList: ['checklist', 'todo', '待办'],

@@ -218,6 +218,17 @@ export const MenuList = memo((props: MenuListProps) => {
         viewItems.push({ type: 'divider' })
       }
 
+      viewItems.push(...(['app_zoomIn', 'app_zoomOut', 'app_zoomReset'] as const).map((commandId) => ({
+        label: t(`command.id_descriptions.${commandId}`),
+        value: commandId,
+        commandId,
+        handler: () => {
+          void commandRegistry.execute(commandId).catch((error: unknown) => {
+            toast.error(error instanceof Error ? error.message : String(error))
+          })
+        },
+      })), { type: 'divider' })
+
       if (showTypewriterScroll) {
         viewItems.push({
           label: t('settings.editor.behavior.typewriter_scroll.label'),

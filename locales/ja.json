@@ -136,7 +136,10 @@
     "quote": "引用",
     "bulletList": "箇条書き",
     "orderedList": "番号付きリスト",
-    "taskList": "タスクリスト"
+    "taskList": "タスクリスト",
+    "insert": "挿入",
+    "codeBlock": "コードブロック",
+    "mathBlock": "数式ブロック"
   },
   "image_insert": {
     "title": "画像を挿入",
@@ -1157,7 +1160,12 @@
       "editor_toggleH4": "H4 に切り替える",
       "editor_toggleH5": "H5 に切り替える",
       "editor_toggleH6": "H6 に切り替える",
-      "app_keepEditorOpen": "開いたままにする"
+      "app_keepEditorOpen": "開いたままにする",
+      "editor_insertCodeBlock": "コードブロックを挿入",
+      "editor_insertMathBlock": "数式ブロックを挿入",
+      "app_zoomIn": "拡大",
+      "app_zoomOut": "縮小",
+      "app_zoomReset": "倍率を100%に戻す"
     }
   },
   "request": {

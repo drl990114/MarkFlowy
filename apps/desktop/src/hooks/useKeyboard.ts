@@ -5,6 +5,7 @@ import { getCapricornEditor } from '@/components/EditorArea/capricornEditorRegis
 import useEditorStore from '@/stores/useEditorStore'
 import { commandRegistry, keybindingRegistry } from '@/commands'
 import { sameKeyMap, normalizeKeyMap, validateKeyMap } from '@/commands/keybindingKeys'
+import { ZOOM_COMMANDS, zoomInPlusShortcut } from '@/commands/zoomCommands'
 import { editorKeymap, keybindingProblem } from '@/commands/keybindingValidation'
 import type {
   EditorShortcutMap,
@@ -120,22 +121,40 @@ function useKeyboard() {
           !validateKeyMap(binding.keys, binding.command),
       )
       .map((binding) =>
-        createAppShortcutHandler(keybindingRegistry.getKeyBindingString(binding.keys), (event) => {
-          if (composing() || event.repeat || !commandRegistry.hasCommand(binding.command))
-            return false
-          if (isOutlineCommand(binding.command) && !isOutlineCommandAvailable(binding.command)) return false
-          if (binding.when === 'editor_focus' && !isEditorTarget(event.target)) return false
-          void commandRegistry
-            .execute(binding.command)
-            .catch((error) => logger.error('Keyboard command failed', error))
-          return true
-        }),
+        createAppShortcutHandler(
+          keybindingRegistry.getKeyBindingString(binding.keys),
+          (event) => {
+            if (composing() || event.repeat || !commandRegistry.hasCommand(binding.command))
+              return false
+            if (isOutlineCommand(binding.command) && !isOutlineCommandAvailable(binding.command)) return false
+            if (binding.when === 'editor_focus' && !isEditorTarget(event.target)) return false
+            void commandRegistry
+              .execute(binding.command)
+              .catch((error) => logger.error('Keyboard command failed', error))
+            return true
+          },
+          // Settings is itself a dialog. Window zoom remains available there,
+          // while nested shortcut recording and other modal commands stay isolated.
+          ZOOM_COMMANDS.some((command) => command === binding.command)
+            ? '[data-mf-settings-surface]'
+            : undefined,
+        ),
       )
+    const handleZoomInPlus = createAppShortcutHandler(
+      zoomInPlusShortcut(keyboardInfos) ?? '',
+      (event) => {
+        if (composing() || event.repeat || !commandRegistry.hasCommand('app_zoomIn')) return false
+        void commandRegistry.execute('app_zoomIn').catch((error) => logger.error('Keyboard command failed', error))
+        return true
+      },
+      '[data-mf-settings-surface]',
+    )
     const handler = (event: KeyboardEvent) => {
       for (const handle of ordinary) {
         handle(event)
         if (event.defaultPrevented) break
       }
+      if (!event.defaultPrevented) handleZoomInPlus(event)
     }
     // Explicit host bindings own their keys in an editor, including keys reclaimed
     // from its default keymap. Other inputs can still consume keys before bubbling.

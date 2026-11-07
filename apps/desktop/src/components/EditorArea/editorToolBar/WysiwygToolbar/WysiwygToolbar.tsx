@@ -35,6 +35,7 @@ import {
   type ToolbarAction,
 } from '../components'
 import { ViewSwitcher } from './components/ViewSwitcher'
+import { InsertBlockMenu } from '../components/InsertBlockMenu'
 
 interface WysiwygToolbarProps {
   editorId?: string
@@ -280,6 +281,7 @@ export const WysiwygToolbar: FC<WysiwygToolbarProps> = (props) => {
     <ToolbarWrapper className='mf-editor-toolbar' ref={containerRef}>
       <ToolbarSection id='common' registerWidth={registerItemWidth} hidden={false}>
         <ViewSwitcher editorId={targetEditorId} groupId={groupId} />
+        <InsertBlockMenu editorId={targetEditorId} groupId={groupId} />
         <MenuList editorId={targetEditorId} groupId={groupId} prependItems={overflowMenuItems} showTypewriterScroll />
       </ToolbarSection>
 

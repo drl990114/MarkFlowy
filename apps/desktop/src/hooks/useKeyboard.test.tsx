@@ -85,6 +85,111 @@ describe('application shortcut scope and persistence', () => {
     input.dispatchEvent(event)
     return event
   }
+  it('dispatches configurable block shortcuts only in the editor and applies rebinding immediately', async () => {
+    const insert = vi.fn()
+    const command = 'editor_insertCodeBlock'
+    const registration = commandRegistry.registerCommand({ id: command, handler: insert })
+    try {
+      const binding = getDefaultKeybindings('linux').find((rule) => rule.command === command)!
+      stored.push(binding)
+      await act(async () => state.reload())
+      expect(press('c', { altKey: true, code: 'KeyC' }).defaultPrevented).toBe(false)
+      input.className = 'cm-editor'
+      expect(press('c', { altKey: true, code: 'KeyC' }).defaultPrevented).toBe(true)
+      expect(insert).toHaveBeenCalledOnce()
+      await act(async () => state.updateKeyBinding(binding.id, ['Ctrl', 'Alt', '[KeyJ]']))
+      expect(press('c', { altKey: true, code: 'KeyC' }).defaultPrevented).toBe(false)
+      expect(press('j', { altKey: true, code: 'KeyJ' }).defaultPrevented).toBe(true)
+      expect(insert).toHaveBeenCalledTimes(2)
+    } finally {
+      registration.dispose()
+    }
+  })
+
+  it('dispatches zoom shortcuts from ordinary application inputs', async () => {
+    const zoom = vi.fn()
+    const registration = commandRegistry.registerCommand({ id: 'app_zoomIn', handler: zoom })
+    try {
+      stored.push(getDefaultKeybindings('linux').find((rule) => rule.command === 'app_zoomIn')!)
+      await act(async () => state.reload())
+      expect(press('=', { code: 'Equal' }).defaultPrevented).toBe(true)
+      expect(zoom).toHaveBeenCalledOnce()
+    } finally {
+      registration.dispose()
+    }
+  })
+
+  it.each(['mac', 'linux'] as const)(
+    'dispatches physical zoom keys in the editor and settings on %s, preserving dialog isolation',
+    async (platform) => {
+      const platformSpy = vi.spyOn(navigator, 'platform', 'get').mockReturnValue(platform === 'mac' ? 'MacIntel' : 'Linux')
+      const handlers = { app_zoomIn: vi.fn(), app_zoomOut: vi.fn(), app_zoomReset: vi.fn() }
+      const registrations = Object.entries(handlers).map(([id, handler]) =>
+        commandRegistry.registerCommand({ id, handler }),
+      )
+      try {
+        stored.push(...getDefaultKeybindings(platform).filter((rule) => rule.command in handlers))
+        await act(async () => state.reload())
+        const modifiers = { ctrlKey: platform !== 'mac', metaKey: platform === 'mac' }
+        input.setAttribute('data-cap-input', '')
+        expect(press('=', { code: 'Equal', ...modifiers }).defaultPrevented).toBe(true)
+        expect(press('-', { code: 'Minus', ...modifiers }).defaultPrevented).toBe(true)
+        expect(press('0', { code: 'Digit0', ...modifiers }).defaultPrevented).toBe(true)
+
+        input.removeAttribute('data-cap-input')
+        const settings = document.createElement('div')
+        settings.setAttribute('role', 'dialog')
+        settings.setAttribute('data-mf-settings-surface', '')
+        document.body.append(settings)
+        settings.append(input)
+        expect(press('=', { code: 'Equal', ...modifiers }).defaultPrevented).toBe(true)
+        expect(press('-', { code: 'Minus', ...modifiers }).defaultPrevented).toBe(true)
+        expect(press('0', { code: 'Digit0', ...modifiers }).defaultPrevented).toBe(true)
+        for (const handler of Object.values(handlers)) expect(handler).toHaveBeenCalledTimes(2)
+        expect(press('+', { code: 'Equal', shiftKey: true, ...modifiers }).defaultPrevented).toBe(true)
+        expect(handlers.app_zoomIn).toHaveBeenCalledTimes(3)
+        expect(press('s', { code: 'KeyS' }).defaultPrevented).toBe(false)
+        expect(save).not.toHaveBeenCalled()
+
+        // A shortcut recorder is a separate modal, even when rendered in settings.
+        const recorder = document.createElement('div')
+        recorder.setAttribute('role', 'dialog')
+        settings.append(recorder)
+        recorder.append(input)
+        expect(press('=', { code: 'Equal', ...modifiers }).defaultPrevented).toBe(false)
+        expect(handlers.app_zoomIn).toHaveBeenCalledTimes(3)
+      } finally {
+        registrations.forEach((registration) => registration.dispose())
+        platformSpy.mockRestore()
+      }
+    },
+  )
+
+  it('removes the default Plus fallback after rebinding zoom and gives explicit commands priority', async () => {
+    const zoom = vi.fn()
+    const registration = commandRegistry.registerCommand({ id: 'app_zoomIn', handler: zoom })
+    const binding = getDefaultKeybindings('linux').find((rule) => rule.command === 'app_zoomIn')!
+    try {
+      stored.push(binding)
+      await act(async () => state.reload())
+      input.className = 'cm-editor'
+      expect(press('+', { code: 'Equal', shiftKey: true }).defaultPrevented).toBe(true)
+      expect(zoom).toHaveBeenCalledOnce()
+      await act(async () => state.updateKeyBinding(binding.id, ['Ctrl', '[KeyJ]']))
+      expect(press('+', { code: 'Equal', shiftKey: true }).defaultPrevented).toBe(false)
+      expect(press('j', { code: 'KeyJ' }).defaultPrevented).toBe(true)
+      expect(zoom).toHaveBeenCalledTimes(2)
+      await act(async () => state.updateKeyBinding(binding.id, binding.defaultKeys))
+      const saveBinding = stored.find((rule) => rule.command === 'app_save')!
+      await act(async () => state.updateKeyBinding(saveBinding.id, ['Ctrl', 'Shift', '+']))
+      expect(press('+', { code: 'Equal', shiftKey: true }).defaultPrevented).toBe(true)
+      expect(save).toHaveBeenCalledOnce()
+      expect(zoom).toHaveBeenCalledTimes(2)
+    } finally {
+      registration.dispose()
+    }
+  })
+
   it('leaves unavailable outline shortcuts unconsumed and uses physical brackets when available', async () => {
     const initialLayout = useLayoutStore.getState()
     const collapseAll = vi.fn()

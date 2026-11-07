@@ -136,7 +136,10 @@
     "quote": "Trích dẫn",
     "bulletList": "Danh sách dấu đầu dòng",
     "orderedList": "Danh sách đánh số",
-    "taskList": "Danh sách công việc"
+    "taskList": "Danh sách công việc",
+    "insert": "Chèn",
+    "codeBlock": "Khối mã",
+    "mathBlock": "Khối công thức"
   },
   "image_insert": {
     "title": "Chèn hình ảnh",
@@ -469,7 +472,12 @@
       "editor_toggleH4": "Chuyển thành H4",
       "editor_toggleH5": "Chuyển thành H5",
       "editor_toggleH6": "Chuyển thành H6",
-      "app_keepEditorOpen": "Giữ mở"
+      "app_keepEditorOpen": "Giữ mở",
+      "editor_insertCodeBlock": "Chèn khối mã",
+      "editor_insertMathBlock": "Chèn khối công thức",
+      "app_zoomIn": "Phóng to",
+      "app_zoomOut": "Thu nhỏ",
+      "app_zoomReset": "Đặt lại mức thu phóng 100%"
     }
   },
   "text_encoding": {

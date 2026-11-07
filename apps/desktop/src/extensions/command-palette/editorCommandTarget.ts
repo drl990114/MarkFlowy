@@ -1,6 +1,6 @@
 import { getCapricornEditor } from '@/components/EditorArea/capricornEditorRegistry'
 import type { CapricornRuntimeAdapter, CapricornSelectionBookmark } from '@/components/EditorArea/capricornRuntimeAdapter'
-import { sourceCodeCodemirrorViewMap } from '@/components/EditorArea/sourceCodeEditorInstances'
+import { getSourceCodeEditor } from '@/components/EditorArea/sourceCodeEditorInstances'
 import { EditorViewType, type EditorViewTypeValue } from '@/constants/editorViewType'
 import useEditorStore from '@/stores/useEditorStore'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
@@ -10,6 +10,8 @@ import type { EditorView } from '@codemirror/view'
 export interface EditorCommandTarget {
   fileId: string
   groupId?: string
+  /** Explicit toolbar pane; undefined retains the active editor compatibility registry. */
+  resourceGroupId?: string
   mode: EditorViewTypeValue
   rich?: CapricornRuntimeAdapter
   bookmark?: CapricornSelectionBookmark | null
@@ -17,16 +19,20 @@ export interface EditorCommandTarget {
   sourceState?: EditorState
 }
 
-export function captureEditorCommandTarget(): EditorCommandTarget | null {
-  const { activeId: fileId, activeGroupId: groupId } = useEditorStore.getState()
+export function captureEditorCommandTarget(pane?: { fileId: string; groupId?: string }): EditorCommandTarget | null {
+  const { activeId, activeGroupId } = useEditorStore.getState()
+  const fileId = pane?.fileId ?? activeId
+  const groupId = pane?.groupId ?? activeGroupId
   if (!fileId) return null
-  const mode = useEditorViewTypeStore.getState().getEditorViewType(fileId)
-  const rich = mode === EditorViewType.WYSIWYG ? getCapricornEditor(fileId) : undefined
+  const mode = useEditorViewTypeStore.getState().getEditorViewType(fileId, groupId)
+  const resourceGroupId = pane?.groupId
+  const rich = mode === EditorViewType.WYSIWYG ? getCapricornEditor(fileId, resourceGroupId) : undefined
   const source =
-    mode === EditorViewType.SOURCECODE ? sourceCodeCodemirrorViewMap.get(fileId)?.cm : undefined
+    mode === EditorViewType.SOURCECODE ? getSourceCodeEditor(fileId, resourceGroupId)?.cm : undefined
   return {
     fileId,
     groupId,
+    resourceGroupId,
     mode,
     rich,
     source,
@@ -44,7 +50,7 @@ export function isCurrentCommandTarget(target: EditorCommandTarget): boolean {
   return (
     activeId === target.fileId &&
     activeGroupId === target.groupId &&
-    useEditorViewTypeStore.getState().getEditorViewType(target.fileId) === target.mode
+    useEditorViewTypeStore.getState().getEditorViewType(target.fileId, target.groupId) === target.mode
   )
 }
 

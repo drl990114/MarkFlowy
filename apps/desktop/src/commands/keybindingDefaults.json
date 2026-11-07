@@ -1,6 +1,31 @@
 {
   "commands": [
     {
+      "id": "editor_insertCodeBlock",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "editor_insertMathBlock",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_zoomIn",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_zoomOut",
+      "configurable": true,
+      "target": "app"
+    },
+    {
+      "id": "app_zoomReset",
+      "configurable": true,
+      "target": "app"
+    },
+    {
       "id": "app_outlineCollapseAll",
       "configurable": true,
       "target": "app"
@@ -222,6 +247,36 @@
     }
   ],
   "rules": [
+    {
+      "id": "editor_insertCodeBlock.default",
+      "command": "editor_insertCodeBlock",
+      "keys": ["CommandOrCtrl", "Alt", "[KeyC]"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "editor_insertMathBlock.default",
+      "command": "editor_insertMathBlock",
+      "keys": ["CommandOrCtrl", "Alt", "[KeyM]"],
+      "when": "editor_focus"
+    },
+    {
+      "id": "app_zoomIn.default",
+      "command": "app_zoomIn",
+      "keys": ["CommandOrCtrl", "[Equal]"],
+      "when": "always"
+    },
+    {
+      "id": "app_zoomOut.default",
+      "command": "app_zoomOut",
+      "keys": ["CommandOrCtrl", "[Minus]"],
+      "when": "always"
+    },
+    {
+      "id": "app_zoomReset.default",
+      "command": "app_zoomReset",
+      "keys": ["CommandOrCtrl", "[Digit0]"],
+      "when": "always"
+    },
     {
       "id": "app_outlineCollapseAll.default",
       "command": "app_outlineCollapseAll",
