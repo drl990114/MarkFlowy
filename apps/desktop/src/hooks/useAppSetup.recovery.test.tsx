@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type * as DraftRecoveryState from '@/services/draftRecoveryState'
 import type { switchWorkspaceInCurrentWindow } from '@/services/workspace-switch'
 import type { UpdateSessionPersistence } from '@/services/update-session'
+import type * as AppSetting from '@/services/app-setting'
 import type * as AppSetup from './useAppSetup'
 import { normalizeStartupAppearance } from '@/startup/appearance'
 
@@ -30,6 +31,9 @@ const mocks = vi.hoisted(() => ({
   closeNative: vi.fn(),
   closeDrafts: vi.fn<(cache: unknown, label: string, close: () => Promise<void>) => Promise<boolean>>(),
   closeRequested: async () => {},
+  settingsChanged: async () => {},
+  setupSettings: vi.fn(),
+  changeLanguage: vi.fn(),
   openExternalPaths: vi.fn(),
   opened: [] as string[],
   paths: {} as Record<string, string | undefined>,
@@ -51,15 +55,22 @@ vi.mock('@/services/windows', () => ({
     emitTo: mocks.emitTo,
     listen: async (event: string, handler: () => Promise<void>) => {
       if (event === 'tauri://close-requested') mocks.closeRequested = handler
+      if (event === 'app_conf_change') mocks.settingsChanged = handler
       return vi.fn()
     },
   },
 }))
-vi.mock('@/helper/logger', () => ({ logger: { debug: vi.fn(), error: mocks.error } }))
+vi.mock('@/helper/logger', () => ({ logger: { debug: vi.fn(), info: vi.fn(), error: mocks.error } }))
 vi.mock('@/helper/files', () => ({ getFileObject: (id: string) => ({ id, name: `${id}.md`, path: mocks.paths[id] }) }))
 vi.mock('@/helper/filesys', () => ({ getFileNameFromPath: vi.fn(), releaseSecurityScope: vi.fn() }))
 vi.mock('@/helper/updater', () => ({ checkUpdate: mocks.checkUpdate }))
-vi.mock('@/i18n', () => ({ i18nInit: vi.fn(), t: (key: string) => key }))
+vi.mock('@/i18n', async () => ({
+  i18nInit: vi.fn(),
+  changeLng: mocks.changeLanguage,
+  locales: (await import('../../../../packages/i18n/src/types')).locales,
+  t: (key: string) => key,
+}))
+vi.mock('@/startup/sentry', () => ({ syncErrorReportingPreference: vi.fn() }))
 vi.mock('zens', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock('@/commands', () => ({
   commandRegistry: { onDidChangeCommands: () => ({ dispose: vi.fn() }) },
@@ -68,9 +79,6 @@ vi.mock('@/themes/library', () => ({ startThemeLibrary: vi.fn() }))
 vi.mock('@/stores/editorResumeStore', () => ({ flushEditorResumeStates: vi.fn() }))
 vi.mock('@/stores', () => ({
   useEditorStore: { getState: () => ({ getRootPath: mocks.getRootPath, opened: mocks.opened }), subscribe: () => vi.fn() },
-}))
-vi.mock('@/stores/useAppSettingStore', () => ({
-  default: { getState: () => ({ settingData: mocks.settingData }), subscribe: () => vi.fn() },
 }))
 vi.mock('@/stores/useOpenedCacheStore', () => ({
   default: { getState: () => ({ setRecentWorkspaces: vi.fn() }) },
@@ -89,7 +97,7 @@ vi.mock('@/stores/useThemeStore', () => ({
 }))
 vi.mock('@/services/update-session', () => ({ listenForUpdateSession: mocks.listenUpdateSession }))
 vi.mock('@/services/recent-file-history', () => ({ startSharedRecentFileHistory: mocks.startRecentHistory }))
-vi.mock('@/services/app-setting', () => ({ appSettingStoreSetup: async () => ({ theme_mode: 'system' }) }))
+vi.mock('@/services/app-setting', () => ({ appSettingStoreSetup: mocks.setupSettings }))
 vi.mock('@/services/draft-recovery', () => ({
   listenForDraftReload: () => vi.fn(), closeWithDraftRecovery: mocks.closeDrafts,
 }))
@@ -134,6 +142,9 @@ beforeEach(async () => {
   delete window.__MARKFLOWY_BOOTSTRAP__
   mocks.windowLabel = 'main'
   mocks.settingData.auto_update = false
+  const { default: settings } = await import('@/stores/useAppSettingStore')
+  settings.setState({ settingData: mocks.settingData })
+  mocks.setupSettings.mockResolvedValue({ theme_mode: 'system' })
   mocks.opened = []
   mocks.paths = {}
   mocks.stageRecovery.mockResolvedValue({ visibleReady: Promise.resolve(), finished: Promise.resolve(0) })
@@ -193,6 +204,32 @@ function bootstrapSession(restoreSessionLabel: string | null) {
     restoreSessionLabel,
   }
 }
+
+describe('shared setting notifications', () => {
+  it('updates this window’s translated UI when another window changes language without an RME editor', async () => {
+    const language = await import('../../../../packages/i18n/src/desktop')
+    await language.i18nInit({ lng: 'en' })
+    mocks.changeLanguage.mockImplementation(language.changeLng)
+    const { default: settings } = await import('@/stores/useAppSettingStore')
+    settings.getState().setSettingData({ language: 'en', theme_mode: 'system' })
+    const { appSettingStoreSetup } = await vi.importActual<typeof AppSetting>(
+      '@/services/app-setting',
+    )
+    mocks.setupSettings.mockImplementation(appSettingStoreSetup)
+    mocks.invoke.mockImplementation(async (command) => {
+      if (command === 'get_app_conf') return { language: 'ru', theme_mode: 'system' }
+      return undefined
+    })
+    await startRuntime()
+    const translated = renderHook(() => language.useTranslation())
+    expect(translated.result.current.t('common.retry')).toBe('Retry')
+
+    await act(async () => { await mocks.settingsChanged() })
+
+    expect(settings.getState().settingData.language).toBe('ru')
+    expect(translated.result.current.t('common.retry')).toBe('Повторить')
+  })
+})
 
 describe('application window restoration', () => {
   it('restores documents and drafts and allows workspace switching when shared history is unreadable', async () => {

@@ -19,7 +19,7 @@ import { getFileNameFromPath, releaseSecurityScope } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
 import { checkUpdate } from '@/helper/updater'
 import { startPeriodicUpdateChecks } from '@/services/update-checks'
-import { i18nInit, t } from '@/i18n'
+import { changeLng, i18nInit, locales, t, type Langs } from '@/i18n'
 import { appSettingStoreSetup } from '@/services/app-setting'
 import { openExternalPaths } from '@/services/open-external-paths'
 import {
@@ -578,6 +578,14 @@ export const useAppRuntimeSetup = () => {
     const settingDataUpdate = currentWindow.listen('app_conf_change', async () => {
       const prevSettingData = useAppSettingStore.getState().settingData
       const nextSettingData = await appSettingStoreSetup()
+      if (nextSettingData.language !== prevSettingData.language) {
+        const language = nextSettingData.language
+        await changeLng(
+          typeof language === 'string' && Object.hasOwn(locales, language)
+            ? (language as Langs)
+            : 'en',
+        )
+      }
 
       if (hasFileExcludePatternsChanged(prevSettingData, nextSettingData)) {
         await refreshWorkspaceFileTree()
