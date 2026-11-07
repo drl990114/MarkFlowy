@@ -631,6 +631,34 @@ describe('indexed draft recovery', () => {
     expect(getFileObject('buffer').content).toBe('latest protected text')
     expect(claimed).toEqual([latest])
   })
+
+  it.each([1, 2])('merges a version %s reload body with its saved untitled tab', async (version) => {
+    const item = descriptor('untitled')
+    item.document.path = undefined
+    const session = sessionFor('main', item)
+    restoreWindowDocuments(session)
+    installNative([item])
+    const document = { id: 'saved-tab', name: 'untitled.md', ext: 'md' }
+    const key = 'mf-draft-reload-document:latest'
+    window.sessionStorage.setItem(key, JSON.stringify('latest unsaved input'))
+    window.sessionStorage.setItem(RELOAD_SESSION_KEY, JSON.stringify({
+      version, activeId: 'saved-tab', documents: [version === 1
+        ? { ...document, content: 'latest unsaved input' }
+        : { ...document, source: { kind: 'reload', key } }],
+    }))
+    const onError = vi.fn()
+    const recovery = await start({ session, reload: true, onError })
+    expect(await recovery.finished).toBe(1)
+    expect(onError).not.toHaveBeenCalled()
+    expect(useEditorStore.getState().opened).toEqual(['saved-tab'])
+    expect(useEditorStore.getState().activeId).toBe('saved-tab')
+    expect(getFileObject('saved-tab').content).toBe('latest unsaved input')
+    expect(bindRecoveredDraft).toHaveBeenCalledWith('saved-tab', expect.objectContaining({
+      document: item.document, content: 'latest unsaved input',
+    }))
+    expect(window.sessionStorage.getItem(RELOAD_SESSION_KEY)).toBeNull()
+  })
+
   it('refreshes a history generation without weakening the exact draft reference', async () => {
     const item = descriptor('active')
     open('active')

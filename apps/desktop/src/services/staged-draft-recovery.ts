@@ -174,6 +174,9 @@ async function readSources(
         {
           documents: recoveryDocuments(reloadSession),
           activeId: reloadSession.activeId,
+          // Reload bodies belong to the same tabs already restored from the
+          // window session, including untitled documents without a path key.
+          restoreIds: true,
           consume: () => removeReloadSnapshot(raw),
         },
       ]
