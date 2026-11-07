@@ -466,11 +466,16 @@ describe('PdfPrintController', () => {
   })
 
   it('keeps the main window unchanged and cleans up after the print window closes', async () => {
+    useAppSettingStore.getState().setSettingData({
+      ...useAppSettingStore.getState().settingData,
+      editor_first_line_indent: true,
+    })
     printMocks.preparePrintDocument.mockResolvedValue({ failedImageCount: 1 })
     printMocks.openPdfPrintWindow.mockImplementation(async (printDocument) => {
       expect(document.title).toBe('MarkFlowy')
       const printRoot = document.querySelector<HTMLElement>('.mf-pdf-print-root')
       expect(printRoot?.getAttribute('aria-hidden')).toBe('true')
+      expect(printRoot?.style.getPropertyValue('--mf-paragraph-first-line-indent')).toBe('2em')
       expect(getComputedStyle(container).display).not.toBe('none')
       expect(getComputedStyle(printRoot!).display).not.toBe('none')
       expect(printDocument).toMatchObject({
@@ -481,6 +486,7 @@ describe('PdfPrintController', () => {
         jobId: expect.any(String),
         rootFontSize: '18px',
         rootLineHeight: '1.8',
+        firstLineIndent: true,
       })
       return { failedImageCount: 1, jobId: '1', status: 'complete' }
     })

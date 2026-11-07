@@ -56,6 +56,7 @@ pub_struct!(AppConf {
     editor_insert_date_format: Option<String>,
     editor_root_font_size: Option<u32>,
     editor_root_line_height: Option<String>,
+    editor_first_line_indent: Option<bool>,
     editor_source_font_size: Option<u32>,
     editor_source_line_height: Option<String>,
     editor_code_font_size: Option<u32>,
@@ -685,6 +686,7 @@ impl AppConf {
             editor_insert_date_format: Some("YYYY-MM-DD".to_string()),
             editor_root_font_size: Some(16),
             editor_root_line_height: Some("1.7".to_string()),
+            editor_first_line_indent: Some(false),
             editor_source_font_size: Some(15),
             editor_source_line_height: Some("1.6".to_string()),
             editor_code_font_size: None,
@@ -843,6 +845,7 @@ impl AppConf {
             editor_insert_date_format,
             editor_root_font_size,
             editor_root_line_height,
+            editor_first_line_indent,
             editor_source_font_size,
             editor_source_line_height,
             editor_code_font_size,
@@ -1442,6 +1445,20 @@ mod tests {
         assert_eq!(conf.editor_root_line_height.as_deref(), Some("1.7"));
         assert_eq!(conf.editor_source_font_size, Some(15));
         assert_eq!(conf.editor_source_line_height.as_deref(), Some("1.6"));
+    }
+
+    #[test]
+    fn first_line_indent_defaults_off_and_survives_settings_roundtrip() {
+        let defaults = typography_default_conf().merge_conf(empty_conf());
+        assert_eq!(defaults.editor_first_line_indent, Some(false));
+        for enabled in [true, false] {
+            let changed = defaults.clone().amend(serde_json::json!({
+                "editor_first_line_indent": enabled
+            }));
+            let saved = serde_json::from_value(serde_json::to_value(changed).unwrap()).unwrap();
+            let restored = typography_default_conf().merge_conf(saved);
+            assert_eq!(restored.editor_first_line_indent, Some(enabled));
+        }
     }
 
     #[test]

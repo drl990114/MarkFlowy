@@ -638,6 +638,10 @@
         "code_font_family": {
           "label": "代码字体",
           "desc": "设置代码编辑器的字体。"
+        },
+        "first_line_indent": {
+          "label": "首行缩进",
+          "desc": "普通段落首行缩进两个字符，预览和导出同步生效，不改变 Markdown。"
         }
       },
       "behavior": {

@@ -615,6 +615,10 @@
         "code_font_family": {
           "label": "Phông chữ mã",
           "desc": "Đặt phông chữ mã của trình soạn thảo."
+        },
+        "first_line_indent": {
+          "label": "Thụt đầu dòng",
+          "desc": "Thụt đầu đoạn hai ký tự trong trình soạn thảo, bản xem trước và bản xuất. Không thay đổi Markdown."
         }
       },
       "behavior": {

@@ -32,6 +32,7 @@ import {
 import { PDF_EXPORT_EVENT } from '../pdf-export/pdfExportMenuItem'
 import type { PdfExportOptions } from '../pdf-export/PdfExportDialog'
 import { usePdfBrowserConfiguration } from '../pdf-export/usePdfBrowserConfiguration'
+import { paragraphIndentationStyle } from '../paragraphIndentation'
 
 const PdfExportDialog = lazy(() =>
   import('../pdf-export/PdfExportDialog').then((module) => ({ default: module.PdfExportDialog })),
@@ -83,6 +84,9 @@ export function PdfPrintController({
   )
   const editorRootFontFamily = useAppSettingStore(
     (state) => state.settingData.editor_root_font_family,
+  )
+  const editorFirstLineIndent = useAppSettingStore(
+    (state) => state.settingData.editor_first_line_indent === true,
   )
   const printTheme = useMemo(
     () =>
@@ -383,6 +387,7 @@ export function PdfPrintController({
           {
             editorCodeFontFamily,
             editorRootFontFamily,
+            firstLineIndent: editorFirstLineIndent,
             failedImageCount,
             fileName: job.fileName,
             html,
@@ -435,7 +440,7 @@ export function PdfPrintController({
     })()
 
     return cancelPreparation
-  }, [editorCodeFontFamily, editorRootFontFamily, finishTask, hydration, job, styleToken, t])
+  }, [editorCodeFontFamily, editorRootFontFamily, editorFirstLineIndent, finishTask, hydration, job, styleToken, t])
 
   const Preview = job?.runtime.Preview
   return (
@@ -491,6 +496,7 @@ export function PdfPrintController({
                 <div
                   ref={rootRef}
                   className='mf-pdf-print-root'
+                  style={paragraphIndentationStyle(editorFirstLineIndent)}
                   data-mf-pdf-print-root=''
                   aria-hidden='true'
                 >

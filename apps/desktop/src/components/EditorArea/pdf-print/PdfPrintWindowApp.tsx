@@ -1,4 +1,5 @@
 import { resolveAppThemeTokens } from '@/appThemeTokens'
+import { paragraphIndentationStyle } from '../paragraphIndentation'
 import { editorLightTheme } from '@markflowy/theme'
 import { emitTo } from '@tauri-apps/api/event'
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
@@ -153,7 +154,11 @@ export function PdfPrintWindowApp({ request }: PdfPrintWindowAppProps) {
 
   return (
     <ThemeProvider theme={printTheme}>
-      <div ref={rootRef} className='mf-pdf-print-root mf-pdf-window-root'>
+      <div
+        ref={rootRef}
+        className='mf-pdf-print-root mf-pdf-window-root'
+        style={paragraphIndentationStyle(payload.firstLineIndent === true)}
+      >
         <WysiwygThemeWrapper
           rootFontSize={payload.rootFontSize}
           rootLineHeight={payload.rootLineHeight}

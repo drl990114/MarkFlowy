@@ -196,6 +196,7 @@ describe('PdfPrintWindowApp', () => {
       jobId: '42',
       rootFontSize: '18px',
       rootLineHeight: '1.8',
+      firstLineIndent: true,
       sourceLabel: 'main',
     }
     await act(async () => {
@@ -207,6 +208,9 @@ describe('PdfPrintWindowApp', () => {
       'Current unsaved content',
     )
     expect(container.querySelector('[data-font-size="18px"]')).not.toBeNull()
+    expect(container.querySelector<HTMLElement>('.mf-pdf-window-root')?.style.getPropertyValue(
+      '--mf-paragraph-first-line-indent',
+    )).toBe('2em')
     expect(windowMocks.show).toHaveBeenCalledOnce()
     expect(windowMocks.setFocus).toHaveBeenCalledOnce()
     expect(printMocks.preparePrintDocument).toHaveBeenCalledWith(

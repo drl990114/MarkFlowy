@@ -538,6 +538,10 @@
         "code_font_family": {
           "label": "Famille de polices de code",
           "desc": "Définissez la famille de polices de code de l'éditeur."
+        },
+        "first_line_indent": {
+          "label": "Retrait de première ligne",
+          "desc": "Indente les paragraphes de deux caractères dans l’éditeur, l’aperçu et les exports, sans modifier le Markdown."
         }
       },
       "behavior": {

@@ -138,6 +138,17 @@ async function layout() {
 }
 
 describe('image export preview surface', () => {
+  it.each([false, true])('carries first-line indentation into HTML and image export (%s)', async (firstLineIndent) => {
+    const preview = fakeRuntime()
+    const { promise } = await start(preview.runtime, { firstLineIndent })
+    await layout()
+    const surface = await promise
+    expect(surface.element.style.getPropertyValue('--mf-paragraph-first-line-indent')).toBe(
+      firstLineIndent ? '2em' : '0',
+    )
+    expect(preview.getProps().doc).toBe('Snapshot with $x^2$ and Mermaid')
+  })
+
   it('waits for formula/diagram hydration, image decoding, fonts and layout', async () => {
     const hydration = deferred()
     const decoded = deferred()

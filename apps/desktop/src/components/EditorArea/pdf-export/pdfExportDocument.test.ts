@@ -1,8 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { getExportableImageSrc } from '@/helper/image'
 import { FileResultCode } from '@markflowy/interface'
 import { invoke } from '@tauri-apps/api/core'
 import { buildPdfExportDocument, PDF_EXPORT_CSP } from './pdfExportDocument'
+
+const paragraphIndentationCss = readFileSync(
+  resolve(process.cwd(), 'src/components/EditorArea/paragraphIndentation.css'), 'utf8',
+)
 
 vi.mock('@/helper/image', () => ({ getExportableImageSrc: vi.fn() }))
 vi.mock('@tauri-apps/api/core', () => ({ invoke: vi.fn() }))
@@ -66,6 +72,28 @@ async function prepare(
 const parse = (html: string) => new DOMParser().parseFromString(html, 'text/html')
 
 describe('standalone PDF document', () => {
+  it.each(['0', '2em'])('preserves paragraph indentation in the portable PDF HTML (%s)', async (indent) => {
+    const root = createRoot('<p>Body</p><blockquote><p>Quote</p></blockquote><ul><li><p>List</p></li></ul>')
+    root.style.setProperty('--mf-paragraph-first-line-indent', indent)
+    // happy-dom does not inherit custom properties; model the computed value
+    // the WebView reads from the prepared preview before freezing its CSS.
+    const livePreview = root.querySelector('.mf-preview-content')!
+    const computed = window.getComputedStyle.bind(window)
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element) =>
+      element === livePreview ? computed(root) : computed(element),
+    )
+    const style = document.createElement('style')
+    style.textContent = paragraphIndentationCss
+    document.head.append(style)
+    cleanups.push(() => style.remove())
+    const exported = parse((await prepare(root)).html)
+    const preview = exported.querySelector<HTMLElement>('.mf-preview-content')!
+    expect(preview.style.getPropertyValue('--mf-paragraph-first-line-indent')).toBe(indent)
+    expect(exported.head.textContent).toContain('.mf-preview-content > p')
+    expect(exported.head.textContent).toContain('text-indent: var(--mf-paragraph-first-line-indent, 0)')
+    expect(preview.textContent).toBe('BodyQuoteList')
+  })
+
   it('keeps heading semantics, skipped levels and unique CJK/duplicate anchors without changing the prepared preview', async () => {
     const root = createRoot(
       '<h1>中文标题</h1><h3>同名</h3><h3>同名</h3><h6>末节 ✨</h6><h2 id="custom">自定义</h2><a href="#中文标题">跳转</a>',

@@ -8,6 +8,7 @@ import { ThemeProvider, type DefaultTheme } from 'styled-components'
 import { waitForPrintLayout } from './pdf-print/printDocument'
 import { loadRmeRuntime, type RmeRuntime } from './rmeRuntime'
 import { RmeThemeProvider } from './RmeThemeProvider'
+import { paragraphIndentationStyle } from './paragraphIndentation'
 
 const IMAGE_EXPORT_TIMEOUT_MS = 15_000
 
@@ -21,6 +22,7 @@ export interface CreateImageExportSurfaceOptions {
   markdown: string
   delegateOptions: CreateWysiwygDelegateOptions
   styleToken: EditorProps['styleToken']
+  firstLineIndent?: boolean
   theme: DefaultTheme
   editorThemeConfig?: ContextType<typeof EditorThemeContext>
   semanticTheme?: ContextType<typeof SemanticThemeContext>
@@ -121,6 +123,7 @@ export async function createImageExportSurface({
   markdown,
   delegateOptions,
   styleToken,
+  firstLineIndent = false,
   theme,
   editorThemeConfig = null,
   semanticTheme = null,
@@ -147,6 +150,9 @@ export async function createImageExportSurface({
     color: exportTheme.primaryFontColor,
     fontFamily: exportTheme.fontFamily,
   })
+  for (const [name, value] of Object.entries(paragraphIndentationStyle(firstLineIndent))) {
+    element.style.setProperty(name, value)
+  }
   doc.body.append(element)
   const abortController = new AbortController()
   const { signal } = abortController

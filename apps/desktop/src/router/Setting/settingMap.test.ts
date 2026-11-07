@@ -29,6 +29,14 @@ describe('AI setting map', () => {
 })
 
 describe('Editor setting map', () => {
+  it('keeps visual first-line indentation optional and off by default', () => {
+    expect(getSettingMap().editor.Style.firstLineIndent).toMatchObject({
+      key: 'editor_first_line_indent',
+      type: 'switch',
+      defaultValue: false,
+    })
+  })
+
   it('enables preview tabs independently of the Markdown display mode', () => {
     expect(getSettingMap().editor.Tabs.enablePreview).toMatchObject({
       key: 'editor_enable_preview_tabs',

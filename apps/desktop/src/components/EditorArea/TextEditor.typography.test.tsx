@@ -5,6 +5,7 @@ import ts from 'typescript'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { CapricornRuntimeOptions } from './capricornRuntimeAdapter'
 import { resolveCodeEditorPreferences } from './codeEditorSettings'
+import { paragraphIndentationStyle } from './paragraphIndentation'
 import {
   capricornClipboardCommands,
   createCapricornKeybindingConfiguration,
@@ -33,6 +34,7 @@ if (!editor?.body) throw new Error('TextEditor implementation was not found')
 const names = new Set([
   'editorRootFontSize',
   'editorRootLineHeight',
+  'editorFirstLineIndent',
   'editorSourceFontSize',
   'editorSourceLineHeight',
   'resolveTypography',
@@ -99,6 +101,7 @@ const compiled = ts.transpileModule(
 const Harness = runInNewContext(compiled, {
   useMemo,
   resolveCodeEditorPreferences,
+  paragraphIndentationStyle,
   rmeRuntime: undefined,
   useFileTextDirectionStore,
   getFileTextDirectionKey,
@@ -128,6 +131,7 @@ const Harness = runInNewContext(compiled, {
   settings: {
     editor_root_font_size?: number
     editor_root_line_height?: string
+    editor_first_line_indent?: unknown
     editor_source_font_size?: number
     editor_source_line_height?: string
     editor_caret_animation?: unknown
@@ -161,6 +165,19 @@ afterEach(() => {
 })
 
 describe('TextEditor Capricorn typography settings', () => {
+  it.each([EditorViewType.WYSIWYG, EditorViewType.PREVIEW])(
+    'updates visual paragraph indentation in %s without modifying Markdown',
+    (viewType) => {
+      const onOptions = vi.fn()
+      const { rerender } = render(<Harness settings={{}} viewType={viewType} onOptions={onOptions} />)
+      expect(onOptions.mock.lastCall?.[0].style['--mf-paragraph-first-line-indent']).toBe('0')
+      for (const saved of [true, false, true, undefined, null, 'true']) {
+        rerender(<Harness settings={{ editor_first_line_indent: saved }} viewType={viewType} onOptions={onOptions} />)
+        expect(onOptions.mock.lastCall?.[0].style['--mf-paragraph-first-line-indent']).toBe(saved === true ? '2em' : '0')
+      }
+    },
+  )
+
   it('updates caret animation from saved preferences and keeps it disabled for unset or invalid values', () => {
     const onOptions = vi.fn()
     const { rerender } = render(<Harness settings={{}} onOptions={onOptions} />)
@@ -339,6 +356,7 @@ describe('TextEditor Capricorn typography settings', () => {
         />,
       )
       expect(onOptions.mock.lastCall?.[0].style).toEqual({
+        '--mf-paragraph-first-line-indent': '0',
         fontSize: `${fontSize}px`,
         lineHeight,
         '--cap-code-font-size': `calc(${fontSize}px * 0.875)`,

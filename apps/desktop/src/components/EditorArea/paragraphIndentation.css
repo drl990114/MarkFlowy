@@ -1,0 +1,6 @@
+/* Only document-level paragraphs: nested lists, quotes, tables and code retain
+   their existing layout. The inherited value also survives export snapshots. */
+:is(.mf-editor-content, [data-mf-capricorn-export]) [data-cap-content] > [data-cap-editable] > p[data-markdown-block='paragraph'],
+.mf-preview-content > p {
+  text-indent: var(--mf-paragraph-first-line-indent, 0);
+}

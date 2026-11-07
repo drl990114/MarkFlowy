@@ -13,6 +13,7 @@ const PRINT_WINDOW_READY_TIMEOUT_MS = 15_000
 export interface PdfPrintWindowDocument {
   editorCodeFontFamily?: string
   editorRootFontFamily?: string
+  firstLineIndent?: boolean
   failedImageCount: number
   fileName: string
   html: string

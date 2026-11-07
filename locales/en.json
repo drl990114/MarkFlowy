@@ -615,6 +615,10 @@
         "code_font_family": {
           "label": "Code font family",
           "desc": "Set the code font family of the editor."
+        },
+        "first_line_indent": {
+          "label": "First-line indent",
+          "desc": "Indent body paragraphs by two characters in the editor, preview, and exports. Markdown stays unchanged."
         }
       },
       "behavior": {

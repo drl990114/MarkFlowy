@@ -538,6 +538,10 @@
         "code_font_family": {
           "label": "Code Familia tipográfico",
           "desc": "Establezca la familia de fuentes de código del editor."
+        },
+        "first_line_indent": {
+          "label": "Sangría de primera línea",
+          "desc": "Aplica dos caracteres de sangría a los párrafos en el editor, la vista previa y las exportaciones, sin modificar Markdown."
         }
       },
       "behavior": {

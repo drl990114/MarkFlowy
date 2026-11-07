@@ -280,6 +280,13 @@ export const getSettingMap = (
           saveToString: true,
           scope: [1, 2],
         },
+        firstLineIndent: {
+          key: 'editor_first_line_indent',
+          type: 'switch',
+          defaultValue: false,
+          title: { i18nKey: 'settings.editor.style.first_line_indent.label' },
+          desc: { i18nKey: 'settings.editor.style.first_line_indent.desc' },
+        },
         normalFontFamily: {
           key: 'editor_root_font_family',
           type: 'fontListSelect',

@@ -20,6 +20,7 @@ import { bindEditorResume, bindSourceEditorResume } from './editorResume'
 import { captureEditorModeFocus } from './editorModeFocus'
 import { editorAutomationRegistry, type EditorAutomationHandle } from './editorAutomationRegistry'
 import { exportHtmlDocument } from './exportHtmlDocument'
+import { paragraphIndentationStyle } from './paragraphIndentation'
 import { setSourceCodeEditor, sourceCodeViewRegistry } from './sourceCodeEditorRegistry'
 import { reportEditorSearchLoadFailure, useEditorSearchStore } from './editorSearchStore'
 import { commandRegistry } from '@/commands'
@@ -760,6 +761,9 @@ function TextEditor(props: TextEditorProps) {
   const editorRootLineHeight = useAppSettingStore(
     (state) => state.settingData.editor_root_line_height,
   )
+  const editorFirstLineIndent = useAppSettingStore(
+    (state) => state.settingData.editor_first_line_indent === true,
+  )
   const editorTypewriterScroll = useAppSettingStore(
     (state) => state.settingData.editor_typewriter_scroll,
   )
@@ -825,6 +829,7 @@ function TextEditor(props: TextEditorProps) {
         markdown,
         delegateOptions,
         styleToken: printStyleToken,
+        firstLineIndent: editorFirstLineIndent,
         theme: {
           ...theme,
           fontFamily: semanticTheme?.['font.editor.family'] ?? theme?.fontFamily,
@@ -835,7 +840,7 @@ function TextEditor(props: TextEditorProps) {
         editorThemeConfig,
       })
     },
-    [delegateOptions, printStyleToken, theme, semanticTheme, editorThemeConfig],
+    [delegateOptions, printStyleToken, theme, semanticTheme, editorThemeConfig, editorFirstLineIndent],
   )
 
   const externalChangeState = useExternalFileChangeStore((state) => {
@@ -2593,6 +2598,7 @@ function TextEditor(props: TextEditorProps) {
       readOnly: savePathReserved || externalChangeResolving,
       spellCheck: wysiwygEditorSpellcheck,
       style: {
+        ...paragraphIndentationStyle(editorFirstLineIndent),
         '--cap-editor-content-width': 'var(--mf-reader-content-width)',
         fontSize: themeFontSize,
         lineHeight: wysiwygRootLineHeight,
@@ -2607,6 +2613,7 @@ function TextEditor(props: TextEditorProps) {
     }
   }, [
     editorCaretAnimation,
+    editorFirstLineIndent,
     snippetOptions,
     delegateOptions,
     linkEditMode,
