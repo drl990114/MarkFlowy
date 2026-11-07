@@ -46,6 +46,69 @@ test('Next routes and next-i18next server props load the Russian web dictionary'
   assert.equal(_nextI18Next.initialI18nStore.ru.common.home.hero.download, 'Скачать MarkFlowy')
 })
 
+test('client navigation from Russian docs to an English guide refreshes newly mounted chrome', async () => {
+  const { create, act } = require('react-test-renderer')
+  const { useTranslation } = require('next-i18next')
+  // Exercise the browser layout-effect ordering without a browser or mocked i18n.
+  const utils = require('next-i18next/dist/commonjs/utils.js')
+  const previousEffect = utils.useIsomorphicLayoutEffect
+  const previousAct = globalThis.IS_REACT_ACT_ENVIRONMENT
+  utils.useIsomorphicLayoutEffect = React.useLayoutEffect
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true
+  let tree
+  try {
+    const childrenOnly = ({ children }) => children
+    const cssImports = [
+      'remixicon/fonts/remixicon.css', 'zens/esm/styles.css', './normalize.css',
+      '../components/theme.css', '../components/site/site.css',
+      '../components/site/home-motion.css', '../components/site/project-stats.css',
+      '../components/document/document.css', '../components/workspace/app.css',
+    ]
+    const { default: App } = await loadModule('pages/_app.tsx', {
+      ...Object.fromEntries(cssImports.map((name) => [name, {}])),
+      '@vercel/analytics/react': { Analytics: () => null },
+      'components/ThemeProvider': childrenOnly,
+      'next/head': () => null,
+      'styled-components': { createGlobalStyle: () => () => null },
+      '@markflowy/interface': { GlobalStyles: () => null },
+      '../utils/website': { isWebsitePage: () => true },
+      '../utils/websiteTheme': { applicationThemeCSS: '', websiteThemeCSS: '' },
+    })
+    const resources = Object.fromEntries(await Promise.all(['en', 'ru', 'zh'].map(async (locale) => [
+      locale, { common: JSON.parse(await readFile(new URL(`../locales/web/${locale}/common.json`, import.meta.url), 'utf8')) },
+    ])))
+    const keys = ['navigation.download', 'common.docs', 'footer.description']
+    function Chrome() {
+      const { t } = useTranslation('common')
+      return React.createElement('p', null, keys.map((key) => t(key)).join('|'))
+    }
+    function IndexPage() { return React.createElement(Chrome) }
+    function GuidePage() { return React.createElement(Chrome) }
+    const userConfig = { ...config, initImmediate: false,
+      localePath: fileURLToPath(new URL('../locales/web/', import.meta.url)) }
+    const props = (locale, Component) => ({
+      Component, router: { locale, pathname: '/docs/[...slug]' },
+      pageProps: { _nextI18Next: { initialLocale: locale, initialI18nStore: resources,
+        ns: ['common'], userConfig } },
+    })
+    const text = () => tree.root.findByType('p').children.join('')
+    const translated = (locale) => keys.map((key) => key.split('.').reduce(
+      (value, part) => value?.[part], resources[locale].common,
+    ) ?? key).join('|')
+    await act(async () => { tree = create(React.createElement(App, props('ru', IndexPage))) })
+    assert.equal(text(), translated('ru'))
+    await act(async () => { tree.update(React.createElement(App, props('en', GuidePage))) })
+    assert.equal(text(), translated('en'))
+    await act(async () => { tree.update(React.createElement(App, props('zh', IndexPage))) })
+    assert.equal(text(), translated('zh'))
+  } finally {
+    if (tree) await act(async () => tree.unmount())
+    utils.useIsomorphicLayoutEffect = previousEffect
+    if (previousAct === undefined) delete globalThis.IS_REACT_ACT_ENVIRONMENT
+    else globalThis.IS_REACT_ACT_ENVIRONMENT = previousAct
+  }
+})
+
 test('the language picker selects Russian and sends untranslated guides to the localized index', async () => {
   const calls = []
   const router = {

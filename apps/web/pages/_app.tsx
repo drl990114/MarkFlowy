@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/react'
 import ThemeProvider from 'components/ThemeProvider'
-import { appWithTranslation } from 'next-i18next'
+import { appWithTranslation, useTranslation } from 'next-i18next'
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import 'remixicon/fonts/remixicon.css'
@@ -18,6 +18,10 @@ import '../components/document/document.css'
 import '../components/workspace/app.css'
 
 function MyApp({ Component, pageProps, router }: AppProps) {
+  // Keep a subscriber mounted across routes: next-i18next changes language in a
+  // layout effect, before a newly mounted page can subscribe to languageChanged.
+  // Updating this persistent shell also refreshes those new page translations.
+  useTranslation('common')
   const website = isWebsitePage(router.pathname)
 
   return (
