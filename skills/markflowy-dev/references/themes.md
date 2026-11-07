@@ -43,7 +43,7 @@ Choose palette roles together: canvas/text, overlay/text, accent/foreground, sel
 
 ## CSS and snippets
 
-Use tokens first. Semantic CSS variables are `--mf-theme-` plus the token name with dots and camel case converted to kebab case: `surface.canvas` becomes `--mf-theme-surface-canvas`, and `font.editor.lineHeight` becomes `--mf-theme-font-editor-line-height`.
+Use tokens for theme-wide colors and typography. Semantic CSS variables are `--mf-theme-` plus the token name with dots and camel case converted to kebab case: `surface.canvas` becomes `--mf-theme-surface-canvas`, and `font.editor.lineHeight` becomes `--mf-theme-font-editor-line-height`. Local presentation requests can be fulfilled by a personal CSS snippet without creating a JSON theme; read [CSS snippets](css-snippets.md) for scope, selectors, examples, and the preview workflow.
 
 Variant `css` follows the active theme. Personal CSS snippets are independent `.css` files: they start disabled on import, can be enabled/reordered separately, and are excluded from theme exports. Enabled snippets are separate stylesheets after theme CSS in list order; specificity and `!important` still apply.
 

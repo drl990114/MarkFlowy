@@ -1,4 +1,5 @@
 import { SemanticThemeContext } from '@/themes/context'
+import { EDITOR_CSS_SCOPE_CLASS } from '@/themes/editorCssScope'
 import { capricornStyle } from '@/themes/runtime'
 import { AsyncSurface } from '@/components/AsyncSurface'
 import { useTranslation } from '@/i18n'
@@ -652,6 +653,7 @@ export function CapricornEditor({
         active={active && state === 'ready' && mode === 'edit' && !options.readOnly}
       />
       <div
+        className={EDITOR_CSS_SCOPE_CLASS}
         data-mf-capricorn-runtime='true'
         id={editorId}
         ref={containerRef}

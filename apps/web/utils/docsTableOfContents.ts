@@ -55,14 +55,18 @@ export const buildDocsTableOfContents = (sourceHtml: string): DocsTableOfContent
   const html = sourceHtml.replace(
     headingPattern,
     (heading, levelValue: string, attributes: string, content: string) => {
-      const title = getHeadingTitle(content)
+      // Contentlayer drops raw HTML anchors. A trailing Markdown heading marker
+      // supplies a stable, language-independent ID without enabling raw HTML.
+      const explicitAnchor = content.match(/\s*\{#([a-zA-Z][\w-]*)\}\s*$/)
+      const headingContent = explicitAnchor ? content.slice(0, explicitAnchor.index) : content
+      const title = getHeadingTitle(headingContent)
 
       if (!title) {
         return heading
       }
 
       const existingId = attributes.match(/\sid=(['"])(.*?)\1/i)?.[2]
-      const baseId = existingId || createSlug(title)
+      const baseId = explicitAnchor?.[1] || existingId || createSlug(title)
       const duplicateIndex = slugCounts.get(baseId) || 0
       const id = duplicateIndex === 0 ? baseId : `${baseId}-${duplicateIndex}`
       const level = Number(levelValue) as 2 | 3
@@ -70,12 +74,12 @@ export const buildDocsTableOfContents = (sourceHtml: string): DocsTableOfContent
       slugCounts.set(baseId, duplicateIndex + 1)
       items.push({ id, level, title })
 
-      if (existingId && existingId === id) {
+      if (!explicitAnchor && existingId && existingId === id) {
         return heading
       }
 
       const attributesWithoutId = attributes.replace(/\sid=(['"])(.*?)\1/i, '')
-      return `<h${levelValue}${attributesWithoutId} id="${id}">${content}</h${levelValue}>`
+      return `<h${levelValue}${attributesWithoutId} id="${id}">${headingContent}</h${levelValue}>`
     },
   )
 

@@ -1,7 +1,7 @@
 ---
 seoTitle: '自定义 MarkFlowy 主题'
-description: '使用可视化编辑器和 JSON 创建、编辑、分享 MarkFlowy 主题。'
-updatedAt: '2026-10-05'
+description: '使用 JSON 主题与 CSS 片段自定义 MarkFlowy，提供模板、选择器说明和实时预览。'
+updatedAt: '2026-11-06'
 ---
 
 # 自定义主题
@@ -13,6 +13,8 @@ updatedAt: '2026-10-05'
 仓库提供 [MarkFlowy Dev](https://github.com/drl990114/MarkFlowy/tree/main/skills/markflowy-dev) 开发辅助 Skill，目前覆盖自定义主题与 CSS，附带浅色/深色模板，以及校验、导入和分享指南。将 `skills/markflowy-dev` 整个目录复制到所用 Agent 的 Skill 目录即可安装，例如 Codex 的 `~/.agents/skills/markflowy-dev`。
 
 可以这样提问：`使用 $markflowy-dev 创建一个暖纸色的 MarkFlowy 主题，包含浅色和深色变体，并说明如何导入和校验。` 没有源码仓库也可以通过应用主题编辑器完成开发。
+
+局部样式可以直接请求个人片段：`使用 $markflowy-dev 为 MarkFlowy 已完成任务添加删除线，输出独立 CSS 片段，保留我当前的主题。` Skill 会区分整套主题、独立 CSS 片段和明确随主题变体切换的 CSS。解释选择器不需要生成新主题；勾选任务或修改正文格式属于普通文档编辑。
 
 ## 可视化编辑
 
@@ -76,6 +78,80 @@ updatedAt: '2026-10-05'
 主题库和 CSS 片段保存在应用数据目录的 `themes-v1.json`。旧 JS 主题、旧自动加载 CSS 不会执行或迁移，原文件不会删除。缺失或失效的主题会暂时回退内置主题，同时保留已选身份，修复后会恢复；主动删除主题才会重置相应选择。
 
 语义 CSS 变量使用 `--mf-theme-` 前缀，点和驼峰转换为连字符，例如 `--mf-theme-surface-canvas`、`--mf-theme-font-editor-line-height`。推荐通过 JSON token 统一调整应用和编辑区的颜色与排版，再用 CSS 补充局部样式。
+
+## 个人 CSS 模板与预览
+
+打开 **设置 → 外观 → 字体与 CSS → 个人 CSS 片段**，新建或编辑片段。“插入模板”会在草稿末尾追加已完成任务删除线、标题分隔线、紧凑表格或引用强调样式，不会覆盖已有内容。“选择器参考”可打开元素速查。
+
+实时预览同时展示当前草稿和其他已启用片段。编辑草稿只影响预览；“保存片段”写入片段库，“保存后启用”决定是否应用到实际界面。导入的片段仍默认停用，需要单独启用。取消编辑会保留原来保存的 CSS。预览示例包含已完成、未完成与嵌套任务，以及标题、引用、代码和表格，可先检查再应用到自己的文档。
+
+### 编辑器选择器速查 {#editor-css-selectors}
+
+正文样式使用 **`.mf-editor-content`** 作为作用域。这个公开根节点同时用于正文编辑器和主题/CSS 预览，可以避免样式影响设置控件。它从提供片段模板与预览的版本开始可用，较早的应用版本可能没有该节点。CSS 不会被自动限定作用域，规则中需要自己带上前缀；下面示例进一步使用 `[data-cap-content]` 定位其中的 Capricorn 渲染区域。
+
+以下内部选择器核对自 **Capricorn 0.5.12**，适用于安装该运行时后的实时编辑与阅读模式。内部类名可能随编辑器升级调整；Markdown 源码模式、PDF/打印使用其他渲染结构，不保证同一条规则在这些模式中生效。
+
+| 元素 | `.mf-editor-content [data-cap-content]` 内的选择器 |
+| --- | --- |
+| 标题 | `h1` 至 `h6` |
+| 列表项 | `.capricorn-markdown-list-item` |
+| 任务项 | `.capricorn-markdown-list-item[data-markdown-task]` |
+| 任务复选框 | `.capricorn-markdown-task-checkbox` |
+| 列表项文字 | `.capricorn-markdown-list-content` |
+| 普通引用 | `blockquote.capricorn-markdown-blockquote` |
+| 引用内的其他块 | `.capricorn-markdown-quoted-block` |
+| 表格行 | `.capricorn-markdown-table-row` |
+| 表头行 | `.capricorn-markdown-table-row[data-markdown-table-header='true']` |
+| 表格单元格 | `.capricorn-markdown-table-cell`、`.capricorn-markdown-inline-table-cell` |
+| 代码块内的代码编辑器 | `.cm-editor` |
+
+列表项和表格单元格不一定使用 `<li>`、`<td>`，代码块也可能包含 CodeMirror 编辑器。避免改变这些组件的布局和编辑行为。不要依赖文档索引、生成的节点 ID 或虚拟滚动占位元素编写样式；虚拟表格的 DOM 行顺序也不能保证 `nth-child` 始终对应原文档的奇偶行。
+
+### 已完成任务删除线
+
+```css
+.mf-editor-content [data-cap-content] .capricorn-markdown-list-item:has(
+  > .capricorn-markdown-task-prefix > .capricorn-markdown-task-checkbox:checked
+) > .capricorn-markdown-list-content {
+  text-decoration: line-through;
+}
+```
+
+这里通过直接子级关系检查当前任务自己的复选框，只对该项文字应用样式。修改时保留这些关系；宽泛的后代选择器可能同时匹配嵌套列表的其他内容。检查“父任务完成、子任务未完成”和“父任务未完成、子任务完成”两种情况。
+
+### 其他常用示例
+
+```css
+/* 标题分隔线 */
+.mf-editor-content [data-cap-content] :is(h1, h2) {
+  border-bottom: 1px solid var(--mf-theme-border-default);
+  padding-bottom: 0.3em;
+}
+
+/* 紧凑表格 */
+.mf-editor-content [data-cap-content] :is(
+  .capricorn-markdown-table-cell,
+  .capricorn-markdown-inline-table-cell
+) {
+  padding: 2px 8px;
+}
+
+/* 引用强调，保留嵌套引用的层级线 */
+.mf-editor-content [data-cap-content] :is(
+  blockquote.capricorn-markdown-blockquote,
+  .capricorn-markdown-quoted-block
+) {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--mf-theme-accent-background) 0,
+    var(--mf-theme-accent-background) 2px,
+    transparent 2px,
+    transparent 1em
+  );
+}
+```
+
+引用竖线由背景绘制，仅修改 `border-color` 不会改变它的颜色。示例使用语义变量跟随当前主题。预览样例不能覆盖所有文档结构，应用后仍需检查实际文档和所用的浅色/深色模式，尤其是在编辑器升级之后。
 
 ## 旧主题迁移
 

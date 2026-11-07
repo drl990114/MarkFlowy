@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import test from 'node:test'
 import { loadPublicMarkdownSources, parsePublicMarkdown } from './web-document-sources.mjs'
+import { buildDocsTableOfContents } from '../apps/web/utils/docsTableOfContents.ts'
 import {
   createPublicDocuments,
   getDocumentLocales,
@@ -14,6 +15,42 @@ import {
 
 const allMarkdowns = await loadPublicMarkdownSources()
 const documents = createPublicDocuments(allMarkdowns)
+
+test('explicit documentation heading IDs survive Markdown rendering in both languages', async () => {
+  const [{ unified }, { default: remarkParse }, { default: remarkRehype },
+    { default: rehypeSlug }, { default: rehypeStringify }] = await Promise.all([
+    import('unified'), import('remark-parse'), import('remark-rehype'),
+    import('rehype-slug'), import('rehype-stringify'),
+  ])
+  for (const locale of ['en', 'zh']) {
+    const source = allMarkdowns.find((entry) =>
+      entry.locale === locale && entry.slug === '/Extension/CustomTheme',
+    )
+    assert.ok(source)
+    const rendered = await unified().use(remarkParse).use(remarkRehype)
+      .use(rehypeSlug).use(rehypeStringify).process(source.body.raw)
+    const { html, items } = buildDocsTableOfContents(String(rendered))
+    assert.match(html, /<h3 id="editor-css-selectors">[^<]+<\/h3>/, locale)
+    assert.doesNotMatch(html, /\{#editor-css-selectors\}/, locale)
+    const item = items.find((entry) => entry.id === 'editor-css-selectors')
+    assert.ok(item, locale)
+    assert.equal(item.title, locale === 'en' ? 'Editor selector reference' : '编辑器选择器速查')
+  }
+})
+
+test('explicit heading IDs preserve existing anchors, deduplicate, and ignore code examples', () => {
+  const { html, items } = buildDocsTableOfContents([
+    '<h2 id="existing">Existing</h2>',
+    '<h3 id="auto-slug">First <em>title</em> {#stable-section}</h3>',
+    '<h3>Second title {#stable-section}</h3>',
+    '<h3><code>{#example}</code></h3>',
+  ].join(''))
+  assert.deepEqual(items.map(({ id }) => id), [
+    'existing', 'stable-section', 'stable-section-1', 'example',
+  ])
+  assert.match(html, /<h3 id="stable-section">First <em>title<\/em><\/h3>/)
+  assert.match(html, /<code>\{#example\}<\/code>/)
+})
 
 test('canonical URLs use the production host, remove tracking, and preserve the selected language', () => {
   assert.equal(

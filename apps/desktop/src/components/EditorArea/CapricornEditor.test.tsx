@@ -570,7 +570,7 @@ describe('CapricornEditor background preparation', () => {
       requestIdentity,
     )
     expect(onRuntimeReady).toHaveBeenCalledWith(
-      container.querySelector('[data-mf-capricorn-runtime]'),
+      container.querySelector('.mf-editor-content[data-mf-capricorn-runtime]'),
       requestIdentity,
     )
     expect(

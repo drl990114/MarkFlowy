@@ -22,6 +22,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PopoverRoot, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { capricornStyle, desktopVariables, legacyTokens } from '@/themes/runtime'
+import { InjectFonts } from '@/injectFonts'
+import { EDITOR_CSS_SCOPE_CLASS } from '@/themes/editorCssScope'
 import {
   createCapricornRuntimeAdapter,
   loadCapricornRuntimeFactory,
@@ -29,8 +31,18 @@ import {
 } from '@/components/EditorArea/capricornRuntimeAdapter'
 import type { ResolvedTheme, ThemeTokenName } from '@markflowy/theme/semantic'
 import type { ThemePreviewState, ThemePreviewLabels } from './protocol'
-const markdown =
-  '# A place for ideas\n\nMake room for **ideas**, *details*, and [connections](https://markflowy.com).\n\n> A theme should support the words.\n\n## A little structure\n\n- First thought\n- Another possibility\n\n```typescript\n// Keep your ideas close\nconst message = "Hello, MarkFlowy"\nfunction greet(name: string) {\n  return `${message}, ${name}`\n}\n```\n\n| Detail | Value |\n| --- | --- |\n| Theme | Personal |\n'
+const markdown = [
+  '# A place for ideas',
+  'Make room for **ideas**, *details*, and [connections](https://markflowy.com).',
+  '> A theme should support the words.',
+  '## A little structure',
+  '- First thought\n- Another possibility',
+  '### Small steps',
+  '- [x] Gather **ideas**, `notes`, and [references](https://markflowy.com).\n  - [ ] Explore one more possibility.\n- [ ] Shape the next draft.\n  - [x] Find a starting point.',
+  '```typescript\n// Keep your ideas close\nconst message = "Hello, MarkFlowy"\nfunction greet(name: string) {\n  return `${message}, ${name}`\n}\n```',
+  '| Detail | Value |\n| --- | --- |\n| Theme | Personal |',
+  '',
+].join('\n\n')
 const inspectSelectors: [string, ThemeTokenName][] = [
   ...(
     [
@@ -88,6 +100,7 @@ export function PreviewSurface({
   }
   return (
     <ThemeProvider theme={legacyTokens(theme.tokens, theme.mode)}>
+      <InjectFonts />
       <style>{baseCss}</style>
       <div
         className='mf-theme-preview @container/preview flex h-full min-h-0 flex-col overflow-hidden'
@@ -297,7 +310,8 @@ function PreviewEditor({ theme, labels }: { theme: ResolvedTheme; labels: ThemeP
       )}
       <div
         ref={container}
-        className='min-h-0 flex-1 overflow-auto'
+        className={`${EDITOR_CSS_SCOPE_CLASS} min-h-0 flex-1 overflow-auto`}
+        data-mf-capricorn-runtime='true'
         data-theme-token='editor.background'
       />
     </main>

@@ -55,6 +55,11 @@ describe('preview document surface', () => {
     await waitFor(() => expect(mocks.create).toHaveBeenCalledTimes(1))
     const options = mocks.create.mock.calls[0][0].options
     expect(options.handleLinkClick('https://example.com')).toBeUndefined()
+    expect(mocks.create.mock.calls[0][0].container).toBe(
+      view.container.querySelector('.mf-editor-content[data-mf-capricorn-runtime]'),
+    )
+    expect(options.markdown).toMatch(/- \[x\] .+\n {2}- \[ \]/)
+    expect(options.markdown).toMatch(/- \[ \] .+\n {2}- \[x\]/)
     view.rerender(
       <PreviewSurface
         theme={theme('#eeeeee')}
@@ -77,6 +82,46 @@ describe('preview document surface', () => {
     )
     view.unmount()
     expect(mocks.destroy).toHaveBeenCalledTimes(1)
+  })
+  it('applies draft CSS to the document scope without affecting preview controls or remounting', async () => {
+    mocks.create.mockImplementation(({ container }: { container: HTMLElement }) => {
+      const content = document.createElement('div')
+      content.setAttribute('data-cap-content', '')
+      const heading = document.createElement('h1')
+      heading.textContent = 'Document heading'
+      content.append(heading)
+      container.append(content)
+      return { updateSettings: mocks.update, destroy: mocks.destroy }
+    })
+    const renderPreview = (spacing: string) => (
+      <>
+        <h1>Outside the document</h1>
+        <PreviewSurface
+          theme={theme('#ffffff')}
+          snippets={[
+            {
+              id: 'draft',
+              css: `.mf-editor-content [data-cap-content] h1 { letter-spacing: ${spacing}; }`,
+            },
+          ]}
+          inspect={false}
+          labels={labels}
+          onInspect={vi.fn()}
+        />
+      </>
+    )
+    const view = render(renderPreview('1px'))
+    await waitFor(() => expect(mocks.create).toHaveBeenCalledTimes(1))
+    const heading = screen.getByRole('heading', { name: 'Document heading' })
+    expect(getComputedStyle(heading).letterSpacing).toBe('1px')
+    expect(
+      getComputedStyle(screen.getByRole('heading', { name: 'Outside the document' })).letterSpacing,
+    ).not.toBe('1px')
+
+    view.rerender(renderPreview('2px'))
+    expect(getComputedStyle(heading).letterSpacing).toBe('2px')
+    expect(mocks.create).toHaveBeenCalledTimes(1)
+    expect(mocks.destroy).not.toHaveBeenCalled()
   })
   it('inspects roles and keeps personal CSS snippets in separate style sheets', async () => {
     const inspect = vi.fn()

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronRight, Plus } from 'lucide-react'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -7,14 +8,13 @@ import {
   DropdownMenuItemPrimitive as MenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import appSettingService from '@/services/app-setting'
 import { useThemeLibrary, type CssSnippet } from '@/themes/library'
 import { ThemeMenu } from './ThemeListItem'
 import { readImport } from './files'
 import { useThemeLabels } from './labels'
+import { CssSnippetEditor } from './CssSnippetEditor'
 
 export function ThemeCustomization() {
   const labels = useThemeLabels()
@@ -88,7 +88,7 @@ export function ThemeCustomization() {
                     id: crypto.randomUUID(),
                     name: labels.untitledCss,
                     css: '',
-                    enabled: false,
+                    enabled: true,
                   })
                 }
               >
@@ -187,39 +187,28 @@ export function ThemeCustomization() {
               </div>
             ))}
             {snippet && (
-              <fieldset
-                disabled={pending}
-                inert={pending}
-                className='m-0 min-w-0 space-y-2 border-0 border-t border-solid border-border pt-3 pr-0 pb-0 pl-0'
-              >
-                <Input
-                  inputSize='sm'
-                  aria-label={labels.name}
-                  value={snippet.name}
-                  onChange={(event) => setSnippet({ ...snippet, name: event.target.value })}
-                />
-                <Textarea
-                  aria-label={labels.css}
-                  className='h-64 font-mono text-ui-control'
-                  value={snippet.css}
-                  onChange={(event) => setSnippet({ ...snippet, css: event.target.value })}
-                />
-                <Button
-                  size='sm'
-                  disabled={pending}
-                  onClick={() =>
-                    void run(async () => {
-                      await library.mutate({ type: 'saveSnippet', snippet })
-                      setSnippet(undefined)
-                    })
-                  }
-                >
-                  {labels.saveCss}
-                </Button>
-                <Button size='sm' variant='ghost' onClick={() => setSnippet(undefined)}>
-                  {labels.cancel}
-                </Button>
-              </fieldset>
+              <CssSnippetEditor
+                snippet={snippet}
+                snippets={library.snippets}
+                pending={pending}
+                onChange={setSnippet}
+                onSave={() =>
+                  void run(async () => {
+                    await library.mutate({ type: 'saveSnippet', snippet })
+                    setSnippet(undefined)
+                  })
+                }
+                onCancel={() => setSnippet(undefined)}
+                onOpenReference={() =>
+                  void run(() => {
+                    const language = String(useAppSettingStore.getState().settingData.language)
+                    const locale = language === 'cn' || language.startsWith('zh') ? '/zh' : ''
+                    return openUrl(
+                      `https://www.markflowy.cc${locale}/docs/Extension/CustomTheme#editor-css-selectors`,
+                    )
+                  })
+                }
+              />
             )}
           </section>
         </div>

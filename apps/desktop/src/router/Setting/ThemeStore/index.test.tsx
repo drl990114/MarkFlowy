@@ -2,8 +2,11 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { darkTheme, lightTheme } from '@markflowy/theme'
-import type { ThemeDocument } from '@markflowy/theme/semantic'
+import { resolveThemeTokens, type ThemeDocument } from '@markflowy/theme/semantic'
 import useThemeStore from '@/stores/useThemeStore'
+import useAppSettingStore from '@/stores/useAppSettingStore'
+import { SemanticThemeContext } from '@/themes/context'
+import { cssSnippetTemplates } from '@/themes/cssSnippetTemplates'
 import { useThemeLibrary } from '@/themes/library'
 import { toAppTheme } from '@/themes/runtime'
 import { changeLng, i18nInit } from '../../../../../../packages/i18n/src/desktop'
@@ -18,6 +21,7 @@ const mocks = vi.hoisted(() => ({
   save: vi.fn(),
   write: vi.fn(),
   openUrl: vi.fn(),
+  preview: vi.fn(),
 }))
 vi.mock('@/i18n', async () => import('../../../../../../packages/i18n/src/desktop'))
 vi.mock('@tauri-apps/plugin-dialog', () => ({ open: mocks.open, save: mocks.save }))
@@ -36,7 +40,12 @@ vi.mock('../../../../../../community-themes.json', () => ({
   ],
 }))
 vi.mock('@/services/dialog', () => ({ dialog: { confirm: mocks.confirm } }))
-vi.mock('./ThemePreview', () => ({ ThemePreview: () => <div>Preview</div> }))
+vi.mock('./ThemePreview', () => ({
+  ThemePreview: (props: unknown) => {
+    mocks.preview(props)
+    return <div>Preview</div>
+  },
+}))
 vi.mock('@/themes/library', async () => {
   const { create } = await import('zustand')
   return {
@@ -103,6 +112,7 @@ beforeEach(async () => {
   vi.resetAllMocks()
   queryClient = new QueryClient()
   sessionStorage.clear()
+  useAppSettingStore.setState({ settingData: {} })
   mocks.mutate.mockResolvedValue(undefined)
   mocks.fetch.mockResolvedValue({ ok: true, json: async () => ocean })
   useThemeLibrary.setState({
@@ -197,6 +207,134 @@ describe('declarative theme manager', () => {
       }),
     )
   })
+  it('previews a task template with the app preferences before saving and enabling it', async () => {
+    const tokens = resolveThemeTokens('light', { 'font.editor.size': '23px' })
+    render(
+      <SemanticThemeContext.Provider value={tokens}>
+        <ThemeCustomization />
+      </SemanticThemeContext.Provider>,
+    )
+    openCustomization()
+    fireEvent.click(screen.getByRole('button', { name: 'New snippet' }))
+    await openMenu('Insert template')
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Completed task strikethrough' }))
+    const css = `${cssSnippetTemplates[0].css}\n`
+    expect((screen.getByRole('textbox', { name: 'CSS' }) as HTMLTextAreaElement).value).toBe(css)
+    expect(
+      screen.getByRole('checkbox', { name: 'Enable after saving' }).getAttribute('data-state'),
+    ).toBe('checked')
+    expect(mocks.preview).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        theme: expect.objectContaining({ tokens }),
+        snippets: [
+          { id: 'paper', css: 'body{}' },
+          { id: expect.any(String), css },
+        ],
+      }),
+    )
+    expect(mocks.mutate).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Save snippet' }))
+    await waitFor(() =>
+      expect(mocks.mutate).toHaveBeenCalledExactlyOnceWith({
+        type: 'saveSnippet',
+        snippet: expect.objectContaining({
+          name: 'Completed task strikethrough',
+          css,
+          enabled: true,
+        }),
+      }),
+    )
+    await waitFor(() => expect(screen.queryByRole('textbox', { name: 'CSS' })).toBeNull())
+  })
+
+  it('previews a disabled draft at its saved position and discards it without changing the library', () => {
+    const snippets = [
+      { id: 'first', name: 'First', css: 'h1{opacity:.9}', enabled: true },
+      { id: 'draft', name: 'Disabled', css: 'p{opacity:.5}', enabled: false },
+      { id: 'ignored', name: 'Ignored', css: 'body{display:none}', enabled: false },
+      { id: 'last', name: 'Last', css: 'h2{opacity:.9}', enabled: true },
+    ]
+    useThemeLibrary.setState({ snippets })
+    render(<ThemeCustomization />)
+    openCustomization()
+    fireEvent.click(screen.getAllByRole('button', { name: 'Edit CSS' })[1])
+    fireEvent.change(screen.getByRole('textbox', { name: 'CSS' }), {
+      target: { value: 'p{opacity:.8}' },
+    })
+    expect(mocks.preview).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        snippets: [
+          { id: 'first', css: 'h1{opacity:.9}' },
+          { id: 'draft', css: 'p{opacity:.8}' },
+          { id: 'last', css: 'h2{opacity:.9}' },
+        ],
+      }),
+    )
+    expect(
+      screen.getByRole('checkbox', { name: 'Enable after saving' }).getAttribute('data-state'),
+    ).toBe('unchecked')
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(screen.queryByText('Preview')).toBeNull()
+    expect(useThemeLibrary.getState().snippets).toEqual(snippets)
+    expect(mocks.mutate).not.toHaveBeenCalled()
+  })
+
+  it('appends templates without replacing custom CSS or its name and can save disabled', async () => {
+    render(<ThemeCustomization />)
+    openCustomization()
+    fireEvent.click(screen.getByRole('button', { name: 'New snippet' }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'My CSS' } })
+    fireEvent.change(screen.getByRole('textbox', { name: 'CSS' }), { target: { value: 'p{}' } })
+    await openMenu('Insert template')
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Heading dividers' }))
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Enable after saving' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save snippet' }))
+    await waitFor(() =>
+      expect(mocks.mutate).toHaveBeenCalledWith({
+        type: 'saveSnippet',
+        snippet: expect.objectContaining({
+          name: 'My CSS',
+          css: `p{}\n\n${cssSnippetTemplates[1].css}\n`,
+          enabled: false,
+        }),
+      }),
+    )
+  })
+
+  it('retains the CSS draft and preview when saving fails', async () => {
+    mocks.mutate.mockRejectedValue(new Error('disk full'))
+    render(<ThemeCustomization />)
+    openCustomization()
+    fireEvent.click(screen.getByRole('button', { name: 'Edit CSS' }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'CSS' }), {
+      target: { value: '.mf-editor-content h1{font-style:italic}' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Save snippet' }))
+    expect((await screen.findByRole('alert')).textContent).toContain('disk full')
+    expect((screen.getByRole('textbox', { name: 'CSS' }) as HTMLTextAreaElement).value).toBe(
+      '.mf-editor-content h1{font-style:italic}',
+    )
+    expect(screen.getByText('Preview')).toBeTruthy()
+    expect(useThemeLibrary.getState().snippets[0].css).toBe('body{}')
+  })
+
+  it.each(['cn', 'zh-CN'])(
+    'opens the %s selector reference without saving a draft',
+    async (language) => {
+      useAppSettingStore.setState({ settingData: { language } })
+      render(<ThemeCustomization />)
+      openCustomization()
+      fireEvent.click(screen.getByRole('button', { name: 'New snippet' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Selector reference' }))
+      await waitFor(() =>
+        expect(mocks.openUrl).toHaveBeenCalledExactlyOnceWith(
+          'https://www.markflowy.cc/zh/docs/Extension/CustomTheme#editor-css-selectors',
+        ),
+      )
+      expect(mocks.mutate).not.toHaveBeenCalled()
+      expect(screen.getByRole('textbox', { name: 'CSS' })).toBeTruthy()
+    },
+  )
   it('disables all snippets in one native mutation', async () => {
     renderStore()
     openCustomization()
