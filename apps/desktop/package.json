@@ -80,7 +80,7 @@
     "parse5": "7.3.0",
     "pdfjs-dist": "6.3.289",
     "postcss": "^8.5.28",
-    "postcss-selector-parser": "6.1.4",
+    "postcss-selector-parser": "6.1.5",
     "postcss-value-parser": "^4.2.0",
     "radix-ui": "^1.6.0",
     "react": "^19.2.0",
