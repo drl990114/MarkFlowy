@@ -405,7 +405,8 @@ mod tests {
         assert!(printable.encode_utf16().count() < 1000);
         assert_ne!(printable, ready.title);
         assert_eq!(printable_title(""), "MarkFlowy PDF");
-        assert!(parse_ready_document(&payload[..999]).is_err());
+        let truncated_payload = payload.chars().take(999).collect::<String>();
+        assert!(parse_ready_document(&truncated_payload).is_err());
         assert!(parse_ready_document("null").is_err());
         assert!(parse_ready_document(&" ".repeat(MAX_READY_BYTES + 1)).is_err());
         assert!(
