@@ -1,7 +1,33 @@
 import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { describe, expect, it } from 'vitest'
-import { scopePdfViewerCss } from './pdfPreviewAssets'
+import { describe, expect, it, vi } from 'vitest'
+import { pdfPreviewAssets, scopePdfViewerCss } from './pdfPreviewAssets'
+
+describe('offline PDF paginator asset', () => {
+  it('ships the standalone pinned script with the same resource path used in DEV', async () => {
+    const plugin = pdfPreviewAssets()
+    const hook = plugin.generateBundle
+    if (typeof hook !== 'function') throw new Error('The PDF resource emitter is unavailable')
+    const emitFile = vi.fn<ThisParameterType<typeof hook>['emitFile']>(() => 'resource')
+    await hook.call(
+      { emitFile } as unknown as ThisParameterType<typeof hook>,
+      {} as Parameters<typeof hook>[0],
+      {},
+      false,
+    )
+    const paginator = emitFile.mock.calls.map(([asset]) => asset)
+      .find((asset) => asset.type === 'asset' && asset.fileName === 'mf-pdf-assets/pagination/paged.polyfill.min.js')
+    if (paginator?.type !== 'asset' || !Buffer.isBuffer(paginator.source))
+      throw new Error('The standalone PDF paginator script was not emitted')
+    expect(paginator.source.toString()).toContain('Paged')
+    expect(paginator.source.length).toBeLessThan(600_000)
+    const license = emitFile.mock.calls.map(([asset]) => asset)
+      .find((asset) => asset.type === 'asset' && asset.fileName === 'mf-pdf-assets/pagination/LICENSE.md')
+    if (license?.type !== 'asset' || !Buffer.isBuffer(license.source))
+      throw new Error('The PDF paginator license was not emitted')
+    expect(license.source.toString()).toContain('MIT License')
+  })
+})
 
 describe('PDF viewer stylesheet isolation', () => {
   it('scopes root and top-level selectors, preserving nested selectors and keyframes', () => {

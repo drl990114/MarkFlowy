@@ -14,8 +14,8 @@ function renderDialog(overrides: Partial<PdfExportDialogProps> = {}) {
     onOpenChange: vi.fn(),
     onExport: vi.fn(),
     onPrint: vi.fn(),
+    onEngineChange: vi.fn(),
     busy: false,
-    nativeOutlineSupported: true,
     checking: false,
     browserInfo: readyBrowser,
     browserSettings: {
@@ -43,6 +43,7 @@ describe('PDF export dialog', () => {
     const { props, rerender } = renderDialog()
     expect(screen.queryByRole('group', { name: 'settings.export.pdf.executable.label' })).toBeNull()
     fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
+    expect(props.onEngineChange).toHaveBeenLastCalledWith('browser')
     fireEvent.click(screen.getByRole('button', { name: 'settings.export.pdf.select' }))
     fireEvent.click(screen.getByRole('button', { name: 'settings.export.pdf.check_again' }))
     expect(props.browserSettings.onSelect).toHaveBeenCalledOnce()
@@ -59,6 +60,7 @@ describe('PDF export dialog', () => {
     fireEvent.click(screen.getByRole('button', { name: 'settings.export.pdf.automatic' }))
     expect(props.browserSettings.onReset).toHaveBeenCalledOnce()
     fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_native' }))
+    expect(props.onEngineChange).toHaveBeenLastCalledWith('native')
     expect(screen.queryByText('/custom/browser')).toBeNull()
     expect(screen.queryByRole('group', { name: 'settings.export.pdf.executable.label' })).toBeNull()
   })
@@ -336,40 +338,6 @@ describe('PDF export dialog', () => {
       landscape: true,
       includeOutline: true,
     })
-  })
-
-  it('allows native export without bookmarks on unsupported platforms and preserves the browser choice', () => {
-    const { props } = renderDialog({ nativeOutlineSupported: false })
-    expect(screen.queryByRole('checkbox', { name: 'pdf_export.include_outline' })).toBeNull()
-    expect(screen.queryByText('pdf_export.native_hint')).toBeNull()
-    const hint = screen.getByText('pdf_export.native_outline_unavailable')
-    expect(
-      screen
-        .getByRole('radio', { name: 'pdf_export.method_native' })
-        .getAttribute('aria-describedby'),
-    ).toBe(hint.id)
-    fireEvent.click(screen.getByRole('button', { name: 'pdf_export.export' }))
-    expect(props.onExport).toHaveBeenLastCalledWith({
-      engine: 'native',
-      paperSize: 'a4',
-      landscape: false,
-      includeOutline: false,
-    })
-    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
-    expect(
-      screen
-        .getByRole('checkbox', { name: 'pdf_export.include_outline' })
-        .getAttribute('aria-checked'),
-    ).toBe('true')
-    fireEvent.click(screen.getByRole('checkbox', { name: 'pdf_export.include_outline' }))
-    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_native' }))
-    expect(screen.queryByRole('checkbox', { name: 'pdf_export.include_outline' })).toBeNull()
-    fireEvent.click(screen.getByRole('radio', { name: 'pdf_export.method_browser' }))
-    expect(
-      screen
-        .getByRole('checkbox', { name: 'pdf_export.include_outline' })
-        .getAttribute('aria-checked'),
-    ).toBe('false')
   })
 
   it('keeps a busy in-app export cancellable and prevents changing methods', () => {

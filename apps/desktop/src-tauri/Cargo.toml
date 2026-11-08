@@ -249,3 +249,9 @@ features = ["no-env-filter"]
 [dev-dependencies.uuid]
 version = "1.16.0"
 features = ["serde"]
+
+# AppKit geometry must be exercised on the real process main thread.
+[[test]]
+name = "pdf_native_geometry"
+path = "tests/pdf_native_geometry.rs"
+harness = false

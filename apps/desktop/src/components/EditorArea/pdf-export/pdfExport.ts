@@ -143,7 +143,7 @@ export function exportPdfWithBrowser(
   return exportPreparedPdf('prepare_pdf_export', request, signal)
 }
 
-/** Native export uses the same verified heading bookmark contract before commit. */
+/** Pre-paginated in-app output uses the shared verified bookmark contract before commit. */
 export function exportPdfWithNative(
   request: NativePdfExportRequest,
   signal: AbortSignal,

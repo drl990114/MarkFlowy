@@ -128,10 +128,10 @@ pub(super) async fn print(
             let page = gtk::PageSetup::new();
             page.set_paper_size(&paper);
             page.set_orientation(orientation);
-            page.set_top_margin(16.0, gtk::Unit::Mm);
-            page.set_bottom_margin(16.0, gtk::Unit::Mm);
-            page.set_left_margin(16.0, gtk::Unit::Mm);
-            page.set_right_margin(16.0, gtk::Unit::Mm);
+            page.set_top_margin(0.0, gtk::Unit::Mm);
+            page.set_bottom_margin(0.0, gtk::Unit::Mm);
+            page.set_left_margin(0.0, gtk::Unit::Mm);
+            page.set_right_margin(0.0, gtk::Unit::Mm);
 
             let settings = gtk::PrintSettings::new();
             settings.set_printer(&printer);

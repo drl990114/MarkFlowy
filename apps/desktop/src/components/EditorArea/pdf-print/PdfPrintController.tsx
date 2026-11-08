@@ -2,7 +2,6 @@ import { resolveAppThemeTokens } from '@/appThemeTokens'
 import bus from '@/helper/eventBus'
 import { getFolderPathFromPath } from '@/helper/filesys'
 import { logger } from '@/helper/logger'
-import useGlobalOSInfo from '@/hooks/useOSInfo'
 import { useTranslation } from '@/i18n'
 import useAppSettingStore from '@/stores/useAppSettingStore'
 import { editorLightTheme } from '@markflowy/theme'
@@ -48,7 +47,14 @@ interface PdfDocumentSnapshot {
 interface PdfPrintJob extends PdfDocumentSnapshot {
   id: number
   runtime: RmeRuntime
+  previewContent: string
   exportOptions?: PdfExportOptions & { outputPath: string; executablePath?: string }
+}
+
+async function preparePreviewContent(markdown: string): Promise<string> {
+  if (!markdown.includes('mermaid')) return markdown
+  const { preparePdfExportMarkdown } = await import('../pdf-export/pdfExportMarkdown')
+  return preparePdfExportMarkdown(markdown)
 }
 
 function getPreparedPreviewHtml(root: HTMLElement): string {
@@ -77,8 +83,6 @@ export function PdfPrintController({
   styleToken,
 }: PdfPrintControllerProps) {
   const { t } = useTranslation()
-  const { osType } = useGlobalOSInfo()
-  const nativeOutlineSupported = osType === 'macos' || osType === 'windows'
   const editorCodeFontFamily = useAppSettingStore(
     (state) => state.settingData.editor_code_font_family,
   )
@@ -101,7 +105,8 @@ export function PdfPrintController({
   )
   const [job, setJob] = useState<PdfPrintJob | null>(null)
   const [pendingExport, setPendingExport] = useState<PdfDocumentSnapshot | null>(null)
-  const browserConfiguration = usePdfBrowserConfiguration(Boolean(pendingExport))
+  const [browserSelected, setBrowserSelected] = useState(false)
+  const browserConfiguration = usePdfBrowserConfiguration(Boolean(pendingExport) && browserSelected)
   const {
     info: browserInfo,
     checking: checkingBrowser,
@@ -142,6 +147,7 @@ export function PdfPrintController({
       setHydration(null)
       setJob(null)
       setPendingExport(null)
+      setBrowserSelected(false)
       setExportBusy(false)
       setExportError(undefined)
       exportStartingRef.current = false
@@ -166,11 +172,14 @@ export function PdfPrintController({
           windowJobId: crypto.randomUUID(),
         }
         if (exportPdf) {
+          setBrowserSelected(false)
           setPendingExport(snapshot)
           setExportError(undefined)
           return
         }
-        const runtime = await loadRmeRuntime()
+        const [runtime, previewContent] = await Promise.all([
+          loadRmeRuntime(), preparePreviewContent(snapshot.content),
+        ])
         if (abortController.signal.aborted || !mountedRef.current) return
         rendererErrorRef.current = null
         jobSequenceRef.current += 1
@@ -178,6 +187,7 @@ export function PdfPrintController({
           id: jobSequenceRef.current,
           ...snapshot,
           runtime,
+          previewContent,
         })
       } catch (error) {
         if (abortController.signal.aborted) return
@@ -231,17 +241,18 @@ export function PdfPrintController({
         setExportBusy(false)
         return
       }
-      const runtime = await loadRmeRuntime()
+      const [runtime, previewContent] = await Promise.all([
+        loadRmeRuntime(), preparePreviewContent(pendingExport.content),
+      ])
       abortController.signal.throwIfAborted()
       jobSequenceRef.current += 1
       setJob({
         ...pendingExport,
         id: jobSequenceRef.current,
         runtime,
+        previewContent,
         exportOptions: {
           ...options,
-          includeOutline:
-            options.includeOutline && (options.engine === 'browser' || nativeOutlineSupported),
           outputPath,
           ...(options.engine === 'browser' ? { executablePath: browserInfo?.executablePath } : {}),
         },
@@ -259,10 +270,12 @@ export function PdfPrintController({
     if (!pendingExport || !abortController || exportStartingRef.current) return
     exportStartingRef.current = true
     try {
-      const runtime = await loadRmeRuntime()
+      const [runtime, previewContent] = await Promise.all([
+        loadRmeRuntime(), preparePreviewContent(pendingExport.content),
+      ])
       abortController.signal.throwIfAborted()
       jobSequenceRef.current += 1
-      setJob({ ...pendingExport, id: jobSequenceRef.current, runtime })
+      setJob({ ...pendingExport, id: jobSequenceRef.current, runtime, previewContent })
       setPendingExport(null)
     } catch (error) {
       if (abortController.signal.aborted) return
@@ -339,11 +352,22 @@ export function PdfPrintController({
             fileFolderPath: getFolderPathFromPath(job.filePath),
           })
           if (preparationAbortController.signal.aborted) throw new DOMException('', 'AbortError')
+          let preparedHtml = document.html
+          if (job.exportOptions.engine === 'native') {
+            const { preparePagedPdfDocument } = await import('../pdf-export/pagedPdfDocument')
+            preparationAbortController.signal.throwIfAborted()
+            preparedHtml = (await preparePagedPdfDocument(document.html, {
+              paperSize: job.exportOptions.paperSize,
+              landscape: job.exportOptions.landscape,
+              signal: preparationAbortController.signal,
+            })).html
+          }
+          preparationAbortController.signal.throwIfAborted()
           startedJobRef.current = job.id
           printWindowOpened = true
           const request = {
             jobId: job.windowJobId,
-            html: document.html,
+            html: preparedHtml,
             outputPath: job.exportOptions.outputPath,
             sourcePath: job.filePath,
             paperSize: job.exportOptions.paperSize,
@@ -448,6 +472,7 @@ export function PdfPrintController({
       {pendingExport ? (
         <Suspense fallback={null}>
           <PdfExportDialog
+            key={pendingExport.windowJobId}
             open
             onOpenChange={(open) => {
               if (!open) finishTask()
@@ -459,7 +484,9 @@ export function PdfPrintController({
               void printInstead()
             }}
             busy={exportBusy}
-            nativeOutlineSupported={nativeOutlineSupported}
+            onEngineChange={(engine) => {
+              if (!exportStartingRef.current) setBrowserSelected(engine === 'browser')
+            }}
             browserInfo={browserInfo}
             checking={checkingBrowser}
             browserCheckError={browserCheckError}
@@ -501,7 +528,7 @@ export function PdfPrintController({
                   aria-hidden='true'
                 >
                   <Preview
-                    doc={job.content}
+                    doc={job.previewContent}
                     delegateOptions={delegateOptions}
                     styleToken={styleToken}
                     handleLinkClick={() => true}

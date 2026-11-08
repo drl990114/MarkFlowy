@@ -1,5 +1,5 @@
 import bus from '@/helper/eventBus'
-import { act } from 'react'
+import { act, useContext, type ComponentProps } from 'react'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { createRoot, type Root } from 'react-dom/client'
 import { Toaster, toast as sonnerToast } from 'sonner'
@@ -12,9 +12,15 @@ import useAppSettingStore from '@/stores/useAppSettingStore'
 import { PDF_EXPORT_EVENT } from '../pdf-export/pdfExportMenuItem'
 import type { PdfExportDialogProps } from '../pdf-export/PdfExportDialog'
 import type * as PdfExportService from '../pdf-export/pdfExport'
+import { EditorThemeContext, type EditorThemeConfig } from '@/editorThemeContext'
+import { desktopDarkTheme } from '@markflowy/theme'
+import type { RmeRuntime } from '../rmeRuntime'
+
+type RuntimeTheme = NonNullable<ComponentProps<RmeRuntime['ThemeProvider']>['theme']>
 
 const previewState = vi.hoisted(() => ({
   docs: [] as string[],
+  themes: [] as (RuntimeTheme | undefined)[],
   error: null as Error | null,
   hydration: { settled: Promise.resolve() },
   onHydrationChange: undefined as
@@ -40,6 +46,7 @@ const exportMocks = vi.hoisted(() => ({
   exportPdf: vi.fn(),
   exportNativePdf: vi.fn(),
   buildDocument: vi.fn(),
+  paginateDocument: vi.fn(),
   save: vi.fn(),
   open: vi.fn(),
   writeSetting: vi.fn(),
@@ -47,7 +54,6 @@ const exportMocks = vi.hoisted(() => ({
 }))
 
 const exportUi = vi.hoisted(() => ({ props: undefined as PdfExportDialogProps | undefined }))
-const platform = vi.hoisted(() => ({ osType: 'macos' as string | undefined }))
 const translate = vi.hoisted(() => (key: string, values?: { count?: number; path?: string }) => {
   if (values?.count !== undefined) return `${key}:${values.count}`
   if (values?.path) return `${key}:${values.path}`
@@ -59,7 +65,6 @@ vi.mock('@/services/app-setting', () => ({
   default: { writeSettingData: exportMocks.writeSetting },
 }))
 vi.mock('@tauri-apps/plugin-opener', () => ({ revealItemInDir: exportMocks.reveal }))
-vi.mock('@/hooks/useOSInfo', () => ({ default: () => platform }))
 vi.mock('../pdf-export/pdfExport', async (importOriginal) => {
   const original = await importOriginal<typeof PdfExportService>()
   return {
@@ -71,6 +76,9 @@ vi.mock('../pdf-export/pdfExport', async (importOriginal) => {
 })
 vi.mock('../pdf-export/pdfExportDocument', () => ({
   buildPdfExportDocument: exportMocks.buildDocument,
+}))
+vi.mock('../pdf-export/pagedPdfDocument', () => ({
+  preparePagedPdfDocument: exportMocks.paginateDocument,
 }))
 vi.mock('../pdf-export/PdfExportDialog', () => ({
   PdfExportDialog: (props: PdfExportDialogProps) => {
@@ -133,14 +141,15 @@ vi.mock('../pdf-export/PdfExportDialog', () => ({
         </button>
         <button
           disabled={props.busy}
-          onClick={() =>
+          onClick={() => {
+            props.onEngineChange?.('native')
             props.onExport({
               engine: 'native',
               paperSize: 'letter',
               landscape: true,
-              includeOutline: props.nativeOutlineSupported,
+              includeOutline: true,
             })
-          }
+          }}
         >
           Export in app
         </button>
@@ -167,8 +176,13 @@ vi.mock('zens', () => ({
 
 vi.mock('rme', async () => {
   const React = await import('react')
+  const runtimeTheme = React.createContext<RuntimeTheme | undefined>(undefined)
 
   return {
+    lightTheme: { codemirrorTheme: { theme: 'light', settings: {}, styles: [] } },
+    darkTheme: { codemirrorTheme: { theme: 'dark', settings: {}, styles: [] } },
+    ThemeProvider: ({ theme, children }: ComponentProps<RmeRuntime['ThemeProvider']>) =>
+      React.createElement(runtimeTheme.Provider, { value: theme }, children),
     Preview: (props: {
       doc: string
       onError?: (error: Error) => void
@@ -178,6 +192,7 @@ vi.mock('rme', async () => {
       const callbacks = React.useRef({ onError, onImageHydrationChange })
       callbacks.current = { onError, onImageHydrationChange }
       const hydration = previewState.hydration
+      previewState.themes.push(React.useContext(runtimeTheme))
       previewState.docs.push(doc)
       previewState.onHydrationChange = onImageHydrationChange
       React.useLayoutEffect(() => {
@@ -208,6 +223,10 @@ vi.mock('./pdfPrintWindow', () => ({
 
 const reactActEnvironment = globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
 
+function ApplicationThemeProbe() {
+  return <output data-testid='application-theme'>{useContext(EditorThemeContext)?.mode}</output>
+}
+
 beforeAll(() => {
   reactActEnvironment.IS_REACT_ACT_ENVIRONMENT = true
 })
@@ -222,8 +241,8 @@ describe('PdfPrintController', () => {
 
   beforeEach(() => {
     document.title = 'MarkFlowy'
-    platform.osType = 'macos'
     previewState.docs = []
+    previewState.themes = []
     previewState.error = null
     previewState.hydration = { settled: Promise.resolve() }
     previewState.onHydrationChange = undefined
@@ -243,6 +262,10 @@ describe('PdfPrintController', () => {
     exportMocks.buildDocument.mockReset().mockResolvedValue({
       html: '<html><body>Prepared PDF snapshot</body></html>',
       headingCount: 2,
+    })
+    exportMocks.paginateDocument.mockReset().mockResolvedValue({
+      html: '<html><body><div class="mf-pdf-pages">Paginated PDF snapshot</div></body></html>',
+      pageCount: 2,
     })
     exportMocks.exportPdf.mockReset().mockResolvedValue({ outputPath: '/exports/draft.pdf' })
     exportMocks.exportNativePdf.mockReset().mockResolvedValue({ outputPath: '/exports/draft.pdf' })
@@ -275,9 +298,10 @@ describe('PdfPrintController', () => {
     getContent = () => '# Current unsaved Markdown',
     filePath?: string,
     withNotifications = false,
+    appTheme: EditorThemeConfig | null = null,
   ) {
     await act(async () => {
-      root.render(
+      const content = (
         <>
           <PdfPrintController
             active
@@ -289,8 +313,12 @@ describe('PdfPrintController', () => {
             styleToken={{ rootFontSize: '18px', rootLineHeight: '1.8' }}
           />
           {withNotifications ? <Toaster closeButton /> : null}
-        </>,
+          {appTheme ? <ApplicationThemeProbe /> : null}
+        </>
       )
+      root.render(appTheme
+        ? <EditorThemeContext.Provider value={appTheme}>{content}</EditorThemeContext.Provider>
+        : content)
     })
   }
 
@@ -299,9 +327,10 @@ describe('PdfPrintController', () => {
     await waitFor(() => expect(printMocks.openPdfPrintWindow).toHaveBeenCalled())
   }
 
-  async function requestExport() {
+  async function requestExport(engine: 'browser' | 'native' = 'browser') {
     await act(async () => bus.emit(PDF_EXPORT_EVENT))
     await screen.findByRole('dialog', { name: 'PDF export' })
+    if (engine === 'browser') await act(async () => exportUi.props?.onEngineChange?.('browser'))
     await waitFor(() => expect(exportUi.props?.checking).toBe(false))
   }
 
@@ -330,6 +359,35 @@ describe('PdfPrintController', () => {
     expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
     await requestPrint()
     expect(load).toHaveBeenCalledTimes(2)
+  })
+
+  it('uses a diagram-local light override for export without changing the dark application runtime theme or source', async () => {
+    const appTheme: EditorThemeConfig = {
+      mode: 'dark',
+      name: 'Dark application',
+      token: desktopDarkTheme,
+      codemirrorTheme: undefined,
+      language: 'zh-CN',
+    }
+    const originalSettings = useAppSettingStore.getState().settingData
+    const source = '# Captured source\n\n```mermaid\nflowchart LR\nA --> B\n```\n'
+    const preparation = deferred<{ failedImageCount: number }>()
+    printMocks.preparePrintDocument.mockReturnValue(preparation.promise)
+    await renderController(() => source, undefined, false, appTheme)
+    await requestExport('native')
+    await clickExport('Export in app')
+    await waitFor(() => expect(printMocks.preparePrintDocument).toHaveBeenCalledOnce())
+    expect(previewState.themes.length).toBeGreaterThan(0)
+    expect(previewState.themes.every((theme) => theme?.mode === 'dark')).toBe(true)
+    expect(previewState.docs.at(-1)).toBe(source.replace('flowchart LR', '%%{init:{"theme":"default"}}%%\nflowchart LR'))
+    expect(screen.getByTestId('application-theme').textContent).toBe('dark')
+    await act(async () => preparation.resolve({ failedImageCount: 0 }))
+    await waitFor(() => expect(document.querySelector('.mf-pdf-print-root')).toBeNull())
+    expect(screen.getByTestId('application-theme').textContent).toBe('dark')
+    expect(appTheme.mode).toBe('dark')
+    expect(appTheme.token).toBe(desktopDarkTheme)
+    expect(source).not.toContain('%%{init:')
+    expect(useAppSettingStore.getState().settingData).toBe(originalSettings)
   })
 
   it('does not mount a renderer after its editor closes while the import is pending', async () => {
@@ -648,12 +706,12 @@ describe('PdfPrintController', () => {
   })
 
   it('exports in app without an available browser and preserves the captured unsaved snapshot', async () => {
-    exportMocks.probeBrowser.mockRejectedValueOnce(new Error('Browser probe failed'))
     const getContent = vi.fn(() => '# Unsaved native export')
     await renderController(getContent, '/notes/draft.md')
-    await requestExport()
+    await requestExport('native')
+    expect(exportMocks.probeBrowser).not.toHaveBeenCalled()
     expect(exportUi.props?.error).toBeUndefined()
-    expect(exportUi.props?.browserCheckError).toBe('Browser probe failed')
+    expect(exportUi.props?.browserCheckError).toBeUndefined()
     getContent.mockReturnValue('# Later edit')
     await clickExport('Export in app')
     await waitFor(() => expect(exportMocks.exportNativePdf).toHaveBeenCalledOnce())
@@ -663,7 +721,7 @@ describe('PdfPrintController', () => {
     expect(exportMocks.exportNativePdf).toHaveBeenCalledWith(
       {
         jobId: expect.any(String),
-        html: '<html><body>Prepared PDF snapshot</body></html>',
+        html: '<html><body><div class="mf-pdf-pages">Paginated PDF snapshot</div></body></html>',
         outputPath: '/exports/draft.pdf',
         sourcePath: '/notes/draft.md',
         paperSize: 'letter',
@@ -676,35 +734,21 @@ describe('PdfPrintController', () => {
     expect(printMocks.openPdfPrintWindow).not.toHaveBeenCalled()
   })
 
-  it.each([
-    ['macos', true],
-    ['windows', true],
-    ['linux', false],
-    [undefined, false],
-  ] as const)('supports native bookmarks on %s: %s', async (osType, supported) => {
-    platform.osType = osType
+  it('pre-paginates only in-app export and forwards its paper, orientation and cancellation signal', async () => {
+    const html = '<html><head></head><body><main class="mf-pdf-export"><table><tbody><tr><th>Header</th></tr><tr><td>Body</td></tr></tbody></table><span class="mf-preview-math-inline"><svg><path d="M0 0L1 1"/></svg></span></main></body></html>'
+    exportMocks.buildDocument.mockResolvedValue({ html, headingCount: 0 })
     await renderController()
     await requestExport()
-    expect(exportUi.props?.nativeOutlineSupported).toBe(supported)
-    // The controller also guards unsupported platforms if a stale dialog requests bookmarks.
-    await act(async () =>
-      exportUi.props?.onExport({
-        engine: 'native',
-        paperSize: 'a4',
-        landscape: false,
-        includeOutline: true,
-      }),
-    )
+    await clickExport('Export in app')
     await waitFor(() => expect(exportMocks.exportNativePdf).toHaveBeenCalledOnce())
-    expect(exportMocks.exportNativePdf.mock.calls[0]![0]).toMatchObject({
-      includeOutline: supported,
-      paperSize: 'a4',
-      landscape: false,
+    expect(exportMocks.paginateDocument).toHaveBeenCalledWith(html, {
+      paperSize: 'letter', landscape: true, signal: expect.any(AbortSignal),
     })
+    expect(exportMocks.exportNativePdf.mock.calls[0]![0].html).toContain('Paginated PDF snapshot')
     expect(exportMocks.exportPdf).not.toHaveBeenCalled()
   })
 
-  it('passes through a disabled native bookmark preference on a supported platform', async () => {
+  it('passes through a disabled in-app bookmark preference', async () => {
     await renderController()
     await requestExport()
     await act(async () =>
@@ -719,11 +763,36 @@ describe('PdfPrintController', () => {
     expect(exportMocks.exportNativePdf.mock.calls[0]![0]).toMatchObject({ includeOutline: false })
   })
 
-  it('keeps browser bookmarks available when the native platform does not support them', async () => {
-    platform.osType = 'linux'
+  it('does not start native printing when pagination finishes after cancellation', async () => {
+    const pagination = deferred<{ html: string; pageCount: number }>()
+    exportMocks.paginateDocument.mockReturnValue(pagination.promise)
+    await renderController()
+    await requestExport('native')
+    await clickExport('Export in app')
+    await waitFor(() => expect(exportMocks.paginateDocument).toHaveBeenCalledOnce())
+    const signal = exportMocks.paginateDocument.mock.calls[0]![1].signal as AbortSignal
+    await act(async () => exportUi.props?.onOpenChange(false))
+    expect(signal.aborted).toBe(true)
+    await act(async () => pagination.resolve({ html: '<html>Late pagination</html>', pageCount: 1 }))
+    expect(exportMocks.exportNativePdf).not.toHaveBeenCalled()
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+
+  it('reports pagination failures before native printing and allows a retry', async () => {
+    exportMocks.paginateDocument.mockRejectedValueOnce(new Error('Pagination could not finish'))
+    await renderController()
+    await requestExport('native')
+    await clickExport('Export in app')
+    await waitFor(() => expect(toastMocks.error).toHaveBeenCalledWith('Pagination could not finish'))
+    expect(exportMocks.exportNativePdf).not.toHaveBeenCalled()
+    await requestExport('native')
+    await clickExport('Export in app')
+    await waitFor(() => expect(exportMocks.exportNativePdf).toHaveBeenCalledOnce())
+  })
+
+  it('keeps browser export on its original document pipeline', async () => {
     await renderController()
     await requestExport()
-    expect(exportUi.props?.nativeOutlineSupported).toBe(false)
     await clickExport('Export A4')
     await waitFor(() => expect(exportMocks.exportPdf).toHaveBeenCalledOnce())
     expect(exportMocks.exportPdf.mock.calls[0]![0]).toMatchObject({
@@ -731,6 +800,24 @@ describe('PdfPrintController', () => {
       includeOutline: true,
     })
     expect(exportMocks.exportNativePdf).not.toHaveBeenCalled()
+    expect(exportMocks.paginateDocument).not.toHaveBeenCalled()
+  })
+
+  it('probes only after selecting browser export and resets a new dialog to in-app export', async () => {
+    await renderController()
+    await requestExport('native')
+    expect(exportMocks.probeBrowser).not.toHaveBeenCalled()
+    await act(async () =>
+      useAppSettingStore.setState({ settingData: { pdf_browser_executable_path: '/new/browser' } }),
+    )
+    expect(exportMocks.probeBrowser).not.toHaveBeenCalled()
+    await act(async () => exportUi.props?.onEngineChange?.('browser'))
+    await waitFor(() => expect(exportMocks.probeBrowser).toHaveBeenCalledOnce())
+    expect(exportMocks.probeBrowser).toHaveBeenCalledWith('/new/browser', false)
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Cancel export' })))
+    await requestExport('native')
+    expect(exportMocks.probeBrowser).toHaveBeenCalledOnce()
+    expect(exportUi.props?.checking).toBe(false)
   })
 
   it('can finish in-app export while the browser probe is still pending', async () => {
@@ -739,6 +826,7 @@ describe('PdfPrintController', () => {
     await renderController()
     await act(async () => bus.emit(PDF_EXPORT_EVENT))
     await screen.findByRole('dialog', { name: 'PDF export' })
+    await act(async () => exportUi.props?.onEngineChange?.('browser'))
     expect(exportUi.props?.checking).toBe(true)
     await clickExport('Export in app')
     await waitFor(() => expect(exportMocks.exportNativePdf).toHaveBeenCalledOnce())
@@ -911,6 +999,7 @@ describe('PdfPrintController', () => {
       bus.emit(PDF_PRINT_EVENT)
     })
     await screen.findByRole('dialog', { name: 'PDF export' })
+    await act(async () => exportUi.props?.onEngineChange?.('browser'))
     await waitFor(() => expect(exportUi.props?.checking).toBe(false))
     expect(getContent).toHaveBeenCalledOnce()
     expect(exportMocks.probeBrowser).toHaveBeenCalledOnce()
@@ -1086,6 +1175,7 @@ describe('PdfPrintController', () => {
     await renderController()
     await act(async () => bus.emit(PDF_EXPORT_EVENT))
     await screen.findByRole('dialog', { name: 'PDF export' })
+    await act(async () => exportUi.props?.onEngineChange?.('browser'))
     await act(async () =>
       useAppSettingStore.setState({ settingData: { pdf_browser_executable_path: '/new/browser' } }),
     )
