@@ -100,7 +100,7 @@
     "use-resize-observer": "^9.1.0",
     "yaml": "2.9.0",
     "zens": "workspace:*",
-    "zod": "^4.1.12",
+    "zod": "^4.6.6",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
