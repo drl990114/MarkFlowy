@@ -8,7 +8,7 @@ import frDesktop from '../../../locales/fr-FR.json'
 import esDesktop from '../../../locales/es.json'
 import jaDesktop from '../../../locales/ja.json'
 import viDesktop from '../../../locales/vi.json'
-import viDesktop from '../../../locales/pt-BR.json'
+import ptBRDesktop from '../../../locales/pt-BR.json'
 
 import ruEditor from '../../../locales/editor/ru.json'
 import enEditor from '../../../locales/editor/en.json'
@@ -17,7 +17,7 @@ import frEditor from '../../../locales/editor/frFR.json'
 import esEditor from '../../../locales/editor/es.json'
 import jaEditor from '../../../locales/editor/ja.json'
 import viEditor from '../../../locales/editor/vi.json'
-import viEditor from '../../../locales/editor/ptBR.json'
+import ptBREditor from '../../../locales/editor/ptBR.json'
 
 import type { Langs } from './types'
 
@@ -31,7 +31,7 @@ const langMap = {
   es: { desktop: esDesktop, editor: esEditor },
   ja: { desktop: jaDesktop, editor: jaEditor },
   vi: { desktop: viDesktop, editor: viEditor },
-  ptBR: { desktop: ptBRDesktop, editor: ptBREditor },
+  'pt-BR': { desktop: ptBRDesktop, editor: ptBREditor },
 } as const
 
 export const desktopResources = Object.fromEntries(

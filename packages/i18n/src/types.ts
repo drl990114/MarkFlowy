@@ -6,7 +6,7 @@ export const locales = {
   es: 'Español',
   ja: '日本語',
   vi: 'Tiếng Việt',
-  ptBR: 'Português',
+  'pt-BR': 'Português (Brasil)',
 } as const
 
 export type Langs = keyof typeof locales

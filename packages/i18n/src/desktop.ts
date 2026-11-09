@@ -13,15 +13,18 @@ const loaders = {
   cn: () =>
     Promise.all([import('../../../locales/zh-CN.json'), import('../../../locales/editor/cn.json')]),
   frFR: () =>
-    Promise.all([import('../../../locales/fr-FR.json'),import('../../../locales/editor/frFR.json'),]),
+    Promise.all([
+      import('../../../locales/fr-FR.json'),
+      import('../../../locales/editor/frFR.json'),
+    ]),
   es: () =>
     Promise.all([import('../../../locales/es.json'), import('../../../locales/editor/es.json')]),
   ja: () =>
     Promise.all([import('../../../locales/ja.json'), import('../../../locales/editor/ja.json')]),
   vi: () =>
     Promise.all([import('../../../locales/vi.json'), import('../../../locales/editor/vi.json')]),
-  ptBR: () =>
-    Promise.all([import('../../../locales/pt-br.json'), import('../../../locales/editor/ptBR.json')]),
+  'pt-BR': () =>
+    Promise.all([import('../../../locales/pt-BR.json'), import('../../../locales/editor/ptBR.json')]),
 }
 const pending = new Map<Langs, Promise<Resource>>()
 const languageKey = (lng?: string): Langs =>

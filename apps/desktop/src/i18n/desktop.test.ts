@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest'
 import i18n, { changeLng, i18nInit, locales } from '../../../../packages/i18n/src/desktop'
+import { queryBookmarks } from '../extensions/bookmarks/query'
 
 it('loads only the current language and English, adds switched languages and retains legacy consumers', async () => {
   await i18nInit({ lng: 'cn' })
@@ -15,6 +16,24 @@ it('loads only the current language and English, adds switched languages and ret
   await legacy.i18nInit({ lng: 'frFR' })
   expect(i18n.language).toBe('frFR')
   expect(Object.keys(i18n.services.resourceStore.data)).toHaveLength(Object.keys(locales).length)
+})
+
+it('switches to Brazilian Portuguese and opens the bookmark library', async () => {
+  await i18nInit({ lng: 'en' })
+  // Remove the bundle loaded by the legacy entry so this exercises the Desktop loader.
+  i18n.removeResourceBundle('pt-BR', 'translation')
+  await changeLng('pt-BR')
+
+  expect(i18n.language).toBe('pt-BR')
+  expect(i18n.t('quick_open.title')).toBe('Abertura rápida')
+  expect(i18n.t('slashMenu.searchPlaceholder')).toBe('Pesquisar itens do menu...')
+
+  const bookmarks = queryBookmarks(
+    [],
+    { sort: { field: 'title', direction: 'asc' }, groupBy: 'none' },
+    i18n.language,
+  )
+  expect(bookmarks).toEqual({ items: [], groups: [] })
 })
 
 it.each(Object.keys(locales))('removes obsolete Mermaid sizing labels for %s', async (language) => {
