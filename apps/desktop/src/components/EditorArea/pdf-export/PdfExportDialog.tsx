@@ -31,8 +31,8 @@ export interface PdfExportDialogProps {
   onOpenChange: (open: boolean) => void
   onExport: (options: PdfExportOptions) => void
   onPrint: () => void
+  onEngineChange?: (engine: PdfExportEngine) => void
   busy: boolean
-  nativeOutlineSupported: boolean
   browserInfo?: PdfBrowserInfo
   checking: boolean
   browserCheckError?: string
@@ -45,8 +45,8 @@ export function PdfExportDialog({
   onOpenChange,
   onExport,
   onPrint,
+  onEngineChange,
   busy,
-  nativeOutlineSupported,
   browserInfo,
   checking,
   browserCheckError,
@@ -61,7 +61,6 @@ export function PdfExportDialog({
   const [includeOutline, setIncludeOutline] = useState(true)
   const ready = browserInfo?.available === true && browserInfo.compatible
   const usingBrowser = engine === 'browser'
-  const outlineSupported = usingBrowser || nativeOutlineSupported
   const browserPath = browserSettings.configuredPath || browserInfo?.executablePath
   const configuringBrowser = busy || browserSettings.busy
   const displayedError =
@@ -97,7 +96,10 @@ export function PdfExportDialog({
               className='grid grid-cols-2 gap-3'
               value={engine}
               onValueChange={(value) => {
-                if (value === 'browser' || value === 'native') setEngine(value)
+                if (value === 'browser' || value === 'native') {
+                  setEngine(value)
+                  onEngineChange?.(value)
+                }
               }}
               disabled={busy}
             >
@@ -132,9 +134,7 @@ export function PdfExportDialog({
                       {t(
                         method === 'browser'
                           ? 'pdf_export.description'
-                          : nativeOutlineSupported
-                            ? 'pdf_export.native_hint'
-                            : 'pdf_export.native_outline_unavailable',
+                          : 'pdf_export.native_hint',
                       )}
                     </span>
                   </span>
@@ -188,29 +188,27 @@ export function PdfExportDialog({
               </Select>
             </div>
           </div>
-          {outlineSupported ? (
-            <div className='flex items-start gap-2'>
-              <Checkbox
-                id={`${id}-outline`}
-                checked={includeOutline}
-                onCheckedChange={(value) => setIncludeOutline(value === true)}
-                disabled={busy}
-                aria-describedby={`${id}-outline-hint`}
-                className='mt-0.5'
-              />
-              <div className='flex min-w-0 flex-col gap-1'>
-                <label
-                  htmlFor={`${id}-outline`}
-                  className='cursor-default select-none text-ui-control text-foreground'
-                >
-                  {t('pdf_export.include_outline')}
-                </label>
-                <p id={`${id}-outline-hint`} className='m-0 text-ui-caption text-muted-foreground'>
-                  {t('pdf_export.outline_hint')}
-                </p>
-              </div>
+          <div className='flex items-start gap-2'>
+            <Checkbox
+              id={`${id}-outline`}
+              checked={includeOutline}
+              onCheckedChange={(value) => setIncludeOutline(value === true)}
+              disabled={busy}
+              aria-describedby={`${id}-outline-hint`}
+              className='mt-0.5'
+            />
+            <div className='flex min-w-0 flex-col gap-1'>
+              <label
+                htmlFor={`${id}-outline`}
+                className='cursor-default select-none text-ui-control text-foreground'
+              >
+                {t('pdf_export.include_outline')}
+              </label>
+              <p id={`${id}-outline-hint`} className='m-0 text-ui-caption text-muted-foreground'>
+                {t('pdf_export.outline_hint')}
+              </p>
             </div>
-          ) : null}
+          </div>
           <div className='flex flex-col gap-1.5'>
             <div className='flex flex-wrap items-center justify-between gap-2'>
               <p role='status' className='m-0 text-ui-control text-foreground'>
@@ -292,7 +290,7 @@ export function PdfExportDialog({
                 engine,
                 paperSize,
                 landscape,
-                includeOutline: outlineSupported && includeOutline,
+                includeOutline,
               })
             }
           >

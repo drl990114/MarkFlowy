@@ -1,8 +1,7 @@
-//! Add navigation to an already printed PDF without changing its page content.
-//! Link rectangles are measured by the print engine, so pagination, embedded
-//! fonts, repeated titles and non-Latin glyph mappings do not affect placement.
-use super::{native_error, PdfExportError, MAX_PDF_BYTES};
-use lopdf::{dictionary, Dictionary, Document, LoadOptions, Object, ObjectId};
+//! Add heading navigation using coordinates from the final physical-page DOM.
+//! The native printer only paints fixed pages; it does not determine pagination.
+use super::{native_error, PaperSize, PdfExportError, MAX_PDF_BYTES};
+use lopdf::{dictionary, Document, LoadOptions, Object, ObjectId};
 use serde::Deserialize;
 use std::collections::{HashMap, HashSet};
 
@@ -10,22 +9,25 @@ const MAX_HEADINGS: usize = 10_000;
 const MAX_TITLE_BYTES: usize = 16 * 1024;
 const MAX_TOTAL_TITLE_BYTES: usize = 4 * 1024 * 1024;
 const MAX_PAGES: usize = 10_000;
-const MAX_ANNOTATIONS: usize = 200_000;
 const MAX_OBJECTS: usize = 1_000_000;
-const MAX_COORDINATE: f32 = 1_000_000.0;
-const PAGE_EDGE_TOLERANCE: f32 = 2.0;
+const PAGE_SIZE_TOLERANCE: f32 = 2.0;
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(super) struct Heading {
     pub index: usize,
     pub title: String,
     pub level: u8,
+    pub page_index: usize,
+    /// Fraction of the physical page width, measured from its left edge.
+    pub left: f32,
+    /// Fraction of the physical page height, measured from its top edge.
+    pub top: f32,
 }
 
 #[derive(Clone, Copy, Debug)]
 struct Destination {
     page: ObjectId,
-    page_number: u32,
     left: f32,
     top: f32,
 }
@@ -39,7 +41,7 @@ struct OutlineNode<'a> {
 }
 
 fn invalid(reason: &str) -> PdfExportError {
-    native_error(format!("PDF heading navigation: {reason}"))
+    native_error(format!("PDF page navigation: {reason}"))
 }
 
 fn resolved<'a>(document: &'a Document, object: &'a Object) -> Result<&'a Object, PdfExportError> {
@@ -49,34 +51,11 @@ fn resolved<'a>(document: &'a Document, object: &'a Object) -> Result<&'a Object
         .map_err(native_error)
 }
 
-fn rectangle(document: &Document, object: &Object) -> Result<[f32; 4], PdfExportError> {
-    let values = resolved(document, object)?
-        .as_array()
-        .map_err(native_error)?;
-    if values.len() != 4 {
-        return Err(invalid("A position rectangle must have four coordinates."));
-    }
-    let mut coordinates = [0.0; 4];
-    for (coordinate, value) in coordinates.iter_mut().zip(values) {
-        *coordinate = resolved(document, value)?
-            .as_float()
-            .map_err(native_error)?;
-        if !coordinate.is_finite() || coordinate.abs() > MAX_COORDINATE {
-            return Err(invalid(
-                "A position coordinate is outside the supported range.",
-            ));
-        }
-    }
-    let [x0, y0, x1, y1] = coordinates;
-    if x0 == x1 || y0 == y1 {
-        return Err(invalid("A position rectangle has no area."));
-    }
-    Ok([x0.min(x1), y0.min(y1), x0.max(x1), y0.max(y1)])
-}
-
-fn page_bounds(document: &Document, page: ObjectId) -> Result<[f32; 4], PdfExportError> {
-    // MediaBox is inheritable. Bound the parent traversal even for malformed
-    // page trees; normal native printer output usually has it on each page.
+fn inherited<'a>(
+    document: &'a Document,
+    page: ObjectId,
+    key: &[u8],
+) -> Result<Option<&'a Object>, PdfExportError> {
     let mut current = page;
     let mut visited = HashSet::new();
     for _ in 0..64 {
@@ -87,105 +66,130 @@ fn page_bounds(document: &Document, page: ObjectId) -> Result<[f32; 4], PdfExpor
             .get_object(current)
             .and_then(Object::as_dict)
             .map_err(native_error)?;
-        if let Ok(bounds) = dictionary.get(b"MediaBox") {
-            return rectangle(document, bounds);
+        if let Ok(value) = dictionary.get(key) {
+            return resolved(document, value).map(Some);
         }
-        current = dictionary
-            .get(b"Parent")
-            .and_then(Object::as_reference)
-            .map_err(native_error)?;
+        let Ok(parent) = dictionary.get(b"Parent") else {
+            return Ok(None);
+        };
+        current = parent.as_reference().map_err(native_error)?;
     }
     Err(invalid("The PDF page tree is too deep."))
 }
 
-fn collect_reference_chain<'a>(
-    document: &'a Document,
-    mut object: &'a Object,
-    candidates: &mut HashSet<ObjectId>,
-) -> Result<(), PdfExportError> {
-    let mut visited = HashSet::new();
-    while let Object::Reference(id) = object {
-        if visited.len() >= 128 || !visited.insert(*id) {
-            return Err(invalid("A PDF annotation reference contains a cycle."));
-        }
-        candidates.insert(*id);
-        object = document
-            .objects
-            .get(id)
-            .ok_or_else(|| invalid("A PDF annotation reference is missing."))?;
-    }
-    Ok(())
-}
-
-fn marker_suffix<'a>(
-    document: &'a Document,
-    annotation: &'a Dictionary,
-    prefix: &[u8],
-) -> Result<Option<&'a [u8]>, PdfExportError> {
-    if annotation.get(b"Subtype").and_then(Object::as_name).ok() != Some(b"Link") {
-        return Ok(None);
-    }
-    let Ok(action) = annotation.get(b"A") else {
-        return Ok(None);
-    };
-    let action = resolved(document, action)?
-        .as_dict()
+fn rectangle(document: &Document, object: &Object) -> Result<[f32; 4], PdfExportError> {
+    let values = resolved(document, object)?
+        .as_array()
         .map_err(native_error)?;
-    if action.get(b"S").and_then(Object::as_name).ok() != Some(b"URI") {
-        return Ok(None);
+    if values.len() != 4 {
+        return Err(invalid("A page rectangle must have four coordinates."));
     }
-    let uri = resolved(document, action.get(b"URI").map_err(native_error)?)?
-        .as_str()
-        .map_err(native_error)?;
-    Ok(uri.strip_prefix(prefix))
+    let mut coordinates = [0.0; 4];
+    for (coordinate, value) in coordinates.iter_mut().zip(values) {
+        *coordinate = resolved(document, value)?
+            .as_float()
+            .map_err(native_error)?;
+        if !coordinate.is_finite() || coordinate.abs() > 1_000_000.0 {
+            return Err(invalid("A page coordinate is outside the supported range."));
+        }
+    }
+    if coordinates[2] <= coordinates[0] || coordinates[3] <= coordinates[1] {
+        return Err(invalid("A page rectangle has no positive area."));
+    }
+    Ok(coordinates)
 }
 
-fn referenced_objects(object: &Object, references: &mut HashSet<ObjectId>) {
-    let mut pending = vec![object];
-    while let Some(object) = pending.pop() {
-        match object {
-            Object::Reference(id) => {
-                references.insert(*id);
-            }
-            Object::Array(array) => pending.extend(array),
-            Object::Dictionary(dictionary) => {
-                pending.extend(dictionary.iter().map(|(_, value)| value))
-            }
-            Object::Stream(stream) => pending.extend(stream.dict.iter().map(|(_, value)| value)),
-            _ => {}
-        }
-    }
+pub(super) struct PageGeometry {
+    bounds: [f32; 4],
+    rotation: i64,
 }
 
-fn remove_detached_objects(document: &mut Document, candidates: &HashSet<ObjectId>) {
-    // An annotation/action/array can be shared, including through a tagged PDF
-    // structure tree. Delete only detached marker objects, never their users.
-    let mut references = HashSet::new();
-    for (_, value) in document.trailer.iter() {
-        referenced_objects(value, &mut references);
+impl PageGeometry {
+    fn read(
+        document: &Document,
+        page: ObjectId,
+        paper: PaperSize,
+        landscape: bool,
+    ) -> Result<Self, PdfExportError> {
+        let bounds = rectangle(
+            document,
+            inherited(document, page, b"MediaBox")?
+                .ok_or_else(|| invalid("A PDF page has no size."))?,
+        )?;
+        if let Some(crop) = inherited(document, page, b"CropBox")? {
+            let crop = rectangle(document, crop)?;
+            if bounds
+                .iter()
+                .zip(crop)
+                .any(|(a, b)| (*a - b).abs() > PAGE_SIZE_TOLERANCE)
+            {
+                return Err(invalid(
+                    "The native printer cropped a prepared physical page.",
+                ));
+            }
+        }
+        let rotation = inherited(document, page, b"Rotate")?
+            .map(Object::as_i64)
+            .transpose()
+            .map_err(native_error)?
+            .unwrap_or(0)
+            .rem_euclid(360);
+        if rotation % 90 != 0 {
+            return Err(invalid("A PDF page has an unsupported rotation."));
+        }
+        let unit = inherited(document, page, b"UserUnit")?
+            .map(Object::as_float)
+            .transpose()
+            .map_err(native_error)?
+            .unwrap_or(1.0);
+        if !unit.is_finite() || unit <= 0.0 {
+            return Err(invalid("A PDF page has an invalid unit."));
+        }
+        let (mut width, mut height) = (
+            (bounds[2] - bounds[0]) * unit,
+            (bounds[3] - bounds[1]) * unit,
+        );
+        if rotation == 90 || rotation == 270 {
+            std::mem::swap(&mut width, &mut height);
+        }
+        let (width_inches, height_inches) = paper.inches();
+        let (expected_width, expected_height) = if landscape {
+            (height_inches * 72.0, width_inches * 72.0)
+        } else {
+            (width_inches * 72.0, height_inches * 72.0)
+        };
+        if (f64::from(width) - expected_width).abs() > f64::from(PAGE_SIZE_TOLERANCE)
+            || (f64::from(height) - expected_height).abs() > f64::from(PAGE_SIZE_TOLERANCE)
+        {
+            return Err(invalid(
+                "The native printer changed the prepared physical page size.",
+            ));
+        }
+        Ok(Self { bounds, rotation })
     }
-    for (id, object) in &document.objects {
-        if !candidates.contains(id) {
-            referenced_objects(object, &mut references);
+
+    pub(super) fn point(&self, left: f32, top: f32) -> (f32, f32) {
+        let [x0, y0, x1, y1] = self.bounds;
+        let (width, height) = (x1 - x0, y1 - y0);
+        // PDF uses unrotated bottom-origin coordinates; DOM uses displayed
+        // left/top coordinates, including the physical page rotation.
+        match self.rotation {
+            90 => (x0 + top * width, y0 + left * height),
+            180 => (x1 - left * width, y0 + top * height),
+            270 => (x1 - top * width, y1 - left * height),
+            _ => (x0 + left * width, y1 - top * height),
         }
     }
-    let mut pending = references
-        .intersection(candidates)
-        .copied()
-        .collect::<Vec<_>>();
-    let mut retained = HashSet::new();
-    while let Some(id) = pending.pop() {
-        if !retained.insert(id) {
-            continue;
-        }
-        if let Some(object) = document.objects.get(&id) {
-            let mut dependencies = HashSet::new();
-            referenced_objects(object, &mut dependencies);
-            pending.extend(dependencies.intersection(candidates).copied());
-        }
+
+    pub(super) fn rectangle(&self, left: f32, top: f32, right: f32, bottom: f32) -> [f32; 4] {
+        let (x0, y0) = self.point(left, top);
+        let (x1, y1) = self.point(right, bottom);
+        [x0.min(x1), y0.min(y1), x0.max(x1), y0.max(y1)]
     }
-    for id in candidates.difference(&retained) {
-        document.objects.remove(id);
+
+    fn destination(&self, page: ObjectId, heading: &Heading) -> Destination {
+        let (left, top) = self.point(heading.left, heading.top);
+        Destination { page, left, top }
     }
 }
 
@@ -199,8 +203,7 @@ fn write_outline(
     let mut roots = Vec::new();
     for heading in headings {
         let Some(&destination) = destinations.get(&heading.index) else {
-            // Print CSS may hide a heading; it has no destination or bookmark.
-            continue;
+            return Err(invalid("A heading has no physical page destination."));
         };
         while ancestors
             .last()
@@ -300,37 +303,59 @@ fn write_outline(
     Ok(nodes.len())
 }
 
-pub(super) fn add_outline(
+/// Verify that the native printer preserved the prepared pagination before
+/// using any DOM position. This runs even when heading navigation is disabled.
+pub(super) struct Navigation<'a> {
+    pub page_count: usize,
+    pub headings: &'a [Heading],
+    pub links: &'a [super::links::InternalLink],
+    pub document_url: &'a str,
+}
+
+pub(super) fn finish_pdf(
     bytes: &[u8],
-    token: &str,
-    headings: &[Heading],
+    navigation: Navigation<'_>,
+    paper: PaperSize,
+    landscape: bool,
+    include_outline: bool,
+    document_title: Option<&str>,
 ) -> Result<(Vec<u8>, usize), PdfExportError> {
-    if bytes.is_empty() || bytes.len() > MAX_PDF_BYTES {
-        return Err(invalid("The generated PDF is empty or too large."));
-    }
-    if token.is_empty()
-        || token.len() > 128
-        || !token
-            .bytes()
-            .all(|byte| byte.is_ascii_alphanumeric() || byte == b'-' || byte == b'_')
+    let Navigation {
+        page_count: expected_page_count,
+        headings,
+        links,
+        document_url,
+    } = navigation;
+    super::links::validate(links, expected_page_count)?;
+    if bytes.is_empty()
+        || bytes.len() > MAX_PDF_BYTES
+        || !(1..=MAX_PAGES).contains(&expected_page_count)
     {
-        return Err(invalid("The heading marker token is invalid."));
+        return Err(invalid("The PDF or prepared page count is invalid."));
     }
-    if headings.len() > MAX_HEADINGS {
-        return Err(invalid("The document has too many headings."));
+    if headings.len() > MAX_HEADINGS || (!include_outline && !headings.is_empty()) {
+        return Err(invalid(
+            "The document heading list is invalid or too large.",
+        ));
     }
-    let mut total_title_bytes = 0;
+    let mut total_title_bytes = 0usize;
     let mut indices = HashSet::new();
     for heading in headings {
-        total_title_bytes += heading.title.len();
+        total_title_bytes = total_title_bytes.saturating_add(heading.title.len());
         if !(1..=6).contains(&heading.level)
             || heading.title.trim().is_empty()
             || heading.title.len() > MAX_TITLE_BYTES
             || total_title_bytes > MAX_TOTAL_TITLE_BYTES
+            || heading.index >= MAX_HEADINGS
             || !indices.insert(heading.index)
+            || heading.page_index >= expected_page_count
+            || !heading.left.is_finite()
+            || !heading.top.is_finite()
+            || !(0.0..=1.0).contains(&heading.left)
+            || !(0.0..=1.0).contains(&heading.top)
         {
             return Err(invalid(
-                "The document heading list is invalid or too large.",
+                "A heading has an invalid title, level, page, or position.",
             ));
         }
     }
@@ -345,120 +370,47 @@ pub(super) fn add_outline(
     if document.objects.len() > MAX_OBJECTS {
         return Err(invalid("The PDF has too many objects."));
     }
-    let pages = document.get_pages();
-    if pages.is_empty() || pages.len() > MAX_PAGES {
-        return Err(invalid("The PDF has an invalid number of pages."));
+    let pages = document.get_pages().into_values().collect::<Vec<_>>();
+    if pages.len() != expected_page_count {
+        return Err(invalid(&format!(
+            "The native printer changed the prepared page count (expected {expected_page_count}, actual {}).",
+            pages.len()
+        )));
     }
-    let prefix = format!("https://markflowy.invalid/pdf-outline/{token}/");
-    let mut destinations: HashMap<usize, Destination> = HashMap::new();
-    let mut detached = HashSet::new();
-    let mut annotation_count = 0;
-    let mut probe_found = false;
-    for (page_number, page_id) in pages {
-        let page = document
-            .get_object(page_id)
-            .and_then(Object::as_dict)
-            .map_err(native_error)?;
-        let Ok(annotations_object) = page.get(b"Annots") else {
-            continue;
-        };
-        let annotations = resolved(&document, annotations_object)?
-            .as_array()
-            .map_err(native_error)?;
-        annotation_count += annotations.len();
-        if annotation_count > MAX_ANNOTATIONS {
-            return Err(invalid("The PDF has too many link annotations."));
-        }
-        let mut kept = Vec::with_capacity(annotations.len());
-        let mut removed = false;
-        let mut bounds = None;
-        for annotation_object in annotations {
-            let annotation = resolved(&document, annotation_object)?
-                .as_dict()
-                .map_err(native_error)?;
-            let Some(suffix) = marker_suffix(&document, annotation, prefix.as_bytes())? else {
-                kept.push(annotation_object.clone());
-                continue;
-            };
-            let position = rectangle(&document, annotation.get(b"Rect").map_err(native_error)?)?;
-            let page_bounds = match bounds {
-                Some(bounds) => bounds,
-                None => {
-                    let value = page_bounds(&document, page_id)?;
-                    bounds = Some(value);
-                    value
-                }
-            };
-            if position[0] < page_bounds[0] - PAGE_EDGE_TOLERANCE
-                || position[1] < page_bounds[1] - PAGE_EDGE_TOLERANCE
-                || position[2] > page_bounds[2] + PAGE_EDGE_TOLERANCE
-                || position[3] > page_bounds[3] + PAGE_EDGE_TOLERANCE
-            {
-                return Err(invalid("A heading marker is outside its PDF page."));
-            }
-            if suffix == b"probe" {
-                probe_found = true;
-            } else {
-                let text = std::str::from_utf8(suffix).map_err(native_error)?;
-                let index = text.parse::<usize>().map_err(native_error)?;
-                if index.to_string() != text || !indices.contains(&index) {
-                    return Err(invalid("A heading marker has an unknown identifier."));
-                }
-                let destination = Destination {
-                    page: page_id,
-                    page_number,
-                    left: position[0],
-                    top: position[3],
-                };
-                destinations
-                    .entry(index)
-                    .and_modify(|previous| {
-                        if destination.page_number < previous.page_number
-                            || (destination.page_number == previous.page_number
-                                && (destination.top > previous.top
-                                    || (destination.top == previous.top
-                                        && destination.left < previous.left)))
-                        {
-                            *previous = destination;
-                        }
-                    })
-                    .or_insert(destination);
-            }
-            removed = true;
-            collect_reference_chain(&document, annotation_object, &mut detached)?;
-            let action_object = annotation.get(b"A").map_err(native_error)?;
-            collect_reference_chain(&document, action_object, &mut detached)?;
-            let action = resolved(&document, action_object)?
-                .as_dict()
-                .map_err(native_error)?;
-            collect_reference_chain(
-                &document,
-                action.get(b"URI").map_err(native_error)?,
-                &mut detached,
-            )?;
-        }
-        if removed {
-            collect_reference_chain(&document, annotations_object, &mut detached)?;
-            let page = document
-                .get_object_mut(page_id)
-                .and_then(Object::as_dict_mut)
-                .map_err(native_error)?;
-            if kept.is_empty() {
-                page.remove(b"Annots");
-            } else {
-                page.set("Annots", Object::Array(kept));
-            }
-        }
-    }
-    if !probe_found {
-        return Err(invalid(
-            "The native printer did not preserve heading positions.",
-        ));
-    }
-    remove_detached_objects(&mut document, &detached);
+    let geometry = pages
+        .iter()
+        .map(|&page| PageGeometry::read(&document, page, paper, landscape))
+        .collect::<Result<Vec<_>, _>>()?;
+    let destinations = headings
+        .iter()
+        .map(|heading| {
+            (
+                heading.index,
+                geometry[heading.page_index].destination(pages[heading.page_index], heading),
+            )
+        })
+        .collect();
+    super::links::replace(&mut document, &pages, &geometry, links, document_url)?;
     let count = write_outline(&mut document, headings, &destinations)?;
-    // Keep content streams and the original page tree untouched. A standard
-    // save rewrites object/xref syntax, not rendered page contents.
+    if let Some(title) = document_title {
+        if title.chars().count() > 4096 {
+            return Err(invalid("The document title is too large."));
+        }
+        let mut utf16 = vec![0xFE, 0xFF];
+        utf16.extend(title.encode_utf16().flat_map(u16::to_be_bytes));
+        let title = Object::string_literal(utf16);
+        if let Ok(info) = document.trailer.get(b"Info").and_then(Object::as_reference) {
+            document
+                .get_object_mut(info)
+                .and_then(Object::as_dict_mut)
+                .map_err(native_error)?
+                .set("Title", title);
+        } else {
+            let info = document.add_object(dictionary! { "Title" => title });
+            document.trailer.set("Info", info);
+        }
+    }
+    // Page content, embedded fonts, unrelated annotations and the page tree stay intact.
     let mut output = Vec::new();
     document.save_to(&mut output).map_err(native_error)?;
     if output.len() > MAX_PDF_BYTES {
@@ -470,18 +422,40 @@ pub(super) fn add_outline(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use lopdf::Stream;
+    use lopdf::{Dictionary, Stream};
 
-    const TOKEN: &str = "outline-test-job";
+    const DOCUMENT_URL: &str = "file:///private/markflowy-native-pdf-unit/document.html";
+
+    fn finish_pdf(
+        bytes: &[u8],
+        page_count: usize,
+        headings: &[Heading],
+        paper: PaperSize,
+        landscape: bool,
+        include_outline: bool,
+        title: Option<&str>,
+    ) -> Result<(Vec<u8>, usize), PdfExportError> {
+        super::finish_pdf(
+            bytes,
+            Navigation {
+                page_count,
+                headings,
+                links: &[],
+                document_url: DOCUMENT_URL,
+            },
+            paper,
+            landscape,
+            include_outline,
+            title,
+        )
+    }
 
     struct Fixture {
         document: Document,
         pages: Vec<ObjectId>,
         content: ObjectId,
-        metadata: ObjectId,
         info: ObjectId,
     }
-
     fn fixture() -> Fixture {
         let mut document = Document::with_version("1.7");
         let parent = document.new_object_id();
@@ -489,246 +463,153 @@ mod tests {
             dictionary! {},
             b"q 1 0 0 1 0 0 cm Q\n".to_vec(),
         ));
+        let link = document.add_object(dictionary! {
+            "Type" => "Annot", "Subtype" => "Link", "Rect" => vec![30.into(),30.into(),90.into(),40.into()],
+            "A" => dictionary! { "S" => "URI", "URI" => Object::string_literal("https://example.com/original") },
+        });
         let pages = (0..3)
             .map(|_| {
                 document.add_object(dictionary! {
                     "Type" => "Page", "Parent" => parent, "Contents" => content,
-                    "Resources" => dictionary! {}, "Annots" => Vec::<Object>::new(),
+                    "Resources" => dictionary! {}, "Annots" => vec![Object::Reference(link)],
                 })
             })
             .collect::<Vec<_>>();
         document.objects.insert(parent, dictionary! {
             "Type" => "Pages", "Kids" => pages.iter().copied().map(Object::Reference).collect::<Vec<_>>(),
-            "Count" => pages.len() as i64, "MediaBox" => vec![0.into(), 0.into(), 600.into(), 800.into()],
+            "Count" => 3, "MediaBox" => vec![10.into(),20.into(),622.into(),812.into()],
         }.into());
-        let metadata = document.add_object(Stream::new(
-            dictionary! {
-                "Type" => "Metadata", "Subtype" => "XML",
-            },
-            b"<metadata>original metadata</metadata>".to_vec(),
-        ));
-        let root = document.add_object(
-            dictionary! { "Type" => "Catalog", "Pages" => parent, "Metadata" => metadata },
-        );
-        let info = document.add_object(dictionary! {
-            "Title" => Object::string_literal("Original document"),
-            "Producer" => Object::string_literal("Native printer"),
-        });
-        document.trailer.set("Root", root);
+        let catalog = document.add_object(dictionary! { "Type" => "Catalog", "Pages" => parent });
+        document.trailer.set("Root", catalog);
+        let info = document
+            .add_object(dictionary! { "Title" => Object::string_literal("Original title") });
         document.trailer.set("Info", info);
-        let mut fixture = Fixture {
+        Fixture {
             document,
             pages,
             content,
-            metadata,
             info,
-        };
-        append_link(&mut fixture, 0, "probe", [20.0, 780.0, 21.0, 781.0], false);
-        fixture
-    }
-
-    fn link(uri: &str, rect: [f32; 4]) -> Object {
-        dictionary! {
-            "Type" => "Annot", "Subtype" => "Link",
-            "Rect" => rect.into_iter().map(Object::Real).collect::<Vec<_>>(),
-            "A" => dictionary! { "S" => "URI", "URI" => Object::string_literal(uri) },
         }
-        .into()
     }
-
-    fn append_annotation(fixture: &mut Fixture, page: usize, annotation: Object) {
-        fixture
-            .document
-            .get_object_mut(fixture.pages[page])
-            .unwrap()
-            .as_dict_mut()
-            .unwrap()
-            .get_mut(b"Annots")
-            .unwrap()
-            .as_array_mut()
-            .unwrap()
-            .push(annotation);
-    }
-
-    fn append_link(
-        fixture: &mut Fixture,
-        page: usize,
-        suffix: &str,
-        rect: [f32; 4],
-        indirect: bool,
-    ) {
-        let mut annotation = link(
-            &format!("https://markflowy.invalid/pdf-outline/{TOKEN}/{suffix}"),
-            rect,
-        );
-        if indirect {
-            let dictionary = annotation.as_dict_mut().unwrap();
-            let mut action = dictionary.remove(b"A").unwrap();
-            let uri = action.as_dict_mut().unwrap().remove(b"URI").unwrap();
-            let uri_id = fixture.document.add_object(uri);
-            action.as_dict_mut().unwrap().set("URI", uri_id);
-            let action_id = fixture.document.add_object(action);
-            dictionary.set("A", action_id);
-            annotation = fixture.document.add_object(annotation).into();
-        }
-        append_annotation(fixture, page, annotation);
-    }
-
     fn pdf(document: &mut Document) -> Vec<u8> {
         let mut bytes = Vec::new();
         document.save_to(&mut bytes).unwrap();
         bytes
     }
-
-    fn headings(values: &[(usize, &str, u8)]) -> Vec<Heading> {
-        values
-            .iter()
-            .map(|&(index, title, level)| Heading {
-                index,
-                title: title.into(),
-                level,
-            })
-            .collect()
+    fn heading(index: usize, title: &str, level: u8, page_index: usize) -> Heading {
+        Heading {
+            index,
+            title: title.into(),
+            level,
+            page_index,
+            left: 0.1,
+            top: 0.25,
+        }
     }
-
-    fn dictionary(document: &Document, id: ObjectId) -> &Dictionary {
+    fn dict(document: &Document, id: ObjectId) -> &Dictionary {
         document.get_object(id).unwrap().as_dict().unwrap()
     }
-
     fn reference(dictionary: &Dictionary, key: &[u8]) -> ObjectId {
         dictionary.get(key).unwrap().as_reference().unwrap()
     }
-
     fn title(dictionary: &Dictionary) -> String {
         let bytes = dictionary.get(b"Title").unwrap().as_str().unwrap();
         assert_eq!(&bytes[..2], &[0xFE, 0xFF]);
-        let utf16 = bytes[2..]
-            .chunks_exact(2)
-            .map(|pair| u16::from_be_bytes([pair[0], pair[1]]))
-            .collect::<Vec<_>>();
-        String::from_utf16(&utf16).unwrap()
+        String::from_utf16(
+            &bytes[2..]
+                .chunks_exact(2)
+                .map(|pair| u16::from_be_bytes([pair[0], pair[1]]))
+                .collect::<Vec<_>>(),
+        )
+        .unwrap()
     }
 
     #[test]
-    fn writes_nested_skipped_levels_duplicate_titles_and_utf16_destinations() {
+    fn coordinates_preserve_nested_skipped_levels_duplicate_titles_and_unicode() {
         let mut fixture = fixture();
-        for (index, page, top) in [
-            (0, 0, 740.0),
-            (1, 0, 650.0),
-            (2, 1, 700.0),
-            (3, 1, 500.0),
-            (4, 2, 700.0),
-        ] {
-            append_link(
-                &mut fixture,
-                page,
-                &index.to_string(),
-                [40.0, top - 1.0, 41.0, top],
-                index % 2 == 0,
-            );
-        }
-        // Repeated printed markers choose the earliest page and then its topmost occurrence.
-        append_link(&mut fixture, 2, "0", [40.0, 770.0, 41.0, 771.0], true);
-        append_link(&mut fixture, 0, "0", [40.0, 749.0, 41.0, 750.0], false);
-        let headings = headings(&[
-            (0, "中文标题 📚", 1),
-            (1, "Repeated", 3),
-            (2, "Repeated", 4),
-            (3, "Sibling", 2),
-            (4, "Next", 1),
-            (5, "Hidden", 2),
-        ]);
-        let (bytes, count) = add_outline(&pdf(&mut fixture.document), TOKEN, &headings).unwrap();
+        let headings = vec![
+            heading(0, "中文标题 📚", 1, 0),
+            heading(1, "Repeated", 3, 0),
+            heading(2, "Repeated", 4, 1),
+            heading(3, "Sibling", 2, 1),
+            heading(4, "Next", 1, 2),
+        ];
+        let (bytes, count) = finish_pdf(
+            &pdf(&mut fixture.document),
+            3,
+            &headings,
+            PaperSize::Letter,
+            false,
+            true,
+            None,
+        )
+        .unwrap();
         assert_eq!(count, 5);
         let document = Document::load_mem(&bytes).unwrap();
-        let catalog = document.catalog().unwrap();
-        assert_eq!(
-            catalog.get(b"PageMode").unwrap().as_name().unwrap(),
-            b"UseOutlines"
-        );
-        let root_id = reference(catalog, b"Outlines");
-        let root = dictionary(&document, root_id);
+        let root_id = reference(document.catalog().unwrap(), b"Outlines");
+        let root = dict(&document, root_id);
         assert_eq!(root.get(b"Count").unwrap().as_i64().unwrap(), 5);
         let first_id = reference(root, b"First");
-        let first = dictionary(&document, first_id);
+        let first = dict(&document, first_id);
         assert_eq!(title(first), "中文标题 📚");
         assert_eq!(reference(first, b"Parent"), root_id);
         assert_eq!(first.get(b"Count").unwrap().as_i64().unwrap(), 3);
         let destination = first.get(b"Dest").unwrap().as_array().unwrap();
         assert_eq!(destination[0].as_reference().unwrap(), fixture.pages[0]);
         assert_eq!(destination[1].as_name().unwrap(), b"XYZ");
-        assert_eq!(destination[2].as_float().unwrap(), 40.0);
-        assert_eq!(destination[3].as_float().unwrap(), 750.0);
-        assert!(matches!(destination[4], Object::Null));
+        assert!((destination[2].as_float().unwrap() - 71.2).abs() < 0.001);
+        assert!((destination[3].as_float().unwrap() - 614.0).abs() < 0.001);
         let child_id = reference(first, b"First");
-        let child = dictionary(&document, child_id);
+        let child = dict(&document, child_id);
         assert_eq!(title(child), "Repeated");
         assert_eq!(reference(child, b"Parent"), first_id);
-        assert_eq!(child.get(b"Count").unwrap().as_i64().unwrap(), 1);
-        let grandchild = dictionary(&document, reference(child, b"First"));
+        let grandchild = dict(&document, reference(child, b"First"));
         assert_eq!(title(grandchild), "Repeated");
         assert_eq!(reference(grandchild, b"Parent"), child_id);
-        let sibling = dictionary(&document, reference(child, b"Next"));
+        assert_eq!(
+            grandchild.get(b"Dest").unwrap().as_array().unwrap()[0]
+                .as_reference()
+                .unwrap(),
+            fixture.pages[1]
+        );
+        let sibling = dict(&document, reference(child, b"Next"));
         assert_eq!(title(sibling), "Sibling");
         assert_eq!(reference(sibling, b"Prev"), child_id);
-        assert_eq!(reference(first, b"Last"), reference(child, b"Next"));
-        let next = dictionary(&document, reference(first, b"Next"));
-        assert_eq!(title(next), "Next");
-        assert_eq!(reference(next, b"Prev"), first_id);
-        for &page in &fixture.pages {
-            assert!(document.get_page_annotations(page).unwrap().is_empty());
-        }
+        assert_eq!(title(dict(&document, reference(first, b"Next"))), "Next");
     }
 
     #[test]
-    fn preserves_original_links_page_content_metadata_and_shared_objects() {
+    fn preserves_printed_content_links_metadata_and_removes_outline_when_disabled() {
         let mut fixture = fixture();
-        append_link(&mut fixture, 1, "7", [50.0, 699.0, 51.0, 700.0], true);
-        let original_link = fixture.document.add_object(link(
-            "https://example.com/original",
-            [30.0, 30.0, 90.0, 40.0],
-        ));
-        append_annotation(&mut fixture, 0, original_link.into());
-        append_annotation(&mut fixture, 1, original_link.into());
-        // A different job's URI is an ordinary link and must survive unchanged.
-        let foreign = link(
-            "https://markflowy.invalid/pdf-outline/other-job/1",
-            [20.0, 20.0, 21.0, 21.0],
-        );
-        append_annotation(&mut fixture, 1, foreign.clone());
-        let page = fixture
+        let old_outline = fixture
             .document
-            .get_object_mut(fixture.pages[1])
-            .unwrap()
-            .as_dict_mut()
-            .unwrap();
-        let annotations = page.remove(b"Annots").unwrap();
-        let array_id = fixture.document.add_object(annotations);
+            .add_object(dictionary! { "Type"=>"Outlines" });
         fixture
             .document
-            .get_object_mut(fixture.pages[1])
+            .catalog_mut()
             .unwrap()
-            .as_dict_mut()
-            .unwrap()
-            .set("Annots", array_id);
-        let original_content = fixture
+            .set("Outlines", old_outline);
+        fixture
             .document
-            .get_object(fixture.content)
+            .catalog_mut()
             .unwrap()
-            .as_stream()
-            .unwrap()
-            .content
-            .clone();
-        let (bytes, count) = add_outline(
+            .set("PageMode", "UseOutlines");
+        let (bytes, count) = finish_pdf(
             &pdf(&mut fixture.document),
-            TOKEN,
-            &headings(&[(7, "Heading", 1)]),
+            3,
+            &[],
+            PaperSize::Letter,
+            false,
+            false,
+            None,
         )
         .unwrap();
-        assert_eq!(count, 1);
+        assert_eq!(count, 0);
         let document = Document::load_mem(&bytes).unwrap();
+        assert!(document.catalog().unwrap().get(b"Outlines").is_err());
+        assert!(document.catalog().unwrap().get(b"PageMode").is_err());
         assert_eq!(
-            document.get_pages().values().copied().collect::<Vec<_>>(),
+            document.get_pages().into_values().collect::<Vec<_>>(),
             fixture.pages
         );
         assert_eq!(
@@ -738,176 +619,482 @@ mod tests {
                 .as_stream()
                 .unwrap()
                 .content,
-            original_content
+            b"q 1 0 0 1 0 0 cm Q\n"
         );
+        assert_eq!(reference(&document.trailer, b"Info"), fixture.info);
         assert_eq!(
-            document
-                .get_object(fixture.metadata)
-                .unwrap()
-                .as_stream()
-                .unwrap()
-                .content,
-            b"<metadata>original metadata</metadata>"
-        );
-        assert_eq!(
-            dictionary(&document, fixture.info)
+            dict(&document, fixture.info)
                 .get(b"Title")
                 .unwrap()
                 .as_str()
                 .unwrap(),
-            b"Original document"
+            b"Original title"
         );
-        assert_eq!(
-            reference(document.catalog().unwrap(), b"Metadata"),
-            fixture.metadata
-        );
-        assert_eq!(reference(&document.trailer, b"Info"), fixture.info);
-        assert_eq!(
-            document
-                .get_page_annotations(fixture.pages[0])
-                .unwrap()
-                .len(),
-            1
-        );
-        let remaining = dictionary(&document, fixture.pages[1])
-            .get(b"Annots")
-            .unwrap()
-            .as_array()
-            .unwrap();
-        assert_eq!(remaining.len(), 2);
-        assert_eq!(remaining[0].as_reference().unwrap(), original_link);
-        assert_eq!(remaining[1], foreign);
-        assert!(!document.objects.contains_key(&array_id));
-        assert!(!bytes
-            .windows(TOKEN.len())
-            .any(|window| window == TOKEN.as_bytes()));
-    }
-
-    #[test]
-    fn removes_outline_and_markers_when_no_heading_was_printed() {
-        for headings in [Vec::new(), headings(&[(0, "Hidden by print CSS", 1)])] {
-            let mut fixture = fixture();
-            let old_outline = fixture
-                .document
-                .add_object(dictionary! { "Type" => "Outlines" });
-            let catalog = fixture.document.catalog_mut().unwrap();
-            catalog.set("Outlines", old_outline);
-            catalog.set("PageMode", "UseOutlines");
-            let (bytes, count) =
-                add_outline(&pdf(&mut fixture.document), TOKEN, &headings).unwrap();
-            assert_eq!(count, 0);
-            let document = Document::load_mem(&bytes).unwrap();
-            assert!(document.catalog().unwrap().get(b"Outlines").is_err());
-            assert!(document.catalog().unwrap().get(b"PageMode").is_err());
-            assert!(document
-                .get_page_annotations(fixture.pages[0])
-                .unwrap()
-                .is_empty());
+        for page in fixture.pages {
+            assert_eq!(document.get_page_annotations(page).unwrap().len(), 1);
         }
     }
 
     #[test]
-    fn requires_calibration_even_without_headings() {
+    fn rejects_repagination_even_when_outline_is_disabled() {
         let mut fixture = fixture();
+        let bytes = pdf(&mut fixture.document);
+        for include_outline in [false, true] {
+            for count in [0, 1, 2, 4, MAX_PAGES + 1] {
+                assert!(finish_pdf(
+                    &bytes,
+                    count,
+                    &[],
+                    PaperSize::Letter,
+                    false,
+                    include_outline,
+                    None
+                )
+                .is_err());
+            }
+        }
+        assert!(finish_pdf(&bytes, 3, &[], PaperSize::A4, false, true, None).is_err());
+        assert!(finish_pdf(&bytes, 3, &[], PaperSize::Letter, true, true, None).is_err());
+        assert!(finish_pdf(b"not a PDF", 3, &[], PaperSize::Letter, false, true, None).is_err());
+    }
+
+    #[test]
+    fn rejects_invalid_duplicate_and_out_of_page_heading_inputs() {
+        let mut fixture = fixture();
+        let bytes = pdf(&mut fixture.document);
+        for bad in [
+            heading(0, "", 1, 0),
+            heading(0, "Invalid level", 7, 0),
+            heading(0, "Invalid page", 1, 3),
+            heading(MAX_HEADINGS, "Invalid identifier", 1, 0),
+            heading(0, &"x".repeat(MAX_TITLE_BYTES + 1), 1, 0),
+        ] {
+            assert!(finish_pdf(&bytes, 3, &[bad], PaperSize::Letter, false, true, None).is_err());
+        }
+        for value in [-0.01, 1.01, f32::INFINITY, f32::NAN] {
+            for coordinate in ["left", "top"] {
+                let mut bad = heading(0, "Invalid coordinate", 1, 0);
+                if coordinate == "left" {
+                    bad.left = value;
+                } else {
+                    bad.top = value;
+                }
+                assert!(
+                    finish_pdf(&bytes, 3, &[bad], PaperSize::Letter, false, true, None).is_err()
+                );
+            }
+        }
+        let duplicate = vec![heading(0, "One", 1, 0), heading(0, "Two", 2, 1)];
+        assert!(finish_pdf(&bytes, 3, &duplicate, PaperSize::Letter, false, true, None).is_err());
+        assert!(finish_pdf(
+            &bytes,
+            3,
+            &[heading(0, "Outline disabled", 1, 0)],
+            PaperSize::Letter,
+            false,
+            false,
+            None
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn converts_rotated_landscape_page_positions_to_pdf_coordinates() {
+        let mut fixture = fixture();
+        for &page in &fixture.pages {
+            fixture
+                .document
+                .get_object_mut(page)
+                .unwrap()
+                .as_dict_mut()
+                .unwrap()
+                .set("Rotate", 90);
+        }
+        let (bytes, count) = finish_pdf(
+            &pdf(&mut fixture.document),
+            3,
+            &[heading(0, "Landscape", 1, 0)],
+            PaperSize::Letter,
+            true,
+            true,
+            None,
+        )
+        .unwrap();
+        assert_eq!(count, 1);
+        let document = Document::load_mem(&bytes).unwrap();
+        let outline = dict(
+            &document,
+            reference(document.catalog().unwrap(), b"Outlines"),
+        );
+        let first = dict(&document, reference(outline, b"First"));
+        let destination = first.get(b"Dest").unwrap().as_array().unwrap();
+        assert!((destination[2].as_float().unwrap() - 163.0).abs() < 0.001);
+        assert!((destination[3].as_float().unwrap() - 99.2).abs() < 0.001);
+    }
+
+    #[test]
+    fn rejects_cropped_or_malformed_physical_page_geometry() {
+        for (key, value) in [
+            (
+                "CropBox",
+                Object::Array(vec![10.into(), 20.into(), 500.into(), 700.into()]),
+            ),
+            ("Rotate", Object::Integer(45)),
+            ("UserUnit", Object::Real(f32::NAN)),
+            (
+                "MediaBox",
+                Object::Array(vec![0.into(), 0.into(), 0.into(), 700.into()]),
+            ),
+        ] {
+            let mut fixture = fixture();
+            fixture
+                .document
+                .get_object_mut(fixture.pages[0])
+                .unwrap()
+                .as_dict_mut()
+                .unwrap()
+                .set(key, value);
+            assert!(finish_pdf(
+                &pdf(&mut fixture.document),
+                3,
+                &[],
+                PaperSize::Letter,
+                false,
+                false,
+                None
+            )
+            .is_err());
+        }
+    }
+    #[test]
+    fn restores_complete_unicode_document_title_after_short_native_print_title() {
+        let mut fixture = fixture();
+        let full_title = "中文📚".repeat(600);
+        let (bytes, count) = finish_pdf(
+            &pdf(&mut fixture.document),
+            3,
+            &[],
+            PaperSize::Letter,
+            false,
+            false,
+            Some(&full_title),
+        )
+        .unwrap();
+        assert_eq!(count, 0);
+        let document = Document::load_mem(&bytes).unwrap();
+        let info = reference(&document.trailer, b"Info");
+        assert_eq!(title(dict(&document, info)), full_title);
+    }
+    fn internal_link(
+        page_index: usize,
+        target_page_index: usize,
+    ) -> super::super::links::InternalLink {
+        super::super::links::InternalLink {
+            page_index,
+            left: 0.1,
+            top: 0.2,
+            right: 0.3,
+            bottom: 0.24,
+            target_page_index,
+            target_left: 0.4,
+            target_top: 0.15,
+        }
+    }
+
+    fn append_annotation(fixture: &mut Fixture, page_index: usize, annotation: Object) -> ObjectId {
+        let id = fixture.document.add_object(annotation);
+        fixture
+            .document
+            .get_object_mut(fixture.pages[page_index])
+            .unwrap()
+            .as_dict_mut()
+            .unwrap()
+            .get_mut(b"Annots")
+            .unwrap()
+            .as_array_mut()
+            .unwrap()
+            .push(Object::Reference(id));
+        id
+    }
+
+    fn uri_annotation(uri: &str, rect: [f32; 4]) -> Object {
+        dictionary! { "Type"=>"Annot", "Subtype"=>"Link", "Rect"=>rect.into_iter().map(Object::Real).collect::<Vec<_>>(),
+            "A"=>dictionary! { "S"=>"URI", "URI"=>Object::string_literal(uri) } }.into()
+    }
+
+    fn finish_links(
+        fixture: &mut Fixture,
+        links: &[super::super::links::InternalLink],
+        outline: bool,
+        landscape: bool,
+    ) -> Document {
+        let headings = if outline {
+            vec![heading(0, "Heading", 1, 0)]
+        } else {
+            Vec::new()
+        };
+        let (bytes, count) = super::finish_pdf(
+            &pdf(&mut fixture.document),
+            Navigation {
+                page_count: 3,
+                headings: &headings,
+                links,
+                document_url: DOCUMENT_URL,
+            },
+            PaperSize::Letter,
+            landscape,
+            outline,
+            None,
+        )
+        .unwrap();
+        assert_eq!(count, usize::from(outline));
+        Document::load_mem(&bytes).unwrap()
+    }
+
+    #[test]
+    fn creates_same_and_cross_page_multiline_internal_links_without_native_annotations_or_outline()
+    {
+        let mut fixture = fixture();
+        for &page in &fixture.pages {
+            fixture
+                .document
+                .get_object_mut(page)
+                .unwrap()
+                .as_dict_mut()
+                .unwrap()
+                .remove(b"Annots");
+        }
+        let mut lines = vec![
+            internal_link(0, 2),
+            internal_link(0, 2),
+            internal_link(0, 0),
+            internal_link(2, 0),
+        ];
+        lines[1].top = 0.25;
+        lines[1].bottom = 0.29;
+        lines[2].left = 0.6;
+        lines[2].right = 0.8;
+        lines[3].target_left = 0.0;
+        lines[3].target_top = 0.0; // Empty named anchors need only a target point.
+        let document = finish_links(&mut fixture, &lines, false, false);
+        assert!(document.catalog().unwrap().get(b"Outlines").is_err());
+        let annotations = document.get_page_annotations(fixture.pages[0]).unwrap();
+        assert_eq!(annotations.len(), 3);
+        let first = annotations[0];
+        let rect = first.get(b"Rect").unwrap().as_array().unwrap();
+        assert!((rect[0].as_float().unwrap() - 71.2).abs() < 0.001);
+        assert!((rect[1].as_float().unwrap() - 621.92).abs() < 0.001);
+        let destination = first.get(b"Dest").unwrap().as_array().unwrap();
+        assert_eq!(destination[0].as_reference().unwrap(), fixture.pages[2]);
+        assert_eq!(destination[1].as_name().unwrap(), b"XYZ");
+        assert!((destination[2].as_float().unwrap() - 254.8).abs() < 0.001);
+        assert!((destination[3].as_float().unwrap() - 693.2).abs() < 0.001);
+        assert_eq!(
+            document
+                .get_page_annotations(fixture.pages[2])
+                .unwrap()
+                .len(),
+            1
+        );
+        let backlink = document.get_page_annotations(fixture.pages[2]).unwrap()[0]
+            .get(b"Dest")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(backlink[0].as_reference().unwrap(), fixture.pages[0]);
+        assert_eq!(backlink[2].as_float().unwrap(), 10.0);
+        assert_eq!(backlink[3].as_float().unwrap(), 812.0);
+    }
+
+    #[test]
+    fn removes_only_private_document_uris_and_matching_native_goto_links() {
+        let mut fixture = fixture();
+        let target_page = fixture.pages[1];
+        let link = internal_link(0, 2);
+        let geometry = PageGeometry::read(
+            &fixture.document,
+            fixture.pages[0],
+            PaperSize::Letter,
+            false,
+        )
+        .unwrap();
+        let rect = geometry.rectangle(link.left, link.top, link.right, link.bottom);
+        for uri in [
+            format!("{DOCUMENT_URL}#%E4%B8%AD%E6%96%87"),
+            format!("{DOCUMENT_URL}#missing"),
+            DOCUMENT_URL.into(),
+            "#中文".into(),
+            "#".into(),
+        ] {
+            append_annotation(&mut fixture, 0, uri_annotation(&uri, rect));
+        }
+        let external_file = append_annotation(
+            &mut fixture,
+            0,
+            uri_annotation("file:///private/other-document.html#中文", rect),
+        );
+        let query = append_annotation(
+            &mut fixture,
+            0,
+            uri_annotation(&format!("{DOCUMENT_URL}?external=1#section"), rect),
+        );
+        let remote = append_annotation(
+            &mut fixture,
+            0,
+            uri_annotation("https://example.com/#中文", rect),
+        );
+        let remote_file=append_annotation(&mut fixture,0,dictionary! { "Type"=>"Annot","Subtype"=>"Link","Rect"=>rect.into_iter().map(Object::Real).collect::<Vec<_>>(),
+            "A"=>dictionary! { "S"=>"GoToR", "F"=>Object::string_literal("other.pdf"),"D"=>0 } }.into());
+        let note=append_annotation(&mut fixture,0,dictionary! { "Type"=>"Annot","Subtype"=>"Text","Rect"=>rect.into_iter().map(Object::Real).collect::<Vec<_>>(), "Contents"=>Object::string_literal("Preserved note") }.into());
+        let matching=append_annotation(&mut fixture,0,dictionary! { "Type"=>"Annot","Subtype"=>"Link","Rect"=>rect.into_iter().map(Object::Real).collect::<Vec<_>>(),
+            "Dest"=>vec![Object::Reference(target_page),Object::Name(b"Fit".to_vec())] }.into());
+        let unrelated=append_annotation(&mut fixture,0,dictionary! { "Type"=>"Annot","Subtype"=>"Link","Rect"=>vec![300.into(),300.into(),400.into(),400.into()],
+            "A"=>dictionary! { "S"=>"GoTo","D"=>vec![Object::Reference(target_page),Object::Name(b"Fit".to_vec())] } }.into());
+        let document = finish_links(&mut fixture, &[link], true, false);
+        let remaining = dict(&document, fixture.pages[0])
+            .get(b"Annots")
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|value| value.as_reference().unwrap())
+            .collect::<Vec<_>>();
+        for id in [external_file, query, remote, remote_file, note, unrelated] {
+            assert!(remaining.contains(&id));
+        }
+        assert!(!remaining.contains(&matching));
+        assert!(!document.objects.contains_key(&matching));
+        assert_eq!(remaining.len(), 8); // Original external link + six preserved + one authoritative internal link.
+        assert_eq!(
+            document
+                .get_page_annotations(fixture.pages[1])
+                .unwrap()
+                .len(),
+            1
+        );
+        assert!(document.catalog().unwrap().get(b"Outlines").is_ok());
+    }
+
+    #[test]
+    fn replaces_indirect_uri_annotations_and_multiline_goto_without_leaving_private_uri_objects() {
+        let mut fixture = fixture();
+        let target_page = fixture.pages[1];
+        let mut lines = vec![internal_link(0, 2), internal_link(0, 2)];
+        lines[1].top = 0.25;
+        lines[1].bottom = 0.29;
+        let uri = fixture
+            .document
+            .add_object(Object::string_literal(format!("{DOCUMENT_URL}#跨页表格")));
+        let action = fixture
+            .document
+            .add_object(dictionary! { "S"=>"URI","URI"=>uri });
+        append_annotation(&mut fixture,0,dictionary! { "Type"=>"Annot","Subtype"=>"Link","A"=>action,"Rect"=>vec![20.into(),20.into(),30.into(),30.into()] }.into());
+        let geometry = PageGeometry::read(
+            &fixture.document,
+            fixture.pages[0],
+            PaperSize::Letter,
+            false,
+        )
+        .unwrap();
+        let r0 = geometry.rectangle(lines[0].left, lines[0].top, lines[0].right, lines[0].bottom);
+        let r1 = geometry.rectangle(lines[1].left, lines[1].top, lines[1].right, lines[1].bottom);
+        append_annotation(&mut fixture,0,dictionary! { "Type"=>"Annot","Subtype"=>"Link","Rect"=>vec![r0[0].into(),r1[1].into(),r0[2].into(),r0[3].into()],
+            "A"=>dictionary! { "S"=>"GoTo","D"=>vec![Object::Reference(target_page),Object::Name(b"Fit".to_vec())] } }.into());
+        let annotations = fixture
+            .document
+            .get_object_mut(fixture.pages[0])
+            .unwrap()
+            .as_dict_mut()
+            .unwrap()
+            .remove(b"Annots")
+            .unwrap();
+        let indirect = fixture.document.add_object(annotations);
         fixture
             .document
             .get_object_mut(fixture.pages[0])
             .unwrap()
             .as_dict_mut()
             .unwrap()
-            .remove(b"Annots");
-        assert!(add_outline(&pdf(&mut fixture.document), TOKEN, &[]).is_err());
-    }
-
-    #[test]
-    fn rejects_unknown_malformed_or_duplicate_heading_identifiers() {
-        for suffix in ["1", "00", "-1", "0/extra", "", "not-a-number"] {
-            let mut fixture = fixture();
-            append_link(&mut fixture, 0, suffix, [20.0, 20.0, 21.0, 21.0], false);
-            assert!(
-                add_outline(
-                    &pdf(&mut fixture.document),
-                    TOKEN,
-                    &headings(&[(0, "Heading", 1)])
-                )
-                .is_err(),
-                "{suffix}"
-            );
+            .set("Annots", indirect);
+        let document = finish_links(&mut fixture, &lines, false, false);
+        assert_eq!(
+            document
+                .get_page_annotations(fixture.pages[0])
+                .unwrap()
+                .len(),
+            3
+        );
+        for id in [uri, action, indirect] {
+            assert!(!document.objects.contains_key(&id));
         }
-        let mut fixture = fixture();
-        assert!(add_outline(
-            &pdf(&mut fixture.document),
-            TOKEN,
-            &headings(&[(0, "One", 1), (0, "Two", 2)])
-        )
-        .is_err());
+        let mut document = document;
+        let bytes = pdf(&mut document);
+        assert!(!bytes
+            .windows(DOCUMENT_URL.len())
+            .any(|window| window == DOCUMENT_URL.as_bytes()));
     }
 
     #[test]
-    fn rejects_missing_degenerate_outside_and_nonnumeric_rectangles() {
-        let bad_rectangles = [
-            None,
-            Some(Object::Array(vec![0.into(), 0.into(), 1.into()])),
-            Some(Object::Array(vec![
-                20.into(),
-                20.into(),
-                20.into(),
-                21.into(),
-            ])),
-            Some(Object::Array(vec![
-                20.into(),
-                20.into(),
-                21.into(),
-                900.into(),
-            ])),
-            Some(Object::Array(vec![
-                20.into(),
-                Object::string_literal("NaN"),
-                21.into(),
-                22.into(),
-            ])),
-            Some(Object::Array(vec![
-                20.into(),
-                20.into(),
-                Object::Real(f32::INFINITY),
-                22.into(),
-            ])),
-        ];
-        for rect in bad_rectangles {
-            let mut fixture = fixture();
-            let mut annotation = link(
-                &format!("https://markflowy.invalid/pdf-outline/{TOKEN}/0"),
-                [20.0, 20.0, 21.0, 21.0],
-            );
-            let dictionary = annotation.as_dict_mut().unwrap();
-            dictionary.remove(b"Rect");
-            if let Some(rect) = rect {
-                dictionary.set("Rect", rect);
+    fn internal_link_rectangles_and_targets_respect_rotated_page_coordinates() {
+        let mut fixture = fixture();
+        for &page in &fixture.pages {
+            fixture
+                .document
+                .get_object_mut(page)
+                .unwrap()
+                .as_dict_mut()
+                .unwrap()
+                .set("Rotate", 90);
+        }
+        let link = internal_link(0, 1);
+        let document = finish_links(&mut fixture, &[link], false, true);
+        let annotations = document.get_page_annotations(fixture.pages[0]).unwrap();
+        let annotation = annotations
+            .iter()
+            .find(|value| value.get(b"Dest").is_ok())
+            .unwrap();
+        let rect = annotation
+            .get(b"Rect")
+            .unwrap()
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_float().unwrap())
+            .collect::<Vec<_>>();
+        assert!((rect[0] - 132.4).abs() < 0.001);
+        assert!((rect[1] - 99.2).abs() < 0.001);
+        assert!((rect[2] - 156.88).abs() < 0.001);
+        assert!((rect[3] - 257.6).abs() < 0.001);
+        let target = annotation.get(b"Dest").unwrap().as_array().unwrap();
+        assert!((target[2].as_float().unwrap() - 101.8).abs() < 0.001);
+        assert!((target[3].as_float().unwrap() - 336.8).abs() < 0.001);
+    }
+
+    #[test]
+    fn validates_internal_link_counts_pages_and_all_normalized_coordinates() {
+        use super::super::links::{validate, MAX_LINK_RECTS};
+        assert!(validate(&vec![internal_link(0, 1); MAX_LINK_RECTS + 1], 3).is_err());
+        for value in [-0.1, 1.1, f32::INFINITY, f32::NAN] {
+            for field in 0..6 {
+                let mut link = internal_link(0, 1);
+                match field {
+                    0 => link.left = value,
+                    1 => link.top = value,
+                    2 => link.right = value,
+                    3 => link.bottom = value,
+                    4 => link.target_left = value,
+                    _ => link.target_top = value,
+                };
+                assert!(validate(&[link], 3).is_err());
             }
-            append_annotation(&mut fixture, 0, annotation);
-            assert!(add_outline(
-                &pdf(&mut fixture.document),
-                TOKEN,
-                &headings(&[(0, "Heading", 1)])
-            )
-            .is_err());
         }
-    }
-
-    #[test]
-    fn bounds_input_metadata_and_rejects_invalid_pdfs() {
-        let mut fixture = fixture();
-        let bytes = pdf(&mut fixture.document);
-        for token in ["", "invalid/token", "bad token"] {
-            assert!(add_outline(&bytes, token, &[]).is_err());
-        }
-        for headings in [
-            headings(&[(0, "", 1)]),
-            headings(&[(0, "Invalid level", 7)]),
-            headings(&[(0, &"x".repeat(MAX_TITLE_BYTES + 1), 1)]),
-        ] {
-            assert!(add_outline(&bytes, TOKEN, &headings).is_err());
-        }
-        assert!(add_outline(b"not a PDF", TOKEN, &[]).is_err());
+        let mut zero = internal_link(0, 1);
+        zero.right = zero.left;
+        assert!(validate(&[zero], 3).is_err());
+        let mut inverted = internal_link(0, 1);
+        inverted.bottom = 0.1;
+        assert!(validate(&[inverted], 3).is_err());
+        assert!(validate(&[internal_link(3, 0)], 3).is_err());
+        assert!(validate(&[internal_link(0, 3)], 3).is_err());
     }
 }

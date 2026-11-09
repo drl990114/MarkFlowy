@@ -71,10 +71,10 @@ pub(super) async fn print(
                         settings.SetPageWidth(width)?;
                         settings.SetPageHeight(height)?;
                         settings.SetScaleFactor(1.0)?;
-                        settings.SetMarginTop(16.0 / 25.4)?;
-                        settings.SetMarginBottom(16.0 / 25.4)?;
-                        settings.SetMarginLeft(16.0 / 25.4)?;
-                        settings.SetMarginRight(16.0 / 25.4)?;
+                        settings.SetMarginTop(0.0)?;
+                        settings.SetMarginBottom(0.0)?;
+                        settings.SetMarginLeft(0.0)?;
+                        settings.SetMarginRight(0.0)?;
                         settings.SetShouldPrintBackgrounds(true)?;
                         settings.SetShouldPrintSelectionOnly(false)?;
                         settings.SetShouldPrintHeaderAndFooter(false)

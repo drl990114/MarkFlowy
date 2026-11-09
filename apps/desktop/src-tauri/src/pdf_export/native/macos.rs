@@ -10,14 +10,17 @@ use objc2::rc::Retained;
 use objc2::runtime::ProtocolObject;
 use objc2::{define_class, msg_send, sel, AllocAnyThread, MainThreadMarker, MainThreadOnly};
 use objc2_app_kit::{
-    NSPaperOrientation, NSPrintAllPages, NSPrintHeaderAndFooter, NSPrintInfo, NSPrintJobSavingURL,
-    NSPrintOperation, NSPrintSaveJob, NSPrintSelectionOnly, NSPrintingPaginationMode, NSWindow,
+    NSPrintAllPages, NSPrintHeaderAndFooter, NSPrintInfo, NSPrintJobSavingURL, NSPrintOperation,
+    NSPrintSaveJob, NSPrintSelectionOnly, NSWindow,
 };
-use objc2_foundation::{NSNumber, NSObject, NSObjectProtocol, NSSize, NSURL};
+use objc2_foundation::{NSNumber, NSObject, NSObjectProtocol, NSURL};
 use objc2_web_kit::WKWebView;
 use tokio::sync::oneshot;
 
 use super::{PaperSize, PdfExportError};
+
+#[path = "macos_paper.rs"]
+mod paper;
 
 type PrintResult = Result<(), PdfExportError>;
 
@@ -132,21 +135,10 @@ pub(super) async fn print(
                 })?;
                 let info = NSPrintInfo::init(NSPrintInfo::alloc());
                 let (width, height) = paper.inches();
-                info.setPaperSize(NSSize::new(width * 72.0, height * 72.0));
-                info.setOrientation(if landscape {
-                    NSPaperOrientation::Landscape
-                } else {
-                    NSPaperOrientation::Portrait
-                });
-                let margin = 16.0 / 25.4 * 72.0;
-                info.setLeftMargin(margin);
-                info.setRightMargin(margin);
-                info.setTopMargin(margin);
-                info.setBottomMargin(margin);
-                info.setHorizontallyCentered(false);
-                info.setVerticallyCentered(false);
-                info.setHorizontalPagination(NSPrintingPaginationMode::Fit);
-                info.setVerticalPagination(NSPrintingPaginationMode::Automatic);
+                paper::configure(&info, width, height, landscape).map_err(|error| {
+                    PdfExportError::new("native_failed", "Could not prepare exact PDF paper.")
+                        .detail(error)
+                })?;
                 // SAFETY: These are AppKit's typed keys and values, and the
                 // dictionary receives an NSURL for its documented saving key.
                 unsafe {

@@ -46,6 +46,12 @@ export function pdfPreviewAssets(): Plugin {
   const require = createRequire(import.meta.url)
   const root = dirname(require.resolve('pdfjs-dist/package.json'))
   const files = new Map<string, string>()
+  // Serve the pinned paginator as a standalone script inside its own iframe.
+  // Reuse this asset contract in DEV and packaged Tauri, without importing the
+  // polyfill into the application's global window or Vite's dependency optimizer.
+  const paginationRoot = dirname(dirname(require.resolve('pagedjs')))
+  files.set('pagination/paged.polyfill.min.js', join(paginationRoot, 'dist/paged.polyfill.min.js'))
+  files.set('pagination/LICENSE.md', join(paginationRoot, 'LICENSE.md'))
   for (const directory of ['cmaps', 'standard_fonts', 'wasm', 'web/images']) {
     for (const entry of readdirSync(join(root, directory), { withFileTypes: true })) {
       if (!entry.isFile()) continue
@@ -70,7 +76,9 @@ export function pdfPreviewAssets(): Plugin {
           response.end()
           return
         }
-        const mime = path.endsWith('.wasm')
+        const mime = path.endsWith('.js')
+          ? 'application/javascript'
+          : path.endsWith('.wasm')
           ? 'application/wasm'
           : path.endsWith('.svg')
             ? 'image/svg+xml'

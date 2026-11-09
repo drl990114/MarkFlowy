@@ -276,7 +276,7 @@ function estimateHeadingCount(root: HTMLElement): number {
   }).length
 }
 
-/** Build an inert, self-contained snapshot for an external Chromium process. */
+/** Build the inert, self-contained snapshot shared by both PDF export methods. */
 export async function buildPdfExportDocument({
   root,
   html,

@@ -108,8 +108,7 @@ pub struct PdfExportRequest {
     include_outline: bool,
 }
 
-/// Native export uses the application's WebView runtime. Supported platforms
-/// locate headings in its paginated PDF before adding document bookmarks.
+/// Application export prints the same prepared physical page DOM on every OS.
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NativePdfExportRequest {
