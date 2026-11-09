@@ -1,0 +1,1702 @@
+{
+  "drafts": {
+    "reload_failed": "Não foi possível preservar os documentos não salvos para recarregá-los. Salve seus arquivos e tente novamente.",
+    "restore_failed": "Não foi possível restaurar os documentos não salvos. Os rascunhos em cache foram mantidos.",
+    "close_failed_description": "Tente recuperar novamente ou mantenha os rascunhos afetados para recuperá-los da próxima vez e feche os documentos.",
+    "keep_and_close": "Manter rascunho e fechar",
+    "keep_failed": "Não foi possível preservar o rascunho para fechar. O documento permaneceu aberto.",
+    "close_failed": "Não foi possível fechar a janela com segurança. Seus documentos permaneceram abertos. Tente novamente.",
+    "error_details": "Detalhes do erro",
+    "restored": "{{count}} documentos não salvos recuperados."
+  },
+  "link_editing": {
+    "label": "Edição de links",
+    "description": "Escolha o editor de links padrão. Cada link também pode ser editado como Markdown.",
+    "popover": "Janela pop-up",
+    "markdown": "Sintaxe Markdown",
+    "open_failed": "Não foi possível abrir o link ou localizar seu título."
+  },
+  "command_palette": {
+    "title": "Paleta de comandos",
+    "placeholder": "Pesquisar comandos…",
+    "empty": "Nenhum comando correspondente",
+    "recent": "Usados recentemente",
+    "hints": "↑↓ Navegar · Enter Executar · Esc Fechar",
+    "failed": "Não foi possível executar “{{command}}”.",
+    "categories": {
+      "file": "Arquivo",
+      "editor": "Editor",
+      "view": "Exibição",
+      "app": "Aplicativo"
+    },
+    "reasons": {
+      "no_document": "Abra um documento primeiro",
+      "unavailable": "Indisponível no contexto atual",
+      "preview": "Não é possível editar no modo de visualização",
+      "read_only": "Este documento é somente leitura",
+      "stale_target": "O editor original foi alterado",
+      "selection_unavailable": "A seleção original não está mais disponível",
+      "no_undo": "Nada para desfazer",
+      "no_redo": "Nada para refazer",
+      "markdown_only": "Disponível para documentos Markdown",
+      "wysiwyg_only": "Disponível somente no modo WYSIWYG",
+      "no_headings": "O documento não tem títulos",
+      "zen_mode": "Saia do Modo Zen primeiro"
+    }
+  },
+  "quick_open": {
+    "title": "Abertura rápida",
+    "placeholder": "Pesquisar arquivos por nome ou caminho…",
+    "loading": "Carregando arquivos do espaço de trabalho…",
+    "load_error": "Não foi possível carregar os arquivos do espaço de trabalho",
+    "empty": "Nenhum arquivo correspondente",
+    "no_recent": "Nenhum arquivo aberto recentemente. Digite um nome de arquivo para pesquisar no espaço de trabalho.",
+    "no_workspace": "Abra um espaço de trabalho para pesquisar os arquivos",
+    "show_more": "Mostrar mais (restam {{count}})",
+    "keyboard_hint": "↑ ↓ para navegar · Enter para abrir · Esc para fechar"
+  },
+  "app_name": "MarkFlowy",
+  "editor": {
+    "render_failed": "Não foi possível renderizar o editor"
+  },
+  "find_replace": {
+    "navigation_unsupported": "Esta versão não oferece suporte à navegação precisa pelos resultados da pesquisa. Atualize o aplicativo e tente novamente.",
+    "navigation_stale": "O resultado da pesquisa foi alterado. Pesquise novamente.",
+    "navigation_failed": "Não foi possível navegar até este resultado. Aguarde o documento carregar e tente novamente.",
+    "find": "Localizar",
+    "replace": "Substituir",
+    "replace_with": "Substituir por",
+    "replace_all": "Tudo",
+    "previous_match": "Localizar ocorrência anterior",
+    "next_match": "Localizar próxima ocorrência",
+    "match_case": "Diferenciar maiúsculas de minúsculas",
+    "close": "Fechar localizar e substituir",
+    "result_count": "{{current}} de {{total}}"
+  },
+  "startup": {
+    "opening_workspace": "Abrindo espaço de trabalho…",
+    "workspace_open_failed": "Não foi possível abrir o espaço de trabalho"
+  },
+  "common": {
+    "none": "Nenhum",
+    "name": "nome",
+    "ok": "ok",
+    "confirm": "confirmar",
+    "cancel": "cancelar",
+    "close": "fechar",
+    "copy": "copiar",
+    "error": "erro",
+    "delete": "excluir",
+    "file": "arquivo",
+    "folder": "pasta",
+    "fetching": "Carregando...",
+    "submit": "enviar",
+    "addHeader": "Adicionar cabeçalho",
+    "addPattern": "Adicionar padrão",
+    "key": "Chave",
+    "value": "Valor",
+    "success": "Sucesso",
+    "import": "Importar",
+    "menu": "Menu",
+    "or": "ou",
+    "retry": "Tentar novamente"
+  },
+  "dialog": {
+    "remember_choice": "Lembrar esta escolha"
+  },
+  "external_file_change": {
+    "conflict": "Alterações externas detectadas",
+    "conflict_description": "O salvamento automático está pausado. Atualizar carrega a versão do disco; Sobrescrever a substitui pelo conteúdo atual.",
+    "update": "Atualizar",
+    "overwrite": "Sobrescrever",
+    "reloaded": "Alterações externas carregadas",
+    "overwritten": "A versão do disco foi sobrescrita",
+    "read_failed": "Não foi possível ler a versão mais recente no disco. Tente novamente.",
+    "resolve_failed": "Não foi possível resolver a alteração do arquivo. O conteúdo atual foi mantido."
+  },
+  "view": {
+    "label": "Exibição",
+    "theme": {
+      "label": "Tema"
+    },
+    "wysiwyg": "WYSIWYG",
+    "source_code": "Código-fonte",
+    "preview": "Visualização"
+  },
+  "toolbar": {
+    "undo": "Desfazer",
+    "redo": "Refazer",
+    "h1": "Título 1",
+    "h2": "Título 2",
+    "h3": "Título 3",
+    "bold": "Negrito",
+    "italic": "Itálico",
+    "code": "Código em linha",
+    "strike": "Tachado",
+    "link": "Link",
+    "image": "Imagem",
+    "quote": "Citação",
+    "bulletList": "Lista com marcadores",
+    "orderedList": "Lista numerada",
+    "taskList": "Lista de tarefas",
+    "insert": "Inserir",
+    "codeBlock": "Bloco de código",
+    "mathBlock": "Bloco matemático",
+    "headingNumbering": "Alternar numeração dos títulos do documento"
+  },
+  "image_insert": {
+    "title": "Inserir imagem",
+    "description": "Digite o URL de uma imagem ou escolha uma imagem do seu computador.",
+    "url_label": "URL da imagem",
+    "url_placeholder": "https://example.com/image.png",
+    "insert_url": "Inserir",
+    "invalid_url": "Digite um URL de imagem HTTP ou HTTPS válido.",
+    "local_filter": "Imagens",
+    "select_local": "Escolher imagem local",
+    "selecting_local": "Escolhendo...",
+    "local_error": "Não foi possível abrir ou ler a imagem selecionada. Tente novamente.",
+    "local_behavior_hint": "As imagens locais seguem a configuração Configurações > Imagem > Comportamento de inserção de imagens locais."
+  },
+  "image_preview": {
+    "toolbar": "Controles de visualização da imagem",
+    "zoom_out": "Diminuir zoom",
+    "zoom_in": "Aumentar zoom",
+    "actual_size": "Tamanho real",
+    "fit_to_window": "Ajustar à janela"
+  },
+  "action": {
+    "bookmark": "favoritar",
+    "bookmarked": "favoritado",
+    "done": "concluído",
+    "edit": "editar",
+    "more": "mais",
+    "save": "salvar",
+    "unsave": "remover dos favoritos",
+    "create_file": "Criar um novo arquivo",
+    "save_and_close": "Salvar e fechar",
+    "save_and_continue": "Salvar e continuar",
+    "unsave_and_close": "Fechar diretamente",
+    "continue_without_save": "Continuar sem salvar",
+    "convert_text": "Conversão de caracteres simplificados",
+    "convert_simplified_to_traditional_tw": "Simplificado → Tradicional (Taiwan)",
+    "convert_simplified_to_traditional_hk": "Simplificado → Tradicional (Hong Kong)",
+    "convert_traditional_to_simplified": "Tradicional → Simplificado"
+  },
+  "confirm": {
+    "move": {
+      "description": "Tem certeza de que deseja mover \"{{name}}\"?"
+    },
+    "replace": {
+      "description": "Já existe um arquivo ou uma pasta com o nome \"{{name}}\" na pasta de destino. Deseja substituí-lo?"
+    },
+    "delete": {
+      "description": "Tem certeza de que deseja excluir \"{{name}}\" {{something}}?"
+    },
+    "trash": {
+      "description": "Tem certeza de que deseja mover \"{{name}}\" para a lixeira?"
+    },
+    "edit_filename_cancel": {
+      "description": "Deseja salvar o conteúdo renomeado?"
+    },
+    "close": {
+      "title": "Deseja salvar as alterações?",
+      "description": "Há arquivos não salvos. Tem certeza de que deseja sair?"
+    },
+    "continue": {
+      "description": "Há alterações não salvas. Deseja salvá-las antes de continuar?"
+    }
+  },
+  "error": {
+    "unsupported_file_format": "Formato de arquivo não compatível"
+  },
+  "sidebar": {
+    "move_left": "Mover para a esquerda",
+    "move_right": "Mover para a direita",
+    "panel_actions": "Ações do painel",
+    "reset_layout": "Restaurar layout padrão da barra lateral",
+    "drag_hint": "Arraste para mover · Clique com o botão direito para ver opções",
+    "move_explorer_command": "Arquivos: mover para o outro lado",
+    "move_search_command": "Pesquisa: mover para o outro lado",
+    "move_bookmarks_command": "Favoritos: mover para o outro lado",
+    "move_toc_command": "Estrutura: mover para o outro lado",
+    "move_ai_command": "IA: mover para o outro lado",
+    "outline_collapse": "Recolher",
+    "outline_expand": "Expandir",
+    "outline_collapse_all": "Recolher todos os títulos",
+    "outline_expand_all": "Expandir todos os títulos",
+    "explorer": "explorador",
+    "search": "pesquisa",
+    "bookmarks": "Marcadores",
+    "leftDock": "Painel esquerdo",
+    "rightDock": "Painel direito",
+    "table_of_contents": "Sumário",
+    "heading_numbering": "Alternar numeração dos títulos do documento",
+    "heading_numbering_add": "Adicionar numeração aos títulos do documento",
+    "heading_numbering_remove": "Remover numeração dos títulos do documento",
+    "heading_numbering_description": "A numeração é gravada no Markdown.",
+    "no_heading_lines": "Nenhuma linha de título encontrada"
+  },
+  "bookmarks": {
+    "path": "Caminho",
+    "name": "Nome",
+    "tags": "Tags",
+    "tag_placeholder": "Adicionar tag",
+    "create_tag": "Criar",
+    "remove_tag": "Remover {{tag}}",
+    "no_tags_found": "Nenhuma etiqueta encontrada.",
+    "empty": "Nenhum marcador",
+    "loading": "Carregando marcadores...",
+    "loadError": "Não foi possível carregar os marcadores",
+    "retry": "Tentar novamente",
+    "viewByTags": "Agrupar por Tags",
+    "viewAsList": "Exibir como lista",
+    "removed": "“{{title}}” removido",
+    "undo": "Desfazer",
+    "removeFailed": "Não foi possível excluir o marcador",
+    "saving": "Salvando…",
+    "saveError": "Não foi possível salvar o marcador.",
+    "sort": "Classificar marcadores",
+    "sortNameAsc": "Nome: A a Z",
+    "sortNameDesc": "Nome: Z a A",
+    "sortNewest": "Mais recentes primeiro",
+    "sortOldest": "Mais antigos primeiro",
+    "untagged": "Sem etiqueta",
+    "saveConflict": "Os marcadores foram alterados em outra janela. Suas edições continuam aqui. Recarregue antes de salvar novamente.",
+    "noLongerExists": "Este marcador foi excluído em outra janela. Suas edições continuam aqui.",
+    "reloadBookmark": "Recarregar e substituir as edições atuais",
+    "reloadLibrary": "Recarregar os marcadores mais recentes",
+    "legacyCleanupWarning": "Seus marcadores foram atualizados, mas não foi possível remover o arquivo de marcadores anterior. Tente novamente para concluir a limpeza.",
+    "legacyConflictWarning": "Um arquivo de marcadores anterior não foi migrado ou foi alterado. Ele foi mantido, e seus marcadores atuais continuam disponíveis."
+  },
+  "welcome": {
+    "title": "Boas-vindas de volta ao {{appName}}",
+    "subtitle": "Um espaço de trabalho focado em Markdown",
+    "getStarted": "Começar",
+    "recentWorkspaces": "Espaços de trabalho recentes",
+    "emptyEditorDescription": "Escolha um arquivo na barra lateral ou comece um novo documento.",
+    "openWorkspaceError": "Não foi possível abrir este espaço de trabalho"
+  },
+  "statusBar": {
+    "label": "Barra de status",
+    "words": "palavras",
+    "chars": "caracteres",
+    "pureChars": "caracteres sem espaços",
+    "pureCharsOption": "caracteres sem espaços (sem espaços ou quebras de linha)",
+    "displaySettings": "Configurações de exibição"
+  },
+  "titleBar": {
+    "label": "Barra de título da janela",
+    "minimize": "Minimizar janela",
+    "maximize": "Maximizar janela",
+    "restore": "Restaurar janela"
+  },
+  "zenMode": {
+    "openFileFirst": "Abra um documento para entrar no Modo Zen",
+    "exitHint": "Modo Zen · Pressione {{shortcut}} ou Escape duas vezes para sair",
+    "shortcutFallback": "Cmd/Ctrl+Shift+F"
+  },
+  "explorer": {
+    "collapse_folders": "Recolher pastas",
+    "refresh_folder_data": "Atualizar dados da pasta",
+    "focus_active_file": "Focar no arquivo atual",
+    "sort": "Classificar arquivos",
+    "sort_name_asc": "Nome: A a Z",
+    "sort_name_desc": "Nome: Z a A"
+  },
+  "file": {
+    "save_dialog_title": "Salvar arquivo",
+    "read_failed": "Falha ao ler o conteúdo do arquivo",
+    "binary_not_openable": "Arquivos binários não podem ser abertos como texto",
+    "untitled": "sem título",
+    "not_found": "Arquivo não encontrado",
+    "openDir": "Abrir pasta",
+    "openFolderInNewWindow": "Abrir pasta em nova janela",
+    "closeFolder": "Fechar pasta",
+    "closeDocument": "Fechar documento",
+    "renameErrors": {
+      "empty": "Digite um nome de arquivo.",
+      "invalid": "Use um nome de arquivo válido, sem separadores de caminho ou caracteres reservados.",
+      "exists": "Já existe um arquivo com esse nome."
+    },
+    "openFile": "Abrir um arquivo",
+    "recentDir": "Pastas abertas recentemente",
+    "emptyOpened": "Nenhum arquivo aberto",
+    "emptyFolder": "Pasta vazia",
+    "unsupportedFileType": "Tipo de arquivo não compatível",
+    "unsupportedFileTypeDesc": "Atualmente, não há suporte para visualizar ou editar este formato de arquivo.",
+    "unsupportedFileTypeLink": "Solicitar suporte no GitHub",
+    "lastModified": "Última atualização",
+    "size": "Tamanho do arquivo",
+    "info": "Informações do arquivo",
+    "newTab": "Nova aba",
+    "path": "Caminho do arquivo",
+    "clearRecent": "Limpar recentes",
+    "openFolderModal": {
+      "title": "Como abrir uma pasta?",
+      "currentWindow": "Janela atual",
+      "newWindow": "Nova janela"
+    }
+  },
+  "about": {
+    "description": "Editor Markdown multiplataforma com IA.",
+    "powered_by_tauri": "Desenvolvido com Tauri {{version}}",
+    "label": "Sobre",
+    "version": "Versão",
+    "newVersion": "Nova versão",
+    "install": "Instalar",
+    "author": "Autor",
+    "release": "Lançamento",
+    "website": "Site",
+    "feedback": "comentários",
+    "issues": "Problemas",
+    "license": "Licença",
+    "current": "versão atual"
+  },
+  "contextmenu": {
+    "label": "Menu de contexto",
+    "explorer": {
+      "new": "Novo",
+      "add_file": "Novo arquivo",
+      "add_folder": "Nova pasta",
+      "rename": "Renomear",
+      "delete_file": "Excluir arquivo",
+      "delete_folder": "Excluir pasta",
+      "moveto_trash": "Mover para a lixeira",
+      "copy": "Copiar",
+      "duplicate_file": "Duplicar arquivo",
+      "copy_to": "Copiar para…",
+      "copy_to_title": "Copiar para a pasta",
+      "absolute_path": "Caminho absoluto",
+      "relative_path": "Caminho relativo",
+      "duplicate_success": "Cópia criada: {{name}}",
+      "copy_to_success": "{{name}} copiado para {{folder}}",
+      "copy_failed": "Não foi possível copiar o arquivo: {{reason}}",
+      "copy_path": "Copiar caminho",
+      "copy_relative_path": "Copiar caminho relativo",
+      "show_in_folder": "Mostrar na pasta"
+    },
+    "editor_tab": {
+      "close": "Fechar",
+      "unsaved": "Alterações não salvas",
+      "previous": "Aba anterior",
+      "next": "Próxima aba",
+      "close_others": "Fechar outras",
+      "close_right": "Fechar à direita",
+      "close_all": "Fechar todas",
+      "export_html": "Exportar para HTML",
+      "export_pdf": "Imprimir / Exportar PDF",
+      "export_pdf_failed": "Não foi possível preparar este documento para impressão.",
+      "export_pdf_image_warning": "{{count}} imagem(ns) não puderam ser carregadas. O texto alternativo será impresso no lugar delas.",
+      "export_pdf_embedded_media": "Conteúdo interativo",
+      "export_pandoc": "Exportar com Pandoc",
+      "export_pandoc_docx": "Documento do Word (.docx)",
+      "export_pandoc_odt": "Texto OpenDocument (.odt)",
+      "export_pandoc_epub": "Livro EPUB (.epub)",
+      "export_pandoc_format": "Exportar para {{format}}",
+      "export_pandoc_exporting": "Exportando para {{format}}...",
+      "export_pandoc_success": "Exportado para {{path}}",
+      "export_pandoc_warning": "Exportado para {{path}}, mas o Pandoc retornou {{count}} aviso(s).",
+      "export_pandoc_setup_title": "Pandoc não está disponível",
+      "export_pandoc_setup_desc": "Instale o Pandoc ou selecione o executável para exportar arquivos DOCX, ODT e EPUB.",
+      "export_pandoc_install": "Guia de instalação",
+      "export_pandoc_select": "Selecionar executável",
+      "export_pandoc_error_not_found": "O Pandoc não foi encontrado. Instale-o ou configure o caminho do executável nas configurações de exportação.",
+      "export_pandoc_error_invalid_executable": "O arquivo selecionado não é um executável válido do Pandoc.",
+      "export_pandoc_error_unsupported_format": "Esta instalação do Pandoc não oferece suporte ao formato de exportação selecionado.",
+      "export_pandoc_error_conversion_failed": "O Pandoc não conseguiu converter este documento.",
+      "export_pandoc_error_timed_out": "A exportação do Pandoc excedeu o limite de 120 segundos.",
+      "export_pandoc_error_output_commit_failed": "O arquivo convertido não pôde substituir o arquivo de destino.",
+      "export_pandoc_failed_title": "Falha na exportação do Pandoc",
+      "export_pandoc_copy_error": "Copiar detalhes do erro",
+      "export_pandoc_copied": "Detalhes do erro copiados",
+      "export_pandoc_copy_failed": "Não foi possível copiar os detalhes do erro.",
+      "export_pandoc_error_code": "Código do erro",
+      "export_pandoc_exit_code": "Código de saída",
+      "export_pandoc_error_message": "Mensagem",
+      "export_pandoc_error_details": "Detalhes",
+      "export_image": "Exportar como imagem",
+      "keep_open": "Manter aberto",
+      "preview": "Aba de visualização",
+      "preview_hint": "Aba de visualização — clique duas vezes para mantê-la aberta"
+    }
+  },
+  "notification": {},
+  "search": {
+    "mode": "Pesquisar em",
+    "modeContent": "Conteúdo",
+    "modeFilename": "Nomes de arquivos",
+    "filename": "Pesquisar nomes de arquivos",
+    "filenameReadyDesc": "Digite um nome de arquivo e pressione Enter ou clique em pesquisar",
+    "filenameSearchingDesc": "Pesquisando nomes de arquivos no espaço de trabalho atual",
+    "filenameSummary": "{{files}} arquivos: {{keyword}}",
+    "filenameEmptyDesc": "Tente outro nome de arquivo ou verifique as exclusões da pesquisa",
+    "line": "Linha {{number}}:",
+    "search_empty": "Nenhum resultado corresponde aos termos pesquisados",
+    "text": "Pesquisar",
+    "caseSensitive": "Diferenciar maiúsculas de minúsculas",
+    "toggleExpandAll": "Alternar expansão de tudo",
+    "ready": "Pronto para pesquisar",
+    "readyDesc": "Digite uma palavra-chave e pressione Enter ou clique em pesquisar",
+    "searching": "Pesquisando",
+    "searchingDesc": "Verificando arquivos Markdown no espaço de trabalho atual",
+    "searchingWithKeyword": "Pesquisando \"{{keyword}}\"...",
+    "resultSummary": "{{files}} arquivos, {{matches}} ocorrências: {{keyword}}",
+    "emptyDesc": "Tente outra palavra-chave ou desative a diferenciação entre maiúsculas e minúsculas",
+    "search_failed": "Falha na pesquisa"
+  },
+  "command": {
+    "id_descriptions": {
+      "app_outlineCollapseAll": "Recolher todos os títulos",
+      "app_outlineExpandAll": "Expandir todos os títulos",
+      "app_commandPalette": "Paleta de comandos",
+      "app_quickOpen": "Abertura rápida",
+      "app_openFolder": "Abrir uma pasta",
+      "app_openSetting": "Abrir a janela de configurações",
+      "app_toggleLeftsidebarVisible": "Alternar visibilidade da barra lateral esquerda",
+      "app_toggleRightsidebarVisible": "Alternar visibilidade da barra lateral direita",
+      "app_toggleZenMode": "Alternar Modo Zen",
+      "app_save": "Salvar arquivo ativo atual",
+      "app_findReplaceEditor": "Localizar e substituir no editor",
+      "app_closeCurrentEditorTab": "Fechar aba atual do editor",
+      "app_hide": "Ocultar o aplicativo",
+      "app_toggleEditorType": "Alternar entre código-fonte e modo WYSIWYG",
+      "app_splitEditorRight": "Dividir editor à direita",
+      "app_splitEditorDown": "Dividir editor abaixo",
+      "editor_copy": "Copiar texto selecionado no editor",
+      "editor_cut": "Recortar texto selecionado no editor",
+      "editor_redo": "Refazer",
+      "editor_undo": "Desfazer",
+      "editor_paste": "Colar texto selecionado no editor",
+      "editor_toggleStrong": "Alternar para negrito",
+      "editor_toggleEmphasis": "Alternar para itálico",
+      "editor_toggleCodeText": "Alternar para código",
+      "editor_toggleDelete": "Alternar para tachado",
+      "editor_insertCurrentDate": "Inserir data atual",
+      "editor_toggleH1": "Alternar para Título 1",
+      "editor_toggleH2": "Alternar para Título 2",
+      "editor_toggleH3": "Alternar para Título 3",
+      "editor_toggleH4": "Alternar para Título 4",
+      "editor_toggleH5": "Alternar para Título 5",
+      "editor_toggleH6": "Alternar para Título 6",
+      "app_keepEditorOpen": "Manter aberto",
+      "editor_insertCodeBlock": "Inserir bloco de código",
+      "editor_insertMathBlock": "Inserir bloco matemático",
+      "app_zoomIn": "Aumentar zoom",
+      "app_zoomOut": "Diminuir zoom",
+      "app_zoomReset": "Redefinir zoom para 100%"
+    }
+  },
+  "text_encoding": {
+    "label": "Codificação de texto e finais de linha",
+    "encoding": "Codificação de texto",
+    "description": "Reabrir lê este arquivo do disco usando a codificação selecionada. Salvar com codificação converte o texto atual. Os finais de linha existentes são preservados.",
+    "mixed_endings": "Finais de linha mistos",
+    "no_endings": "Sem finais de linha",
+    "unconfirmed": "Não confirmada",
+    "confirm_hint": "A codificação foi inferida pelo conteúdo ou restaurada de um rascunho anterior. Verifique se o texto está correto antes de salvar com a codificação selecionada.",
+    "roundtrip_hint": "Este arquivo contém mapeamentos de bytes fora do padrão. Após a edição, converta-o explicitamente para outra codificação.",
+    "preview_hint": "Visualização dos primeiros 4.000 caracteres. Um rascunho de recuperação do conteúdo atual será mantido antes da aplicação.",
+    "preview_reopen": "Visualizar reabertura",
+    "apply_reopen": "Aplicar reabertura",
+    "save_with_encoding": "Salvar com esta codificação",
+    "save_failed": "Ainda não foi salvo. Seu conteúdo e a seleção de codificação foram mantidos. Verifique a mensagem de salvamento e tente novamente.",
+    "errors": {
+      "invalid_encoding": "Não é possível ler este arquivo com a codificação selecionada. Visualize outra codificação e confira o texto antes de reabri-lo.",
+      "unsupported_encoding": "Não foi possível identificar a codificação do arquivo ou ela não é compatível. Abra Codificação de texto e finais de linha, selecione uma codificação e visualize o texto antes de reabri-lo.",
+      "binary": "Este arquivo contém dados binários e não pode ser aberto como texto.",
+      "invalid_bom": "O marcador de codificação (BOM) do arquivo não corresponde à codificação selecionada. Escolha a codificação correspondente e tente novamente.",
+      "unmappable": "A codificação atual não consegue salvar alguns caracteres. Seu conteúdo ainda está no editor. Salve como UTF-8 ou remova os caracteres incompatíveis e tente novamente.",
+      "unmappable_character": "{{encoding}} não consegue salvar o caractere “{{character}}”. Seu conteúdo ainda está no editor. Salve como UTF-8 ou remova este caractere e tente novamente.",
+      "confirm_encoding": "A codificação detectada ainda não foi confirmada. Seu conteúdo permanece no editor. Abra Codificação de texto e finais de linha, visualize o texto e escolha Salvar com esta codificação.",
+      "noncanonical": "O mapeamento de bytes original não pode ser preservado após a edição. Escolha outra codificação, como UTF-8, ou salve uma cópia.",
+      "not_reversible": "A codificação selecionada alteraria alguns caracteres. Escolha UTF-8 ou outra codificação que preserve todo o texto antes de salvar.",
+      "ambiguous_bom": "O texto começa com um marcador de codificação invisível. Escolha a variante BOM da codificação Unicode atual antes de salvar.",
+      "finish_input": "Conclua a entrada de texto atual antes de tentar novamente.",
+      "save_first": "Salve o arquivo antes de visualizar outra codificação.",
+      "retry_read": "O arquivo está sendo alterado. Aguarde a conclusão das alterações e visualize-o novamente.",
+      "preview_again": "O documento ou arquivo foi alterado. Visualize-o novamente antes de aplicar a nova codificação.",
+      "draft_pending": "O conteúdo atual ainda não foi protegido por um rascunho de recuperação. Tente novamente antes de reabrir o arquivo.",
+      "invalid_unicode": "O texto contém uma sequência de caracteres inválida. O arquivo original não foi gravado. Corrija o texto afetado e tente novamente.",
+      "save_failed": "Ainda não foi salvo. Seu conteúdo continua no editor. Verifique se o arquivo permite gravação e tente novamente ou salve uma cópia.",
+      "read_failed": "Não foi possível ler o arquivo. Verifique se ele ainda existe e se você tem permissão para lê-lo; depois, tente novamente.",
+      "preview_failed": "Não foi possível concluir a operação de codificação. O conteúdo atual foi mantido. Tente novamente."
+    }
+  },
+  "settings": {
+    "select_placeholder": "Selecione uma opção",
+    "font_placeholder": "Selecione uma fonte",
+    "select_folder": "Selecionar pasta",
+    "value_placeholder": "Digite um valor…",
+    "edit_item": "Editar item",
+    "delete_item": "Excluir item",
+    "label": "Configuração",
+    "back_to_app": "Voltar ao aplicativo",
+    "back_to_settings": "Voltar às configurações",
+    "search_placeholder": "Pesquisar configurações...",
+    "search_empty": "Nenhuma configuração correspondente",
+    "search_results": "{{count}} resultados",
+    "navigation": {
+      "preferences": "Preferências",
+      "writing": "Escrita e arquivos",
+      "ai": "AI",
+      "help": "Ajuda"
+    },
+    "general": {
+      "startup": {
+        "label": "Início",
+        "left": "Barra lateral esquerda ao iniciar",
+        "right": "Barra lateral direita ao iniciar",
+        "restore": "Restaurar último estado",
+        "description": "Será aplicado na próxima inicialização do aplicativo. Restaurar mantém o painel selecionado e o estado aberto ou fechado da barra lateral."
+      },
+      "label": "geral",
+      "app": {
+        "label": "aplicativo",
+        "open_file_in_new_window": {
+          "label": "Abrir arquivos avulsos em uma nova janela",
+          "desc": "Abre em uma nova janela arquivos avulsos que estão fora do espaço de trabalho atual. Os arquivos do espaço de trabalho atual permanecem na janela atual. Desative para abrir todos os arquivos na janela atual."
+        },
+        "automatic_updates": {
+          "label": "Atualização automática",
+          "desc": "Verifica atualizações automaticamente e as instala ao iniciar o aplicativo."
+        },
+        "error_reporting": {
+          "label": "Compartilhar relatórios de erros",
+          "desc": "Desativado por padrão. Envia ao Sentry os tipos de erro e os locais correspondentes no código do aplicativo. O conteúdo dos documentos, caminhos de arquivos, credenciais e atividade de navegação não são incluídos. Você pode desativar isso a qualquer momento."
+        }
+      },
+      "autosave": {
+        "label": "Salvamento automático",
+        "switch_auto_save": {
+          "label": "Salvamento automático",
+          "desc": "Ativa ou desativa o salvamento automático. O arquivo atual será salvo automaticamente no intervalo definido."
+        },
+        "autosaveInterval": {
+          "label": "Intervalo de salvamento automático",
+          "desc": "Define o intervalo do salvamento automático em milissegundos."
+        }
+      },
+      "misc": {
+        "label": "Diversos",
+        "language": {
+          "label": "Idioma",
+          "desc": "Define o idioma do aplicativo."
+        },
+        "file_exclude_patterns": {
+          "label": "Lista de exclusão de arquivos",
+          "desc": "Exclui do explorador e da pesquisa os arquivos e pastas correspondentes. Use um padrão no estilo gitignore por linha.",
+          "placeholder": "por exemplo, **/node_modules/*"
+        }
+      },
+      "desc": "Configurações gerais do aplicativo."
+    },
+    "editor": {
+      "label": "Editor",
+      "style": {
+        "label": "Estilo",
+        "full_width": {
+          "label": "Largura total",
+          "desc": "Define o editor para usar toda a largura."
+        },
+        "font_size": {
+          "label": "Tamanho da fonte do documento",
+          "desc": "Tamanho da fonte para escrita e leitura."
+        },
+        "line_height": {
+          "label": "Altura de linha do documento",
+          "desc": "Altura de linha para escrita e leitura."
+        },
+        "source_font_size": {
+          "label": "Tamanho da fonte do código-fonte",
+          "desc": "Tamanho da fonte no modo de código-fonte, independente do texto do documento."
+        },
+        "source_line_height": {
+          "label": "Altura de linha do código-fonte",
+          "desc": "Altura de linha no modo de código-fonte."
+        },
+        "font_family": {
+          "label": "Família de fontes",
+          "desc": "Define a família de fontes principal do editor."
+        },
+        "code_font_family": {
+          "label": "Família de fontes do código",
+          "desc": "Define a família de fontes do código no editor."
+        },
+        "first_line_indent": {
+          "label": "Recuo da primeira linha",
+          "desc": "Recua os parágrafos do corpo em dois caracteres no editor, na visualização e nas exportações. O Markdown permanece inalterado."
+        }
+      },
+      "behavior": {
+        "label": "Comportamento",
+        "md_default_mode": {
+          "label": "Modo padrão do Markdown",
+          "desc": "Define o modo de edição padrão ao criar um novo arquivo Markdown."
+        },
+        "text_direction": {
+          "follow_global": "Seguir configuração global",
+          "label": "Direção do texto",
+          "desc": "Direção do texto do corpo nos modos WYSIWYG e Visualização. Automático detecta a direção de cada parágrafo.",
+          "auto": "Automática",
+          "ltr": "Da esquerda para a direita (LTR)",
+          "rtl": "Da direita para a esquerda (RTL)"
+        },
+        "typewriter_scroll": {
+          "label": "Rolagem de máquina de escrever",
+          "desc": "Quando ativada, o cursor fica centralizado na área de visualização durante a edição."
+        },
+        "caret_animation": {
+          "label": "Cursor suave",
+          "desc": "Anima o cursor do texto do corpo no modo WYSIWYG. Segue a preferência do sistema para movimento reduzido."
+        },
+        "placeholder": {
+          "label": "Texto de espaço reservado",
+          "desc": "Quando ativado, um texto de espaço reservado será exibido em parágrafos vazios."
+        },
+        "insert_date_format": {
+          "label": "Formato de inserção da data",
+          "desc": "Formato de data usado pelo comando Inserir data atual. Usa os tokens de formato do Day.js, como YYYY-MM-DD ou YYYY-MM-DD HH:mm.",
+          "preview": "Visualização:"
+        }
+      },
+      "wysiwyg": {
+        "label": "WYSIWYG",
+        "codemirror_linewrap": {
+          "label": "Quebra de linha em blocos de código",
+          "desc": "Define se as linhas dos blocos de código serão quebradas quando excederem a largura disponível."
+        },
+        "live_preview_block_behavior": {
+          "label": "Blocos de visualização ao vivo",
+          "desc": "Escolha quando exibir o código-fonte de HTML, Mermaid e fórmulas em bloco.",
+          "options": {
+            "auto": "Mostrar o código-fonte somente durante a edição",
+            "always_split": "Sempre mostrar o código-fonte e a visualização"
+          }
+        },
+        "spellcheck": {
+          "label": "Correção ortográfica",
+          "desc": "Define se a correção ortográfica será ativada no modo WYSIWYG."
+        }
+      },
+      "sourcecode": {
+        "label": "Código-fonte",
+        "spellcheck": {
+          "label": "Correção ortográfica",
+          "desc": "Define se a correção ortográfica será ativada no modo de código-fonte."
+        }
+      },
+      "desc": "Opções de configuração do Markdown para o editor, incluindo estilo, comportamento e modo WYSIWYG.",
+      "code_editing": {
+        "label": "Edição de código",
+        "embedded_label": "Código incorporado",
+        "default": "Padrão",
+        "custom": "Personalizado",
+        "on": "Ativado",
+        "off": "Desativado",
+        "indent_style": {
+          "label": "Indentação",
+          "desc": "Compartilhada pelo modo de código-fonte e pelo código incorporado. O editor de código-fonte do frontmatter sempre usa espaços.",
+          "spaces": "Espaços",
+          "tabs": "Tabulações"
+        },
+        "indent_size": {
+          "label": "Largura da indentação",
+          "desc": "A indentação com espaços usa 2 colunas por padrão. As tabulações ocupam 4 colunas no modo de código-fonte e 2 no código incorporado. A largura escolhida se aplica a ambos.",
+          "default": "2 colunas (tabulações variam conforme o modo)"
+        },
+        "auto_close": {
+          "label": "Fechar colchetes e aspas automaticamente",
+          "desc": "Insere o colchete ou a aspa correspondente durante a digitação no modo de código-fonte e no código incorporado."
+        },
+        "whitespace": {
+          "label": "Mostrar espaços em branco",
+          "desc": "Exibe espaços e tabulações sem alterar o conteúdo do documento.",
+          "trailing": "Espaços em branco no final",
+          "all": "Todos os espaços e tabulações"
+        },
+        "line_wrap": {
+          "label": "Quebrar linhas longas",
+          "desc": "Quebra linhas longas no limite do editor sem inserir quebras de linha. Linhas muito longas ainda podem exigir rolagem horizontal.",
+          "mixed_default": "Por área (padrão)",
+          "mixed_desc": "Por padrão, blocos de código comuns não quebram linhas, mas o código-fonte da visualização e do frontmatter quebra. Escolha Ativado ou Desativado para aplicar uma configuração a todas as áreas. Linhas muito longas ainda podem exigir rolagem horizontal."
+        },
+        "line_numbers": {
+          "label": "Números de linha",
+          "desc": "A opção Esparso mostra a primeira linha e depois a cada dez linhas.",
+          "all": "Todas as linhas",
+          "sparse": "Esparsos"
+        },
+        "active_line": {
+          "label": "Realçar linha atual",
+          "desc": "Realça a linha que contém o cursor para facilitar a localização do ponto de edição."
+        },
+        "font_size": {
+          "label": "Tamanho da fonte do código",
+          "desc": "Por padrão, corresponde a 87,5% do tamanho da fonte do documento e é dimensionado junto com ela. Escolha Personalizado para definir um tamanho fixo.",
+          "default": "Seguir documento ({{value}} px)",
+          "relative_default": "Seguir documento (87,5%)",
+          "unit": "{{value}} px"
+        },
+        "line_height": {
+          "label": "Altura de linha do código",
+          "desc": "A altura da linha é um múltiplo do tamanho da fonte. O padrão é 1,6×; escolha Personalizado para ajustar o espaçamento entre linhas.",
+          "default": "1,6× (padrão)",
+          "unit": "{{value}}×"
+        },
+        "default_value": "{{value}} (padrão)",
+        "typography_disabled": "“Usar fontes, tamanho e altura de linha pessoais” está desativado. O tamanho de fonte e a altura de linha personalizados não estão sendo aplicados."
+      },
+      "tabs": {
+        "label": "Abas",
+        "enable_preview": {
+          "label": "Ativar abas de visualização",
+          "desc": "Clique uma vez em arquivos no Explorador ou nos resultados da pesquisa para reutilizar uma aba de visualização. Clique duas vezes ou edite o arquivo para mantê-lo aberto. As abas salvas permanecem abertas."
+        }
+      }
+    },
+    "keyboard": {
+      "label": "Atalhos de teclado",
+      "shortcut_conflict": "Este atalho já está em uso",
+      "desc": "Pesquise comandos e clique em um atalho para alterá-lo.",
+      "table_label": "Tabela de atalhos de teclado",
+      "command": "Comando",
+      "keybinding": "Atalho de teclado",
+      "scope": "Contexto",
+      "edit": "Editar",
+      "edit_shortcut": "Editar atalho",
+      "shortcut": "Atalho",
+      "save": "Salvar",
+      "load_failed": "Não foi possível carregar os atalhos. Verifique o arquivo de configuração e tente novamente.",
+      "save_failed": "Não foi possível salvar o atalho. A configuração anterior foi mantida. Tente novamente.",
+      "invalid_binding": "Pressione uma combinação válida que inclua uma tecla principal.",
+      "reserved_binding": "Esta combinação está reservada para digitação, navegação ou área de transferência do sistema. Escolha outra.",
+      "unsupported_binding": "O editor atual não oferece suporte a esta combinação. Escolha outra.",
+      "conflict_with": "Já está em uso por “{{command}}”. Altere primeiro o atalho desse comando.",
+      "saving": "Salvando…",
+      "unbound": "Não atribuído",
+      "record_help": "Pressione as teclas · Enter para salvar · Esc para cancelar",
+      "remove_binding": "Remover atalho",
+      "reset_default": "Restaurar padrão",
+      "clipboard_note": "O atalho de recortar do sistema continua disponível. Você pode atribuir outro atalho para recortar aqui.",
+      "search": "Pesquisar comandos ou atalhos",
+      "modified_only": "Somente modificados",
+      "retry": "Tentar novamente",
+      "scope_app": "Aplicativo",
+      "scope_editor": "Editor",
+      "modified": "Modificado",
+      "system_binding": "Atalho do sistema",
+      "no_results": "Nenhum atalho correspondente"
+    },
+    "ai": {
+      "label": "AI",
+      "model": {
+        "label": "Modelo de IA"
+      },
+      "ChatGPT": {
+        "label": "ChatGPT",
+        "api_base": {
+          "label": "URL base da API",
+          "desc": "URL base da API do ChatGPT."
+        },
+        "api_key": {
+          "label": "Chave da API",
+          "desc": "Chave da API do ChatGPT."
+        },
+        "models": {
+          "label": "Modelos",
+          "desc": "Lista de modelos separados por vírgulas. O padrão é \"gpt-3.5-turbo, gpt-4-32k, gpt-4\"."
+        }
+      },
+      "DeepSeek": {
+        "label": "DeepSeek",
+        "api_base": {
+          "label": "URL base da API",
+          "desc": "URL base da API do DeepSeek."
+        },
+        "api_key": {
+          "label": "Chave da API",
+          "desc": "Chave da API do DeepSeek."
+        },
+        "models": {
+          "label": "Modelos",
+          "desc": "Lista de modelos separados por vírgulas. O padrão é \"\"."
+        }
+      },
+      "Ollama": {
+        "label": "Ollama",
+        "api_base": {
+          "label": "URL base da API",
+          "desc": "URL base da API do Ollama."
+        },
+        "models": {
+          "label": "Modelos",
+          "desc": "Por padrão, os modelos disponíveis são detectados automaticamente, então geralmente não é necessário configurar esta opção. Use uma lista separada por vírgulas apenas por compatibilidade ou como alternativa quando a detecção não estiver disponível."
+        }
+      },
+      "Google": {
+        "label": "Google",
+        "api_base": {
+          "label": "URL base da API",
+          "desc": "Endereço da API de IA do Google."
+        },
+        "api_key": {
+          "label": "Chave da API",
+          "desc": "Chave da API de IA do Google."
+        },
+        "models": {
+          "label": "Lista de modelos",
+          "desc": "Lista de modelos separados por vírgulas. O valor padrão é \"\"."
+        }
+      },
+      "desc": "Configuração dos modelos de IA. Quando baseUrl está vazio, o endereço oficial será usado por padrão. O cabeçalho da solicitação pode ser usado para configurar informações como chaves; consulte a documentação do provedor de serviços."
+    },
+    "resetAppConf": {
+      "label": "Redefinir configuração do aplicativo",
+      "desc": "Redefine a configuração do aplicativo para restaurar os valores padrão. Isso redefinirá todas as configurações, incluindo tema, idioma, salvamento automático etc., e não poderá ser desfeito.",
+      "success": "A configuração do aplicativo foi redefinida para os valores padrão."
+    },
+    "image": {
+      "label": "Imagem",
+      "paste_event": {
+        "label": "Colagem no editor",
+        "when_paste_image": {
+          "label": "Ao colar conteúdo com uma imagem",
+          "desc": "Selecione o comportamento padrão ao colar imagens no editor.",
+          "options": {
+            "do_nothing": "Não fazer nada",
+            "save_to_local_relative": "Salvar em um caminho relativo ao espaço de trabalho",
+            "save_to_local_absolute": "Salvar em um caminho absoluto global",
+            "paste_as_base64": "Colar como codificação Base64",
+            "save_to_file_relative": "Salvar em um caminho relativo ao arquivo atual"
+          }
+        },
+        "paste_image_save_absolute_path": {
+          "label": "Caminho absoluto global",
+          "desc": "Ao colar uma imagem, ela será salva neste caminho."
+        },
+        "paste_image_save_relative_path": {
+          "label": "Caminho relativo ao espaço de trabalho",
+          "desc": "Ao colar uma imagem, o caminho será calculado em relação ao espaço de trabalho atual conforme suas regras, e ela será salva neste local."
+        },
+        "paste_image_save_relative_path_rule": {
+          "label": "Regras de caminho",
+          "desc": "Variáveis compatíveis: ${documentPath} (caminho da pasta pai do arquivo atual), ${fileName} (nome do arquivo atual sem extensão). Exemplo: ${documentPath}/photo/${fileName}"
+        }
+      },
+      "upload_img": {
+        "label": "Inserir imagem local",
+        "when_upload_image": {
+          "label": "Comportamento de inserção de imagens locais",
+          "desc": "Escolha o comportamento padrão para imagens locais selecionadas no computador, arrastadas para o editor ou coladas por um programa de captura de tela.",
+          "options": {
+            "insert_path": "Inserir o caminho original do arquivo",
+            "save_to_local_absolute": "Salvar em um caminho absoluto global",
+            "save_to_local_relative": "Salvar em um caminho relativo ao espaço de trabalho",
+            "paste_as_base64": "Colar como codificação Base64",
+            "save_to_file_relative": "Salvar em um caminho relativo ao arquivo atual"
+          }
+        },
+        "upload_image_save_absolute_path": {
+          "label": "Caminho absoluto global",
+          "desc": "Ao carregar uma imagem, ela será salva neste caminho."
+        },
+        "upload_image_save_relative_path": {
+          "label": "Caminho relativo ao espaço de trabalho",
+          "desc": "Ao carregar uma imagem, o caminho será calculado em relação ao espaço de trabalho atual conforme suas regras, e ela será salva neste local."
+        },
+        "upload_image_save_relative_path_rule": {
+          "label": "Regras de caminho",
+          "desc": "Variáveis compatíveis: ${documentPath} (caminho da pasta pai do arquivo atual), ${fileName} (nome do arquivo atual sem extensão). Exemplo: ${documentPath}/photo/${fileName}"
+        }
+      },
+      "desc": "Configura o processamento e o carregamento de imagens, incluindo colagem, caminhos de salvamento e comportamento ao inserir arquivos de imagem."
+    },
+    "export": {
+      "label": "Exportação",
+      "desc": "Configure as ferramentas opcionais usadas para exportar documentos.",
+      "pandoc": {
+        "label": "Pandoc",
+        "executable": {
+          "label": "Executável do Pandoc",
+          "desc": "O Pandoc não vem incluído no MarkFlowy. Use a detecção automática ou selecione um executável local."
+        },
+        "status": {
+          "checking": "Verificando o Pandoc...",
+          "ready": "Pandoc {{version}} está pronto.",
+          "invalid_executable": "O caminho configurado não aponta para um executável válido do Pandoc.",
+          "incompatible": "O Pandoc foi encontrado, mas não oferece suporte a todos os formatos necessários.",
+          "not_found": "Pandoc não encontrado."
+        },
+        "select": "Selecionar executável",
+        "automatic": "Usar detecção automática",
+        "check_again": "Verificar novamente",
+        "install_guide": "Guia de instalação"
+      },
+      "pdf": {
+        "label": "Exportação de PDF",
+        "executable": {
+          "label": "Navegador para exportação de PDF",
+          "desc": "O MarkFlowy usa um navegador Chrome, Chromium ou Edge local para exportar PDFs com marcadores de títulos. Detecte-o automaticamente ou selecione o executável."
+        },
+        "status": {
+          "checking": "Procurando um navegador para exportação de PDF…",
+          "ready": "O navegador {{version}} está pronto.",
+          "invalid_executable": "O caminho configurado não aponta para um executável válido de navegador compatível.",
+          "incompatible": "O navegador foi encontrado, mas sua versão não oferece suporte a marcadores de títulos em PDF.",
+          "not_found": "Nenhum navegador compatível para exportação de PDF foi encontrado.",
+          "save_failed": "Não foi possível salvar a configuração do navegador. Tente novamente."
+        },
+        "select": "Escolher navegador…",
+        "automatic": "Detectar automaticamente",
+        "check_again": "Verificar novamente"
+      }
+    },
+    "display": {
+      "label": "Aparência",
+      "theme": {
+        "unavailable": "{{name}} (indisponível)",
+        "unavailable_help": "Os temas selecionados estão indisponíveis: {{names}}. Temas integrados serão usados temporariamente e suas seleções serão mantidas. Importe os temas novamente como JSON ou escolha outro tema. Temas JS antigos e CSS carregados automaticamente precisam de migração manual.",
+        "migration_guide": "Guia de migração de temas",
+        "label": "Tema",
+        "mode": {
+          "label": "Modo do tema",
+          "desc": "Escolha como o aplicativo alterna entre os temas claro e escuro",
+          "system": "Seguir sistema",
+          "light": "Claro",
+          "dark": "Escuro"
+        },
+        "light_theme": {
+          "label": "Tema claro",
+          "desc": "Selecione o tema usado no modo claro"
+        },
+        "dark_theme": {
+          "label": "Tema escuro",
+          "desc": "Selecione o tema usado no modo escuro"
+        },
+        "accent_color": {
+          "label": "Cor do tema",
+          "desc": "Substitui a cor de destaque do tema selecionado",
+          "follow_theme": "Seguir tema",
+          "custom": "Personalizada"
+        }
+      },
+      "size": {
+        "label": "Dimensões",
+        "zoom": {
+          "label": "Escala",
+          "desc": "Redimensiona ou amplia a escala de exibição da página inteira"
+        }
+      },
+      "desc": "Configurações de aparência e exibição do aplicativo, incluindo opções visuais como escala da interface e temas."
+    },
+    "updates": {
+      "label": "Atualizações",
+      "desc": "Verifica atualizações ao iniciar. Baixe e instale somente quando quiser.",
+      "checks": "Verificações de atualização",
+      "interval": "Verificar enquanto o aplicativo estiver em execução",
+      "interval_desc": "As verificações ocorrem somente enquanto o MarkFlowy está aberto. Também há uma verificação a cada inicialização.",
+      "interval_0": "Somente ao iniciar",
+      "interval_60": "A cada hora",
+      "interval_120": "A cada 2 horas",
+      "interval_240": "A cada 4 horas"
+    },
+    "support": {
+      "label": "Suporte",
+      "desc": "Todo apoio é importante para nós! Você pode contribuir das seguintes formas para melhorar este projeto de código aberto.",
+      "github_star": "Marcar uma estrela no GitHub",
+      "github_star_desc": "Se você gosta deste projeto, marque uma estrela no GitHub. Esse é o nosso maior incentivo!",
+      "github_issue": "Enviar um problema ou uma sugestão",
+      "github_issue_desc": "Se encontrar problemas ou tiver sugestões, envie uma solicitação no GitHub."
+    },
+    "copilot": {
+      "label": "Copiloto",
+      "desc": "Configuração de escrita assistida por IA. Selecione o provedor e o modelo de IA que você configurou. Para melhorar a velocidade de resposta, recomendamos um modelo pequeno, com cerca de 2 bilhões de parâmetros ou menos.",
+      "enable": {
+        "label": "Ativar copiloto",
+        "desc": "Ativa a escrita assistida por IA"
+      },
+      "provider": {
+        "label": "Provedor",
+        "desc": "Selecione o provedor de serviços de IA"
+      },
+      "model": {
+        "label": "Modelo",
+        "desc": "Selecione o modelo de IA a ser usado"
+      }
+    },
+    "themeStore": {
+      "controls": {
+        "retryPreview": "Tentar visualizar novamente",
+        "loadingPreview": "Carregando visualização do tema",
+        "reinstall": "Reinstalar",
+        "builtIn": "Temas integrados",
+        "builtInDescription": "Incluídos no MarkFlowy.",
+        "local": "Temas locais",
+        "localDescription": "Temas que você criou ou importou.",
+        "active": "Em uso",
+        "currentTheme": "Tema atual",
+        "tools": "Ferramentas de tema",
+        "more": "Mais ações",
+        "customization": "Tipografia e CSS",
+        "unknownAuthor": "Autor não especificado",
+        "noInstalled": "Nenhum tema da comunidade instalado.",
+        "installedOnly": "Somente instalados",
+        "title": "Temas",
+        "create": "Criar tema",
+        "import": "Importar JSON",
+        "export": "Exportar JSON",
+        "edit": "Editar",
+        "copy": "Copiar e editar",
+        "remove": "Remover",
+        "apply": "Aplicar",
+        "save": "Salvar e aplicar",
+        "close": "Fechar",
+        "undo": "Desfazer",
+        "redo": "Refazer",
+        "search": "Localizar um token…",
+        "modified": "Somente modificados",
+        "reset": "Redefinir",
+        "link": "Vincular ao token",
+        "value": "Valor",
+        "inspect": "Inspecionar visualização",
+        "snippets": "Trechos CSS pessoais",
+        "addCss": "Importar CSS",
+        "createCss": "Novo trecho",
+        "untitledCss": "Trecho sem título",
+        "disableAll": "Desativar tudo",
+        "includeCss": "Incluir CSS pessoal",
+        "up": "Mover para cima",
+        "down": "Mover para baixo",
+        "name": "Nome",
+        "author": "Autor",
+        "variant": "Variante",
+        "addLight": "Adicionar variante clara",
+        "addDark": "Adicionar variante escura",
+        "advanced": "JSON / CSS avançado",
+        "options": "Opções do tema",
+        "previewOptions": "Opções de visualização",
+        "closeAdvanced": "Fechar editor avançado",
+        "noTokens": "Nenhum token correspondente",
+        "css": "CSS do tema",
+        "json": "JSON do tema",
+        "applyJson": "Atualizar a partir do JSON",
+        "revertJson": "Descartar alterações do JSON",
+        "pendingJson": "Aplique ou descarte as alterações do JSON para continuar a edição visual e a exportação.",
+        "catalog": "Temas da comunidade",
+        "install": "Instalar",
+        "emptyCatalog": "Nenhum tema da comunidade disponível.",
+        "replace": "Este ID de tema já existe. Deseja substituí-lo?",
+        "replaceAction": "Substituir",
+        "cancel": "Cancelar",
+        "saveCopy": "Salvar uma cópia",
+        "draft": "Há um rascunho local disponível.",
+        "resume": "Retomar rascunho",
+        "discard": "Descartar rascunho",
+        "preview": "Visualização do tema",
+        "loadError": "Não foi possível carregar a visualização do editor.",
+        "retry": "Tentar novamente",
+        "linked": "Vinculado",
+        "inherited": "Padrão",
+        "customCss": "O CSS personalizado pode substituir o token inspecionado.",
+        "preferences": "A visualização mostra somente o tema. Suas preferências pessoais também são aplicadas quando você o utiliza.",
+        "personalTypography": "Usar fontes, tamanho e altura de linha pessoais",
+        "saved": "Salvo",
+        "error": "Erro",
+        "enabled": "Ativado",
+        "editCss": "Editar CSS",
+        "saveCss": "Salvar trecho",
+        "insertCssTemplate": "Inserir modelo",
+        "cssSelectorReference": "Referência de seletores",
+        "cssPreviewHint": "A visualização inclui este rascunho e outros trechos ativados. Salve para aplicar as alterações.",
+        "enableCssAfterSave": "Ativar após salvar",
+        "cssTemplateCompletedTasks": "Tachado para tarefas concluídas",
+        "cssTemplateHeadingDividers": "Divisores de títulos",
+        "cssTemplateCompactTables": "Tabelas compactas",
+        "cssTemplateQuoteAccent": "Destaque de citação",
+        "noSnippets": "Nenhum trecho CSS pessoal.",
+        "deleteConfirm": "Remover este tema?",
+        "removeVariant": "Remover variante",
+        "schema": "Exportar esquema JSON",
+        "light": "Claro",
+        "dark": "Escuro",
+        "catalogMismatch": "O ID do tema não corresponde ao catálogo da comunidade.",
+        "previewNotes": "Notas",
+        "previewIdeas": "Ideias",
+        "previewWelcome": "Boas-vindas",
+        "previewSearch": "Visualização da pesquisa",
+        "previewSearchPlaceholder": "Pesquisar…",
+        "previewNewNote": "Nova nota",
+        "changeTheme": "Alterar",
+        "changeLight": "Alterar tema claro",
+        "changeDark": "Alterar tema escuro",
+        "useInLight": "Usado no modo claro",
+        "useInDark": "Usado no modo escuro",
+        "browseThemes": "Explorar todos os temas",
+        "backToAppearance": "Voltar à aparência",
+        "chooseLight": "Escolher um tema claro",
+        "chooseDark": "Escolher um tema escuro",
+        "preserveMode": "Ao selecionar um tema, o modo de exibição atual é mantido.",
+        "selected": "Selecionado",
+        "setLight": "Definir como tema claro",
+        "setDark": "Definir como tema escuro",
+        "noLightVariant": "Sem variante clara",
+        "noDarkVariant": "Sem variante escura",
+        "installAndSelect": "Instalar e selecionar",
+        "noMatchingThemes": "Nenhum tema da comunidade disponível para este modo.",
+        "openCssDirectory": "Abrir pasta CSS",
+        "cssDirectoryHint": "Os arquivos CSS desta pasta são sincronizados automaticamente. Novos arquivos começam desativados; edite-os ou exclua-os na pasta.",
+        "externalCssFile": "Arquivo externo",
+        "revealCssFile": "Mostrar na pasta"
+      },
+      "label": "Loja de temas",
+      "desc": "Explore temas integrados e da comunidade ou personalize o seu próprio tema.",
+      "submit_theme": "Enviar tema",
+      "name": "Nome",
+      "mode": "Modo",
+      "version": "Versão",
+      "author": "Autor",
+      "description": "Descrição",
+      "tags": "Etiqueta",
+      "action": "Ação",
+      "official": "Oficial",
+      "builtin": "Integrado",
+      "installed": "Instalado",
+      "download": "Baixar",
+      "uninstall": "Desinstalar",
+      "only_installed": "Mostrar somente os instalados",
+      "no_local_themes": "Nenhum tema local",
+      "remove_local_theme": "Tem certeza de que deseja remover o tema local \"{{name}}\"? Isso excluirá os arquivos da pasta.",
+      "online_themes": "Temas online",
+      "local_css_files": "Arquivo CSS local",
+      "install_theme": "Instalar tema",
+      "install_theme_confirm": "Tem certeza de que deseja instalar {{name}}?",
+      "uninstall_theme": "Desinstalar tema",
+      "uninstall_theme_confirm": "Tem certeza de que deseja desinstalar {{name}}?"
+    }
+  },
+  "updater": {
+    "install": "instalar",
+    "download_and_install": "Baixar e instalar",
+    "downloading": "Baixando nova versão…",
+    "install_success": "Atualização instalada com sucesso.",
+    "restart": "Reiniciar",
+    "install_failed": "Não foi possível instalar a atualização: {{error}}",
+    "check_failed": "Não foi possível verificar se há atualizações: {{error}}",
+    "interrupted_title": "Atualização não concluída",
+    "interrupted_description": "A atualização para {{version}} não foi concluída. A instalação automática está pausada. Você pode tentar novamente, desativar as atualizações automáticas ou cancelar para continuar usando o MarkFlowy.",
+    "disable_auto_update": "Desativar atualizações automáticas"
+  },
+  "workspace": {
+    "info": "Informações do espaço de trabalho",
+    "none": "Nenhum espaço de trabalho aberto",
+    "searchPlaceholder": "Pesquisar espaços de trabalho e arquivos recentes…",
+    "open": "Abrir",
+    "openFileOrFolder": "Abrir arquivo ou pasta",
+    "recentFiles": "Arquivos recentes",
+    "sync_mode": {
+      "git_local": {
+        "name": "Git local",
+        "description": "Sincronizar com repositório Git local"
+      },
+      "git_remote": {
+        "name": "Git remoto",
+        "description": "Sincronizar com repositório Git remoto"
+      },
+      "pure_local": {
+        "name": "Somente local",
+        "description": "Somente espaço de trabalho local"
+      }
+    },
+    "label": "Livro"
+  },
+  "request": {
+    "headers_config": {
+      "label": "Configurar cabeçalho da solicitação",
+      "desc": "Adicione cabeçalhos HTTP personalizados à solicitação para aceitar vários pares de chave e valor."
+    }
+  },
+  "ai": {
+    "capabilities": "Função",
+    "export_conversation": "Exportar conversa",
+    "assistant": "Chat com IA",
+    "you": "Você",
+    "sources": "Fontes",
+    "response_interrupted": "Resposta interrompida",
+    "error": "Erro",
+    "request_failed": "Falha na solicitação",
+    "settings": "Configurações",
+    "new_chat": "Nova conversa",
+    "welcome_title": "Como posso ajudar você hoje?",
+    "welcome_description": "Faça perguntas, explore ideias ou adicione o documento atual como contexto.",
+    "try_asking": "Experimente perguntar",
+    "prompt_document_title": "Resumir este documento",
+    "prompt_document_description": "Usar o documento ativo como contexto",
+    "prompt_document_value": "Resuma o documento atual e destaque os pontos principais.",
+    "prompt_explain_title": "Explicar um tópico",
+    "prompt_explain_description": "Explique claramente algo complexo",
+    "prompt_explain_value": "Explique este tópico com clareza e um exemplo prático: ",
+    "ask_placeholder": "Pergunte qualquer coisa… Use @ para adicionar contexto",
+    "current_document": "Documento atual",
+    "no_active_document": "Nenhum documento ativo",
+    "select_model": "Selecionar modelo",
+    "search_models": "Pesquisar modelos…",
+    "no_models_found": "Nenhum modelo encontrado",
+    "no_models_configured": "Nenhum modelo de IA configurado",
+    "model_unavailable": "Este modelo não está disponível",
+    "select_available_model": "Selecione um modelo disponível para enviar",
+    "provider_not_configured": "{{provider}} não está configurado",
+    "configure_provider": "Configurar {{provider}}",
+    "provider_settings": "Configurações de {{provider}}",
+    "manage_providers": "Gerenciar provedores de IA",
+    "ollama_connecting": "Conectando ao Ollama…",
+    "ollama_offline": "O Ollama está offline",
+    "ollama_empty": "Nenhum modelo compatível do Ollama encontrado",
+    "ollama_retry": "Tentar novamente",
+    "add_context": "Adicionar contexto",
+    "add_active_file": "Adicionar arquivo ativo",
+    "add_open_tabs": "Adicionar abas abertas",
+    "search_open_tabs": "Pesquisar abas abertas…",
+    "no_open_tabs": "Nenhuma aba aberta",
+    "no_context_files_available": "Não há mais arquivos abertos para adicionar",
+    "selected_context_files": "Arquivos de contexto ({{count}}/8)",
+    "context_limit_reached": "Você pode adicionar até 8 arquivos",
+    "remove_attachment": "Remover {{name}}",
+    "attachment_missing": "O arquivo não existe mais",
+    "attachment_unreadable": "Não foi possível ler o arquivo",
+    "attachment_binary": "Somente arquivos de texto podem ser usados como contexto",
+    "attachment_too_many": "Você pode anexar até 8 arquivos",
+    "attachment_truncated": "O conteúdo foi truncado para caber no limite de contexto",
+    "attachment_errors": "Corrija os erros dos anexos antes de enviar",
+    "send": "Enviar",
+    "stop": "Parar",
+    "working": "O assistente está trabalhando",
+    "scroll_to_bottom": "Rolar até o fim",
+    "edit": "Editar",
+    "save_edit": "Salvar alterações",
+    "cancel_edit": "Cancelar edição",
+    "regenerate": "Gerar novamente",
+    "previous_branch": "Ramificação anterior",
+    "next_branch": "Próxima ramificação",
+    "branch_position": "{{current}} de {{total}}",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "delete": "Excluir",
+    "new_chat_confirm_title": "Iniciar uma nova conversa?",
+    "new_chat_confirm_description": "Isso apagará a conversa no espaço de trabalho atual.",
+    "new_chat_confirm": "Iniciar nova conversa",
+    "cancel": "Cancelar",
+    "export_empty": "Não há conversa para exportar"
+  },
+  "capricorn": {
+    "heading": {
+      "collapseSection": "Recolher seção",
+      "expandSection": "Expandir seção"
+    },
+    "blockTypeMenu": {
+      "title": "Converter para",
+      "multiple": "Converter {{count}} blocos",
+      "search": "Pesquisar tipos de bloco…",
+      "noResults": "Nenhum tipo de bloco correspondente",
+      "group": {
+        "text": "Texto",
+        "list": "Listas",
+        "source": "Código-fonte"
+      },
+      "hint": "↑↓ Selecionar · Enter Converter · Esc Cancelar",
+      "reason": {
+        "readOnly": "Este documento não pode ser editado.",
+        "unsupported": "A seleção contém um bloco que não pode ser convertido.",
+        "containers": "Selecione blocos consecutivos no mesmo contêiner para combiná-los.",
+        "html": "O conteúdo precisa ser um bloco de código-fonte HTML independente.",
+        "math": "Uma fórmula não pode preservar os delimitadores nem as linhas em branco nas extremidades deste código-fonte.",
+        "stale": "Os blocos selecionados foram alterados. Abra o menu novamente."
+      }
+    },
+    "blockHandle": {
+      "convertOrMove": "Clique para converter · Arraste para mover",
+      "convert": "Converter {{target}}",
+      "kind": {
+        "block": "bloco",
+        "blockquote": "citação",
+        "code": "código",
+        "footnote": "nota de rodapé",
+        "frontmatter": "frontmatter",
+        "heading1": "título 1",
+        "heading2": "título 2",
+        "heading3": "título 3",
+        "heading4": "título 4",
+        "heading5": "título 5",
+        "heading6": "título 6",
+        "horizontalRule": "separador",
+        "html": "HTML",
+        "listBullet": "item de lista com marcadores",
+        "listOrdered": "item de lista numerada",
+        "listTask": "item de lista de tarefas",
+        "math": "fórmula",
+        "mermaid": "diagrama Mermaid",
+        "paragraph": "parágrafo",
+        "rawMarkdown": "Markdown bruto",
+        "reference": "referência",
+        "table": "tabela"
+      },
+      "moveOrSelect": "Mover ou selecionar {{target}}",
+      "select": "Selecionar {{target}}"
+    },
+    "selection": {
+      "selectAllHint": "Pressione {{shortcut}} novamente para selecionar o documento inteiro",
+      "selectAllTableHint": "Pressione {{shortcut}} novamente para selecionar a tabela inteira"
+    },
+    "selectionToolbar": {
+      "label": "Formatação de texto",
+      "bold": "Negrito",
+      "italic": "Itálico",
+      "strike": "Tachado",
+      "highlight": "Realce",
+      "link": "Inserir link"
+    },
+    "placeholder": {
+      "default": "Digite '/' para ver os comandos"
+    },
+    "clipboard": {
+      "copied_markdown": "Copiado como Markdown",
+      "cut_markdown": "Recortado como Markdown",
+      "retained": "Copiado. O conteúdo original foi mantido.",
+      "failed": "Falha ao gravar na área de transferência. O conteúdo original foi mantido."
+    },
+    "livePreview": {
+      "largeDeferred": "A visualização grande está pausada. O código-fonte completo continua disponível.",
+      "renderLarge": "Renderizar visualização grande (pode demorar)",
+      "actions": "Ações do bloco {{kind}}",
+      "copied": "Código-fonte copiado",
+      "copy": "Copiar código-fonte",
+      "copying": "Copiando código-fonte…",
+      "editSource": "Editar código-fonte",
+      "editSourceForKind": "Editar código-fonte {{kind}}",
+      "hideSource": "Ocultar código-fonte",
+      "kind": {
+        "html": "HTML",
+        "math": "Math",
+        "mermaid": "Mermaid"
+      },
+      "preview": "Visualização de {{kind}}",
+      "retryCopy": "Tentar copiar o código-fonte novamente",
+      "sourceEditor": "Editor de código-fonte {{kind}}"
+    },
+    "sourceFallback": {
+      "longLine": "Linhas muito longas rolam horizontalmente para manter a visualização do código-fonte responsiva.",
+      "loading": "Preparando visualização do código-fonte…",
+      "truncated": "Somente o trecho inicial é exibido enquanto a visualização completa do código-fonte carrega."
+    },
+    "link": {
+      "title": "Título",
+      "markdown": "Editar Markdown",
+      "remove": "Remover link",
+      "copy": "Copiar endereço",
+      "copyFailed": "Não foi possível copiar o endereço.",
+      "sharedReference": "As alterações de endereço e título se aplicam a todos os links que usam esta referência.",
+      "open": "Abrir link",
+      "actions": "Ações do link",
+      "edit": "Editar link",
+      "text": "Texto",
+      "address": "Endereço",
+      "save": "Salvar link",
+      "cancel": "Cancelar",
+      "invalidAddress": "Digite um endereço de link válido."
+    },
+    "image": {
+      "unavailable": "Imagem indisponível",
+      "loading": "Carregando imagem…",
+      "edit": "Editar endereço",
+      "resetSize": "Restaurar tamanho automático"
+    },
+    "preview": {
+      "retry": "Tentar novamente"
+    },
+    "editor": {
+      "loading": "Carregando editor Capricorn",
+      "opening": "Abrindo documento",
+      "load_failed": "Não foi possível carregar o editor Capricorn",
+      "preparation_failed": "Falha na preparação do documento em segundo plano. Tente novamente."
+    },
+    "snippets": {
+      "title": "Inserir trecho",
+      "search": "Pesquisar trechos…",
+      "manage": "Gerenciar trechos…",
+      "blank": "Novo bloco vazio",
+      "stale": "O ponto de inserção foi alterado. Abra o seletor novamente."
+    },
+    "table": {
+      "actions": "Ações da tabela",
+      "alignment": "Alinhamento da coluna",
+      "copy": "Copiar",
+      "cut": "Recortar",
+      "paste": "Colar",
+      "selectAll": "Selecionar tudo",
+      "action": {
+        "column": "Ações da coluna",
+        "columnAt": "Ações da coluna {{index}}",
+        "row": "Ações da linha",
+        "rowAt": "Ações da linha {{index}}"
+      },
+      "addColumnAfter": "Inserir coluna à direita",
+      "addColumnBefore": "Inserir coluna à esquerda",
+      "addRowAfter": "Inserir linha abaixo",
+      "addRowBefore": "Inserir linha acima",
+      "alignCenter": "Centralizar coluna",
+      "alignLeft": "Alinhar coluna à esquerda",
+      "alignNone": "Limpar alinhamento da coluna",
+      "alignRight": "Alinhar coluna à direita",
+      "deleteColumn": "Excluir coluna atual",
+      "deleteRow": "Excluir linha atual",
+      "deleteTable": "Excluir tabela",
+      "duplicateRow": "Duplicar linha",
+      "duplicateColumn": "Duplicar coluna",
+      "moveRowUp": "Mover linha para cima",
+      "moveRowDown": "Mover linha para baixo",
+      "moveColumnLeft": "Mover coluna para a esquerda",
+      "moveColumnRight": "Mover coluna para a direita",
+      "selectRow": "Selecionar linha",
+      "selectColumn": "Selecionar coluna",
+      "dragRow": "Arrastar linha para reordenar",
+      "dragColumn": "Arrastar coluna para reordenar",
+      "dragRowPosition": "Mover linha {{from}} para a posição {{to}}",
+      "dragColumnPosition": "Mover coluna {{from}} para a posição {{to}}",
+      "movedRow": "Linha movida para a posição {{position}}",
+      "movedColumn": "Coluna movida para a posição {{position}}"
+    }
+  },
+  "inline_insert": {
+    "insert_link": "Inserir link",
+    "edit_link": "Editar link",
+    "insert_image": "Inserir imagem",
+    "edit_image": "Editar imagem",
+    "address": "Endereço",
+    "text": "Texto",
+    "alt": "Descrição",
+    "optional": "Opcional",
+    "choose_image": "Escolher imagem local…",
+    "change": "Alterar",
+    "replace_image": "Substituir imagem",
+    "edit_alt": "Editar descrição",
+    "remove": "Remover",
+    "unlink": "Remover link",
+    "insert": "Inserir",
+    "save": "Salvar",
+    "close": "Fechar",
+    "inserting": "Inserindo…",
+    "open": "Abrir link",
+    "copy": "Copiar endereço",
+    "invalid_address": "Digite um endereço ou caminho de arquivo válido.",
+    "local_error": "Não foi possível selecionar esta imagem. Tente novamente.",
+    "insert_error": "Não foi possível inserir. Sua entrada foi mantida.",
+    "open_error": "Não foi possível abrir este link.",
+    "copy_error": "Não foi possível copiar este endereço.",
+    "single_block": "Selecione o texto em um único parágrafo ou célula da tabela."
+  },
+  "history": {
+    "title": "Histórico local",
+    "description": "Revise as alterações e restaure uma versão como rascunho não salvo.",
+    "enabled": "Ativar histórico local",
+    "enabled_description": "Manter versões dos documentos abertos no MarkFlowy. A proteção de rascunhos não salvos continua ativa mesmo quando esta opção está desativada.",
+    "retention": "Histórico comum: 30 dias, até 100 versões por documento, com limite desejado de 1 GB. Rascunhos não salvos e sessões de edição ativas são protegidos.",
+    "count": "{{count}} versões",
+    "clear_title": "Gerenciar histórico armazenado",
+    "clear_description": "Exclua o histórico sem excluir seus arquivos ou rascunhos não salvos. Enquanto o recurso estiver ativado, novas alterações poderão gerar um novo histórico.",
+    "clear_workspace": "Excluir histórico do espaço de trabalho atual",
+    "clear_loose": "Excluir histórico de documentos independentes",
+    "clear_all": "Excluir todo o histórico dos espaços de trabalho",
+    "clear_confirm": "Excluir permanentemente {{count}} versões? É possível liberar até {{size}} MB de conteúdo não compartilhado. Arquivos e rascunhos não salvos serão mantidos.",
+    "all_workspaces": "Todos os espaços de trabalho e documentos independentes",
+    "loose": "Documentos independentes",
+    "delete": "Excluir histórico",
+    "empty": "Ainda não há histórico.",
+    "previous": "Anterior",
+    "next": "Próximo",
+    "before": "Antes das alterações",
+    "after": "Resultado mais recente",
+    "refresh": "Há novas alterações · atualizar comparação",
+    "loading": "Carregando comparação…",
+    "compare_failed": "Não foi possível carregar a comparação. O texto original está sendo exibido; você ainda pode restaurar esta versão.",
+    "select": "Selecione uma versão para inspecionar as alterações.",
+    "restore_before": "Restaurar estado anterior às alterações",
+    "restore": "Restaurar esta versão",
+    "merging": "Agrupando alterações",
+    "kind_save": "Salvo",
+    "kind_external": "Alterações externas",
+    "kind_ai": "Edição por IA",
+    "kind_checkpoint": "Ponto de verificação do rascunho",
+    "kind_restore": "Antes da restauração",
+    "kind_discard": "Antes de descartar",
+    "kind_overwrite": "Antes de sobrescrever",
+    "kind_autosave": "Salvamento automático",
+    "kind_opened": "Versão inicial",
+    "protected": "Rascunho protegido",
+    "pending": "Protegendo rascunho…",
+    "failed": "Falha ao proteger o rascunho",
+    "paused": "Rascunho restaurado · salve manualmente",
+    "large": "Documento grande: exibindo o texto original.",
+    "compare_current": "Comparar com o rascunho atual",
+    "compare_version": "Comparar com outra versão",
+    "compare_batch": "Comparar antes e depois",
+    "snapshot": "Versão selecionada",
+    "current": "Rascunho atual",
+    "versions": "Versões",
+    "split": "Visualização dividida",
+    "unified": "Visualização unificada",
+    "full_context": "Mostrar contexto completo",
+    "previous_change": "Alteração anterior",
+    "next_change": "Próxima alteração",
+    "no_changes": "Nenhuma diferença",
+    "change_position": "{{current}} / {{total}} alterações",
+    "added_lines": "Linhas adicionadas: {{count}}",
+    "removed_lines": "Linhas removidas: {{count}}",
+    "unchanged_lines": "$ linhas sem alterações · clique para expandir",
+    "retry": "Tentar proteger novamente",
+    "coarse": "As diferenças são simplificadas dentro do limite de processamento; o texto completo é preservado.",
+    "compute_large": "Calcular diferenças de documentos grandes",
+    "deleted": "{{count}} versões do histórico excluídas.",
+    "kind_write-pending": "Gravação de arquivo interrompida",
+    "budget_limited": "O armazenamento do histórico atingiu o limite desejado. Os pontos de verificação automáticos e as novas sessões de IA foram pausados; a proteção de rascunhos e as cópias de segurança continuam. Exclua o histórico desnecessário para retomar.",
+    "kind_recovered-save": "Salvamento recuperado"
+  },
+  "document_preview": {
+    "html_title": "Visualização de HTML",
+    "pdf_title": "Leitor de PDF",
+    "refresh": "Atualizar",
+    "run_scripts": "Executar scripts",
+    "loading": "Carregando…",
+    "load_failed": "Não foi possível carregar este arquivo.",
+    "retry": "Tentar novamente",
+    "resources_blocked": "Recursos não carregados",
+    "resource_folder_hint": "Abra como espaço de trabalho a pasta que contém este documento e seus recursos; em seguida, atualize a visualização.",
+    "resource_errors": {
+      "not_found": "Arquivo não encontrado.",
+      "permission_denied": "Permissão para ler este arquivo negada.",
+      "outside_root": "Fora da pasta ou do espaço de trabalho deste documento.",
+      "too_large": "O recurso ou a visualização expandida excede o limite de tamanho.",
+      "unsupported": "Tipo de recurso ou URL não compatível.",
+      "invalid_css": "Não foi possível analisar esta folha de estilos.",
+      "resource_limit": "Importação circular ou limite de quantidade/profundidade de recursos atingido.",
+      "read_failed": "Não foi possível ler este recurso."
+    },
+    "previous_page": "Página anterior",
+    "next_page": "Próxima página",
+    "page": "Número da página",
+    "zoom_out": "Diminuir zoom",
+    "zoom_in": "Aumentar zoom",
+    "fit_width": "Ajustar à largura",
+    "search": "Pesquisar no PDF",
+    "previous_match": "Ocorrência anterior",
+    "next_match": "Próxima ocorrência",
+    "password_required": "Digite a senha do PDF",
+    "password_incorrect": "Senha incorreta. Tente novamente.",
+    "unlock": "Desbloquear",
+    "cancel": "Cancelar"
+  },
+  "snippets": {
+    "library": "Biblioteca de trechos",
+    "description": "Reutilize fórmulas, diagramas e código em espaços de trabalho locais.",
+    "kind": "Tipo",
+    "kinds": {
+      "math": "Fórmula",
+      "mermaid": "Mermaid",
+      "code": "Código"
+    },
+    "search": "Pesquisar trechos…",
+    "new": "Novo trecho",
+    "copy": "Duplicar",
+    "copyCustom": "Copiar como personalizado",
+    "copySuffix": "(cópia)",
+    "show": "Mostrar",
+    "hide": "Ocultar",
+    "hidden": "Oculto",
+    "delete": "Excluir",
+    "deleteTitle": "Excluir “{{title}}”?",
+    "builtin": "Integrado",
+    "custom": "Personalizado",
+    "unsaved": "Alterações não salvas",
+    "name": "Nome",
+    "language": "Linguagem de programação",
+    "languagePlaceholder": "por exemplo, typescript; deixe vazio para texto simples",
+    "source": "Código-fonte",
+    "sourceHelp": "Digite somente o código-fonte, sem os delimitadores externos ``` ou $$. O texto e os espaços em branco serão inseridos literalmente; as variáveis não serão expandidas.",
+    "save": "Salvar",
+    "discard": "Descartar",
+    "unsavedTitle": "Salvar alterações do trecho?",
+    "unsavedDescription": "Salve ou descarte suas alterações antes de sair deste trecho.",
+    "loadError": "Não foi possível carregar os trechos",
+    "saveError": "Não foi possível salvar as alterações",
+    "retry": "Tentar novamente",
+    "noResults": "Nenhum trecho correspondente",
+    "conflict": "A biblioteca foi alterada em outra janela. Seu rascunho foi preservado. Duplique-o como um novo trecho ou descarte o rascunho e selecione o original novamente.",
+    "preview": "Visualização",
+    "previewAgain": "Atualizar visualização",
+    "previewStale": "O código-fonte foi alterado. Atualize a visualização.",
+    "previewError": "Visualização indisponível. Você ainda pode salvar o código-fonte.",
+    "builtins": {
+      "math-fraction": "Fração",
+      "math-root": "Raiz quadrada",
+      "math-sum": "Somatório",
+      "math-matrix": "Matriz",
+      "mermaid-flow": "Fluxograma",
+      "mermaid-sequence": "Diagrama de sequência",
+      "mermaid-class": "Diagrama de classes",
+      "mermaid-state": "Diagrama de estados",
+      "code-json": "Objeto JSON",
+      "code-typescript": "Função TypeScript",
+      "code-python": "Função Python",
+      "code-bash": "Script Bash"
+    }
+  },
+  "pdf_export": {
+    "title": "Exportar PDF",
+    "description": "Usa o Chrome, Chromium ou Edge instalado no computador.",
+    "method_description": "Escolha como exportar este documento como PDF.",
+    "method": "Método de exportação",
+    "method_browser": "Exportação pelo navegador",
+    "method_native": "Exportação pelo aplicativo",
+    "native_hint": "Não é necessário instalar um navegador. Os títulos podem ser incluídos como marcadores no PDF.",
+    "native_ready": "Pronto para exportar no aplicativo.",
+    "paper_size": "Tamanho do papel",
+    "orientation": "Orientação",
+    "portrait": "Retrato",
+    "landscape": "Paisagem",
+    "include_outline": "Incluir marcadores de títulos",
+    "outline_hint": "Transforma os títulos do documento em um sumário navegável no PDF. Documentos sem títulos não terão marcadores.",
+    "export": "Exportar PDF",
+    "print": "Imprimir…",
+    "exporting": "Exportando PDF…",
+    "success": "PDF salvo em {{path}}.",
+    "failed": "Falha ao exportar PDF. Seu documento foi preservado.",
+    "image_warning": "{{count}} imagens não puderam ser carregadas. Confira o PDF exportado.",
+    "browser_check_failed": "Falha ao detectar o navegador. Tente novamente.",
+    "cancelled": "Exportação do PDF cancelada.",
+    "system_print": "Impressão do sistema…",
+    "system_print_hint": "A impressão do sistema também está disponível. Salvar como PDF pela caixa de diálogo de impressão não garante a inclusão de marcadores de títulos.",
+    "browser": {
+      "error_details": "Detalhes do erro",
+      "checking": "Verificando o navegador para exportação de PDF…",
+      "ready": "O navegador {{version}} está pronto.",
+      "not_found": "Nenhum navegador compatível para exportação de PDF foi encontrado.",
+      "incompatible": "Esta versão do navegador não oferece suporte à exportação de PDF com marcadores de títulos.",
+      "settings_hint": "Escolha aqui um navegador Chrome, Chromium ou Edge instalado."
+    }
+  },
+  "file_deletion": {
+    "permanent_title": "Excluir “{{name}}” permanentemente?",
+    "trash_title": "Mover “{{name}}” para a lixeira?",
+    "permanent_action": "Excluir permanentemente",
+    "trash_action": "Mover para a lixeira",
+    "counting": "Contando…",
+    "counts": "{{files}} arquivos · {{folders}} subpastas",
+    "files_only": "{{files}} arquivos",
+    "folders_only": "{{folders}} subpastas",
+    "short_scope": "Inclui itens ocultos e itens ignorados pelos filtros",
+    "short_partial": "Pelo menos {{files}} arquivos · {{folders}} subpastas",
+    "partial_hint": "A contagem está incompleta. Pode haver mais itens.",
+    "empty": "Pasta vazia",
+    "symlink": "Somente o link será removido. O destino não será afetado.",
+    "count_failed": "Não foi possível contar o conteúdo. Tente novamente.",
+    "permanent_warning": "A exclusão permanente não pode ser desfeita."
+  }
+}

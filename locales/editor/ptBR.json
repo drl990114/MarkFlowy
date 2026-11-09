@@ -1,0 +1,89 @@
+{
+  "editor": {
+    "common": {
+      "loading": "Carregando",
+      "accept": "Aceitar"
+    },
+    "image": {
+      "source": "Origem",
+      "sourcePlaceholder": "Insira uma URL ou caminho da imagem",
+      "embeddedSource": "Imagem incorporada",
+      "replaceSource": "Substituir",
+      "replaceSourcePlaceholder": "Cole uma URL, caminho ou data URL de substituição",
+      "alt": "Texto alternativo",
+      "altPlaceholder": "Descreva esta imagem",
+      "referenceLabel": "Rótulo de referência",
+      "referenceLabelPlaceholder": "Digite um rótulo de referência",
+      "cancel": "Cancelar",
+      "apply": "Aplicar",
+      "saving": "Salvando...",
+      "updateError": "Não foi possível atualizar a origem da imagem. Tente novamente.",
+      "emptyTitle": "Nenhuma imagem de origem",
+      "emptyDescription": "Clique para adicionar uma",
+      "errorTitle": "Imagem indisponível",
+      "errorDescription": "Clique para editar a origem"
+    },
+    "table": {
+      "insertColumnAfter": "inserir coluna após",
+      "insertColumnBefore": "inserir coluna antes",
+      "insertRowAfter": "inserir linha após",
+      "insertRowBefore": "inserir linha antes",
+      "alignLeft": "Alinhar à esquerda",
+      "alignCenter": "Centralizar",
+      "alignRight": "Alinhar à direita",
+      "deleteColumn": "excluir coluna",
+      "deleteRow": "excluir linha"
+    },
+    "codemirror": {
+      "searchInputPlaceholder": "Idioma de entrada",
+      "frontMatterPlaceholder": "insira o front matter do yaml"
+    },
+    "ai": {
+      "generate": "Gerar texto",
+      "stop": "Parar",
+      "retry": "Tentar novamente",
+      "regenerate": "Regenerar",
+      "preview": "Pré-visualizar",
+      "error": "Ocorreu um erro",
+      "prompt": "Prompt"
+    },
+    "toolbar": {
+      "undo": "Desfazer",
+      "redo": "Refazer",
+      "separator": "Inserir separador",
+      "blockquote": "Citação",
+      "bold": "Negrito",
+      "italic": "Itálico",
+      "codeText": "Texto de código",
+      "codeBlock": "Bloco de código",
+      "heading": "Título",
+      "bulletList": "Lista com marcadores",
+      "orderedList": "Lista ordenada",
+      "taskList": "Lista de tarefas"
+    },
+    "slashMenu": {
+      "searchPlaceholder": "Pesquisar itens do menu...",
+      "noResults": "Nenhum resultado",
+      "image": "Imagem",
+      "toNavigate": "para navegar",
+      "toSelect": "para selecionar",
+      "toCancel": "para cancelar"
+    },
+    "blockType": {
+      "delete": "Excluir",
+      "paragraph": "Parágrafo",
+      "heading": "Título {{level}}",
+      "codeBlock": "Bloco de código",
+      "blockquote": "Citação",
+      "bulletList": "Lista com marcadores",
+      "orderedList": "Lista ordenada",
+      "taskList": "Lista de tarefas",
+      "transformTo": "Transformar em"
+    },
+    "blockTypeGroup": {
+      "text": "Texto",
+      "list": "Lista",
+      "other": "Outros"
+    }
+  }
+}

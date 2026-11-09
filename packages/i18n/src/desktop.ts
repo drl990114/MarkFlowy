@@ -23,6 +23,8 @@ const loaders = {
     Promise.all([import('../../../locales/ja.json'), import('../../../locales/editor/ja.json')]),
   vi: () =>
     Promise.all([import('../../../locales/vi.json'), import('../../../locales/editor/vi.json')]),
+  'pt-BR': () =>
+    Promise.all([import('../../../locales/pt-BR.json'), import('../../../locales/editor/ptBR.json')]),
 }
 const pending = new Map<Langs, Promise<Resource>>()
 const languageKey = (lng?: string): Langs =>

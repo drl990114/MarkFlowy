@@ -1,0 +1,367 @@
+{
+  "common": {
+    "docs": "Documentação"
+  },
+  "docs": {
+    "tableOfContents": "Nesta página",
+    "content": {
+      "description": "Comece com MarkFlowy: instale o aplicativo, edite arquivos Markdown locais, alterne entre edição visual e de código-fonte e configure a assistência opcional de IA.",
+      "fallback": "Esses guias estão disponíveis atualmente em inglês."
+    },
+    "sidebar": {
+      "gettingStarted": "Primeiros passos"
+    }
+  },
+  "mock": {
+    "intro": {
+      "title": "Bem-vindo ao MarkFlowy!",
+      "ai_label": "Com IA:",
+      "ai_desc": "Suporte nativo a Copilot, tradução, resumo e modelos populares como DeepSeek/ChatGPT.",
+      "lightweight_label": "Leve:",
+      "lightweight_desc": "Construído com Tauri para macOS, Windows e Linux. O tamanho do pacote varia conforme a plataforma e o instalador.",
+      "modes_label": "Modos de edição:",
+      "modes_desc": "Alterne entre editor visual e código-fonte.",
+      "files_label": "Suporte a arquivos:",
+      "files_desc": "Manipula Markdown, JSON, TXT e muito mais.",
+      "themes_label": "Temas personalizados:",
+      "themes_desc": "Crie e compartilhe seus próprios estilos e temas do editor.",
+      "hotkeys_label": "Atalhos:",
+      "hotkeys_desc": "Atalhos de teclado totalmente personalizáveis.",
+      "images_label": "Imagens inteligentes:",
+      "images_desc": "Gerenciamento fácil de caminhos ou conversão Base64.",
+      "manager_label": "Gerenciador de arquivos:",
+      "manager_desc": "Visão em árvore poderosa com busca global.",
+      "multilingual_label": "Multilíngue:",
+      "multilingual_desc": "Suporte nativo para 5+ idiomas principais.",
+      "footer": "Aproveite para experimentar o editor!"
+    },
+    "config": {
+      "description": "Um editor de Markdown local-first focado em documentos grandes e IA opcional."
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "MarkFlowy",
+      "subtitle": "Um editor de Markdown local-first focado em documentos grandes e IA opcional.",
+      "description": "Encontre seu fluxo de escrita com o MarkFlowy, um editor de Markdown local-first para macOS, Windows e Linux. Edição visual e de código-fonte, com assistência opcional de IA.",
+      "download": "Baixar agora",
+      "metaTitle": "MarkFlowy — Editor de Markdown local-first"
+    },
+    "statRings": {
+      "platforms": "Plataformas",
+      "files": "Arquivos locais",
+      "optional": "Opcional"
+    },
+    "features": {
+      "lead": "Um editor minimalista, porém poderoso, que combina inteligência de IA com uma experiência de escrita refinada — feito para quem valoriza foco e cuidado.",
+      "feature1": {
+        "title": "Múltiplos modos de edição",
+        "description": "Suporta edição em modo de código-fonte e WYSIWYG para atender a diferentes cenários, além de permitir edição de arquivos além de Markdown, como JSON, TXT, etc."
+      },
+      "feature2": {
+        "title": "Assistente de IA integrado",
+        "description": "Integra um poderoso assistente de IA que oferece geração de texto, conversas, tradução e outras funções para melhorar a eficiência de edição."
+      },
+      "feature3": {
+        "title": "Temas personalizados",
+        "description": "Oferece temas claro e escuro integrados e suporte a temas personalizados para atender às necessidades pessoais."
+      },
+      "capability1": {
+        "tag": "Edição",
+        "title": "WYSIWYG e código-fonte",
+        "body": "Alternância perfeita entre os modos de editor visual e de código-fonte. Edite Markdown, JSON, TXT e muito mais com total flexibilidade."
+      },
+      "capability2": {
+        "tag": "IA",
+        "title": "Copilot e assistente inteligente",
+        "body": "Conecte provedores opcionais de IA para chat, tradução, resumos e Copilot. Escolha serviços em nuvem ou execute um modelo local com Ollama."
+      },
+      "capability3": {
+        "tag": "Desempenho",
+        "title": "Edição de documentos grandes",
+        "body": "Carregamento e renderização otimizados tornam a abertura, rolagem e edição de documentos grandes mais suaves."
+      },
+      "capability4": {
+        "tag": "Personalização",
+        "title": "Temas e atalhos",
+        "body": "Crie seus próprios temas de editor e compartilhe-os. Atalhos de teclado totalmente personalizáveis para combinar com seu fluxo de trabalho."
+      }
+    },
+    "contributors": {
+      "title": "Criado por muitos colaboradores",
+      "titleLead": "Criado por muitos",
+      "titleAccent": "colaboradores",
+      "description": "Obrigado a todos os desenvolvedores que contribuíram para o MarkFlowy",
+      "count": "{{count}} colaboradores em órbita",
+      "viewAll": "Ver todos os contribuidores",
+      "globeLabel": "Globo de colaboradores globais do MarkFlowy",
+      "orbitLabel": "Links de perfis de colaboradores orbitando o globo"
+    },
+    "guides": {
+      "ollamaLink": "Configurar IA local",
+      "introLink": "Leia a introdução"
+    }
+  },
+  "releases": {
+    "title": "Lançamentos",
+    "meta_description": "Explore os lançamentos do MarkFlowy, novas funções de edição, melhorias e correções. Baixe o editor de Markdown para macOS, Windows e Linux.",
+    "description_before_link": "Aqui estão os lançamentos mais recentes do MarkFlowy. Clique em uma versão para ver suas alterações e atualizações detalhadas. Baixe em",
+    "github_link": "Lançamentos no GitHub",
+    "description_after_link": ".",
+    "see_details": "Ver detalhes"
+  },
+  "theme": {
+    "system": "Sistema",
+    "light": "Modo claro",
+    "dark": "Modo escuro"
+  },
+  "navigation": {
+    "home": "Início",
+    "docs": "Documentação",
+    "download": "Baixar",
+    "github": "GitHub",
+    "theme": "Tema",
+    "language": "Idioma",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
+    "webApp": "Aplicativo web",
+    "releases": "Lançamentos"
+  },
+  "fileTitle": {
+    "Snippets": "Biblioteca de trechos",
+    "intro": "Introdução",
+    "CustomTheme": "Tema personalizado",
+    "CODE_OF_CONDUCT": "Código de Conduta",
+    "CONTRIBUTING": "Contribuição",
+    "Community": "Diretrizes da comunidade",
+    "Extension": "Guia de extensões",
+    "License": "Licença",
+    "UseCopilotWithOllama": "Usando Copilot com Ollama"
+  },
+  "auth": {
+    "login": "Entrar",
+    "register": "Cadastrar-se",
+    "email": "E-mail",
+    "emailPlaceholder": "Digite seu e-mail",
+    "displayName": "Nome de exibição",
+    "displayNamePlaceholder": "Digite seu nome de exibição",
+    "verificationCode": "Código de verificação",
+    "codePlaceholder": "Digite o código de 8 dígitos",
+    "sendCode": "Enviar código",
+    "resend": "Reenviar código",
+    "resendCode": "Reenviar em {{seconds}}s",
+    "signIn": "Entrar",
+    "createAccount": "Criar conta",
+    "changeEmail": "Alterar",
+    "autoRegisterHint": "E-mails não registrados serão cadastrados automaticamente",
+    "backToHome": "Voltar para a página inicial",
+    "continueWithGitHub": "Continuar com GitHub",
+    "githubRedirecting": "Redirecionando para o GitHub...",
+    "githubLoginError": "Não foi possível iniciar o login com GitHub",
+    "orContinueWithEmail": "ou continuar com e-mail",
+    "githubCompleting": "Concluindo login com GitHub",
+    "githubCallbackFailed": "Falha no login com GitHub",
+    "githubCallbackError": "O link de login do GitHub é inválido ou expirou. Tente novamente.",
+    "githubAccountLinkRequired": "Já existe uma conta com este e-mail. Faça login com e-mail e depois vincule o GitHub nas Configurações.",
+    "backToSignIn": "Voltar para o login",
+    "welcomeBack": "Bem-vindo de volta",
+    "welcomeDescription": "Faça login em seu espaço de trabalho e continue de onde parou."
+  },
+  "site": {
+    "nav": {
+      "features": "Recursos",
+      "main": "Navegação principal",
+      "skip": "Ir para o conteúdo",
+      "writing": "Escrever e editar",
+      "editor": "Editor de Markdown",
+      "editorDescription": "Edição visual com modo de código-fonte",
+      "demoDescription": "Comece a escrever sem instalar",
+      "workspace": "Seu espaço de trabalho",
+      "files": "Arquivos locais e documentos grandes",
+      "filesDescription": "Formatos abertos, organização fluida",
+      "assistant": "Assistência opcional de IA",
+      "assistantDescription": "Serviços em nuvem ou modelos locais Ollama",
+      "themes": "Temas e personalização",
+      "themesDescription": "Faça o editor parecer com você",
+      "start": "Começar",
+      "downloadDescription": "Para macOS, Windows e Linux",
+      "webDescription": "Seu espaço de trabalho no navegador · Beta",
+      "featuresDescription": "Descubra o que o MarkFlowy pode fazer",
+      "quickstart": "Início rápido",
+      "explore": "Explorar mais",
+      "support": "Suporte",
+      "openSource": "Código aberto",
+      "buildTogether": "Construir junto",
+      "githubDescription": "Navegue pelo código-fonte e acompanhe o desenvolvimento",
+      "contributeDescription": "Comece com uma issue ou uma melhoria",
+      "feedbackDescription": "Reporte problemas e compartilhe ideias",
+      "contributors": "Colaboradores",
+      "contributorsDescription": "Conheça as pessoas que constroem o MarkFlowy",
+      "back": "Voltar"
+    },
+    "hero": {
+      "eyebrow": "LOCAL FIRST. IDEIAS EM MOVIMENTO.",
+      "title": "Suas ideias, em fluxo total.",
+      "lead": "Um editor de Markdown feito para edição fluida e escrita focada.",
+      "description": "Local-first, com edição visual e de código-fonte. Seu assistente de IA pode usar a Skill oficial para abrir, salvar e exportar documentos no MarkFlowy.",
+      "try": "Experimente online",
+      "platforms": "Feito para o seu jeito de trabalhar"
+    },
+    "preview": {
+      "eyebrow": "SEU ESPAÇO DE TRABALHO LOCAL",
+      "title": "Uma pasta para tudo o que está tomando forma.",
+      "description": "Abra uma pasta local para reunir anotações, rascunhos e arquivos de projeto. Navegue pelos seus arquivos, siga o sumário do documento e continue escrevendo na mesma janela.",
+      "note": "MarkFlowy Desktop · Espaço de trabalho local",
+      "screenshotAlt": "MarkFlowy desktop em modo claro, mostrando arquivos locais, o editor visual e o sumário do documento"
+    },
+    "singleFile": {
+      "eyebrow": "MODO DE ARQUIVO ÚNICO",
+      "title": "Um arquivo. Sua atenção total.",
+      "description": "Abra um arquivo Markdown e comece a escrever. Sem configuração de espaço de trabalho, com as mesmas ferramentas do editor prontas quando você precisar.",
+      "open": {
+        "title": "Abra um arquivo e comece",
+        "body": "Trabalhe diretamente com um documento local ou comece uma nova anotação e salve-a no lugar certo."
+      },
+      "focus": {
+        "title": "Mantenha a página tranquila",
+        "body": "Uma barra de título compacta deixa espaço para suas palavras. Clique no nome do documento para renomeá-lo."
+      },
+      "grow": {
+        "title": "Adicione uma pasta quando precisar",
+        "body": "Abra uma pasta local quando uma nota se torna um projeto. Suas ferramentas familiares de escrita vêm com você."
+      },
+      "link": "Explorar a escrita em arquivo único",
+      "note": "MarkFlowy Desktop · Modo de arquivo único",
+      "screenshotAlt": "MarkFlowy Desktop em modo de arquivo único, com um documento Markdown e seu nome de arquivo na barra de título compacta"
+    },
+    "features": {
+      "eyebrow": "PENSADO PARA CONECTAR",
+      "title": "Tudo que sua escrita precisa. Nada no caminho.",
+      "description": "Desde uma nota rápida até um documento longo, construa um fluxo de escrita que pareça com você.",
+      "write": {
+        "title": "Markdown, do jeito que você pensa.",
+        "body": "Escreva visualmente ou aproxime-se mais da fonte. Trabalhe com Markdown, JSON e texto simples em um espaço familiar.",
+        "link": "Explorar o editor",
+        "alt": "Editor desktop do MarkFlowy exibindo um exemplo de escrita"
+      },
+      "local": {
+        "title": "Alto desempenho para rascunhos mais longos.",
+        "body": "Carregamento e renderização otimizados tornam a abertura, rolagem e edição de documentos grandes mais suaves. Trabalhe diretamente com arquivos em suas próprias pastas."
+      },
+      "ai": {
+        "title": "Um pouco de ajuda, quando você precisar.",
+        "body": "Traga seu próprio serviço de IA para conversas, resumos e tradução, ou conecte um modelo local com Ollama.",
+        "alt": "Editor desktop do MarkFlowy com seu painel opcional de assistente de IA"
+      },
+      "personal": {
+        "title": "Faça-se em casa.",
+        "body": "Escolha seu tema, defina seus atalhos e se acomode em um espaço sem distrações que funcione para você.",
+        "link": "Explorar personalização"
+      },
+      "shortcuts": {
+        "write": "Texto em negrito",
+        "focus": "Focar na escrita",
+        "command": "Encontrar um comando"
+      }
+    },
+    "workflow": {
+      "eyebrow": "DO PENSAMENTO AO FINALIZADO",
+      "title": "Um espaço. Todo o seu fluxo de escrita.",
+      "capture": {
+        "title": "Capture o pensamento.",
+        "body": "Abra um único arquivo para uma ideia rápida ou uma pasta para um projeto maior. Comece a escrever sem importar suas anotações.",
+        "visual": "Capture uma ideia"
+      },
+      "refine": {
+        "title": "Encontre as palavras certas.",
+        "body": "Use títulos e o sumário para moldar seu rascunho. Alternem entre edição visual e de código-fonte, com IA opcional para resumos e tradução.",
+        "visual": "Refine seu rascunho"
+      },
+      "share": {
+        "title": "Leve isso com você.",
+        "body": "Mantenha seus arquivos Markdown, exporte HTML ou uma imagem, ou salve em PDF pela caixa de diálogo de impressão do sistema. Leve sua escrita para onde ela precisar ir.",
+        "visual": "Pronto para compartilhar"
+      }
+    },
+    "stats": {
+      "eyebrow": "CONSTRUÍDO EM ABERTO, CRESCENDO JUNTOS",
+      "title": "Pequenas contribuições. Progresso duradouro.",
+      "body": "Uma estrela, um download, uma contribuição. O MarkFlowy cresce com pessoas que se importam com escrita e código aberto.",
+      "stars": "Estrelas no GitHub",
+      "forks": "Forks de código aberto",
+      "downloads": "Downloads de pacotes de lançamento",
+      "source": "Dados públicos do GitHub",
+      "updated": "Atualizado",
+      "downloadNote": "Os downloads incluem instaladores estáveis e pacotes de atualização."
+    },
+    "community": {
+      "eyebrow": "CONSTRUÍDO EM ABERTO",
+      "title": "Melhor, juntos.",
+      "body": "O MarkFlowy cresce com as pessoas que o usam. Leia o código, compartilhe uma ideia, reporte um bug ou ajude a moldar o que vem a seguir.",
+      "thanks": "Possibilitado por nossos colaboradores"
+    },
+    "cta": {
+      "title": "Sua próxima ideia começa aqui.",
+      "body": "Um pouco mais de foco. Muito mais fluxo.",
+      "docs": "Leia a documentação"
+    },
+    "footer": {
+      "product": "Produto",
+      "resources": "Recursos",
+      "community": "Comunidade",
+      "tagline": "Um espaço local-first para ideias se transformarem em palavras.",
+      "contribute": "Contribuir",
+      "feedback": "Feedback e problemas",
+      "privacy": "Política de privacidade",
+      "license": "Licença",
+      "made": "Feito por amor à escrita."
+    },
+    "releases": {
+      "eyebrow": "SEMPRE AVANÇANDO",
+      "latest": "Último lançamento",
+      "empty": "As notas de lançamento estão temporariamente indisponíveis. Você pode encontrar todos os lançamentos no GitHub."
+    }
+  },
+  "workspace": {
+    "title": "Espaços de trabalho",
+    "eyebrow": "SEU ESPAÇO DE ESCRITA",
+    "description": "Continue de onde parou ou conecte um repositório do GitHub para começar algo novo.",
+    "ready": "Pronto para escrever",
+    "syncedCount": "{{count}} espaços de trabalho sincronizados",
+    "settings": "Configurações",
+    "import": "Importar espaço de trabalho",
+    "recent": "Começar a escrever",
+    "pinned": "Sem conta necessária",
+    "demo": "Espaço de trabalho de demonstração",
+    "demoDescription": "Um espaço para experimentar a escrita. Salvo neste navegador.",
+    "local": "Local",
+    "shared": "Compartilhado",
+    "synced": "Sincronizado",
+    "signInRequired": "Faça login para conectar",
+    "connectTitle": "Traga seus repositórios para o MarkFlowy",
+    "connectDescription": "Conecte o GitHub, escolha um repositório e mantenha seus documentos juntos.",
+    "localShared": "Local e compartilhado",
+    "count": "{{count}} espaços de trabalho",
+    "repositories": "{{count}} repositórios",
+    "loading": "Carregando espaços de trabalho...",
+    "emptyTitle": "Seu próximo projeto começa aqui.",
+    "emptyDescription": "Importe um repositório do GitHub para criar seu primeiro espaço de trabalho.",
+    "files": "Arquivos",
+    "editor": "Escrever",
+    "outline": "Estrutura",
+    "panels": "Painéis do espaço de trabalho",
+    "staged": "Alterações",
+    "stagedEmpty": "Suas edições aparecerão aqui.",
+    "source": "Fonte",
+    "previewMode": "Pré-visualização",
+    "save": "Salvar",
+    "saving": "Salvando",
+    "saved": "Salvo",
+    "saveMessage": "Mensagem de salvamento",
+    "commitMessage": "Mensagem de confirmação",
+    "noFile": "Escolha um documento para começar a escrever.",
+    "loadingFiles": "Carregando arquivos...",
+    "loadingFile": "Carregando documento...",
+    "headingCount": "{{count}} títulos"
+  }
+}
