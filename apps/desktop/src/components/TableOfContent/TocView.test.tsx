@@ -1,5 +1,5 @@
 import { runInNewContext } from 'node:vm'
-import { act, cleanup, render, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { useImperativeHandle, useState } from 'react'
 import ts from 'typescript'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -13,6 +13,7 @@ import textEditorSource from '../EditorArea/TextEditor.tsx?raw'
 import { EditorViewType } from '@/constants/editorViewType'
 import type { FileType } from '@/helper/fileTypeHandler'
 import type { ResumeSelection } from '@/stores/editorResumeStore'
+import useLayoutStore from '@/stores/useLayoutStore'
 
 const harness = vi.hoisted(() => ({
   commands: new Map<string, () => void>(),
@@ -68,14 +69,16 @@ vi.mock('../EditorArea/sourceCodeEditorRegistry', () => ({
 vi.mock('../SideBar/SideBarHeader', () => ({
   default: ({ actions }: { actions?: React.ReactNode }) => <>{actions}</>,
 }))
-vi.mock('../SideBar/DockPanelMenu', () => ({ DockPanelMenu: () => null }))
 vi.mock('./HeadingNumberingButton', () => ({
   CapricornHeadingNumberingButton: () => {
     harness.numberingMount()
     return null
   },
 }))
-vi.mock('@/i18n', () => ({ t: (key: string) => key }))
+vi.mock('@/i18n', () => {
+  const t = (key: string) => key
+  return { t, useTranslation: () => ({ t }) }
+})
 vi.mock('@markflowy/interface', () => ({
   TableOfContents: ({ ref, activeId }: { ref: React.Ref<unknown>; activeId?: string }) => {
     const [headings, setHeadings] = useState<{ value: string }[]>([])
@@ -208,6 +211,7 @@ function createCursorOutlineRuntime(prefix = '') {
 
 afterEach(() => {
   cleanup()
+  useLayoutStore.setState({ showOutlineGeneratedNumbers: true })
   setCapricornEditor('file', undefined)
   harness.commands.clear()
   harness.refresh.mockClear()
@@ -222,6 +226,40 @@ afterEach(() => {
   harness.rme.mockReset()
   vi.useRealTimers()
   document.body.replaceChildren()
+})
+
+it('toggles only automatic outline numbers without rereading the editor', async () => {
+  const headings: CapricornHeading[] = [
+    { id: 'authored', level: 1, number: '1', text: '1 Introduction', title: 'Introduction' },
+    { id: 'generated', level: 1, number: null, text: '2. Details', title: '2. Details' },
+  ]
+  const getAll = vi.fn(() => headings)
+  setCapricornEditor('file', {
+    headings: { getAll, subscribe: () => () => {} },
+  } as unknown as CapricornRuntimeAdapter)
+  render(<TocView />)
+
+  const displayedHeadings = () => harness.refresh.mock.lastCall?.[0].newHeadings
+  await waitFor(() => expect(displayedHeadings()).toMatchObject([
+    { id: 'authored', value: 'Introduction', chapter: '1' },
+    { id: 'generated', value: '2. Details', chapter: undefined },
+  ]))
+
+  const menuButton = screen.getByRole('button', { name: 'sidebar.panel_actions' })
+  fireEvent.keyDown(menuButton, { key: 'Enter' })
+  fireEvent.click(await screen.findByRole('menuitem', { name: 'sidebar.outline_hide_generated_numbers' }))
+  expect(displayedHeadings()).toMatchObject([
+    { id: 'authored', value: 'Introduction', chapter: '1' },
+    { id: 'generated', value: '2. Details', chapter: null },
+  ])
+
+  fireEvent.keyDown(menuButton, { key: 'Enter' })
+  fireEvent.click(await screen.findByRole('menuitem', { name: 'sidebar.outline_show_generated_numbers' }))
+  expect(displayedHeadings()).toMatchObject([
+    { id: 'authored', value: 'Introduction', chapter: '1' },
+    { id: 'generated', value: '2. Details', chapter: undefined },
+  ])
+  expect(getAll).toHaveBeenCalledOnce()
 })
 
 describe('outline cursor following', () => {

@@ -4,6 +4,7 @@ import { getHeadingValue } from '@/helper/string'
 import { useEditorStore } from '@/stores'
 import useEditorViewTypeStore from '@/stores/useEditorViewTypeStore'
 import useFileTypeConfigStore from '@/stores/useFileTypeConfigStore'
+import useLayoutStore from '@/stores/useLayoutStore'
 import { TableOfContents } from '@markflowy/interface'
 import type { IHeadingData, TableOfContentsRef } from '@markflowy/interface'
 import { t } from '@/i18n'
@@ -172,6 +173,19 @@ type TocViewProps = {
 
 export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   const tocRef = useRef<TableOfContentsRef>(null)
+  const tocHeadingsRef = useRef<IHeadingData[]>([])
+  const showGeneratedNumbers = useLayoutStore((state) => state.showOutlineGeneratedNumbers)
+  const refreshTocHeadings = useCallback((headings: IHeadingData[]) => {
+    tocHeadingsRef.current = headings
+    // An undefined chapter uses the generated number. Explicit chapters came from the document.
+    tocRef.current?.refreshByHeadings({
+      newHeadings: useLayoutStore.getState().showOutlineGeneratedNumbers
+        ? headings
+        : headings.map((heading) =>
+            heading.chapter === undefined ? { ...heading, chapter: null } : heading,
+          ),
+    })
+  }, [])
   const [outlineSession, setOutlineSession] = useState<OutlineSession | null>(null)
   const outlineSessionRef = useRef<OutlineSession | null>(null)
   const outlineSnapshot = useSyncExternalStore(
@@ -261,7 +275,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       cancelAnimationFrame(rafRef.current)
       rafRef.current = null
     }
-    tocRef.current?.refreshByHeadings({ newHeadings: [] })
+    refreshTocHeadings([])
     outlineSessionRef.current = null
     setOutlineSession(null)
     setActiveHeadingId(null)
@@ -276,7 +290,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     headingIntentRef.current++
     sourceScrollElRef.current = null
     setSourceScrollEl(null)
-  }, [])
+  }, [refreshTocHeadings])
 
   useEffect(() => registerOutlineCommands({
     isCurrent: () => {
@@ -471,7 +485,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         session.refresh(headings)
         outlineSessionRef.current = session
         setOutlineSession(session)
-        tocRef.current?.refreshByHeadings({ newHeadings: headings })
+        refreshTocHeadings(headings)
         setOutlineSource((current) =>
           current?.id === currentActiveId && current.editor === editor
             ? current
@@ -486,7 +500,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         refresh.cancel = () => clearTimeout(timer)
       }
     },
-    [],
+    [refreshTocHeadings],
   )
 
   useEffect(() => {
@@ -592,7 +606,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             session.refresh(headings, new Map(sourceHeadings.map((heading) => [heading.id, heading.pos])))
             outlineSessionRef.current = session
             setOutlineSession(session)
-            tocRef.current?.refreshByHeadings({ newHeadings: headings })
+            refreshTocHeadings(headings)
             scheduleActiveHeadingUpdateRef.current()
           }, 0)
           return
@@ -615,7 +629,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
     })
 
     return () => disposable.dispose()
-  }, [clearOutline, scheduleCapricornHeadingRefresh])
+  }, [clearOutline, refreshTocHeadings, scheduleCapricornHeadingRefresh])
 
   useEffect(() => {
     const currentEditorPanelEl = document.querySelector('#editor-panel') as HTMLElement | null
@@ -894,6 +908,16 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             <DropdownMenuItemPrimitive disabled={!canFold} onSelect={() => { void commandRegistry.execute(OUTLINE_EXPAND_ALL) }}>
               {t('sidebar.outline_expand_all')}
               <span className='ml-auto pl-4 text-ui-caption text-muted-foreground'>{expandShortcut}</span>
+            </DropdownMenuItemPrimitive>
+            <DropdownMenuItemPrimitive
+              onSelect={() => {
+                useLayoutStore.getState().toggleOutlineGeneratedNumbers()
+                refreshTocHeadings(tocHeadingsRef.current)
+              }}
+            >
+              {t(showGeneratedNumbers
+                ? 'sidebar.outline_hide_generated_numbers'
+                : 'sidebar.outline_show_generated_numbers')}
             </DropdownMenuItemPrimitive>
           </DockPanelMenu>
         </>}

@@ -18,6 +18,12 @@ describe('outline heading formatting', () => {
     expect(container.querySelector('p')).toBeNull()
   })
 
+  it.each(['1.', '2)'])('keeps an authored %s prefix alongside inline formatting', (prefix) => {
+    const { container } = render(<HeadingTitle title={`${prefix} **Introduction**`} />)
+    expect(container.textContent).toBe(`${prefix} Introduction`)
+    expect(container.querySelector('strong')?.textContent).toBe('Introduction')
+  })
+
   it('keeps heading links and images as text inside the outline navigation link', () => {
     const onClick = vi.fn()
     const { container, getByRole } = render(

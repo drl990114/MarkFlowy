@@ -224,6 +224,8 @@
     "outline_expand": "Déplier",
     "outline_collapse_all": "Replier tous les titres",
     "outline_expand_all": "Déplier tous les titres",
+    "outline_hide_generated_numbers": "Masquer la numérotation automatique",
+    "outline_show_generated_numbers": "Afficher la numérotation automatique",
     "explorer": "explorer",
     "search": "chercher",
     "bookmarks": "Favoris",

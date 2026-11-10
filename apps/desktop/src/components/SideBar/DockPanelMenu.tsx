@@ -40,16 +40,18 @@ function usePanelActions(panelId: DockPanelId) {
 export function DockPanelMenu({
   panelId,
   children,
+  className,
 }: {
   panelId: DockPanelId
   children?: ReactNode
+  className?: string
 }) {
   const actions = usePanelActions(panelId)
   return (
     <DropdownMenuRoot>
       <DropdownMenuTrigger asChild>
         <Button
-          className='mf-dock-panel-menu'
+          className={className}
           aria-label={actions.t('sidebar.panel_actions')}
           size='icon-chrome'
           variant='chrome'

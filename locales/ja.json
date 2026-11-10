@@ -224,6 +224,8 @@
     "outline_expand": "展開する",
     "outline_collapse_all": "すべての見出しを折りたたむ",
     "outline_expand_all": "すべての見出しを展開する",
+    "outline_hide_generated_numbers": "自動番号を非表示にする",
+    "outline_show_generated_numbers": "自動番号を表示する",
     "explorer": "エクスプローラー",
     "search": "検索",
     "bookmarks": "ブックマーク",

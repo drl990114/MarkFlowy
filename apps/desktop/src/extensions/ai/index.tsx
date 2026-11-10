@@ -96,7 +96,7 @@ function AskWorkspaceContent({ session }: { session: AskRuntimeSession }) {
   return (
     <Container>
       <SideBarHeader
-        actions={<DockPanelMenu panelId='ai' />}
+        actions={<DockPanelMenu panelId='ai' className='mf-dock-panel-menu--hover' />}
         name={t('ai.assistant')}
         onRightNavItemClick={handleRightNavItemClick}
         rightNavItems={[

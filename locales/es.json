@@ -224,6 +224,8 @@
     "outline_expand": "Expandir",
     "outline_collapse_all": "Contraer todos los títulos",
     "outline_expand_all": "Expandir todos los títulos",
+    "outline_hide_generated_numbers": "Ocultar la numeración automática",
+    "outline_show_generated_numbers": "Mostrar la numeración automática",
     "explorer": "explorador",
     "search": "buscar",
     "bookmarks": "Marcadores",

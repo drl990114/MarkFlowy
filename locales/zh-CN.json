@@ -230,6 +230,8 @@
     "outline_expand": "展开",
     "outline_collapse_all": "折叠全部标题",
     "outline_expand_all": "展开全部标题",
+    "outline_hide_generated_numbers": "隐藏自动序号",
+    "outline_show_generated_numbers": "显示自动序号",
     "explorer": "探索",
     "search": "搜索",
     "bookmarks": "书签",

@@ -224,6 +224,8 @@
     "outline_expand": "Развернуть",
     "outline_collapse_all": "Свернуть все заголовки",
     "outline_expand_all": "Развернуть все заголовки",
+    "outline_hide_generated_numbers": "Скрыть автоматическую нумерацию",
+    "outline_show_generated_numbers": "Показать автоматическую нумерацию",
     "explorer": "Проводник",
     "search": "Поиск",
     "bookmarks": "Закладки",

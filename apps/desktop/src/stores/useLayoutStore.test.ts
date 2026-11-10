@@ -15,6 +15,7 @@ beforeEach(() => {
     rightBar: { activePanelId: 'toc', size: 280, visible: true },
     leftStartup: 'restore',
     rightStartup: 'restore',
+    showOutlineGeneratedNumbers: true,
     zenModeActive: false,
   })
 })
@@ -74,6 +75,7 @@ describe('useLayoutStore Dock state', () => {
     vi.resetModules()
     const { default: reloadedLayoutStore } = await import('./useLayoutStore')
 
+    expect(reloadedLayoutStore.getState().showOutlineGeneratedNumbers).toBe(true)
     expect(reloadedLayoutStore.getState().leftBar).toEqual({
       activePanelId: 'search',
       size: 304,
@@ -175,12 +177,21 @@ describe('useLayoutStore Dock state', () => {
         rightBar: { activePanelId: 'toc', size: 420, visible: true },
         leftStartup: 'restore',
         rightStartup: 'restore',
+        showOutlineGeneratedNumbers: true,
       },
     })
   })
 })
 
 describe('Dock restart preferences', () => {
+  it('remembers when automatic outline numbers are hidden', async () => {
+    useLayoutStore.getState().toggleOutlineGeneratedNumbers()
+    vi.resetModules()
+    const restored = (await import('./useLayoutStore')).default.getState()
+
+    expect(restored.showOutlineGeneratedNumbers).toBe(false)
+  })
+
   it('restores closed panels without restoring Zen Mode', async () => {
     useLayoutStore.getState().setDockPanel('left', 'bookmarks')
     useLayoutStore.getState().setLeftBarVisible(false)

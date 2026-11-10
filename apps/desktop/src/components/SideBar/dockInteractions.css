@@ -1,13 +1,13 @@
-.mf-dock-panel-menu {
+.mf-dock-panel-menu--hover {
   opacity: 0;
 }
-[data-slot='dock-toolbar']:hover .mf-dock-panel-menu,
-[data-slot='dock-toolbar']:focus-within .mf-dock-panel-menu,
-.mf-dock-panel-menu[data-state='open'] {
+[data-slot='dock-toolbar']:hover .mf-dock-panel-menu--hover,
+[data-slot='dock-toolbar']:focus-within .mf-dock-panel-menu--hover,
+.mf-dock-panel-menu--hover[data-state='open'] {
   opacity: 1;
 }
 @media (hover: none) {
-  .mf-dock-panel-menu {
+  .mf-dock-panel-menu--hover {
     opacity: 1;
   }
 }

@@ -224,6 +224,8 @@
     "outline_expand": "Mở rộng",
     "outline_collapse_all": "Thu gọn tất cả tiêu đề",
     "outline_expand_all": "Mở rộng tất cả tiêu đề",
+    "outline_hide_generated_numbers": "Ẩn số thứ tự tự động",
+    "outline_show_generated_numbers": "Hiện số thứ tự tự động",
     "explorer": "Trình khám phá",
     "search": "Tìm kiếm",
     "bookmarks": "Dấu trang",

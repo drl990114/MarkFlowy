@@ -224,6 +224,8 @@
     "outline_expand": "Expand",
     "outline_collapse_all": "Collapse all headings",
     "outline_expand_all": "Expand all headings",
+    "outline_hide_generated_numbers": "Hide automatic numbering",
+    "outline_show_generated_numbers": "Show automatic numbering",
     "explorer": "explorer",
     "search": "search",
     "bookmarks": "Bookmarks",

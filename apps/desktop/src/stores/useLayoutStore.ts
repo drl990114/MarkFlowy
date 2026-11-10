@@ -31,7 +31,7 @@ export type DockLayoutItem = {
   size: number
 }
 export type DockProfile = { leftBar: DockLayoutItem; rightBar: DockLayoutItem }
-type DockPreferences = Pick<LayoutStore, 'panelOrder' | 'leftBar' | 'rightBar' | 'leftStartup' | 'rightStartup' | 'documentDocks'>
+type DockPreferences = Pick<LayoutStore, 'panelOrder' | 'leftBar' | 'rightBar' | 'leftStartup' | 'rightStartup' | 'documentDocks' | 'showOutlineGeneratedNumbers'>
 const dockSides: readonly DockSide[] = ['left', 'right']
 
 export function isDockPanelId(value: unknown): value is DockPanelId {
@@ -112,6 +112,7 @@ function normalizePreferences(value: unknown): DockPreferences {
     rightBar: normalizeDock(saved.rightBar, 'right', panelOrder, true),
     leftStartup: normalizeStartup(saved.leftStartup, 'left', panelOrder),
     rightStartup: normalizeStartup(saved.rightStartup, 'right', panelOrder),
+    showOutlineGeneratedNumbers: saved.showOutlineGeneratedNumbers !== false,
   }
 }
 
@@ -250,6 +251,9 @@ const useLayoutStore = create<LayoutStore>()(
         if (side === 'left') state.leftStartup = panel
         else state.rightStartup = panel
       }),
+      toggleOutlineGeneratedNumbers: () => set((state) => {
+        state.showOutlineGeneratedNumbers = !state.showOutlineGeneratedNumbers
+      }),
       setZenModeActive: (active) => set((state) => { state.zenModeActive = active }),
       toggleZenMode: () => set((state) => { state.zenModeActive = !state.zenModeActive }),
     })),
@@ -257,13 +261,14 @@ const useLayoutStore = create<LayoutStore>()(
       name: DOCK_PREFERENCES_STORAGE_KEY,
       version: 3,
       storage: dockStorage,
-      partialize: ({ panelOrder, leftBar, rightBar, leftStartup, rightStartup, hasWorkspace, workspaceDocks, documentDocks }) => ({
+      partialize: ({ panelOrder, leftBar, rightBar, leftStartup, rightStartup, hasWorkspace, workspaceDocks, documentDocks, showOutlineGeneratedNumbers }) => ({
         panelOrder,
         leftBar: !hasWorkspace && workspaceDocks ? workspaceDocks.leftBar : leftBar,
         rightBar: !hasWorkspace && workspaceDocks ? workspaceDocks.rightBar : rightBar,
         documentDocks: hasWorkspace ? documentDocks : { leftBar, rightBar },
         leftStartup,
         rightStartup,
+        showOutlineGeneratedNumbers,
       }),
       migrate: (saved) => normalizePreferences(saved),
       merge: (saved, current) => {
@@ -288,6 +293,8 @@ export type LayoutStore = DockProfile & {
   leftStartup: DockStartup
   rightStartup: DockStartup
   setStartupPanel: (side: DockSide, panel: DockStartup) => void
+  showOutlineGeneratedNumbers: boolean
+  toggleOutlineGeneratedNumbers: () => void
   zenModeActive: boolean
   openExplorer: () => void
   openDockPanel: (panelId: DockPanelId) => void

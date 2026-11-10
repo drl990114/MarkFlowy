@@ -414,7 +414,7 @@ export const TocViewContainer = styled.div<ContainerProps>`
 
       .toc-list a[aria-current='location'] {
         color: var(--mf-text-primary);
-        background: var(--mf-control-selected);
+        background-color: var(--mf-control-selected);
       }
 
       .toc-list a:focus-visible {
@@ -423,7 +423,29 @@ export const TocViewContainer = styled.div<ContainerProps>`
       }
 
       .toc-list a:active {
-        background: var(--mf-control-ghost-pressed, ${props.theme.fileTreeSelectedBgColor});
+        background-color: var(--mf-control-ghost-pressed);
+      }
+
+      @supports selector(li:has(> a)) {
+        .toc-list li {
+          &:hover {
+            background-color: var(--mf-control-ghost-hover);
+          }
+
+          &:has(> a[aria-current='location']) {
+            background-color: var(--mf-control-selected);
+          }
+
+          &:has(> a:active) {
+            background-color: var(--mf-control-ghost-pressed);
+          }
+        }
+
+        .toc-list li > a,
+        .toc-list li > a[aria-current='location'],
+        .toc-list li > a:active {
+          background-color: transparent;
+        }
       }
 
       .toc-toolbar__title {
