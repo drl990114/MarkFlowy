@@ -28,7 +28,7 @@ jobs:
             arch: x86_64
             target: x86_64-unknown-linux-gnu
           - build: macos
-            os: macos-latest
+            os: macos-26-intel
             arch: x86_64
             target: x86_64-apple-darwin
           - build: macos
@@ -140,7 +140,7 @@ jobs:
             ./target/${{ matrix.target }}/release/bundle/rpm/**.rpm.sig
 
       - uses: actions/upload-artifact@v4
-        if: matrix.os == 'macos-latest' && matrix.arch == 'aarch64'
+        if: matrix.target == 'aarch64-apple-darwin'
         with:
           name: aarch64artifacts-${{ matrix.target }}
           path: |
@@ -148,7 +148,7 @@ jobs:
             ./target/${{ matrix.target }}/release/bundle/macos/**.app.*
 
       - uses: actions/upload-artifact@v4
-        if: matrix.os == 'macos-latest' && matrix.arch == 'x86_64'
+        if: matrix.target == 'x86_64-apple-darwin'
         with:
           name: artifacts-${{ matrix.target }}
           path: |

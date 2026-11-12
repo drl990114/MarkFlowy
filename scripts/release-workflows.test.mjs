@@ -89,6 +89,17 @@ test('native E2E is a required macOS gate and always retains diagnostics', () =>
   assert.ok(steps.indexOf(artifact) > execution)
 })
 
+test('Intel macOS packages build on Intel runners', async () => {
+  for (const name of ['tauri-release', 'test-bundle', 'nodejs']) {
+    const { build } = (await workflow(name)).jobs
+    const intel = build.strategy.matrix.include.find(
+      (entry) => entry.target === 'x86_64-apple-darwin',
+    )
+    assert.equal(build['runs-on'], '${{ matrix.os }}', name)
+    assert.equal(intel?.os, 'macos-26-intel', name)
+  }
+})
+
 test('all release packages retain matching signatures through collection and publication', async (t) => {
   const directory = await mkdtemp(path.join(tmpdir(), 'markflowy-release-artifacts-'))
   t.after(() => rm(directory, { recursive: true, force: true }))
@@ -118,7 +129,7 @@ test('all release packages retain matching signatures through collection and pub
       build: 'macos',
       arch,
       job: 'build',
-      uploadIf: `matrix.os == 'macos-latest' && matrix.arch == '${arch}'`,
+      uploadIf: `matrix.target == '${arch}-apple-darwin'`,
       download,
       fixtures: [
         [`dmg/MarkFlowy_1.2.3_${filenameArch}.dmg`, `MarkFlowy_v1.2.3_${filenameArch}.dmg`],
