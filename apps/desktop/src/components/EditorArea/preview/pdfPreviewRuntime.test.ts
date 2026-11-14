@@ -1,13 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api'
-import type { EventBus, PDFFindController } from 'pdfjs-dist/types/web/pdf_viewer'
+import type { EventBus, PDFFindController, PDFLinkService } from 'pdfjs-dist/types/web/pdf_viewer'
 import type * as PdfRuntime from 'pdfjs-dist/legacy/build/pdf.mjs'
 import type * as PdfViewerRuntime from 'pdfjs-dist/legacy/web/pdf_viewer.mjs'
 import { clampPdfPage, openPdfPreview, type PdfPreviewCallbacks } from './pdfPreviewRuntime'
 
 interface ViewerOptions {
+  container: HTMLDivElement
   eventBus: EventBus
   findController: PDFFindController
+  linkService: PDFLinkService
   abortSignal: AbortSignal
 }
 
@@ -78,13 +80,20 @@ vi.mock('pdfjs-dist/legacy/web/pdf_viewer.mjs', async (importOriginal) => {
     currentScaleValue = 'page-width'
     pagesCount = 3
     pdfDocument: PDFDocumentProxy | null = null
+    container: HTMLDivElement
     eventBus: EventBus
     findController: PDFFindController
     constructor(options: ViewerOptions) {
+      this.container = options.container
       this.eventBus = options.eventBus
       this.findController = options.findController
       this.findController.onIsPageVisible = (page: number) => page === this.currentPageNumber
       mocks.options(options)
+    }
+    scrollPageIntoView({ pageNumber }: { pageNumber: number }) {
+      this.currentPageNumber = pageNumber
+      this.container.scrollTop = 600
+      this.container.scrollLeft = 80
     }
     setDocument(doc: PDFDocumentProxy | null) {
       mocks.setDocument(doc)
@@ -123,6 +132,42 @@ beforeEach(() => {
 })
 
 describe('PDF reader lifecycle', () => {
+  it('keeps the destination visible when PDF.js focuses a newly rendered text layer', async () => {
+    const container = document.createElement('div')
+    const pages = container.appendChild(document.createElement('div'))
+    document.body.appendChild(container)
+    const controller = new AbortController()
+    try {
+      const preview = await openPdfPreview(
+        container, pages, '/footnote.pdf', callbacks(), controller.signal,
+      )
+      const { eventBus, linkService } = mocks.options.mock.calls[0][0]
+      await linkService.goToDestination([2, { name: 'XYZ' }, 80, 600, null])
+      expect(preview.capture()).toMatchObject({ page: 3, scrollTop: 600, scrollLeft: 80 })
+
+      const layer = pages.appendChild(document.createElement('div'))
+      layer.tabIndex = 0
+      const focus = layer.focus.bind(layer)
+      const focusSpy = vi.spyOn(layer, 'focus').mockImplementation((options) => {
+        if (!options?.preventScroll) queueMicrotask(() => {
+          container.scrollTop = 300
+          container.scrollLeft = 0
+        })
+        focus(options)
+      })
+      eventBus.dispatch('textlayerrendered', { pageNumber: 3, source: { textLayer: { div: layer } } })
+      await Promise.resolve()
+
+      expect(focusSpy).toHaveBeenCalledExactlyOnceWith({ preventScroll: true })
+      expect(layer.focus).toBe(focusSpy)
+      expect(document.activeElement).toBe(layer)
+      expect(preview.capture()).toMatchObject({ page: 3, scrollTop: 600, scrollLeft: 80 })
+    } finally {
+      controller.abort()
+      container.remove()
+    }
+  })
+
   it('uses local resources, clamps navigation/zoom, searches through PDF.js and disposes on close', async () => {
     const controller = new AbortController()
     const events = callbacks()

@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { FileResultCode, type FileSysResult } from '@/helper/filesys'
 import type { PDFDocumentLoadingTask, PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api'
+import type { PDFPageView } from 'pdfjs-dist/types/web/pdf_page_view'
 import type { PDFViewer } from 'pdfjs-dist/types/web/pdf_viewer'
 import workerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'
 import { enablePdfTextStreamIteration } from './pdfTextStreamCompatibility'
@@ -79,7 +80,27 @@ export async function openPdfPreview(
     )
     guard()
     pdf.GlobalWorkerOptions.workerSrc = workerUrl
-    const eventBus = new EventBus()
+    const eventBus = new (class extends EventBus {
+      dispatch(name: string, data: object) {
+        if (name !== 'textlayerrendered') return super.dispatch(name, data)
+
+        const { source } = data as { source?: Pick<PDFPageView, 'textLayer'> }
+        const layer = source?.textLayer?.div
+        if (!layer || !container.contains(layer)) return super.dispatch(name, data)
+
+        // PDF.js synchronously focuses the destination layer during this event.
+        // Keep that focus transfer while preventing the browser from scrolling to the layer top.
+        const focus = layer.focus
+        const descriptor = Object.getOwnPropertyDescriptor(layer, 'focus')
+        layer.focus = (options) => focus.call(layer, { ...options, preventScroll: true })
+        try {
+          super.dispatch(name, data)
+        } finally {
+          if (descriptor) Object.defineProperty(layer, 'focus', descriptor)
+          else Reflect.deleteProperty(layer, 'focus')
+        }
+      }
+    })()
     const linkService = new PDFLinkService({ eventBus })
     linkService.externalLinkEnabled = false
     const findController = new PDFFindController({ eventBus, linkService })
