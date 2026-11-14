@@ -111,8 +111,12 @@ try {
   await browser.switchToWindow('main')
   assert.equal(await browser.execute(() => Boolean(window.__MARKFLOWY_E2E__)), true,
     'Refusing to automate a non-isolated application')
-  const location = await browser.getUrl()
-  assert.match(location, /^https?:\/\/localhost:3000\//, 'Expected the live Vite DEV application')
+  const tauriConfig = JSON.parse(
+    await readFile(new URL('../src-tauri/tauri.conf.json', import.meta.url), 'utf8'),
+  )
+  const location = new URL(await browser.getUrl())
+  assert.equal(location.origin, new URL(tauriConfig.build.devUrl).origin,
+    'Expected the live Vite DEV application')
   // Each scenario starts with fresh frontend listeners after DEV HMR, while
   // retaining the same isolated native process and profile.
   await browser.refresh()

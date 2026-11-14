@@ -14,14 +14,6 @@ use super::conf::{AppConf, StartupAppearance};
 #[cfg(target_os = "macos")]
 use tauri::TitleBarStyle;
 
-fn get_webview_url(path: &str) -> WebviewUrl {
-    if tauri::is_dev() {
-        WebviewUrl::External(format!("http://localhost:3000/{}", path).parse().unwrap())
-    } else {
-        WebviewUrl::App(path.into())
-    }
-}
-
 static APP_SESSION_ID: OnceLock<String> = OnceLock::new();
 static WINDOW_RECENCY: Mutex<Vec<String>> = Mutex::new(Vec::new());
 static WINDOW_CREATION_QUEUE: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
@@ -261,7 +253,7 @@ pub async fn create_new_window(_app: AppHandle, path: Option<String>) -> Result<
     build_main_window(
         &_app,
         window_label.clone(),
-        get_webview_url("index.html"),
+        WebviewUrl::App("index.html".into()),
         opened_urls,
         Some(None),
     )?;

@@ -2,7 +2,7 @@
 
 import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import glob from 'fast-glob'
@@ -22,6 +22,17 @@ async function getConfig(command: ConfigEnv['command'], mode: string) {
 }
 
 describe('Desktop workspace development resolution', () => {
+  it('uses the configured Tauri development port without falling back to another port', async () => {
+    const tauriConfig = JSON.parse(
+      readFileSync(new URL('./src-tauri/tauri.conf.json', import.meta.url), 'utf8'),
+    )
+    const config = await getConfig('serve', 'development')
+    expect(config.server).toMatchObject({
+      port: Number(new URL(tauriConfig.build.devUrl).port),
+      strictPort: true,
+    })
+  })
+
   it('assigns every test to exactly one of the unit and published host suites', async () => {
     // A readable entry is sufficient to resolve the config; do not require the
     // private package just to verify test discovery in a public checkout.

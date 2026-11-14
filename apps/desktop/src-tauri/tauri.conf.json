@@ -5,7 +5,7 @@
   "identifier": "com.drl990114.markflowy",
   "build": {
     "beforeDevCommand": "yarn dev",
-    "devUrl": "http://localhost:3000",
+    "devUrl": "http://localhost:30417",
     "frontendDist": "../dist"
   },
   "plugins": {

@@ -59,6 +59,9 @@ function optionalCapricornRuntimePlugin(runtimeEntry: string | null): Plugin {
 }
 
 export default defineConfig(async ({ command, mode }) => {
+  const tauriConfig = JSON.parse(
+    readFileSync(new URL('./src-tauri/tauri.conf.json', import.meta.url), 'utf8'),
+  ) as { version: string; build: { devUrl: string } }
   const capricornRuntimeEntry = resolvePrivateCapricornRuntime(
     fileURLToPath(
       new URL(
@@ -82,7 +85,7 @@ export default defineConfig(async ({ command, mode }) => {
 
   return {
     server: {
-      port: 3000,
+      port: Number(new URL(tauriConfig.build.devUrl).port),
       strictPort: true,
       fs: {
         allow: [workspaceRoot],
@@ -142,10 +145,7 @@ export default defineConfig(async ({ command, mode }) => {
       },
     },
     define: {
-      __MARKFLOWY_HOST_VERSION__: JSON.stringify(
-        JSON.parse(readFileSync(new URL('./src-tauri/tauri.conf.json', import.meta.url), 'utf8'))
-          .version,
-      ),
+      __MARKFLOWY_HOST_VERSION__: JSON.stringify(tauriConfig.version),
       __MARKFLOWY_CAPRICORN_RUNTIME_AVAILABLE__: JSON.stringify(capricornRuntimeEntry !== null),
       __MARKFLOWY_CAPRICORN_RUNTIME_VERSION__: JSON.stringify(
         capricornRuntimeEntry ? CAPRICORN_VERSION : null,
