@@ -1,5 +1,49 @@
 # UPDATE LOG
 
+## v1.3.1
+
+Features:
+
+- **Keep links and bookmarks in PDFs exported in the app.** Links to headings and footnotes jump to their targets even when heading bookmarks are turned off. External links keep their full addresses, including URL fragments. In-app export also supports heading bookmarks on Linux.
+
+- **Show or hide automatic numbering in the outline.** Choose **Hide automatic numbering** or **Show automatic numbering** from the outline panel menu. MarkFlowy remembers your choice, and numbers written in the document stay visible.
+
+- **Use MarkFlowy in Brazilian Portuguese.** Select **Português (Brasil)** in Settings to change the desktop and editor interface language.
+
+Improvements and Fixes:
+
+- Improved in-app PDF pagination for A4 and Letter in portrait and landscape. Long tables repeat their headers on continuation pages. Mermaid diagrams use a print-friendly light theme by default and respect themes set in the diagram configuration.
+
+- Fixed the built-in PDF reader scrolling back to the top of the destination page when jumping to a footnote or heading on a page that has yet to render.
+
+- Fixed the outline dropping prefixes such as `1.` or `2)` from formatted headings.
+
+- Improved scrolling in long documents when changing direction, and kept wide-table headers aligned with the visible columns while scrolling.
+
+- Undo and redo now include automatic heading renumbering in the same step as the edit that triggered it.
+
+---
+
+新功能：
+
+- **应用内导出的 PDF 保留链接和书签。** 即使关闭标题书签，文内链接仍能跳到对应的标题或脚注。外部链接保留完整地址及其中的锚点。Linux 也可通过应用内导出生成标题书签。
+
+- **在目录中显示或隐藏自动序号。** 在目录面板菜单中选择**隐藏自动序号**或**显示自动序号**。MarkFlowy 会记住你的选择，正文标题中已有的编号仍会显示。
+
+- **新增巴西葡萄牙语。** 在设置中选择 **Português (Brasil)**，即可切换桌面应用和编辑器的界面语言。
+
+改进与修复：
+
+- 改进应用内导出的 PDF 分页，覆盖 A4 和 Letter 的横向与纵向排版。长表格跨页时会重复表头。Mermaid 图表默认使用便于打印的浅色主题，并保留图表中显式设置的主题。
+
+- 修复内置 PDF 阅读器跳转到尚未渲染页面的脚注或标题时，视口回弹到页首的问题。
+
+- 修复目录中带格式的标题丢失 `1.` 或 `2)` 等前缀的问题。
+
+- 改进长文档反向滚动时的稳定性，并让宽表格的固定表头在滚动时保持与可见列对齐。
+
+- 触发标题自动重新编号的编辑操作现在可以和编号变化一起撤销或重做。
+
 ## v1.3.0
 
 Features:
