@@ -298,11 +298,11 @@ export const runDevDesktop = async ({
     resolveShutdownStarted = resolveStarted
   })
 
-  const spawnManaged = (label, cli, args, cwd) => {
+  const spawnManaged = (label, cli, args, cwd, env = devEnvironment) => {
     const child = spawnProcess(process.execPath, [cli, ...args], {
       cwd,
       detached: !isWindows,
-      env: devEnvironment,
+      env,
       shell: false,
       stdio: 'inherit',
       windowsHide: true,
@@ -376,6 +376,7 @@ export const runDevDesktop = async ({
         '--ui=stream',
       ],
       ROOT_DIR,
+      { ...devEnvironment, MARKFLOWY_EDITOR_WATCH_ONLY: '1' },
     )
 
     turboProcess.once('error', (error) => {

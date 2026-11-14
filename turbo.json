@@ -27,6 +27,7 @@
     "dev": {
       "cache": false,
       "persistent": true,
+      "passThroughEnv": ["MARKFLOWY_EDITOR_WATCH_ONLY"],
       "dependsOn": ["^build"]
     }
   }
