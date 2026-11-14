@@ -2,10 +2,8 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath, URL } from 'url'
 import { createHash } from 'node:crypto'
-import { readFileSync, statSync } from 'node:fs'
-import { createRequire } from 'node:module'
-import { resolve } from 'node:path'
-import { defineConfig, loadEnv, normalizePath, type Plugin, type ResolverFunction } from 'vite'
+import { readFileSync } from 'node:fs'
+import { defineConfig, normalizePath, type Plugin, type ResolverFunction } from 'vite'
 import svgr from 'vite-plugin-svgr'
 import { configDefaults } from 'vitest/config'
 
@@ -14,7 +12,6 @@ import { CAPRICORN_VERSION, resolvePrivateCapricornRuntime } from './capricornRu
 import { pdfPreviewAssets } from './pdfPreviewAssets'
 
 const workspaceRoot = fileURLToPath(new URL('../..', import.meta.url))
-const desktopRoot = fileURLToPath(new URL('.', import.meta.url))
 const desktopSourceRoot = normalizePath(fileURLToPath(new URL('./src', import.meta.url)))
 const rmeSourceRoot = normalizePath(
   fileURLToPath(new URL('../../packages/editor/src', import.meta.url)),
@@ -65,34 +62,17 @@ export default defineConfig(async ({ command, mode }) => {
   const tauriConfig = JSON.parse(
     readFileSync(new URL('./src-tauri/tauri.conf.json', import.meta.url), 'utf8'),
   ) as { version: string; build: { devUrl: string } }
-  const sourceOverride =
-    command === 'serve' && mode === 'development'
-      ? loadEnv(mode, desktopRoot, 'CAPRICORN_').CAPRICORN_SOURCE_ROOT?.trim()
-      : undefined
-  const sourceRoot = sourceOverride ? resolve(desktopRoot, sourceOverride) : undefined
-  const sourceEntry = sourceRoot && normalizePath(resolve(sourceRoot, 'src/release/index.tsx'))
-  const sourceRequire = sourceRoot && createRequire(resolve(sourceRoot, 'package.json'))
-  if (sourceEntry && !statSync(sourceEntry, { throwIfNoEntry: false })?.isFile()) {
-    throw new Error(`CAPRICORN_SOURCE_ROOT has no runtime entry: ${sourceEntry}`)
-  }
-  const privateRuntimeEntry = sourceEntry
-    ? null
-    : resolvePrivateCapricornRuntime(
-        fileURLToPath(
-          new URL(
-            '../../.private-runtime/node_modules/@drl990114/capricorn-runtime/package.json',
-            import.meta.url,
-          ),
-        ),
-      )
-  const capricornRuntimeEntrySha256 = privateRuntimeEntry
-    ? createHash('sha256').update(readFileSync(privateRuntimeEntry)).digest('hex')
+  const capricornRuntimeEntry = resolvePrivateCapricornRuntime(
+    fileURLToPath(
+      new URL(
+        '../../.private-runtime/node_modules/@drl990114/capricorn-runtime/package.json',
+        import.meta.url,
+      ),
+    ),
+  )
+  const capricornRuntimeEntrySha256 = capricornRuntimeEntry
+    ? createHash('sha256').update(readFileSync(capricornRuntimeEntry)).digest('hex')
     : null
-  const runtimeEntry =
-    sourceEntry ??
-    (command === 'serve' && privateRuntimeEntry
-      ? `${privateRuntimeEntry}?v=${capricornRuntimeEntrySha256}`
-      : privateRuntimeEntry)
   const analyzePlugin =
     mode === 'analyze'
       ? (await import('rollup-plugin-visualizer')).visualizer({
@@ -108,7 +88,7 @@ export default defineConfig(async ({ command, mode }) => {
       port: Number(new URL(tauriConfig.build.devUrl).port),
       strictPort: true,
       fs: {
-        allow: sourceRoot ? [workspaceRoot, sourceRoot] : [workspaceRoot],
+        allow: [workspaceRoot],
       },
     },
     clearScreen: false,
@@ -125,7 +105,11 @@ export default defineConfig(async ({ command, mode }) => {
       // Vite caches node_modules URLs immutably using its lockfile-based hash.
       // The private installer can replace this entry without changing that lockfile.
       // Version the dev entry by its bytes; published chunks already have hashed names.
-      optionalCapricornRuntimePlugin(runtimeEntry),
+      optionalCapricornRuntimePlugin(
+        command === 'serve' && capricornRuntimeEntry
+          ? `${capricornRuntimeEntry}?v=${capricornRuntimeEntrySha256}`
+          : capricornRuntimeEntry,
+      ),
       // Shared and Desktop styles import theme + utilities explicitly without
       // Tailwind's global preflight layer.
       tailwindcss(),
@@ -162,23 +146,16 @@ export default defineConfig(async ({ command, mode }) => {
     },
     define: {
       __MARKFLOWY_HOST_VERSION__: JSON.stringify(tauriConfig.version),
-      __MARKFLOWY_CAPRICORN_RUNTIME_AVAILABLE__: JSON.stringify(runtimeEntry !== null),
+      __MARKFLOWY_CAPRICORN_RUNTIME_AVAILABLE__: JSON.stringify(capricornRuntimeEntry !== null),
       __MARKFLOWY_CAPRICORN_RUNTIME_VERSION__: JSON.stringify(
-        sourceEntry ? 'source-integration' : privateRuntimeEntry ? CAPRICORN_VERSION : null,
+        capricornRuntimeEntry ? CAPRICORN_VERSION : null,
       ),
-      __MARKFLOWY_CAPRICORN_RUNTIME_ENTRY_SHA256__: JSON.stringify(capricornRuntimeEntrySha256),
+      __MARKFLOWY_CAPRICORN_RUNTIME_ENTRY_SHA256__: JSON.stringify(
+        capricornRuntimeEntrySha256,
+      ),
     },
     resolve: {
       alias: [
-        ...(sourceRequire
-          ? [
-              {
-                // Capricorn's worker needs the same DOM-free decoder as its own dev server.
-                find: 'decode-named-character-reference',
-                replacement: sourceRequire.resolve('decode-named-character-reference'),
-              },
-            ]
-          : []),
         // Development consumes the same shared source as tests, including CSS.
         // Production still resolves the package's independently emitted output.
         ...(command === 'serve'
@@ -216,7 +193,7 @@ export default defineConfig(async ({ command, mode }) => {
           ),
         },
       ],
-      dedupe: ['react', 'react-dom', ...(sourceRoot ? ['use-sync-external-store'] : [])],
+      dedupe: ['react', 'react-dom'],
     },
     test: {
       environment: 'happy-dom',
