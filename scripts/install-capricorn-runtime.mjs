@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url'
 import { runNpm as runNpmCli } from './npm-cli.mjs'
 
 const CAPRICORN_PACKAGE = '@drl990114/capricorn-runtime'
-const CAPRICORN_VERSION = '0.5.14'
-const CAPRICORN_SHA256 = '84d1571428f2a66adc55cba69e855b8760001ec9d3d356152d7fdfb94970d211'
+const CAPRICORN_VERSION = '0.5.15'
+const CAPRICORN_SHA256 = '6c9da6751d1974667a1b4e806000ac9fdb06b330da89e8d56366f1e21101e07c'
 const GITHUB_REGISTRY = 'https://npm.pkg.github.com'
 
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)))
