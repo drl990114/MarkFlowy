@@ -84,13 +84,13 @@ describe('theme selection preview', () => {
       themeId: 'Tokyo Night',
       resolvedMode: 'dark',
       palette: {
-        surfaceApp: '#1a1b26',
-        surfacePanel: '#16161e',
-        surfaceToolbar: '#16161e',
-        foreground: '#a9b1d6',
-        mutedForeground: '#787c99',
-        border: '#101014',
-        accent: '#3d59a1dd',
+        surfaceApp: '#24283b',
+        surfacePanel: '#1f2335',
+        surfaceToolbar: '#1f2335',
+        foreground: '#c0caf5',
+        mutedForeground: '#a9b1d6',
+        border: '#414868',
+        accent: '#7aa2f7',
       },
     })
     const startup = resolveStartupTheme(appearance)

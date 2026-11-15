@@ -149,6 +149,7 @@ import {
   startEditorInteractionMeasurement,
 } from './editorPerformanceDiagnostics'
 import { EditorWrapper } from './EditorWrapper'
+import { EDITOR_CSS_SCOPE_CLASS } from '@/themes/editorCssScope'
 import {
   CapricornEditor,
   type CapricornEditorHandle,
@@ -3130,7 +3131,7 @@ function TextEditor(props: TextEditorProps) {
       return null
     }
 
-    const cls = classNames('markdown-body', {
+    const cls = classNames(EDITOR_CSS_SCOPE_CLASS, 'markdown-body', {
       'editor-active': active,
     })
 

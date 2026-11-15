@@ -96,7 +96,10 @@ export function getThemeTokens(theme: MfTheme, preferences: ThemeOverrides = {})
     typeof accent === 'string' &&
     accent.toLowerCase() !== String(overrides['accent.background']).toLowerCase()
   ) {
+    // A personal accent invalidates derived accent companions too, so the
+    // contrast resolver picks a fresh foreground/subtle pair.
     delete overrides['accent.subtle']
+    delete overrides['accent.foreground']
   }
   return resolveThemeTokens(theme.mode, { ...overrides, ...preferences })
 }
