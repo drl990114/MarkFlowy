@@ -4,7 +4,7 @@ import { tokyoNightPalette } from './tokyo-night-palette'
 
 const { colors, syntax } = tokyoNightPalette
 
-// Original VS Code Tokyo Night colors; provenance and license are in the palette.
+// MarkText "Tokyo Night Storm" colors; provenance and license are in the palette.
 // MarkFlowy's shared surface/state roles are coarser than VS Code's workbench
 // roles, so this maps their nearest equivalent without introducing new colors.
 export const tokyoNightTheme: MfTheme = {
@@ -22,7 +22,8 @@ export const tokyoNightTheme: MfTheme = {
     accentColor: colors['button.background'],
     accentColorFocused: colors['inputOption.activeBackground'],
     borderColor: colors['panel.border'],
-    borderColorFocused: colors['textLink.foreground'],
+    // Storm keeps the focus ring on the accent blue instead of the link cyan.
+    borderColorFocused: colors['button.background'],
     bgColor: colors['editor.background'],
     bgColorSecondary: colors['textCodeBlock.background'],
     hoverColor: colors['toolbar.hoverBackground'],
@@ -58,6 +59,12 @@ export const tokyoNightTheme: MfTheme = {
   tokens: {
     'border.subtle': colors['tree.indentGuidesStroke'],
     'interaction.pressed': colors['toolbar.activeBackground'],
+    // Storm keeps the focus ring on the accent blue; the legacy mapping above
+    // would otherwise resolve it to the link cyan.
+    'focus.ring': { ref: 'accent.background' },
+    // The Storm accent is light, so the contrast-derived foreground would be
+    // near-black; the port pins it to the editor canvas color instead.
+    'accent.foreground': colors['button.foreground'],
     // Use upstream diff/debugger washes for states without a shared counterpart.
     'status.danger.background': colors['diffEditor.removedTextBackground'],
     'status.success.background': colors['diffEditor.insertedTextBackground'],
@@ -72,6 +79,10 @@ export const tokyoNightTheme: MfTheme = {
     'editor.selection.foreground': { ref: 'editor.foreground' },
     'editor.selection.inactiveBackground': colors['editor.inactiveSelectionBackground'],
     'editor.code.activeLine': colors['editor.lineHighlightBackground'],
+    // The port marks text with a bright chartreuse; MarkFlowy requires an
+    // opaque highlight background, so the ported alpha is dropped.
+    'editor.highlight.background': '#e1fb05',
+    'editor.highlight.foreground': colors['button.foreground'],
     'syntax.comment': syntax.comment,
     'syntax.keyword': syntax.keyword,
     'syntax.string': syntax.string,
@@ -83,4 +94,73 @@ export const tokyoNightTheme: MfTheme = {
     'syntax.punctuation': syntax.punctuation,
     'syntax.meta': syntax.meta,
   },
+  // Editor-content styling ported from the MarkText Tokyo Night Storm theme.
+  // Rules target the shared editor scope (editing, reading and previews) and
+  // cover both engines: RME reads its two official color variables, while the
+  // `.markdown-body` double-class variants outrank the runtime-injected RME
+  // styles for colors RME hard-codes (hr, list markers). The
+  // `[data-cap-content]` variants only add specificity for the private
+  // Capricorn engine and match nothing until that runtime is installed.
+  globalStyleText: `.mf-editor-content {
+  --rme-editor-link-color: ${colors['textLink.foreground']};
+  --rme-editor-blockquote-color: rgba(192, 202, 245, 0.6);
+}
+.mf-editor-content h1, .mf-editor-content [data-cap-content] h1 {
+  color: ${syntax.keyword};
+  border-bottom: 1px solid ${colors['tree.indentGuidesStroke']};
+  padding-bottom: 0.3em;
+}
+.mf-editor-content h2, .mf-editor-content [data-cap-content] h2 {
+  color: ${syntax.function};
+  border-bottom: 1px solid ${colors['tree.indentGuidesStroke']};
+  padding-bottom: 0.3em;
+}
+.mf-editor-content h3, .mf-editor-content [data-cap-content] h3 { color: ${colors['textLink.foreground']}; }
+.mf-editor-content h4, .mf-editor-content [data-cap-content] h4 { color: ${syntax.string}; }
+.mf-editor-content h5, .mf-editor-content [data-cap-content] h5 { color: ${colors['editorWarning.foreground']}; }
+.mf-editor-content h6, .mf-editor-content [data-cap-content] h6 { color: ${syntax.tag}; }
+
+/* Inline emphasis */
+.mf-editor-content em, .mf-editor-content [data-cap-content] em { color: ${syntax.keyword}; }
+.mf-editor-content del, .mf-editor-content [data-cap-content] del { color: ${syntax.tag}; }
+
+/* Links */
+.mf-editor-content a, .mf-editor-content [data-cap-content] a {
+  color: ${colors['textLink.foreground']};
+  text-decoration: none;
+}
+
+/* Blockquote text; the bar keeps the border.default token. */
+.mf-editor-content blockquote, .mf-editor-content [data-cap-content] blockquote,
+.mf-editor-content .capricorn-markdown-quoted-block {
+  color: rgba(192, 202, 245, 0.6);
+}
+
+/* Horizontal rule */
+.mf-editor-content.markdown-body hr, .mf-editor-content [data-cap-content] hr {
+  height: 0;
+  background: transparent;
+  border: 0;
+  border-top: 2px dashed rgba(192, 202, 245, 0.3);
+}
+
+/* Lists */
+.mf-editor-content.markdown-body li::marker,
+.mf-editor-content [data-cap-content] li::marker {
+  color: ${syntax.function};
+}
+
+/* Tables */
+.mf-editor-content th, .mf-editor-content [data-cap-content] th {
+  background-color: ${colors['textCodeBlock.background']};
+}
+.mf-editor-content .capricorn-markdown-table-row[data-markdown-table-header='true'] {
+  background-color: ${colors['textCodeBlock.background']};
+}
+
+/* Code block */
+.mf-editor-content pre, .mf-editor-content [data-cap-content] pre {
+  background-color: ${colors['textCodeBlock.background']};
+  border-radius: 6px;
+}`,
 }

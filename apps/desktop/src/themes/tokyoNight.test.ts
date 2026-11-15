@@ -8,22 +8,23 @@ describe('Tokyo Night theme integration', () => {
   it('carries its built-in palette and syntax through both editor bridges', () => {
     expect(builtInThemes.filter((theme) => theme.name === 'Tokyo Night')).toEqual([tokyoNightTheme])
     const tokens = getThemeTokens(tokyoNightTheme)
-    expect(tokens['surface.canvas']).toBe('#1a1b26ff')
-    expect(tokens['chrome.sidebar.background']).toBe('#16161eff')
-    // Upstream syntax and surfaces remain exact; UI foreground/focus mappings
-    // use brighter upstream swatches for MarkFlowy's denser controls.
+    expect(tokens['surface.canvas']).toBe('#24283bff')
+    expect(tokens['chrome.sidebar.background']).toBe('#1f2335ff')
+    // Ported MarkText Storm palette: the editor foreground is the bright
+    // Neovim fg swatch, and the focus ring follows the accent blue instead of
+    // the link cyan.
     expect(tokens).toMatchObject({
-      'text.primary': '#a9b1d6ff',
-      'text.secondary': '#787c99ff',
-      'editor.foreground': '#a9b1d6ff',
-      'accent.background': '#3d59a1dd',
-      'accent.foreground': '#ffffffff',
-      'border.default': '#101014ff',
-      'focus.ring': '#6183bbff',
-      'chrome.tab.activeBackground': '#16161eff',
-      'scrollbar.thumb': '#868bc415',
-      'editor.link': '#6183bbff',
-      'syntax.comment': '#51597dff',
+      'text.primary': '#c0caf5ff',
+      'text.secondary': '#a9b1d6ff',
+      'editor.foreground': '#c0caf5ff',
+      'accent.background': '#7aa2f7ff',
+      'accent.foreground': '#1a1b26ff',
+      'border.default': '#414868ff',
+      'focus.ring': '#7aa2f7ff',
+      'chrome.tab.activeBackground': '#24283bff',
+      'scrollbar.thumb': '#414868aa',
+      'editor.link': '#7dcfffff',
+      'syntax.comment': '#565f89ff',
       'syntax.attribute': '#bb9af7ff',
       'syntax.meta': '#73dacaff',
     })
@@ -32,7 +33,7 @@ describe('Tokyo Night theme integration', () => {
       '--cap-code-token-keyword': '#bb9af7ff',
       '--cap-code-token-string': '#9ece6aff',
       '--cap-code-token-title': '#7aa2f7ff',
-      '--cap-code-selection': '#515c7e4d',
+      '--cap-code-selection': '#515c7e66',
       '--cap-selection-foreground': tokens['editor.foreground'],
     })
     const styles = codeMirrorSyntaxStyles(tokens)
@@ -57,7 +58,7 @@ describe('Tokyo Night theme integration', () => {
     const reference = variant.tokens['editor.selection.foreground']
     if (typeof reference !== 'object') throw new Error('Expected a live selection reference')
     reference.ref = 'accent.foreground'
-    expect(getThemeTokens(tokyoNightTheme)['editor.selection.foreground']).toBe('#a9b1d6ff')
+    expect(getThemeTokens(tokyoNightTheme)['editor.selection.foreground']).toBe('#c0caf5ff')
   })
 
   it('applies personal colors and typography after the built-in palette', () => {
@@ -73,7 +74,7 @@ describe('Tokyo Night theme integration', () => {
       'font.code.family': 'Monaco, monospace',
       'font.editor.size': '20px',
       'syntax.keyword': '#bb9af7ff',
-      'editor.selection.foreground': '#a9b1d6ff',
+      'editor.selection.foreground': '#c0caf5ff',
     })
   })
 })
