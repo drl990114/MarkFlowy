@@ -1,5 +1,7 @@
 import type { Update } from '@tauri-apps/plugin-updater'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { ConfirmOptions } from '@/services/dialog'
 import useUpdaterStore from '@/stores/useUpdaterStore'
 import { checkUpdate, fetchUpdate, installUpdate } from './updater'
 
@@ -7,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   preserveSession: vi.fn(),
   info: vi.fn(),
   check: vi.fn(),
-  confirm: vi.fn(),
+  confirm: vi.fn<(options: ConfirmOptions) => Promise<string | null>>(),
   invoke: vi.fn(),
   loading: vi.fn(() => 'update-toast'),
   dismiss: vi.fn(),
@@ -53,7 +55,6 @@ vi.mock('@tauri-apps/plugin-store', () => ({
 vi.mock('@/services/app-setting', () => ({ writeSettingPatch: mocks.writeSettingPatch }))
 vi.mock('@/services/dialog', () => ({ dialog: { confirm: mocks.confirm } }))
 vi.mock('@/i18n', () => ({ i18n: { t: (key: string) => key, language: 'en' } }))
-vi.mock('@/components/UpdateDialogContent', () => ({ UpdateDialogContent: () => null }))
 vi.mock('./logger', () => ({ logger: { error: mocks.logError } }))
 vi.mock('zens', () => ({
   toast: {
@@ -111,6 +112,8 @@ beforeEach(() => {
   })
   useUpdaterStore.setState({ update: null, isInstalling: false, installedVersion: null })
 })
+
+afterEach(cleanup)
 
 describe('Windows update recovery', () => {
   beforeEach(() => {
@@ -389,9 +392,59 @@ describe('checkUpdate', () => {
     expect(update.downloadAndInstall).not.toHaveBeenCalled()
     expect(update.download).not.toHaveBeenCalled()
     expect(useUpdaterStore.getState().update).toBe(update)
-    const options = mocks.info.mock.calls[0][1]
-    options.action.onClick()
+    render(mocks.info.mock.calls[0][1].action)
+    fireEvent.click(screen.getByRole('button', { name: 'updater.download_and_install' }))
     await vi.waitFor(() => expect(update.install).toHaveBeenCalledOnce())
+  })
+
+  it('opens the release notes without downloading and allows reopening after cancel', async () => {
+    const update = createUpdate()
+    update.body = '## Improvements\n\n- Improved update notifications'
+    update.date = '2026-11-15T12:00:00Z'
+    mocks.check.mockResolvedValue(update)
+    const choice = deferred<string | null>()
+    mocks.confirm.mockReturnValueOnce(choice.promise)
+
+    await checkUpdate()
+    render(mocks.info.mock.calls[0][1].action)
+    const viewNotes = screen.getByRole('button', { name: 'updater.view_release_notes' })
+    fireEvent.click(viewNotes)
+    fireEvent.click(viewNotes)
+
+    await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce())
+    const [options] = mocks.confirm.mock.calls[0]
+    const notes = within(render(options.content).container)
+    expect(notes.getByText('MarkFlowy 1.0.0')).toBeTruthy()
+    expect(notes.getByText('about.release').nextElementSibling?.getAttribute('datetime')).toBe(update.date)
+    expect(notes.getByRole('heading', { name: 'Improvements' })).toBeTruthy()
+    expect(notes.getByText('Improved update notifications')).toBeTruthy()
+    expect(update.download).not.toHaveBeenCalled()
+
+    await act(async () => choice.resolve('cancel'))
+    expect(mocks.dismiss).not.toHaveBeenCalled()
+    fireEvent.click(viewNotes)
+    await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledTimes(2))
+    expect(update.download).not.toHaveBeenCalled()
+  })
+
+  it.each([false, true])('installs from the notes only if the version is still offered (superseded: %s)', async (superseded) => {
+    const update = createUpdate()
+    const newerUpdate = createUpdate('2.0.0')
+    mocks.check.mockResolvedValueOnce(update).mockResolvedValueOnce(newerUpdate)
+    const choice = deferred<string | null>()
+    mocks.confirm.mockReturnValueOnce(choice.promise)
+
+    await checkUpdate()
+    render(mocks.info.mock.calls[0][1].action)
+    fireEvent.click(screen.getByRole('button', { name: 'updater.view_release_notes' }))
+    await vi.waitFor(() => expect(mocks.confirm).toHaveBeenCalledOnce())
+
+    if (superseded) await checkUpdate()
+    await act(async () => choice.resolve('install'))
+
+    expect(update.download).toHaveBeenCalledTimes(superseded ? 0 : 1)
+    expect(newerUpdate.download).not.toHaveBeenCalled()
+    if (!superseded) expect(mocks.dismiss).toHaveBeenCalledWith('available-update')
   })
 
   it('does not repeat the offer for the same release', async () => {

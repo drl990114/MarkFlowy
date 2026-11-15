@@ -1179,6 +1179,7 @@
   "updater": {
     "install": "install",
     "download_and_install": "Download and install",
+    "view_release_notes": "View release notes",
     "downloading": "Downloading new version…",
     "install_success": "Update installed successfully.",
     "restart": "Restart",

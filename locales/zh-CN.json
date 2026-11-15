@@ -1158,6 +1158,7 @@
   "updater": {
     "install": "安装",
     "download_and_install": "下载并安装",
+    "view_release_notes": "查看更新内容",
     "downloading": "正在下载新版本…",
     "install_success": "更新安装成功。",
     "restart": "重新启动",

@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { withPreservedUpdateSession } from '@/services/update-session'
 import { currentWindow } from '@/services/windows'
 import { recordUpdateAttempt } from '@/services/update-recovery'
@@ -124,13 +125,61 @@ export const checkUpdate = async () => {
   const update = await fetchUpdate()
   if (!update || update.version === previousVersion || useUpdaterStore.getState().isInstalling) return
 
+  const toastId = 'available-update'
+  const installOfferedUpdate = () => {
+    if (useUpdaterStore.getState().update?.version !== update.version) return
+    toast.dismiss(toastId)
+    void installUpdate(update)
+  }
+
+  let detailsOpen = false
+  const showUpdateDetails = async () => {
+    if (detailsOpen) return
+    detailsOpen = true
+    try {
+      const [{ UpdateDialogContent }, { dialog }] = await Promise.all([
+        import('@/components/UpdateDialogContent'),
+        import('@/services/dialog'),
+      ])
+      const action = await dialog.confirm({
+        title: i18n.t('about.newVersion'),
+        content: (
+          <UpdateDialogContent
+            body={update.body}
+            locale={i18n.resolvedLanguage ?? i18n.language}
+            releaseDate={update.date}
+            releaseDateLabel={i18n.t('about.release')}
+            version={update.version}
+          />
+        ),
+        size: 'lg',
+        actions: [
+          { id: 'cancel', label: i18n.t('common.cancel') },
+          { id: 'install', label: i18n.t('about.install'), primary: true },
+        ],
+      })
+      if (action === 'install') installOfferedUpdate()
+    } catch (error) {
+      logger.error('Open update details failed:', error)
+    } finally {
+      detailsOpen = false
+    }
+  }
+
   toast.info(i18n.t('about.newVersion'), {
-    id: 'available-update',
+    id: toastId,
+    className: 'flex-wrap',
     description: `v${update.version}`,
     duration: Infinity,
-    action: {
-      label: i18n.t('updater.download_and_install'),
-      onClick: () => { void installUpdate(update) },
-    },
+    action: (
+      <div className='flex w-full flex-wrap justify-end gap-2'>
+        <Button size='sm' variant='outline' onClick={() => void showUpdateDetails()}>
+          {i18n.t('updater.view_release_notes')}
+        </Button>
+        <Button size='sm' onClick={installOfferedUpdate}>
+          {i18n.t('updater.download_and_install')}
+        </Button>
+      </div>
+    ),
   })
 }

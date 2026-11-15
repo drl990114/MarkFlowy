@@ -1110,6 +1110,7 @@
   "updater": {
     "install": "インストール",
     "download_and_install": "ダウンロードしてインストール",
+    "view_release_notes": "更新内容を見る",
     "downloading": "新しいバージョンをダウンロードしています…",
     "install_success": "アップデートをインストールしました。",
     "restart": "再起動",

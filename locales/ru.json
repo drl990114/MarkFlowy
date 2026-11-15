@@ -1179,6 +1179,7 @@
   "updater": {
     "install": "Установить",
     "download_and_install": "Скачать и установить",
+    "view_release_notes": "Что нового",
     "downloading": "Загрузка новой версии…",
     "install_success": "Обновление успешно установлено.",
     "restart": "Перезапустить",

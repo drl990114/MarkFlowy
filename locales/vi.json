@@ -1179,6 +1179,7 @@
   "updater": {
     "install": "Cài đặt",
     "download_and_install": "Tải xuống và cài đặt",
+    "view_release_notes": "Xem nội dung cập nhật",
     "downloading": "Đang tải xuống phiên bản mới…",
     "install_success": "Đã cài đặt bản cập nhật thành công.",
     "restart": "Khởi động lại",

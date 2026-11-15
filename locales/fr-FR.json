@@ -1102,6 +1102,7 @@
   "updater": {
     "install": "installer",
     "download_and_install": "Télécharger et installer",
+    "view_release_notes": "Voir les nouveautés",
     "downloading": "Téléchargement de la nouvelle version…",
     "install_success": "Mise à jour installée.",
     "restart": "Redémarrer",
