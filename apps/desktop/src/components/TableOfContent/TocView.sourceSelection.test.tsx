@@ -158,6 +158,25 @@ afterEach(() => {
 })
 
 describe('Source Code outline selection tracking', () => {
+  it('reads source container geometry once per outline update for a long document', () => {
+    const doc = Array.from({ length: 200 }, (_, index) => `# Heading ${index}\nparagraph`).join('\n')
+    const editor = createSource(doc)
+    publishSource(editor.source)
+    const rendered = render(<TocView />)
+    act(() => vi.advanceTimersByTime(350))
+    flushFrame()
+    const geometry = vi.spyOn(editor.native.dom, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(0, -10000, 600, 20000))
+    geometry.mockClear()
+    act(() => {
+      editor.viewport.dispatchEvent(new Event('wheel'))
+      editor.viewport.dispatchEvent(new Event('scroll'))
+    })
+    flushFrame()
+    expect(rendered.getByTestId('active-heading').textContent).toBe(`heading-${doc.lastIndexOf('# Heading')}`)
+    expect(geometry).toHaveBeenCalledTimes(1)
+  })
+
   it('follows the focused selection head across sections in one viewport, including reverse selections', () => {
     const { native, getByTestId } = mountSource()
     const active = () => getByTestId('active-heading').textContent

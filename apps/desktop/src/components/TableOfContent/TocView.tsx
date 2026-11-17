@@ -365,23 +365,20 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
         return headings[start - 1]?.id ?? null
       }
 
+      const cmEditorEl = codemirrorView.cm.dom
+      const viewportEl = sourceScrollElRef.current
+      if (!cmEditorEl || !viewportEl || sourceHeadingsRef.current.length === 0) return null
+      // All heading coordinates in this frame share the same container origin.
+      // Read geometry once rather than once for every heading above the viewport.
+      const baseRect = viewportEl === codemirrorView.cm.scrollDOM
+        ? codemirrorView.cm.scrollDOM.getBoundingClientRect()
+        : cmEditorEl.getBoundingClientRect()
+      const cmScrollTop = codemirrorView.cm.scrollDOM.scrollTop
       return resolveActiveHeadingId({
         headings: sourceHeadingsRef.current,
-        scrollEl: sourceScrollElRef.current,
+        scrollEl: viewportEl,
         getCoords: (pos) => {
-          const cmEditorEl = codemirrorView.cm.dom
-          if (!cmEditorEl) {
-            return null
-          }
-
           const lineBlock = codemirrorView.cm.lineBlockAt(position(pos))
-          const viewportEl = sourceScrollElRef.current
-          const baseRect =
-            viewportEl === codemirrorView.cm.scrollDOM
-              ? codemirrorView.cm.scrollDOM.getBoundingClientRect()
-              : cmEditorEl.getBoundingClientRect()
-          const cmScrollTop = codemirrorView.cm.scrollDOM.scrollTop
-
           return {
             top: baseRect.top + lineBlock.top - cmScrollTop,
             bottom: baseRect.top + lineBlock.bottom - cmScrollTop,
