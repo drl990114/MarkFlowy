@@ -480,6 +480,8 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
     if (!tabItems) return
 
     const handleWheel = (event: WheelEvent) => {
+      // Pinch-to-zoom is delivered as Ctrl-wheel by trackpads.
+      if (event.ctrlKey || event.defaultPrevented) return
       if (tabItems.scrollWidth <= tabItems.clientWidth) return
 
       const rawDelta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY

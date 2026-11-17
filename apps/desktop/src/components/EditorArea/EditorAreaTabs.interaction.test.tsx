@@ -202,3 +202,40 @@ describe('editor tab keyboard boundaries', () => {
     expect(document.activeElement).toBe(second)
   })
 })
+
+describe('editor tab wheel boundaries', () => {
+  function overflowingTabs() {
+    const { container } = render(tabs())
+    const list = container.querySelector<HTMLElement>('.tab-items')!
+    Object.defineProperties(list, {
+      scrollWidth: { configurable: true, value: 500 },
+      clientWidth: { configurable: true, value: 200 },
+    })
+    return list
+  }
+
+  it('leaves Ctrl-wheel zoom gestures untouched', () => {
+    const list = overflowingTabs()
+    const event = new WheelEvent('wheel', {
+      deltaY: 40, ctrlKey: true, bubbles: true, cancelable: true,
+    })
+    // happy-dom's WheelEvent extends UIEvent and omits MouseEvent modifiers.
+    Object.defineProperty(event, 'ctrlKey', { value: true })
+    fireEvent(list, event)
+    expect(list.scrollLeft).toBe(0)
+    expect(event.defaultPrevented).toBe(false)
+  })
+
+  it.each([
+    { deltaX: 0, deltaY: 40, deltaMode: 0, expected: 40 },
+    { deltaX: 60, deltaY: 10, deltaMode: 0, expected: 60 },
+    { deltaX: 0, deltaY: 2, deltaMode: 1, expected: 32 },
+    { deltaX: 0, deltaY: 1, deltaMode: 2, expected: 200 },
+  ])('retains ordinary overflow scrolling %j', ({ expected, ...deltas }) => {
+    const list = overflowingTabs()
+    const event = new WheelEvent('wheel', { ...deltas, bubbles: true, cancelable: true })
+    fireEvent(list, event)
+    expect(list.scrollLeft).toBe(expected)
+    expect(event.defaultPrevented).toBe(true)
+  })
+})
