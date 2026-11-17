@@ -1129,3 +1129,85 @@ describe('Capricorn outline click ownership', () => {
     expect(runtime.editor.headings.jumpTo).toHaveBeenCalledExactlyOnceWith('first', { offset: 100 })
   })
 })
+
+it('releases outline subscriptions and queued scans across 100 rapid document lifecycles', () => {
+  vi.useFakeTimers()
+  const callbacks: (() => void)[] = []
+  const subscriptions = new Set<() => void>()
+  const scans: ReturnType<typeof vi.fn>[] = []
+  const { rerender, unmount } = render(<TocView />)
+  try {
+    for (let index = 0; index < 100; index++) {
+      const id = `stress-${index}`
+      const heading = { id, level: 1, number: null, text: id, title: id }
+      const getAll = vi.fn(() => [heading])
+      scans.push(getAll)
+      harness.editorState.activeId = id
+      harness.viewState.editorViewTypeMap.set(id, 'wysiwyg')
+      harness.fileState.fileTypeConfigMap.set(id, { type: 'markdown' })
+      act(() => setCapricornEditor(id, {
+        headings: {
+          getAll,
+          subscribe: (listener: (headings: CapricornHeading[]) => void) => {
+            const callback = () => listener([heading])
+            callbacks.push(callback)
+            subscriptions.add(callback)
+            return () => subscriptions.delete(callback)
+          },
+        },
+      } as unknown as CapricornRuntimeAdapter))
+      rerender(<TocView />)
+      expect(subscriptions.size).toBe(1)
+      act(() => callbacks.slice(0, -1).forEach((callback) => callback()))
+      if (index % 10 === 0) act(() => vi.runAllTimers())
+    }
+    act(() => vi.runAllTimers())
+    expect(screen.getByTestId('outline-heading').textContent).toBe('stress-99')
+    unmount()
+    const publications = harness.refresh.mock.calls.length
+    act(() => {
+      callbacks.forEach((callback) => callback())
+      vi.runAllTimers()
+    })
+    expect(subscriptions.size).toBe(0)
+    expect(harness.sourceListeners.size).toBe(0)
+    expect(harness.commands.size).toBe(0)
+    expect(vi.getTimerCount()).toBe(0)
+    expect(harness.refresh).toHaveBeenCalledTimes(publications)
+    expect(scans.every((scan) => scan.mock.calls.length <= 1)).toBe(true)
+  } finally {
+    unmount()
+    for (let index = 0; index < 100; index++) setCapricornEditor(`stress-${index}`, undefined)
+  }
+})
+
+it('balances heading subscriptions over 100 outline mount/unmount cycles', () => {
+  vi.useFakeTimers()
+  const listeners = new Set<() => void>()
+  const stale: (() => void)[] = []
+  setCapricornEditor('file', {
+    headings: {
+      getAll: () => [],
+      subscribe: (listener: () => void) => {
+        listeners.add(listener)
+        stale.push(listener)
+        return () => listeners.delete(listener)
+      },
+    },
+  } as unknown as CapricornRuntimeAdapter)
+  for (let index = 0; index < 100; index++) {
+    const probe = render(<TocView />)
+    expect(listeners.size).toBe(1)
+    if (index % 2 === 0) act(() => vi.runAllTimers())
+    probe.unmount()
+    expect(listeners.size).toBe(0)
+    expect(harness.commands.size).toBe(0)
+    expect(vi.getTimerCount()).toBe(0)
+  }
+  const publications = harness.refresh.mock.calls.length
+  act(() => {
+    stale.forEach((listener) => listener())
+    vi.runAllTimers()
+  })
+  expect(harness.refresh).toHaveBeenCalledTimes(publications)
+})

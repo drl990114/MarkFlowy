@@ -586,3 +586,27 @@ describe('useEditorStore confirmed batch close scope', () => {
     expect(useEditorStore.getState().getGroup('left')).toBeUndefined()
   })
 })
+
+it('preserves tab identity across 100 split moves and ignores old close snapshots', () => {
+  useEditorStore.setState({
+    editorLayout: {
+      type: 'branch', id: 'stress-layout', direction: 'horizontal', sizes: [50, 50],
+      children: [
+        { type: 'leaf', id: 'stress-left', opened: ['left-anchor', 'moving'], activeId: 'moving' },
+        { type: 'leaf', id: 'stress-right', opened: ['right-anchor'], activeId: 'right-anchor' },
+      ],
+    },
+    activeGroupId: 'stress-left', activeId: 'moving', opened: ['left-anchor', 'moving', 'right-anchor'],
+  })
+  for (let index = 0; index < 100; index++) {
+    const from = index % 2 === 0 ? 'stress-left' : 'stress-right'
+    const to = index % 2 === 0 ? 'stress-right' : 'stress-left'
+    useEditorStore.getState().moveFileToGroup(from, to, 'moving')
+    useEditorStore.getState().closeAllFilesInGroup(from, ['moving'])
+    expect(useEditorStore.getState().getGroup(from)?.opened).not.toContain('moving')
+    expect(useEditorStore.getState().getGroup(to)?.opened.filter((id) => id === 'moving')).toHaveLength(1)
+    expect(useEditorStore.getState().opened.filter((id) => id === 'moving')).toHaveLength(1)
+  }
+  useEditorStore.getState().closeFileInGroup('stress-left', 'moving')
+  expect(useEditorStore.getState().opened).toEqual(['left-anchor', 'right-anchor'])
+})
