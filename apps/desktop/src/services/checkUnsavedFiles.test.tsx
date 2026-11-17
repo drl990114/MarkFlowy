@@ -4,6 +4,10 @@ import type { ConfirmOptions } from './dialog'
 
 const mocks = vi.hoisted(() => ({
   confirm: vi.fn(),
+  content: 'original',
+  contents: new Map<string, string>(),
+  revisions: new Map<string, number>(),
+  revision: 1,
   getFileObject: vi.fn(),
   getSaveOpenedEditorEntries: vi.fn(),
   idStateMap: new Map<string, { hasUnsavedChanges?: boolean }>(),
@@ -19,7 +23,12 @@ vi.mock('@/services/dialog', () => ({
   dialog: { confirm: mocks.confirm },
 }))
 
+vi.mock('@/components/EditorArea/fileSaveCoordinator', () => ({
+  fileSaveCoordinator: { getRevision: (id: string) => mocks.revisions.get(id) ?? mocks.revision },
+}))
+
 vi.mock('@/stores', () => ({
+  useEditorStore: { getState: () => ({ getEditorContent: (id: string) => mocks.contents.get(id) ?? mocks.content }) },
   useEditorStateStore: {
     getState: () => ({ idStateMap: mocks.idStateMap }),
   },
@@ -34,6 +43,51 @@ import { checkUnsavedFiles, guardUnsavedFilesAsync } from './checkUnsavedFiles'
 import { isDraftRecoveryPending, registerDraftRecovery } from './draftRecoveryState'
 
 describe('guardUnsavedFilesAsync', () => {
+  it.each(['async', 'callback'] as const)(
+    '%s does not close the same dirty ID edited during discard protection', async (api) => {
+      mocks.idStateMap.set('dirty', { hasUnsavedChanges: true })
+      mocks.confirm.mockResolvedValue('unsaved')
+      let finish!: () => void
+      mocks.protectDiscard.mockReturnValue(new Promise<void>((resolve) => { finish = resolve }))
+      const close = vi.fn()
+      const pending = api === 'async'
+        ? guardUnsavedFilesAsync({ fileIds: ['dirty'], onContinue: close })
+        : checkUnsavedFiles({ fileIds: ['dirty'], onUnsavedAndClose: close })
+      await vi.waitFor(() => expect(mocks.protectDiscard).toHaveBeenCalledOnce())
+      mocks.content = 'new edit while checkpoint is pending'
+      mocks.revision++
+      finish()
+      if (api === 'async') await expect(pending).resolves.toBe(false)
+      else await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(close).not.toHaveBeenCalled()
+    },
+  )
+
+  it.each(['async', 'callback'] as const)(
+    '%s rechecks content and format revisions across the full discard batch', async (api) => {
+      for (const change of ['content', 'revision', 'unchanged']) {
+        mocks.contents.clear()
+        mocks.revisions.clear()
+        mocks.idStateMap.set('dirty', { hasUnsavedChanges: true })
+        mocks.idStateMap.set('second', { hasUnsavedChanges: true })
+        mocks.confirm.mockResolvedValue('unsaved')
+        let finish!: () => void
+        mocks.protectDiscard.mockReset().mockReturnValue(new Promise<void>((resolve) => { finish = resolve }))
+        const close = vi.fn()
+        const pending = api === 'async'
+          ? guardUnsavedFilesAsync({ fileIds: ['dirty', 'second'], onContinue: close })
+          : checkUnsavedFiles({ fileIds: ['dirty', 'second'], onUnsavedAndClose: close })
+        await vi.waitFor(() => expect(mocks.protectDiscard).toHaveBeenCalledOnce())
+        if (change === 'content') mocks.contents.set('second', 'changed without a revision')
+        if (change === 'revision') mocks.revisions.set('second', mocks.revision + 1)
+        finish()
+        if (api === 'async') await expect(pending).resolves.toBe(change === 'unchanged')
+        else await new Promise((resolve) => setTimeout(resolve, 0))
+        expect(close).toHaveBeenCalledTimes(change === 'unchanged' ? 1 : 0)
+      }
+    },
+  )
+
   it('waits for pending disk validation before deciding whether closing requires confirmation', async () => {
     mocks.idStateMap.set('recovering', { hasUnsavedChanges: true })
     const promote = vi.fn()
@@ -53,6 +107,10 @@ describe('guardUnsavedFilesAsync', () => {
   })
 
   beforeEach(() => {
+    mocks.contents.clear()
+    mocks.revisions.clear()
+    mocks.content = 'original'
+    mocks.revision = 1
     mocks.confirm.mockReset()
     mocks.getFileObject.mockReset()
     mocks.getSaveOpenedEditorEntries.mockReset()

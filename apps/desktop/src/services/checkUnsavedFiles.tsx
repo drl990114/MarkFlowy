@@ -3,7 +3,8 @@ import { toast } from 'zens'
 import { protectDiscard } from './local-history'
 import { getFileObject, getSaveOpenedEditorEntries } from '@/helper/files'
 import { dialog } from '@/services/dialog'
-import { useEditorStateStore } from '@/stores'
+import { useEditorStateStore, useEditorStore } from '@/stores'
+import { fileSaveCoordinator } from '@/components/EditorArea/fileSaveCoordinator'
 import { t } from '@/i18n'
 import { isDraftRecoveryPending, waitForDraftRecovery } from './draftRecoveryState'
 import { resolveDraftRecoveryBeforeClose } from './draftRecoveryActions'
@@ -81,6 +82,20 @@ const confirmUnsavedFiles = async (
   })
 }
 
+// Capture after the discard choice, before asynchronous history protection.
+// Read through the store to flush live editor sources before comparing revisions.
+const captureDiscardGuard = (fileIds: string[]) => {
+  const snapshots = fileIds.map((id) => ({
+    id,
+    content: useEditorStore.getState().getEditorContent(id),
+    revision: fileSaveCoordinator.getRevision(id),
+  }))
+  return () => snapshots.every(({ id, content, revision }) =>
+    useEditorStore.getState().getEditorContent(id) === content &&
+    fileSaveCoordinator.getRevision(id) === revision,
+  )
+}
+
 const guardUnsavedFileIds = async (params: GuardUnsavedFilesParams, hasUnsavedFiles: string[]) => {
   if (hasUnsavedFiles.length === 0) {
     await params.onContinue()
@@ -102,7 +117,9 @@ const guardUnsavedFileIds = async (params: GuardUnsavedFilesParams, hasUnsavedFi
   }
 
   if (action === 'unsaved') {
+    const isDiscardCurrent = captureDiscardGuard(hasUnsavedFiles)
     await protectDiscard(hasUnsavedFiles)
+    if (!isDiscardCurrent()) return false
     if (params.onUnsavedAndContinue) {
       await params.onUnsavedAndContinue(hasUnsavedFiles)
     } else {
@@ -146,7 +163,9 @@ export const checkUnsavedFiles = (params: CheckUnsavedFilesParams) => {
       const action = await confirmUnsavedFiles(remaining)
       if (action === 'save') await params.onSaveAndClose?.(remaining)
       if (action === 'unsaved') {
+        const isDiscardCurrent = captureDiscardGuard(remaining)
         await protectDiscard(remaining)
+        if (!isDiscardCurrent()) return
         await params.onUnsavedAndClose?.(remaining)
       }
     })()
