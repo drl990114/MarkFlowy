@@ -1097,3 +1097,35 @@ it('cancels old-editor snapshots and initializes the replacement editor once', (
   })
   expect(nextGetAll).toHaveBeenCalledOnce()
 })
+
+
+describe('Capricorn outline click ownership', () => {
+  it.each(['document', 'mode', 'replacement', 'removed'])('ignores stale headings after %s changes', (change) => {
+    vi.useFakeTimers()
+    createCursorEditorPane()
+    const runtime = createCursorOutlineRuntime()
+    setCapricornEditor('file', runtime.editor)
+    render(<TocView />)
+    act(() => vi.runAllTimers())
+    const oldClick = harness.refresh.mock.lastCall![0].newHeadings[0].onClick
+    if (change === 'document') harness.editorState.activeId = 'other'
+    if (change === 'mode') harness.viewState.editorViewTypeMap.set('file', EditorViewType.SOURCECODE)
+    act(() => {
+      if (change === 'replacement') setCapricornEditor('file', createCursorOutlineRuntime('new-').editor)
+      if (change === 'removed') setCapricornEditor('file', undefined)
+      oldClick()
+    })
+    expect(runtime.editor.headings.jumpTo).not.toHaveBeenCalled()
+  })
+
+  it('still jumps through the current runtime heading', async () => {
+    vi.useFakeTimers()
+    createCursorEditorPane()
+    const runtime = createCursorOutlineRuntime()
+    setCapricornEditor('file', runtime.editor)
+    render(<TocView />)
+    act(() => vi.runAllTimers())
+    await act(async () => harness.refresh.mock.lastCall![0].newHeadings[0].onClick())
+    expect(runtime.editor.headings.jumpTo).toHaveBeenCalledExactlyOnceWith('first', { offset: 100 })
+  })
+})

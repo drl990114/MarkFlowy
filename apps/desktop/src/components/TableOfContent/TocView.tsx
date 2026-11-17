@@ -468,10 +468,11 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             id: heading.id,
             htmlNode: null,
             onClick: () => {
+              if (!isCurrentEditor()) return
               activeHeadingSourceRef.current = 'viewport'
               headingIntentRef.current++
               void editor.headings.jumpTo(heading.id, { offset: 100 }).then(() => {
-                scheduleActiveHeadingUpdateRef.current()
+                if (isCurrentEditor()) scheduleActiveHeadingUpdateRef.current()
               })
             },
           } as IHeadingData
@@ -580,6 +581,13 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
                 id: heading.id,
                 htmlNode: null,
                 onClick: () => {
+                  // The previous outline can remain visible until the new editor's scan.
+                  if (
+                    useEditorStore.getState().activeId !== currentActiveId ||
+                    !isMarkdownFile(currentActiveId) ||
+                    useEditorViewTypeStore.getState().editorViewTypeMap.get(currentActiveId) !== EditorViewType.SOURCECODE ||
+                    sourceCodeCodemirrorViewMap.get(currentActiveId) !== codemirrorView
+                  ) return
                   const outline = sourceOutlineRef.current
                   const pos =
                     outline?.editor === codemirrorView

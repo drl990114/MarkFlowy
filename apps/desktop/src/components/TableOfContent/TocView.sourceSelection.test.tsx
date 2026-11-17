@@ -16,6 +16,7 @@ const harness = vi.hoisted(() => ({
   sourceViews: new Map<string, unknown>(),
   sourceListeners: new Set<() => void>(),
   extractMatches: vi.fn(),
+  headingClicks: [] as { id: string; onClick?: () => void }[],
 }))
 
 vi.mock('@/commands', () => ({
@@ -71,7 +72,10 @@ vi.mock('@markflowy/interface', () => ({
   TableOfContents: ({ ref, activeId }: { ref: Ref<unknown>; activeId?: string }) => {
     const [headings, setHeadings] = useState<{ id: string }[]>([])
     useImperativeHandle(ref, () => ({
-      refreshByHeadings: ({ newHeadings }: { newHeadings: { id: string }[] }) => setHeadings(newHeadings),
+      refreshByHeadings: ({ newHeadings }: { newHeadings: { id: string; onClick?: () => void }[] }) => {
+        harness.headingClicks = newHeadings
+        setHeadings(newHeadings)
+      },
     }))
     return <output data-testid='active-heading' data-heading-count={headings.length}>{activeId}</output>
   },
@@ -158,6 +162,28 @@ afterEach(() => {
 })
 
 describe('Source Code outline selection tracking', () => {
+  it.each(['document', 'mode', 'replacement', 'removed'])('ignores a stale heading after %s ownership changes', (change) => {
+    const { native } = mountSource()
+    const oldClick = harness.headingClicks[1].onClick!
+    const dispatch = vi.spyOn(native, 'dispatch')
+    const focus = vi.spyOn(native, 'focus')
+    if (change === 'document') harness.editorState.activeId = 'other'
+    if (change === 'mode') harness.viewState.editorViewTypeMap.set('file', EditorViewType.PREVIEW)
+    if (change === 'replacement') harness.sourceViews.set('file', createSource().source)
+    if (change === 'removed') harness.sourceViews.delete('file')
+    act(() => oldClick())
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(focus).not.toHaveBeenCalled()
+  })
+
+  it('still navigates a current source heading and focuses its editor', () => {
+    const { native } = mountSource()
+    const focus = vi.spyOn(native, 'focus')
+    act(() => harness.headingClicks[1].onClick!())
+    expect(native.state.selection.main.head).toBe(beta)
+    expect(focus).toHaveBeenCalledOnce()
+  })
+
   it('reads source container geometry once per outline update for a long document', () => {
     const doc = Array.from({ length: 200 }, (_, index) => `# Heading ${index}\nparagraph`).join('\n')
     const editor = createSource(doc)
