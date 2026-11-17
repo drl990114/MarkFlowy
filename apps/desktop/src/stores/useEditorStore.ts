@@ -829,26 +829,45 @@ const useEditorStore = create<EditorStore>()(subscribeWithSelector((set, get) =>
       applyLayoutChange(state.editorLayout, layout, group.id)
     },
 
-    closeOtherFilesInGroup: (groupId, id) => {
+    closeOtherFilesInGroup: (groupId, id, confirmedIds) => {
       const state = get()
       const layout = cloneEditorLayout(state.editorLayout)
       const group = findGroup(layout, groupId)
       if (!group) return
 
-      group.opened = group.opened.includes(id) ? [id] : []
-      group.activeId = group.opened[0]
-      applyLayoutChange(state.editorLayout, layout, group.id)
+      if (confirmedIds) {
+        // An async save/discard decision only covers the tabs shown at its start.
+        const closing = new Set(confirmedIds)
+        const previousCount = group.opened.length
+        group.opened = group.opened.filter((openedId) => openedId === id || !closing.has(openedId))
+        if (group.opened.length === previousCount) return
+        if (!group.activeId || !group.opened.includes(group.activeId)) {
+          group.activeId = group.opened.includes(id) ? id : group.opened[0]
+        }
+      } else {
+        group.opened = group.opened.includes(id) ? [id] : []
+        group.activeId = group.opened[0]
+      }
+      applyLayoutChange(state.editorLayout, layout, confirmedIds ? state.activeGroupId : group.id)
     },
 
-    closeAllFilesInGroup: (groupId) => {
+    closeAllFilesInGroup: (groupId, confirmedIds) => {
       const state = get()
       const layout = cloneEditorLayout(state.editorLayout)
       const group = findGroup(layout, groupId)
       if (!group) return
 
-      group.opened = []
-      group.activeId = undefined
-      applyLayoutChange(state.editorLayout, layout, group.id)
+      if (confirmedIds) {
+        const closing = new Set(confirmedIds)
+        const previousCount = group.opened.length
+        group.opened = group.opened.filter((openedId) => !closing.has(openedId))
+        if (group.opened.length === previousCount) return
+        if (!group.activeId || !group.opened.includes(group.activeId)) group.activeId = group.opened[0]
+      } else {
+        group.opened = []
+        group.activeId = undefined
+      }
+      applyLayoutChange(state.editorLayout, layout, confirmedIds ? state.activeGroupId : group.id)
     },
 
     moveFileToGroup: (sourceGroupId, targetGroupId, id, targetIndex) => {
@@ -1077,8 +1096,8 @@ type EditorStore = {
   openFileInGroup: (groupId: string, id: string, options?: OpenFileInGroupOptions) => boolean
   keepFileOpen: (groupId: string, id: string) => void
   closeFileInGroup: (groupId: string, id: string) => void
-  closeOtherFilesInGroup: (groupId: string, id: string) => void
-  closeAllFilesInGroup: (groupId: string) => void
+  closeOtherFilesInGroup: (groupId: string, id: string, confirmedIds?: readonly string[]) => void
+  closeAllFilesInGroup: (groupId: string, confirmedIds?: readonly string[]) => void
   moveFileToGroup: (
     sourceGroupId: string,
     targetGroupId: string,

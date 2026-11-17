@@ -533,3 +533,56 @@ describe('useEditorStore.getEditorContent', () => {
     expect(docToString).toHaveBeenCalledWith(doc)
   })
 })
+
+describe('useEditorStore confirmed batch close scope', () => {
+  beforeEach(() => {
+    useEditorStore.getState().setEditorLayout({
+      type: 'branch', id: 'layout', direction: 'horizontal', sizes: [50, 50],
+      children: [
+        { type: 'leaf', id: 'left', opened: ['a', 'b', 'new-unsaved'], activeId: 'new-unsaved', previewId: 'b' },
+        { type: 'leaf', id: 'right', opened: ['right-file', 'moved'], activeId: 'right-file' },
+      ],
+    }, 'right')
+  })
+
+  it('closes only confirmed tabs without stealing the active pane or late tab', () => {
+    useEditorStore.getState().closeAllFilesInGroup('left', ['a', 'b'])
+    expect(useEditorStore.getState().getGroup('left')).toMatchObject({
+      opened: ['new-unsaved'], activeId: 'new-unsaved',
+    })
+    expect(useEditorStore.getState().getGroup('left')?.previewId).toBeUndefined()
+    expect(useEditorStore.getState().activeGroupId).toBe('right')
+    expect(useEditorStore.getState().activeId).toBe('right-file')
+  })
+
+  it('keeps the retained tab and late active tab when closing confirmed others', () => {
+    useEditorStore.getState().closeOtherFilesInGroup('left', 'a', ['a', 'b'])
+    expect(useEditorStore.getState().getGroup('left')).toMatchObject({
+      opened: ['a', 'new-unsaved'], activeId: 'new-unsaved',
+    })
+    expect(useEditorStore.getState().activeGroupId).toBe('right')
+  })
+
+  it('does not close moved, missing or late tabs when the retained tab has gone', () => {
+    useEditorStore.getState().closeOtherFilesInGroup('left', 'already-closed', ['a', 'b', 'moved'])
+    expect(useEditorStore.getState().getGroup('left')?.opened).toEqual(['new-unsaved'])
+    expect(useEditorStore.getState().getGroup('right')?.opened).toEqual(['right-file', 'moved'])
+  })
+
+  it('does not publish an empty, missing or already-applied close scope', () => {
+    const initial = useEditorStore.getState().editorLayout
+    useEditorStore.getState().closeAllFilesInGroup('left', [])
+    useEditorStore.getState().closeAllFilesInGroup('left', ['already-closed'])
+    useEditorStore.getState().closeOtherFilesInGroup('left', 'a', ['a'])
+    useEditorStore.getState().closeAllFilesInGroup('missing-group', ['a'])
+    expect(useEditorStore.getState().editorLayout).toBe(initial)
+  })
+
+  it('retains the unscoped API for immediate closes', () => {
+    useEditorStore.getState().closeOtherFilesInGroup('left', 'a')
+    expect(useEditorStore.getState().getGroup('left')?.opened).toEqual(['a'])
+    expect(useEditorStore.getState().activeGroupId).toBe('left')
+    useEditorStore.getState().closeAllFilesInGroup('left')
+    expect(useEditorStore.getState().getGroup('left')).toBeUndefined()
+  })
+})

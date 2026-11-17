@@ -1,6 +1,6 @@
 import { EVENT } from '@/constants'
 import useFileCacheStore from '@/helper/files'
-import { checkUnsavedFiles, saveUnsavedFiles } from '@/services/checkUnsavedFiles'
+import { checkUnsavedFiles, getUnsavedFileIds, saveUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import { memo, type DragEvent, useCallback, useEffect, useRef } from 'react'
 import { ArrowLeftIcon, ArrowRightIcon, XIcon } from 'lucide-react'
@@ -254,18 +254,23 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
               checkUnsavedFiles({
                 fileIds: otherIds,
                 onSaveAndClose: async (hasUnsavedFileIds) => {
-                  if (await saveUnsavedFiles(hasUnsavedFileIds)) {
-                    closeOtherFilesInGroup(groupId, id)
+                  if (
+                    await saveUnsavedFiles(hasUnsavedFileIds) &&
+                    getUnsavedFileIds(otherIds).length === 0
+                  ) {
+                    closeOtherFilesInGroup(groupId, id, otherIds)
                   }
                 },
-                onUnsavedAndClose: () => {
-                  closeOtherFilesInGroup(groupId, id)
+                onUnsavedAndClose: (discardedIds) => {
+                  // A previously clean tab may have been edited while protection ran.
+                  if (getUnsavedFileIds(otherIds).some((fileId) => !discardedIds.includes(fileId))) return
+                  closeOtherFilesInGroup(groupId, id, otherIds)
                 },
               }) > 0
             ) {
               return
             }
-            closeOtherFilesInGroup(groupId, id)
+            closeOtherFilesInGroup(groupId, id, otherIds)
           },
         },
         {
@@ -273,23 +278,27 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
           value: 'close_all',
           handler: () => {
             const { closeAllFilesInGroup, getGroup } = useEditorStore.getState()
-            const openedIds = getGroup(groupId)?.opened || []
+            const openedIds = [...(getGroup(groupId)?.opened || [])]
             if (
               checkUnsavedFiles({
                 fileIds: openedIds,
                 onSaveAndClose: async (hasUnsavedFileIds) => {
-                  if (await saveUnsavedFiles(hasUnsavedFileIds)) {
-                    closeAllFilesInGroup(groupId)
+                  if (
+                    await saveUnsavedFiles(hasUnsavedFileIds) &&
+                    getUnsavedFileIds(openedIds).length === 0
+                  ) {
+                    closeAllFilesInGroup(groupId, openedIds)
                   }
                 },
-                onUnsavedAndClose: () => {
-                  closeAllFilesInGroup(groupId)
+                onUnsavedAndClose: (discardedIds) => {
+                  if (getUnsavedFileIds(openedIds).some((fileId) => !discardedIds.includes(fileId))) return
+                  closeAllFilesInGroup(groupId, openedIds)
                 },
               }) > 0
             ) {
               return
             }
-            closeAllFilesInGroup(groupId)
+            closeAllFilesInGroup(groupId, openedIds)
           },
         },
       ],

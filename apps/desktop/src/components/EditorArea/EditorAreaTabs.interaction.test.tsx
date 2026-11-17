@@ -10,7 +10,10 @@ import EditorAreaTabs from './EditorAreaTabs'
 const state = vi.hoisted(() => ({
   dirty: true,
   close: vi.fn(),
+  closeAll: vi.fn(),
+  closeOthers: vi.fn(),
   check: vi.fn(),
+  unsavedIds: vi.fn(),
   save: vi.fn(),
   keepOpen: vi.fn(),
   open: vi.fn(),
@@ -21,6 +24,7 @@ const state = vi.hoisted(() => ({
 vi.mock('@/i18n', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 vi.mock('@/services/checkUnsavedFiles', () => ({
   checkUnsavedFiles: state.check,
+  getUnsavedFileIds: state.unsavedIds,
   saveUnsavedFiles: state.save,
 }))
 vi.mock('@/helper/files', () => ({
@@ -32,6 +36,8 @@ vi.mock('@/stores', async () => {
   const editor = {
     getGroup: () => state.group,
     closeFileInGroup: state.close,
+    closeAllFilesInGroup: state.closeAll,
+    closeOtherFilesInGroup: state.closeOthers,
     openFileInGroup: state.open,
     keepFileOpen: state.keepOpen,
   }
@@ -79,6 +85,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   state.check.mockImplementation(() => (state.dirty ? 1 : 0))
   state.save.mockResolvedValue(true)
+  state.unsavedIds.mockReturnValue([])
   state.keepOpen.mockImplementation(() => {
     state.group = { ...state.group, previewId: undefined }
     state.listeners.forEach((listener) => listener())
@@ -237,5 +244,85 @@ describe('editor tab wheel boundaries', () => {
     fireEvent(list, event)
     expect(list.scrollLeft).toBe(expected)
     expect(event.defaultPrevented).toBe(true)
+  })
+})
+
+
+describe('editor tab batch close scope', () => {
+  beforeEach(() => {
+    state.group = { id: 'group', activeId: 'file', opened: ['file', 'other'], previewId: undefined }
+  })
+  afterEach(() => {
+    state.group = { id: 'group', activeId: 'file', opened: ['file'], previewId: undefined }
+  })
+
+  it.each(['close_all', 'close_others'])('keeps %s bound to the confirmed files while saving', async (command) => {
+    render(tabs())
+    fireEvent.contextMenu(screen.getAllByRole('tab')[0])
+    const menu = state.menu.mock.calls[0][0] as Parameters<typeof showContextMenu>[0]
+    const action = menu.items.find((item) => 'value' in item && item.value === command)
+    act(() => { if (action && 'handler' in action) action.handler?.() })
+    const options = state.check.mock.calls[0][0] as Parameters<typeof checkUnsavedFiles>[0]
+    const confirmed = command === 'close_all' ? ['file', 'other'] : ['other']
+    expect(options.fileIds).toEqual(confirmed)
+    let finishSave!: (saved: boolean) => void
+    state.save.mockImplementationOnce(() => new Promise<boolean>((resolve) => { finishSave = resolve }))
+    let saving!: Promise<void> | void
+    act(() => { saving = options.onSaveAndClose?.(confirmed) })
+    state.group = { ...state.group, activeId: 'new-unsaved', opened: [...state.group.opened, 'new-unsaved'] }
+    await act(async () => { finishSave(true); await saving })
+    if (command === 'close_all') {
+      expect(state.closeAll).toHaveBeenCalledExactlyOnceWith('group', confirmed)
+    } else {
+      expect(state.closeOthers).toHaveBeenCalledExactlyOnceWith('group', 'file', confirmed)
+    }
+  })
+
+  it.each(['close_all', 'close_others'])('keeps %s bound to the confirmed files after discard protection', async (command) => {
+    render(tabs())
+    fireEvent.contextMenu(screen.getAllByRole('tab')[0])
+    const menu = state.menu.mock.calls[0][0] as Parameters<typeof showContextMenu>[0]
+    const action = menu.items.find((item) => 'value' in item && item.value === command)
+    act(() => { if (action && 'handler' in action) action.handler?.() })
+    const options = state.check.mock.calls[0][0] as Parameters<typeof checkUnsavedFiles>[0]
+    const confirmed = command === 'close_all' ? ['file', 'other'] : ['other']
+    state.group = { ...state.group, activeId: 'new-unsaved', opened: [...state.group.opened, 'new-unsaved'] }
+    await act(async () => { await options.onUnsavedAndClose?.(confirmed) })
+    if (command === 'close_all') {
+      expect(state.closeAll).toHaveBeenCalledExactlyOnceWith('group', confirmed)
+    } else {
+      expect(state.closeOthers).toHaveBeenCalledExactlyOnceWith('group', 'file', confirmed)
+    }
+  })
+  it.each(['close_all', 'close_others'].flatMap((command) =>
+    ['save-failed', 'new-edit-after-save', 'new-edit-before-discard'].map((reason) => ({ command, reason })),
+  ))('retains tabs when $reason invalidates $command', async ({ command, reason }) => {
+    render(tabs())
+    fireEvent.contextMenu(screen.getAllByRole('tab')[0])
+    const menu = state.menu.mock.calls[0][0] as Parameters<typeof showContextMenu>[0]
+    const action = menu.items.find((item) => 'value' in item && item.value === command)
+    act(() => { if (action && 'handler' in action) action.handler?.() })
+    const options = state.check.mock.calls[0][0] as Parameters<typeof checkUnsavedFiles>[0]
+    if (reason === 'save-failed') state.save.mockResolvedValueOnce(false)
+    else state.unsavedIds.mockReturnValue(['other'])
+    await act(async () => {
+      if (reason === 'new-edit-before-discard') await options.onUnsavedAndClose?.(['file'])
+      else await options.onSaveAndClose?.(['file'])
+    })
+    expect(state.closeAll).not.toHaveBeenCalled()
+    expect(state.closeOthers).not.toHaveBeenCalled()
+  })
+
+  it.each(['close_all', 'close_others'])('leaves %s unchanged when confirmation is canceled', (command) => {
+    render(tabs())
+    fireEvent.contextMenu(screen.getAllByRole('tab')[0])
+    const menu = state.menu.mock.calls[0][0] as Parameters<typeof showContextMenu>[0]
+    const action = menu.items.find((item) => 'value' in item && item.value === command)
+    act(() => { if (action && 'handler' in action) action.handler?.() })
+    // The guard owns cancellation and does not invoke either continuation.
+    expect(state.check).toHaveBeenCalledOnce()
+    expect(state.closeAll).not.toHaveBeenCalled()
+    expect(state.closeOthers).not.toHaveBeenCalled()
+    expect(state.save).not.toHaveBeenCalled()
   })
 })
