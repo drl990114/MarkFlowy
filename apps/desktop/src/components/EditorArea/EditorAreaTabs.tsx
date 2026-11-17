@@ -626,6 +626,11 @@ const EditorAreaTabs = memo((props: EditorAreaTabsProps) => {
 
   const handleTabListKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
+      // Leave IME navigation and OS/application shortcuts to their owners.
+      if (
+        event.defaultPrevented || event.nativeEvent.isComposing || event.keyCode === 229 ||
+        event.ctrlKey || event.metaKey || event.altKey || event.shiftKey
+      ) return
       const target = event.target
       if (!(target instanceof HTMLElement) || target.getAttribute('role') !== 'tab') return
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return

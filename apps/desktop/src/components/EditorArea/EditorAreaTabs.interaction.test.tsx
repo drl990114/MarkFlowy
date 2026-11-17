@@ -25,7 +25,7 @@ vi.mock('@/services/checkUnsavedFiles', () => ({
 }))
 vi.mock('@/helper/files', () => ({
   default: (selector: (value: unknown) => unknown) =>
-    selector({ entries: { file: { name: 'Document.md' } } }),
+    selector({ entries: { file: { name: 'Document.md' }, other: { name: 'Other.md' } } }),
 }))
 vi.mock('@/stores', async () => {
   const { useSyncExternalStore } = await import('react')
@@ -161,5 +161,44 @@ describe('editor tab close affordance', () => {
     expect(state.close).toHaveBeenCalledWith('group', 'file')
     await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('tab')))
     expect(screen.getByRole('tab').getAttribute('aria-controls')).toBe('editor-panel-group')
+  })
+})
+
+describe('editor tab keyboard boundaries', () => {
+  beforeEach(() => {
+    state.dirty = false
+    state.group = { id: 'group', activeId: 'file', opened: ['file', 'other'], previewId: undefined }
+  })
+  afterEach(() => {
+    state.group = { id: 'group', activeId: 'file', opened: ['file'], previewId: undefined }
+  })
+
+  it.each([
+    { ctrlKey: true },
+    { metaKey: true },
+    { altKey: true },
+    { shiftKey: true },
+    { isComposing: true },
+    { keyCode: 229 },
+  ])('does not switch documents for reserved keyboard input %j', (options) => {
+    render(tabs())
+    const tab = screen.getAllByRole('tab')[0]
+    tab.focus()
+    const event = new KeyboardEvent('keydown', {
+      key: 'ArrowRight', bubbles: true, cancelable: true, ...options,
+    })
+    fireEvent(tab, event)
+    expect(state.open).not.toHaveBeenCalled()
+    expect(document.activeElement).toBe(tab)
+    expect(event.defaultPrevented).toBe(false)
+  })
+
+  it('retains ordinary arrow navigation and focuses the next document tab', () => {
+    render(tabs())
+    const [first, second] = screen.getAllByRole('tab')
+    first.focus()
+    fireEvent.keyDown(first, { key: 'ArrowRight' })
+    expect(state.open).toHaveBeenCalledExactlyOnceWith('group', 'other')
+    expect(document.activeElement).toBe(second)
   })
 })
