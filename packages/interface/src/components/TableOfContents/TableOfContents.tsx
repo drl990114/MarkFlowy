@@ -75,6 +75,18 @@ export interface TableOfContentsProps {
   renderTitle?: (title: string) => React.ReactNode
 }
 
+// Visible rows keep their original preorder key even when siblings are folded.
+function indexOfHeadingKey(nodes: readonly HeadingNode[], key: number): number {
+  let low = 0
+  let high = nodes.length
+  while (low < high) {
+    const mid = low + Math.floor((high - low) / 2)
+    if (nodes[mid].key < key) low = mid + 1
+    else high = mid
+  }
+  return nodes[low]?.key === key ? low : -1
+}
+
 const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((props, ref) => {
   const {
     headingsData,
@@ -99,7 +111,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
   const [headings, setHeadings] = useState(headingsData);
   const [headingTree, setHeadingTree] = useState<HeadingTree>();
   const [activeNodeState, setActiveNodeState] = useState<HeadingNode>();
-  const [activeParentsState, setActiveParentsState] = useState<any>();
+  const [activeParentsState, setActiveParentsState] = useState<Record<number, boolean>>()
   const [container, setContainer] = useState<HTMLElement>();
   const [scroll, setScroll] = useState<HTMLElement | undefined>(scrollEl);
   const navRef = useRef<HTMLElement>(null);
@@ -118,29 +130,27 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     }
   }, [headingsData]);
 
-  const flattenedHeadings = useMemo(() => {
-    if (!headingTree) return [];
-    const items: HeadingNode[] = [];
-    headingTree.traverseInPreorder((h) => {
-      items.push(h);
-      if (collapsible) return collapsedIds.has(h.id) ? TraverseResult.NoChildren : TraverseResult.Continue
-      return !autoExpand || activeParentsState?.[h.key] || h.parent?.key === -1
-        ? TraverseResult.Continue
-        : TraverseResult.NoChildren;
-    });
-    return items;
-  }, [headingTree, autoExpand, activeParentsState, collapsible, collapsedIds])
+  // Caret changes can update the active parent chain without changing the
+  // visible list at all. Only automatic expansion consumes that chain.
+  const autoParents = autoExpand && !collapsible ? activeParentsState : undefined
+  const { items: flattenedHeadings, indexById } = useMemo(() => {
+    const items: HeadingNode[] = []
+    const byId = new Map<string, number>()
+    headingTree?.traverseInPreorder((node) => {
+      if (!byId.has(node.id)) byId.set(node.id, items.length)
+      items.push(node)
+      if (collapsible) return collapsedIds.has(node.id) ? TraverseResult.NoChildren : TraverseResult.Continue
+      return !autoExpand || autoParents?.[node.key] || node.parent?.key === -1
+        ? TraverseResult.Continue : TraverseResult.NoChildren
+    })
+    return { items, indexById: byId }
+  }, [headingTree, autoExpand, autoParents, collapsible, collapsedIds])
 
   const visibleActiveId = useMemo(() => {
     if (!collapsible || !headingTree) return activeId
     const selectedId = activeId ?? activeNodeState?.id
     if (!selectedId) return undefined
-    let selected: HeadingNode | undefined
-    headingTree.traverseInPreorder((node) => {
-      if (node.id !== selectedId) return TraverseResult.Continue
-      selected = node
-      return TraverseResult.Stop
-    })
+    let selected = headingTree.getById(selectedId)
     let visible = selected
     while (selected?.parent && selected.parent.key !== -1) {
       selected = selected.parent
@@ -236,7 +246,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     (activeNode: HeadingNode) => {
       if (headingTree) {
         let curNode = activeNode;
-        const activeParents: Record<string, any> = {};
+        const activeParents: Record<number, boolean> = {}
         const root = headingTree.getRoot();
         if (root) {
           activeParents[root.key] = true;
@@ -256,16 +266,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
       return;
     }
 
-    let targetNode: HeadingNode | null = null;
-    headingTree.traverseInPreorder((h: HeadingNode) => {
-      if (h.id === activeId) {
-        targetNode = h;
-        return TraverseResult.Stop;
-      }
-
-      return TraverseResult.Continue;
-    });
-
+    const targetNode = headingTree.getById(activeId)
     if (targetNode && targetNode !== activeNodeState) {
       setActiveNodeState(targetNode);
       setActiveParentsState(buildActiveParents(targetNode));
@@ -311,6 +312,8 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     };
   }, [headingTree, scroll, parseHeadings, scrollHandler]);
 
+  const activeNodeId = activeNodeState?.id
+  const activeNodeKey = activeNodeState?.key
   useEffect(() => {
     if (!flattenedHeadings.length) {
       revealedHeadingIdRef.current = undefined
@@ -320,27 +323,21 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     if (!nav || nav.clientHeight <= 0) return
     // The controlled node and its expanded parents settle together. A sibling
     // can move when the previously active branch collapses in the next render.
-    if (!collapsible && autoExpand && activeId && activeNodeState?.id !== activeId) return
-    const index = flattenedHeadings.findIndex((h) =>
-      isTableOfContentsHeadingActive({
-        activeId: visibleActiveId,
-        activeNodeKey: activeNodeState?.key,
-        firstHeadingKey: flattenedHeadings[0]?.key,
-        headingId: h.id,
-        headingKey: h.key,
-      }),
-    )
+    if (!collapsible && autoExpand && activeId && activeNodeId !== activeId) return
+    // Folding is a manual view operation, not a new document navigation
+    // intent. Do not steal the user's scroll when the semantic id is unchanged.
+    const semanticId = activeId ?? activeNodeId ?? flattenedHeadings[0].id
+    if (revealedHeadingIdRef.current === semanticId) return
+    const index = visibleActiveId
+      ? (indexById.get(visibleActiveId) ?? -1)
+      : activeNodeKey !== undefined ? indexOfHeadingKey(flattenedHeadings, activeNodeKey) : 0
     // A controlled id may arrive before its headings or expanded parents.
     if (index < 0) return
-    // Folding is a manual view operation, not a new document navigation intent.
-    // Keep the semantic active id so folding its ancestors never steals scrolling.
-    const headingId = activeId ?? activeNodeState?.id ?? flattenedHeadings[index].id
-    if (revealedHeadingIdRef.current === headingId) return
 
     if (flattenedHeadings.length > 50) {
       const offset = rowVirtualizer.getOffsetForIndex(index, 'auto')?.[0]
       if (offset === undefined) return
-      revealedHeadingIdRef.current = headingId
+      revealedHeadingIdRef.current = semanticId
       // Rows have fixed heights, so one offset is enough. scrollToIndex retries
       // across frames and can undo a user's immediate manual outline scroll.
       if (offset !== nav.scrollTop) rowVirtualizer.scrollToOffset(offset)
@@ -349,7 +346,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
 
     const row = nav.querySelector<HTMLElement>(`li[aria-posinset="${index + 1}"]`)
     if (!row) return
-    revealedHeadingIdRef.current = headingId
+    revealedHeadingIdRef.current = semanticId
     // Compact and expanded nonvirtual rows have different actual heights.
     // Scroll this nav only; scrollIntoView would also move ancestor panels.
     const rowRect = row.getBoundingClientRect()
@@ -359,7 +356,7 @@ const TableOfContents = forwardRef<TableOfContentsRef, TableOfContentsProps>((pr
     if (delta) nav.scrollTo({ top: nav.scrollTop + delta, behavior: 'auto' })
     // Remember the semantic id across tree refreshes. Reading elsewhere in the
     // outline must not be pulled back by a scroll render or a title update.
-  }, [activeId, activeNodeState?.id, activeNodeState?.key, autoExpand, collapsible, visibleActiveId, flattenedHeadings, rowVirtualizer, viewportHeight])
+  }, [activeId, activeNodeId, activeNodeKey, autoExpand, collapsible, visibleActiveId, flattenedHeadings, indexById, rowVirtualizer, viewportHeight])
 
   useImperativeHandle(ref, () => ({
     refresh: ({ newContainer, newScroll }) => {

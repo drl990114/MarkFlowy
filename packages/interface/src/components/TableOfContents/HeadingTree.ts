@@ -22,6 +22,10 @@ export interface IHeadingData {
 export class HeadingTree {
   private root?: HeadingNode;
 
+  // First-in-document order matches the old preorder lookup even if an
+  // external host accidentally supplies duplicate HTML ids.
+  private readonly nodesById = new Map<string, HeadingNode>()
+
   private offsetCacheVersion: number;
 
   constructor(headings: IHeadingData[]) {
@@ -50,6 +54,7 @@ export class HeadingTree {
     ]; // init with root node
     const siblingCounts = new Map<HeadingNode, Map<number, number>>()
     headingNodes.forEach((node) => {
+      if (!this.nodesById.has(node.id)) this.nodesById.set(node.id, node)
       while (nodeStack.length && nodeStack[nodeStack.length - 1].depth >= node.depth) {
         nodeStack.pop();
       }
@@ -93,6 +98,10 @@ export class HeadingTree {
 
     this.root = nodeStack[0];
     this.offsetCacheVersion = offsetCacheVersion;
+  }
+
+  getById(id: string) {
+    return this.nodesById.get(id)
   }
 
   getRoot() {

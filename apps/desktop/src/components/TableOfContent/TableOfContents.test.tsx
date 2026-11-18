@@ -122,6 +122,30 @@ describe('TableOfContents virtualization', () => {
 })
 
 describe('TableOfContents active heading visibility', () => {
+  it('reveals a new current heading without traversing a fixed 19,824-row outline again', () => {
+    mockOutlineLayout()
+    const collapsed = new Set<string>()
+    const outline = (activeId: string) => (
+      <TableOfContents headingsData={largeHeadings} collapsible collapsedHeadingIds={collapsed}
+        activeId={activeId} compact={false} />
+    )
+    const view = render(outline(largeHeadings[0].id))
+    const visit = HeadingTree.prototype.traverseInPreorder
+    let visited = 0
+    const traversals = vi.spyOn(HeadingTree.prototype, 'traverseInPreorder')
+      .mockImplementation(function (this: HeadingTree, callback) {
+        return visit.call(this, (node) => {
+          visited++
+          return callback(node)
+        })
+      })
+    const last = largeHeadings[largeHeadings.length - 1].id
+    view.rerender(outline(last))
+    act(() => fireEvent.scroll(view.container.querySelector('nav')!))
+    expect(view.container.querySelector('[aria-current="location"]')?.getAttribute('href')).toBe(`#${last}`)
+    expect({ traversals: traversals.mock.calls.length, visited }).toEqual({ traversals: 0, visited: 0 })
+  })
+
   it.each([50, 51, 500])('reveals an offscreen current heading among %i rows', async (count) => {
     const { viewportHeight } = mockOutlineLayout()
     const headings = Array.from({ length: count }, (_, index) => heading(1, index))
@@ -348,6 +372,17 @@ describe('TableOfContents manual folding', () => {
 })
 
 describe('HeadingTree numbering', () => {
+  it('indexes the first occurrence of a heading id in document order', () => {
+    const tree = new HeadingTree([
+      { ...heading(1, 0), id: 'duplicate' },
+      { ...heading(2, 1), id: 'duplicate' },
+      { ...heading(1, 2), id: 'unique' },
+    ])
+    expect(tree.getById('duplicate')?.key).toBe(0)
+    expect(tree.getById('unique')?.key).toBe(2)
+    expect(tree.getById('missing')).toBeUndefined()
+  })
+
   it('preserves skipped levels, mixed sibling depths and explicit numbering', () => {
     const inputs = [2, 4, 3, 4, 2, 5, 4].map(heading)
     inputs[4].chapter = 'IV'
