@@ -13,6 +13,7 @@ import { configDefaults } from 'vitest/config'
 import * as runtimeResolver from './capricornRuntimeResolver'
 import desktopConfig from './vite.config'
 import publishedConfig from './vitest.capricorn-published.config'
+import { resolveCapricornSourceEntry } from './vitest.capricorn-source.config'
 
 const desktopRoot = fileURLToPath(new URL('.', import.meta.url))
 const sourceRoot = normalizePath(fileURLToPath(new URL('../../packages/zens/src', import.meta.url)))
@@ -22,6 +23,25 @@ async function getConfig(command: ConfigEnv['command'], mode: string) {
 }
 
 describe('Desktop workspace development resolution', () => {
+  it('finds the current Capricorn source entry, falls back to the old layout, and reports missing entries', () => {
+    const root = mkdtempSync(join(tmpdir(), 'markflowy-capricorn-source-'))
+    const legacy = join(root, 'src/release/index.tsx')
+    const current = join(root, 'editor/runtime/runtime-api.tsx')
+    try {
+      expect(() => resolveCapricornSourceEntry(root)).toThrow('Capricorn source entry not found')
+      expect(() => resolveCapricornSourceEntry(root)).toThrow(legacy)
+      expect(() => resolveCapricornSourceEntry(root)).toThrow(current)
+      mkdirSync(join(root, 'src/release'), { recursive: true })
+      writeFileSync(legacy, '')
+      expect(resolveCapricornSourceEntry(root)).toBe(legacy)
+      mkdirSync(join(root, 'editor/runtime'), { recursive: true })
+      writeFileSync(current, '')
+      expect(resolveCapricornSourceEntry(root)).toBe(current)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+
   it('uses the configured Tauri development port without falling back to another port', async () => {
     const tauriConfig = JSON.parse(
       readFileSync(new URL('./src-tauri/tauri.conf.json', import.meta.url), 'utf8'),
