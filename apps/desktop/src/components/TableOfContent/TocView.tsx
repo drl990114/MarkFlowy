@@ -35,6 +35,7 @@ import { CapricornHeadingNumberingButton } from './HeadingNumberingButton'
 import { renderHeadingTitle } from './HeadingTitle'
 import { TocViewContainer } from './styles'
 import { scheduleOutlineAfterPaint } from './scheduleOutlineAfterPaint'
+import { findSourceViewportHeading } from './sourceViewportHeading'
 import { subscribeOutlineScrollIntent, subscribeSourceOutline } from './outlineTracking'
 import { getOutlineSession, releaseOutlineSession, type OutlineSession, type OutlineSnapshot } from './outlineSession'
 import { OUTLINE_COLLAPSE_ALL, OUTLINE_EXPAND_ALL, registerOutlineCommands } from './outlineCommands'
@@ -58,11 +59,6 @@ type SourceHeadingInfo = {
   depth: number
   value: string
   id: string
-}
-
-type HeadingViewportCoords = {
-  top: number
-  bottom?: number
 }
 
 type PendingCapricornOutline = {
@@ -119,52 +115,6 @@ const resolveSourceScrollEl = (activeId: string, codemirrorScrollEl: HTMLElement
   }
 
   return getActiveEditorScrollEl(activeId) ?? codemirrorScrollEl
-}
-
-const resolveActiveHeadingId = (params: {
-  headings: { pos: number; id: string }[]
-  scrollEl: HTMLElement | null
-  getCoords: (pos: number) => HeadingViewportCoords | null
-  offset?: number
-}): string | null => {
-  const { headings, scrollEl, getCoords, offset = 16 } = params
-  if (!scrollEl || headings.length === 0) {
-    return null
-  }
-
-  const containerRect = scrollEl.getBoundingClientRect()
-  const viewportTop = containerRect.top + offset
-  const viewportBottom = containerRect.bottom
-  let currentId: string | null = headings[0]?.id ?? null
-  let firstVisibleId: string | null = null
-
-  for (const heading of headings) {
-    try {
-      const coords = getCoords(heading.pos)
-      if (!coords) {
-        continue
-      }
-
-      const headingTop = coords.top
-      const headingBottom = coords.bottom ?? coords.top
-      const isVisible = headingBottom >= viewportTop && headingTop <= viewportBottom
-
-      if (isVisible) {
-        firstVisibleId = heading.id
-        break
-      }
-
-      if (headingTop < viewportTop) {
-        currentId = heading.id
-      } else {
-        break
-      }
-    } catch (error) {
-      continue
-    }
-  }
-
-  return firstVisibleId ?? currentId
 }
 
 type TocViewProps = {
@@ -368,23 +318,13 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
       const cmEditorEl = codemirrorView.cm.dom
       const viewportEl = sourceScrollElRef.current
       if (!cmEditorEl || !viewportEl || sourceHeadingsRef.current.length === 0) return null
-      // All heading coordinates in this frame share the same container origin.
-      // Read geometry once rather than once for every heading above the viewport.
-      const baseRect = viewportEl === codemirrorView.cm.scrollDOM
-        ? codemirrorView.cm.scrollDOM.getBoundingClientRect()
-        : cmEditorEl.getBoundingClientRect()
-      const cmScrollTop = codemirrorView.cm.scrollDOM.scrollTop
-      return resolveActiveHeadingId({
-        headings: sourceHeadingsRef.current,
-        scrollEl: viewportEl,
-        getCoords: (pos) => {
-          const lineBlock = codemirrorView.cm.lineBlockAt(position(pos))
-          return {
-            top: baseRect.top + lineBlock.top - cmScrollTop,
-            bottom: baseRect.top + lineBlock.bottom - cmScrollTop,
-          }
-        },
-      })
+      const viewport = viewportEl.getBoundingClientRect()
+      const origin = (viewportEl === codemirrorView.cm.scrollDOM
+        ? viewport.top : cmEditorEl.getBoundingClientRect().top) - codemirrorView.cm.scrollDOM.scrollTop
+      return findSourceViewportHeading(
+        sourceHeadingsRef.current, viewport.top + 16 - origin, viewport.bottom - origin,
+        (pos) => codemirrorView.cm.lineBlockAt(position(pos)),
+      )
     }
 
     return null
