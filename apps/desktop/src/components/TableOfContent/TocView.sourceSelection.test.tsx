@@ -201,6 +201,37 @@ describe('Source Code outline selection tracking', () => {
     expect(harness.extractMatches).not.toHaveBeenCalled()
   })
 
+  it.each(['deleted', 'paragraph', 'rescanned'] as const)('rejects a %s cached heading in the same editor', (change) => {
+    const { native } = mountSource()
+    const click = harness.headingClicks[1].onClick!
+    if (change === 'deleted') act(() => native.dispatch({ changes: { from: beta, to: beta + '## Beta\n'.length } }))
+    if (change === 'paragraph') act(() => native.dispatch({ changes: { from: beta, insert: 'not a heading ' } }))
+    if (change === 'rescanned') {
+      act(() => { harness.commands.get('app:toc_refresh')?.(); vi.advanceTimersByTime(32) })
+      expect(harness.headingClicks[1].onClick).not.toBe(click)
+    }
+    const dispatch = vi.spyOn(native, 'dispatch')
+    const focus = vi.spyOn(native, 'focus')
+    act(() => click())
+    expect(dispatch).not.toHaveBeenCalled()
+    expect(focus).not.toHaveBeenCalled()
+  })
+
+  it('still resolves a shifted and renamed source heading against the current document', () => {
+    const { native } = mountSource()
+    const click = harness.headingClicks[1].onClick!
+    act(() => native.dispatch({ changes: [
+      { from: 0, insert: 'intro\n' },
+      { from: beta + 3, to: beta + 7, insert: 'Updated' },
+    ] }))
+    harness.extractMatches.mockClear()
+    act(() => click())
+    expect(native.state.selection.main.head).toBe(beta + 'intro\n'.length)
+    expect(harness.extractMatches).toHaveBeenCalledExactlyOnceWith(native, {
+      from: beta + 'intro\n'.length, to: beta + 'intro\n'.length + 1,
+    })
+  })
+
   it('still navigates a current source heading and focuses its editor', () => {
     const { native } = mountSource()
     const focus = vi.spyOn(native, 'focus')

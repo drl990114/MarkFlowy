@@ -6,7 +6,6 @@ import {
 import { rawTextExtension, resetRawText, type RawTextProjection } from './raw-text'
 import { indentWithTab } from '@codemirror/commands'
 import {
-  ensureSyntaxTree,
   type LanguageDescription,
   type LanguageSupport,
 } from '@codemirror/language'
@@ -37,7 +36,6 @@ import {
   keymap,
   ViewPlugin,
 } from '@codemirror/view'
-import type { SyntaxNodeRef, Tree } from '@lezer/common'
 import { assertGet, isPromise, replaceNodeAtPosition } from '@rme-sdk/sdk/core'
 import type { EditorSchema, EditorView, ProsemirrorNode } from '@rme-sdk/sdk/pm'
 import { exitCode } from '@rme-sdk/sdk/pm/commands'
@@ -226,21 +224,7 @@ export const scrollCodemirrorToMatch = (
   return scrolled
 }
 
-export const extractMatches = (view: CodeMirrorEditorView) => {
-  const tree: Tree | null = ensureSyntaxTree(view.state, view.state.doc.length)
-  const matches: any[] = []
-  tree?.iterate({
-    from: 0,
-    to: view.state.doc.length,
-    enter: ({ type, from, to }: SyntaxNodeRef) => {
-      if (type.name.startsWith('ATXHeading')) {
-        matches.push({ from, to, value: view.state.doc.sliceString(from, to), type: type.name })
-      }
-    },
-  })
-
-  return matches
-}
+export { extractMatches } from './outline'
 
 export type CreateCodemirrorOptions = {
   codemirrorOptions?: CodemirrorOptions

@@ -15,7 +15,7 @@ import { DockPanelMenu } from '@/components/SideBar/DockPanelMenu'
 import { ListIcon } from 'lucide-react'
 import { createStore } from 'zustand/vanilla'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import type { ChangeDesc } from '@codemirror/state'
+import { MapMode, type ChangeDesc } from '@codemirror/state'
 import type { MfCodemirrorView } from 'rme'
 import { getLoadedRmeRuntime, type RmeRuntime } from '../EditorArea/rmeRuntime'
 import {
@@ -489,7 +489,12 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             // Capricorn outline never needs to import or initialize RME.
             const runtime = getLoadedRmeRuntime()
             if (!runtime) return
-            const matches = runtime.extractMatches(codemirrorView.cm)
+            // Older runtime declarations only describe the full scan; the
+            // range is an optional, backwards-compatible optimization.
+            const readHeadings: (
+              view: MfCodemirrorView['cm'], range?: { from: number; to: number },
+            ) => { from: number; type: string; value: string }[] = runtime.extractMatches
+            const matches = readHeadings(codemirrorView.cm)
             const sourceHeadings: SourceHeadingInfo[] = matches.map((match) => {
               const depth = Number(match.type.split('ATXHeading')?.[1]) || 1
               const value = getHeadingValue(match.value)
@@ -504,11 +509,10 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             })
 
             sourceHeadingsRef.current = sourceHeadings
-            sourceOutlineRef.current = {
-              id: currentActiveId,
-              editor: codemirrorView,
-              changes: null,
+            const snapshot: NonNullable<typeof sourceOutlineRef.current> = {
+              id: currentActiveId, editor: codemirrorView, changes: null,
             }
+            sourceOutlineRef.current = snapshot
             setSourceOutlineEditor(codemirrorView)
             const chapterData = getHeadingChapterData(sourceHeadings, runtime)
             const nextScrollEl = resolveSourceScrollEl(currentActiveId, codemirrorView.cm.scrollDOM)
@@ -530,13 +534,23 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
                     useEditorStore.getState().activeId !== currentActiveId ||
                     !isMarkdownFile(currentActiveId) ||
                     useEditorViewTypeStore.getState().editorViewTypeMap.get(currentActiveId) !== EditorViewType.SOURCECODE ||
-                    sourceCodeCodemirrorViewMap.get(currentActiveId) !== codemirrorView
+                    sourceCodeCodemirrorViewMap.get(currentActiveId) !== codemirrorView ||
+                    sourceOutlineRef.current !== snapshot
                   ) return
-                  const outline = sourceOutlineRef.current
-                  const pos =
-                    outline?.editor === codemirrorView
-                      ? (outline.changes?.mapPos(heading.pos, 1) ?? heading.pos)
-                      : heading.pos
+                  let pos = heading.pos
+                  if (snapshot.changes) {
+                    // The original opening '#' must survive and still belong
+                    // to an actual Markdown heading, not a paragraph or fence.
+                    const mapped = snapshot.changes.mapPos(pos, 1, MapMode.TrackAfter)
+                    if (mapped === null) return
+                    const match = readHeadings(codemirrorView.cm, { from: mapped, to: mapped + 1 })
+                      .find((item) => {
+                        const level = Number(/^ATXHeading([1-6])$/.exec(item.type)?.[1])
+                        return item.from <= mapped && mapped < item.from + level
+                      })
+                    if (!match) return
+                    pos = match.from
+                  }
                   codemirrorView.cm.dispatch({
                     selection: {
                       anchor: pos,
