@@ -1,12 +1,13 @@
 import type { IHeadingData } from '@markflowy/interface'
 import { ChevronLeftIcon, ChevronRightIcon, SearchIcon } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { useStore, type StoreApi } from 'zustand'
 import { Button } from '@/components/ui/button'
 import { Command } from '@/components/ui/command'
 import { Popover } from '@/components/ui/popover'
 import { useTranslation } from '@/i18n'
-import { indexOutlineHeadings, matchOutlineHeadings } from './outlineHeadingSearch'
+import { HeadingTitle } from './HeadingTitle'
+import { getOutlineBreadcrumb, indexOutlineHeadings, matchOutlineHeadings } from './outlineHeadingSearch'
 
 type HeadingStore = StoreApi<IHeadingData[]>
 const PAGE_SIZE = 40
@@ -70,7 +71,7 @@ function HeadingChoices({ headings, onChoose }: {
         />
         <Command.List className='max-h-[min(320px,50vh)]'>
           <Command.Empty>{t('search.search_empty')}</Command.Empty>
-          {rows.map(({ heading, title, parents }) => (
+          {rows.map(({ heading, title, parent }) => (
             <Command.Item
               className='gap-2'
               key={heading.id}
@@ -85,8 +86,17 @@ function HeadingChoices({ headings, onChoose }: {
                 H{heading.depth}
               </span>
               <span className='min-w-0 flex-1'>
-                <span className='block truncate'>{title || t('file.untitled')}</span>
-                {parents ? <span className='block truncate text-ui-caption text-muted-foreground'>{parents}</span> : null}
+                <span className='block truncate'><HeadingTitle title={title || t('file.untitled')} /></span>
+                {parent ? (
+                  <span className='block truncate text-ui-caption text-muted-foreground'>
+                    {getOutlineBreadcrumb(parent).map((part, position) => (
+                      <Fragment key={part.heading.depth}>
+                        {position > 0 ? ' › ' : null}
+                        <HeadingTitle title={part.title} />
+                      </Fragment>
+                    ))}
+                  </span>
+                ) : null}
               </span>
             </Command.Item>
           ))}

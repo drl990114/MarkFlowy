@@ -114,6 +114,64 @@ describe('outline heading picker', () => {
     expect(screen.queryByRole('combobox')).toBeNull()
   })
 
+  it('renders formatted results and each ancestor as readable labels, not links or image requests', () => {
+    const leaf = heading('leaf', '**Summary** `quick` ~~old~~ [Docs](https://example.invalid/file)', 5)
+    mount([
+      heading('root', '**Launch** ![Plan](https://example.invalid/cover.png)'),
+      heading('empty', '', 2),
+      heading('sub', 'Phase [B](https://example.invalid/phase)', 3),
+      leaf,
+    ])
+    const input = open()
+    fireEvent.change(input, { target: { value: 'launch summary' } })
+    const option = screen.getByRole('option')
+    expect(option.textContent).toBe('H5Summary quick old DocsLaunch Plan › Phase B')
+    expect(Array.from(option.querySelectorAll('strong'), (el) => el.textContent)).toEqual(['Summary', 'Launch'])
+    expect(option.querySelector('code')?.textContent).toBe('quick')
+    expect(option.querySelector('del')?.textContent).toBe('old')
+    expect(option.querySelector('a,img,button')).toBeNull()
+    fireEvent.keyDown(input, { key: 'Enter' })
+    expect(leaf.onClick).toHaveBeenCalledExactlyOnceWith(leaf)
+  })
+
+  it('does not merge independent Markdown delimiters across breadcrumb segments', () => {
+    mount([heading('a', '*Start'), heading('b', 'End*', 2), heading('c', 'Leaf', 3)])
+    const input = open()
+    fireEvent.change(input, { target: { value: 'Leaf' } })
+    const row = screen.getByRole('option')
+    expect(row.textContent).toBe('H3Leaf*Start › End*')
+    expect(row.querySelector('em')).toBeNull()
+  })
+
+  it('releases the live outline and all result rows across repeated open, search and close cycles', () => {
+    const entries = Array.from({ length: 2_000 }, (_, i) =>
+      heading(String(i), i === 1999 ? '**Final** chapter' : `Part ${i}`))
+    const { headings, view } = mount(entries)
+    const subscribe = headings.subscribe
+    let active = 0
+    let peak = 0
+    headings.subscribe = (listener) => {
+      active += 1
+      peak = Math.max(peak, active)
+      const unsubscribe = subscribe(listener)
+      return () => { active -= 1; unsubscribe() }
+    }
+    for (let i = 0; i < 40; i += 1) {
+      const input = open()
+      expect(active).toBe(1)
+      expect(document.querySelectorAll('[cmdk-item]')).toHaveLength(40)
+      fireEvent.change(input, { target: { value: i % 2 ? 'final' : 'no match here' } })
+      expect(document.querySelectorAll('[cmdk-item]')).toHaveLength(i % 2)
+      fireEvent.keyDown(input, { key: 'Escape' })
+      expect(active).toBe(0)
+      expect(document.querySelectorAll('[cmdk-item]')).toHaveLength(0)
+    }
+    view.unmount()
+    expect(active).toBe(0)
+    expect(peak).toBe(1)
+    expect(entries.at(-1)?.onClick).not.toHaveBeenCalled()
+  })
+
   it('bounds a 20,000-heading result list, pages duplicates and finds the final title directly', () => {
     const rows = Array.from({ length: 20_000 }, (_, i) => heading(String(i), i === 19_999 ? '尾声' : 'Chapter'))
     mount(rows)

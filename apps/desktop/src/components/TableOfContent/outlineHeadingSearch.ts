@@ -3,7 +3,7 @@ import type { IHeadingData } from '@markflowy/interface'
 interface Choice {
   heading: IHeadingData
   title: string
-  parents: string
+  parent: Choice | undefined
   searchTitle: string
   searchPath: string
 }
@@ -12,16 +12,26 @@ const fold = (text: string) => text.normalize('NFKC').toLowerCase()
 
 /** Built from the published outline, never the document text or visible DOM. */
 export function indexOutlineHeadings(headings: readonly IHeadingData[]): Choice[] {
-  const ancestors: { depth: number; title: string }[] = []
+  const ancestors: Choice[] = []
   return headings.map((heading) => {
-    while (ancestors.length && ancestors[ancestors.length - 1].depth >= heading.depth) {
+    while (ancestors.length && ancestors[ancestors.length - 1].heading.depth >= heading.depth) {
       ancestors.pop()
     }
     const title = [heading.chapter, heading.value].filter(Boolean).join(' ').trim()
-    const parents = ancestors.map((ancestor) => ancestor.title).filter(Boolean).join(' › ')
-    ancestors.push({ depth: heading.depth, title })
-    return { heading, title, parents, searchTitle: fold(title), searchPath: fold(parents) }
+    const last = ancestors.at(-1)
+    const parent = last?.title ? last : last?.parent
+    const searchPath = parent?.searchPath ? `${parent.searchPath} › ${parent.searchTitle}` : parent?.searchTitle ?? ''
+    const choice: Choice = { heading, title, parent, searchTitle: fold(title), searchPath }
+    ancestors.push(choice)
+    return choice
   })
+}
+
+/** Walk only a visible row's ancestors; keep each title's Markdown independent. */
+export function getOutlineBreadcrumb(parent: Choice): Choice[] {
+  const parts: Choice[] = []
+  for (let choice: Choice | undefined = parent; choice; choice = choice.parent) parts.push(choice)
+  return parts.reverse()
 }
 
 export function matchOutlineHeadings(choices: readonly Choice[], query: string): readonly Choice[] {
