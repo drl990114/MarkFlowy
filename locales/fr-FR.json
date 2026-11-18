@@ -220,6 +220,7 @@
     "move_bookmarks_command": "Signets : déplacer de l’autre côté",
     "move_toc_command": "Plan : déplacer de l’autre côté",
     "move_ai_command": "IA : déplacer de l’autre côté",
+    "outline_find_heading": "Rechercher un titre",
     "outline_collapse": "Replier",
     "outline_expand": "Déplier",
     "outline_collapse_all": "Replier tous les titres",

@@ -220,6 +220,7 @@
     "move_bookmarks_command": "Favoritos: mover para o outro lado",
     "move_toc_command": "Estrutura: mover para o outro lado",
     "move_ai_command": "IA: mover para o outro lado",
+    "outline_find_heading": "Buscar título",
     "outline_collapse": "Recolher",
     "outline_expand": "Expandir",
     "outline_collapse_all": "Recolher todos os títulos",

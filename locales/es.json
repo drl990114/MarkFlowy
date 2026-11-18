@@ -220,6 +220,7 @@
     "move_bookmarks_command": "Marcadores: mover al otro lado",
     "move_toc_command": "Esquema: mover al otro lado",
     "move_ai_command": "IA: mover al otro lado",
+    "outline_find_heading": "Buscar encabezado",
     "outline_collapse": "Contraer",
     "outline_expand": "Expandir",
     "outline_collapse_all": "Contraer todos los títulos",

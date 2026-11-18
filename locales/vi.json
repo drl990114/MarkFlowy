@@ -220,6 +220,7 @@
     "move_bookmarks_command": "Dấu trang: Chuyển sang phía bên kia",
     "move_toc_command": "Dàn ý: Chuyển sang phía bên kia",
     "move_ai_command": "AI: Chuyển sang phía bên kia",
+    "outline_find_heading": "Tìm tiêu đề",
     "outline_collapse": "Thu gọn",
     "outline_expand": "Mở rộng",
     "outline_collapse_all": "Thu gọn tất cả tiêu đề",

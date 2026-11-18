@@ -220,6 +220,7 @@
     "move_bookmarks_command": "Bookmarks: Move to the other side",
     "move_toc_command": "Outline: Move to the other side",
     "move_ai_command": "AI: Move to the other side",
+    "outline_find_heading": "Find heading",
     "outline_collapse": "Collapse",
     "outline_expand": "Expand",
     "outline_collapse_all": "Collapse all headings",

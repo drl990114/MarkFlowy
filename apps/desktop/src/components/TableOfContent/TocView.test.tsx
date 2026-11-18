@@ -8,6 +8,7 @@ import type {
   CapricornHeading,
   CapricornRuntimeAdapter,
 } from '../EditorArea/capricornRuntimeAdapter'
+import { getOutlineSession } from './outlineSession'
 import { TocView } from './TocView'
 import textEditorSource from '../EditorArea/TextEditor.tsx?raw'
 import { EditorViewType } from '@/constants/editorViewType'
@@ -260,6 +261,27 @@ it('toggles only automatic outline numbers without rereading the editor', async 
     { id: 'generated', value: '2. Details', chapter: undefined },
   ])
   expect(getAll).toHaveBeenCalledOnce()
+})
+
+it('finds a visually folded child via the published outline and the existing Capricorn jump', async () => {
+  const getAll = vi.fn(() => [
+    { id: 'root', level: 1, text: 'Parent', title: 'Parent' },
+    { id: 'target', level: 2, text: 'Arrival', title: 'Arrival' },
+  ])
+  const jumpTo = vi.fn(async () => true)
+  const editor = { headings: { getAll, jumpTo, subscribe: () => () => {} } } as unknown as CapricornRuntimeAdapter
+  setCapricornEditor('file', editor)
+  render(<TocView />)
+  const trigger = await screen.findByRole('button', { name: 'sidebar.outline_find_heading' })
+  const session = getOutlineSession(editor, 'file', EditorViewType.WYSIWYG)
+  act(() => session.setCollapsedIds(new Set(['root'])))
+  fireEvent.click(trigger)
+  const input = screen.getByRole('combobox')
+  fireEvent.change(input, { target: { value: 'Arrival' } })
+  fireEvent.click(screen.getByRole('option', { name: /Arrival/ }))
+  expect(jumpTo).toHaveBeenCalledExactlyOnceWith('target', { offset: 100 })
+  expect(getAll).toHaveBeenCalledOnce()
+  expect([...session.getSnapshot().collapsedIds]).toEqual(['root'])
 })
 
 describe('outline cursor following', () => {

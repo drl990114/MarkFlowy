@@ -220,6 +220,7 @@
     "move_bookmarks_command": "ブックマーク：反対側に移動",
     "move_toc_command": "アウトライン：反対側に移動",
     "move_ai_command": "AI：反対側に移動",
+    "outline_find_heading": "見出しを検索",
     "outline_collapse": "折りたたむ",
     "outline_expand": "展開する",
     "outline_collapse_all": "すべての見出しを折りたたむ",

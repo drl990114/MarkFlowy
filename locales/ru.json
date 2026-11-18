@@ -220,6 +220,7 @@
     "move_bookmarks_command": "Закладки: переместить на другую сторону",
     "move_toc_command": "Оглавление: переместить на другую сторону",
     "move_ai_command": "ИИ: переместить на другую сторону",
+    "outline_find_heading": "Найти заголовок",
     "outline_collapse": "Свернуть",
     "outline_expand": "Развернуть",
     "outline_collapse_all": "Свернуть все заголовки",

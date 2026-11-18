@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { EditorState } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
-import { act, cleanup, render } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useImperativeHandle, useState, type ReactNode, type Ref } from 'react'
 import type { MfCodemirrorView } from 'rme'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -63,11 +63,16 @@ vi.mock('../EditorArea/capricornEditorRegistry', () => ({
   getCapricornEditor: () => undefined,
   subscribeCapricornEditors: () => () => {},
 }))
-vi.mock('../SideBar/SideBarHeader', () => ({ default: () => null }))
+vi.mock('../SideBar/SideBarHeader', () => ({
+  default: ({ actions }: { actions: ReactNode }) => <>{actions}</>,
+}))
 vi.mock('../SideBar/DockPanelMenu', () => ({ DockPanelMenu: () => null }))
 vi.mock('./HeadingNumberingButton', () => ({ CapricornHeadingNumberingButton: () => null }))
 vi.mock('./styles', () => ({ TocViewContainer: ({ children }: { children: ReactNode }) => <div>{children}</div> }))
-vi.mock('@/i18n', () => ({ t: (key: string) => key }))
+vi.mock('@/i18n', () => {
+  const t = (key: string) => key
+  return { t, useTranslation: () => ({ t }) }
+})
 vi.mock('@markflowy/interface', () => ({
   TableOfContents: ({ ref, activeId }: { ref: Ref<unknown>; activeId?: string }) => {
     const [headings, setHeadings] = useState<{ id: string }[]>([])
@@ -85,6 +90,7 @@ const documentText = '# Alpha\nalpha paragraph\n\n## Beta\nbeta paragraph\n\n## 
 const beta = documentText.indexOf('## Beta')
 const gamma = documentText.indexOf('## Gamma')
 const natives: EditorView[] = []
+const nativeScrollIntoView = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'scrollIntoView')
 
 function createSource(doc = documentText) {
   const pane = document.createElement('div')
@@ -128,8 +134,10 @@ beforeEach(() => {
   vi.useFakeTimers()
   vi.stubGlobal('ResizeObserver', class {
     observe() {}
+    unobserve() {}
     disconnect() {}
   })
+  Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', { configurable: true, value: vi.fn() })
   Object.defineProperty(Range.prototype, 'getClientRects', { configurable: true, value: () => [] })
   Object.defineProperty(Range.prototype, 'getBoundingClientRect', {
     configurable: true,
@@ -158,6 +166,8 @@ afterEach(() => {
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
   vi.useRealTimers()
+  if (nativeScrollIntoView) Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', nativeScrollIntoView)
+  else Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView')
   document.body.replaceChildren()
 })
 
@@ -174,6 +184,21 @@ describe('Source Code outline selection tracking', () => {
     act(() => oldClick())
     expect(dispatch).not.toHaveBeenCalled()
     expect(focus).not.toHaveBeenCalled()
+  })
+
+  it('finds and selects a source heading without rescanning or changing the document', () => {
+    const { native } = mountSource()
+    harness.extractMatches.mockClear()
+    const initial = native.state.doc
+    fireEvent.click(screen.getByRole('button', { name: 'sidebar.outline_find_heading' }))
+    const input = screen.getByRole('combobox')
+    fireEvent.change(input, { target: { value: 'Gamma' } })
+    fireEvent.keyDown(input, { key: 'Enter' })
+    act(() => vi.advanceTimersByTime(32))
+    expect(native.state.selection.main.head).toBe(gamma)
+    expect(native.hasFocus).toBe(true)
+    expect(native.state.doc).toBe(initial)
+    expect(harness.extractMatches).not.toHaveBeenCalled()
   })
 
   it('still navigates a current source heading and focuses its editor', () => {

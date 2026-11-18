@@ -13,6 +13,7 @@ import { DropdownMenuItemPrimitive } from '@/components/ui/dropdown-menu'
 import { useCommandShortcut } from '@/commands/useCommandShortcut'
 import { DockPanelMenu } from '@/components/SideBar/DockPanelMenu'
 import { ListIcon } from 'lucide-react'
+import { createStore } from 'zustand/vanilla'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { ChangeDesc } from '@codemirror/state'
 import type { MfCodemirrorView } from 'rme'
@@ -33,6 +34,7 @@ import { getCapricornRuntimeInput } from '../EditorArea/capricornRuntimeDom'
 import SideBarHeader from '../SideBar/SideBarHeader'
 import { CapricornHeadingNumberingButton } from './HeadingNumberingButton'
 import { renderHeadingTitle } from './HeadingTitle'
+import { OutlineHeadingPicker } from './OutlineHeadingPicker'
 import { TocViewContainer } from './styles'
 import { scheduleOutlineAfterPaint } from './scheduleOutlineAfterPaint'
 import { findSourceViewportHeading } from './sourceViewportHeading'
@@ -123,10 +125,12 @@ type TocViewProps = {
 
 export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   const tocRef = useRef<TableOfContentsRef>(null)
-  const tocHeadingsRef = useRef<IHeadingData[]>([])
+  // Only the open picker subscribes. Ordinary typing does not re-render the
+  // whole panel to keep a second list up to date.
+  const [headingList] = useState(() => createStore<IHeadingData[]>(() => []))
   const showGeneratedNumbers = useLayoutStore((state) => state.showOutlineGeneratedNumbers)
   const refreshTocHeadings = useCallback((headings: IHeadingData[]) => {
-    tocHeadingsRef.current = headings
+    headingList.setState(headings, true)
     // An undefined chapter uses the generated number. Explicit chapters came from the document.
     tocRef.current?.refreshByHeadings({
       newHeadings: useLayoutStore.getState().showOutlineGeneratedNumbers
@@ -135,7 +139,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             heading.chapter === undefined ? { ...heading, chapter: null } : heading,
           ),
     })
-  }, [])
+  }, [headingList])
   const [outlineSession, setOutlineSession] = useState<OutlineSession | null>(null)
   const outlineSessionRef = useRef<OutlineSession | null>(null)
   const outlineSnapshot = useSyncExternalStore(
@@ -840,10 +844,15 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
   const canFold = Boolean(activeIsMarkdown && outlineSession && outlineSession.fileId === activeId &&
     outlineSession.mode === activeViewType && outlineSnapshot.headingCount > 0)
 
+  const pickerOwner = canFold && (activeViewType === EditorViewType.SOURCECODE
+    ? sourceOutlineEditor === sourceEditor && sourceEditor
+    : outlineSource?.id === activeId && outlineSource?.editor === capricornEditor && capricornEditor)
+
   return (
     <TocViewContainer variant={variant}>
       <SideBarHeader
         actions={<>
+          {pickerOwner ? <OutlineHeadingPicker headings={headingList} owner={pickerOwner} /> : null}
           {headingNumberingAction}
           <DockPanelMenu panelId='toc'>
             <DropdownMenuItemPrimitive disabled={!canFold} onSelect={() => { void commandRegistry.execute(OUTLINE_COLLAPSE_ALL) }}>
@@ -857,7 +866,7 @@ export const TocView = ({ variant = 'sidebar' }: TocViewProps) => {
             <DropdownMenuItemPrimitive
               onSelect={() => {
                 useLayoutStore.getState().toggleOutlineGeneratedNumbers()
-                refreshTocHeadings(tocHeadingsRef.current)
+                refreshTocHeadings(headingList.getState())
               }}
             >
               {t(showGeneratedNumbers

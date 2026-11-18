@@ -226,6 +226,7 @@
     "move_bookmarks_command": "书签：移到另一侧",
     "move_toc_command": "大纲：移到另一侧",
     "move_ai_command": "AI：移到另一侧",
+    "outline_find_heading": "查找标题",
     "outline_collapse": "折叠",
     "outline_expand": "展开",
     "outline_collapse_all": "折叠全部标题",
