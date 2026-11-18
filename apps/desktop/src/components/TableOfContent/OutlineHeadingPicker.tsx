@@ -146,7 +146,9 @@ export function OutlineHeadingPicker({ headings, owner }: { headings: HeadingSto
       >
         <HeadingChoices headings={headings} onChoose={(heading) => {
           if (!heading.onClick) return
-          skipRestore.current = true
+          // A source heading focuses its editor; a visual heading only scrolls.
+          // Radix preserves outside focus in the former case and returns to
+          // the trigger in the latter. Do not move a visual editor's caret.
           setOpenFor(null)
           heading.onClick(heading)
         }} />

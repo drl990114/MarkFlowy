@@ -278,10 +278,12 @@ it('finds a visually folded child via the published outline and the existing Cap
   fireEvent.click(trigger)
   const input = screen.getByRole('combobox')
   fireEvent.change(input, { target: { value: 'Arrival' } })
-  fireEvent.click(screen.getByRole('option', { name: /Arrival/ }))
+  fireEvent.keyDown(input, { key: 'Enter' })
   expect(jumpTo).toHaveBeenCalledExactlyOnceWith('target', { offset: 100 })
   expect(getAll).toHaveBeenCalledOnce()
   expect([...session.getSnapshot().collapsedIds]).toEqual(['root'])
+  // This runtime jumps by scrolling; the editor did not claim focus.
+  await waitFor(() => expect(document.activeElement).toBe(trigger))
 })
 
 describe('outline cursor following', () => {
