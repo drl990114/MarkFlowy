@@ -9,12 +9,14 @@ import EditorAreaTabs from './EditorAreaTabs'
 
 const state = vi.hoisted(() => ({
   dirty: true,
+  path: 'C:\\Notes\\Document.md' as string | undefined,
   close: vi.fn(),
   check: vi.fn(),
   save: vi.fn(),
   keepOpen: vi.fn(),
   open: vi.fn(),
   menu: vi.fn(),
+  reveal: vi.fn(),
   listeners: new Set<() => void>(),
   group: { id: 'group', activeId: 'file', opened: ['file'], previewId: undefined as string | undefined },
 }))
@@ -25,8 +27,9 @@ vi.mock('@/services/checkUnsavedFiles', () => ({
 }))
 vi.mock('@/helper/files', () => ({
   default: (selector: (value: unknown) => unknown) =>
-    selector({ entries: { file: { name: 'Document.md' } } }),
+    selector({ entries: { file: { name: 'Document.md', path: state.path } } }),
 }))
+vi.mock('@tauri-apps/plugin-opener', () => ({ revealItemInDir: state.reveal }))
 vi.mock('@/stores', async () => {
   const { useSyncExternalStore } = await import('react')
   const editor = {
@@ -75,8 +78,10 @@ function tabs() {
 
 beforeEach(() => {
   state.dirty = true
+  state.path = 'C:\\Notes\\Document.md'
   state.group.previewId = undefined
   vi.clearAllMocks()
+  state.reveal.mockResolvedValue(undefined)
   state.check.mockImplementation(() => (state.dirty ? 1 : 0))
   state.save.mockResolvedValue(true)
   state.keepOpen.mockImplementation(() => {
@@ -85,6 +90,29 @@ beforeEach(() => {
   })
 })
 afterEach(cleanup)
+
+describe('editor tab file location', () => {
+  it('reveals the right-clicked file in the system file manager without closing the tab', async () => {
+    render(tabs())
+    fireEvent.contextMenu(screen.getByRole('tab'))
+    const menu = state.menu.mock.calls[0][0] as Parameters<typeof showContextMenu>[0]
+    const action = menu.items.find((item) => 'value' in item && item.value === 'show_in_folder')
+
+    expect(action).toMatchObject({ label: 'contextmenu.explorer.show_in_folder' })
+    act(() => { if (action && 'handler' in action) action.handler?.() })
+    await waitFor(() => expect(state.reveal).toHaveBeenCalledExactlyOnceWith('C:\\Notes\\Document.md'))
+    expect(state.close).not.toHaveBeenCalled()
+  })
+
+  it('does not show a file-manager action for a document without a disk path', () => {
+    state.path = undefined
+    render(tabs())
+    fireEvent.contextMenu(screen.getByRole('tab'))
+    const menu = state.menu.mock.calls[0][0] as Parameters<typeof showContextMenu>[0]
+
+    expect(menu.items.some((item) => 'value' in item && item.value === 'show_in_folder')).toBe(false)
+  })
+})
 
 describe('preview editor tabs', () => {
   it('marks a preview accessibly and keeps it open on double-click without reopening or closing it', () => {
