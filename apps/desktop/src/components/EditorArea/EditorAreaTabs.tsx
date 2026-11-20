@@ -1,7 +1,9 @@
 import { EVENT } from '@/constants'
 import useFileCacheStore from '@/helper/files'
+import { logger } from '@/helper/logger'
 import { checkUnsavedFiles, saveUnsavedFiles } from '@/services/checkUnsavedFiles'
 import { useEditorStateStore, useEditorStore } from '@/stores'
+import { revealItemInDir } from '@tauri-apps/plugin-opener'
 import { memo, type DragEvent, useCallback, useEffect, useRef } from 'react'
 import { ArrowLeftIcon, ArrowRightIcon, XIcon } from 'lucide-react'
 import { useTranslation } from '@/i18n'
@@ -195,9 +197,10 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
     (state) => state.idStateMap.get(id)?.hasUnsavedChanges ?? false,
   )
   const { t } = useTranslation()
-  const fileName = useFileCacheStore((state) => state.entries[id]?.name)
-  if (!fileName) return null
+  const file = useFileCacheStore((state) => state.entries[id])
+  if (!file?.name) return null
 
+  const { name: fileName, path: filePath } = file
   const tabLabel = getTabLabel(fileName, compact)
 
   const requestClose = (e?: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -232,6 +235,15 @@ const EditorAreaTab = memo((props: EditorAreaTabProps) => {
       x: e.clientX,
       y: e.clientY,
       items: [
+        ...(filePath ? [{
+          label: t('contextmenu.explorer.show_in_folder'),
+          value: 'show_in_folder',
+          handler: () => {
+            void revealItemInDir(filePath).catch((error) => {
+              logger.error('Failed to reveal editor tab file:', error)
+            })
+          },
+        }] : []),
         ...(preview ? [{
           label: t('contextmenu.editor_tab.keep_open'),
           value: 'keep_open',
