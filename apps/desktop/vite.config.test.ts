@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, posix } from 'node:path'
 import glob from 'fast-glob'
 import { createServer, normalizePath, type ConfigEnv, type Plugin } from 'vite'
 import { describe, expect, it, vi } from 'vitest'
@@ -51,6 +51,22 @@ describe('Desktop workspace development resolution', () => {
       port: Number(new URL(tauriConfig.build.devUrl).port),
       strictPort: true,
     })
+  })
+
+  it('scans the Desktop pages, shared UI and lazy editor before the first mode switch', async () => {
+    const config = await getConfig('serve', 'development')
+    const { module } = JSON.parse(
+      readFileSync(new URL('../../packages/editor/package.json', import.meta.url), 'utf8'),
+    ) as { module: string }
+    const entries = [config.optimizeDeps?.entries ?? []].flat()
+    const startupEntries = glob.sync(
+      ['*.html', '../../packages/zens/src/index.ts', '../../packages/zens/src/components/*.tsx'],
+      { cwd: desktopRoot },
+    )
+    for (const entry of [...startupEntries, posix.join('../../packages/editor', module)]) {
+      expect(entries.some((pattern) => posix.matchesGlob(entry, pattern)), entry).toBe(true)
+    }
+    expect(config.optimizeDeps?.exclude).toContain('rme')
   })
 
   it('assigns every test to exactly one of the unit and published host suites', async () => {

@@ -93,6 +93,14 @@ export default defineConfig(async ({ command, mode }) => {
     },
     clearScreen: false,
     optimizeDeps: {
+      // Pre-discover the linked UI and lazy editor dependencies to avoid reloading
+      // the first document or interrupting its first switch to source mode.
+      entries: [
+        '*.html',
+        '../../packages/editor/dist/index.mjs',
+        '../../packages/zens/src/index.ts',
+        '../../packages/zens/src/components/*.tsx',
+      ],
       // Keep linked workspace modules live so warm starts can reuse the cache
       // without retaining an old copy of their components or theme contexts.
       exclude: ['rme', 'zens', '@markflowy/theme'],

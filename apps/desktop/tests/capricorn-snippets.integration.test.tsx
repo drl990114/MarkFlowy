@@ -1,6 +1,7 @@
+// @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { useMemo } from 'react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CapricornEditor } from '@/components/EditorArea/CapricornEditor'
 import type { CapricornRuntimeAdapter } from '@/components/EditorArea/capricornRuntimeAdapter'
 import { mutateSnippet, useSnippetLibrary, useSnippetStore } from '@/features/snippets/store'
@@ -8,6 +9,24 @@ import type { SnippetLibrary } from '@/features/snippets/types'
 import SnippetPreview from '@/router/Setting/SnippetSetting/SnippetPreview'
 
 const mocks = vi.hoisted(() => ({ invoke: vi.fn(), listen: vi.fn(), t: (key: string) => key }))
+vi.hoisted(() => {
+  vi.stubGlobal('matchMedia', (media: string) =>
+    Object.assign(new EventTarget(), { media, matches: false }),
+  )
+})
+beforeAll(() => {
+  const createRange = document.createRange.bind(document)
+  vi.spyOn(document, 'createRange').mockImplementation(() =>
+    Object.assign(createRange(), {
+      getClientRects: () => [],
+      getBoundingClientRect: () => new DOMRect(),
+    }),
+  )
+})
+afterAll(() => {
+  vi.restoreAllMocks()
+  vi.unstubAllGlobals()
+})
 vi.mock('@tauri-apps/api/core', () => ({ invoke: mocks.invoke }))
 vi.mock('@tauri-apps/api/event', () => ({ listen: mocks.listen }))
 vi.mock('@/i18n', () => ({

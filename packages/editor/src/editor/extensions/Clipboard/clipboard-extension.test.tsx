@@ -1,3 +1,4 @@
+import { undo } from '@rme-sdk/sdk/pm/history'
 import { DOMParser, DOMSerializer, Schema } from '@rme-sdk/sdk/pm/model'
 import {
   AllSelection,
@@ -13,7 +14,6 @@ import { describe, expect, it, vi } from 'vitest'
 import { shouldStopNodeViewEvent } from '../../codemirror/stop-event'
 import { createWysiwygDelegate } from '../../components/WysiwygEditor/delegate'
 import { TransformerExtension } from '../Transformer/transformer-extension'
-import { ClipboardExtension } from './clipboard-extension'
 
 type WysiwygDelegate = ReturnType<typeof createWysiwygDelegate>
 type WysiwygDocument = ReturnType<WysiwygDelegate['stringToDoc']>
@@ -48,16 +48,19 @@ function createManagedEditorView(
   })
 }
 
-function createClipboardEvent(type: 'copy' | 'cut') {
+function createClipboardEvent(eventType: 'copy' | 'cut' | 'paste') {
   const contents = new Map<string, string>()
   const clipboardData = {
+    get items() {
+      return Array.from(contents.keys(), (type) => ({ kind: 'string', type, getAsFile: () => null }))
+    },
     clearData: vi.fn(() => contents.clear()),
     getData: vi.fn((format: string) => contents.get(format) ?? ''),
     setData: vi.fn((format: string, value: string) => {
       contents.set(format, value)
     }),
   }
-  const event = new Event(type, { bubbles: true, cancelable: true })
+  const event = new Event(eventType, { bubbles: true, cancelable: true })
   Object.defineProperty(event, 'clipboardData', { value: clipboardData })
 
   return { clipboardData, contents, event }
@@ -235,7 +238,7 @@ describe('ClipboardExtension', () => {
     }
   })
 
-  it('pastes MarkFlowy clipboard HTML back as structured nodes', async () => {
+  it('pastes MarkFlowy clipboard HTML back as structured nodes and undoes the paste', () => {
     const delegate = createWysiwygDelegate()
     const sourceDoc = delegate.stringToDoc(markdown)
     const htmlContainer = document.createElement('div')
@@ -244,21 +247,21 @@ describe('ClipboardExtension', () => {
     )
     const targetDoc = delegate.stringToDoc('replace me')
     const view = createManagedEditorView(delegate, targetDoc, new AllSelection(targetDoc))
-    const clipboard = delegate.manager.getExtension(ClipboardExtension)
+    const { contents, event } = createClipboardEvent('paste')
+    contents.set('text/html', htmlContainer.innerHTML)
+    contents.set('text/plain', delegate.docToString(sourceDoc))
     const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     try {
-      const handled = await clipboard.handleClipboardData({
-        html: htmlContainer.innerHTML,
-        text: delegate.docToString(sourceDoc),
-        view,
-      })
+      view.dom.dispatchEvent(event)
 
-      expect(handled).toBe(true)
+      expect(event.defaultPrevented).toBe(true)
       expect(view.state.doc.content.content.map((node) => node.type.name)).toEqual(
         sourceDoc.content.content.map((node) => node.type.name),
       )
       expect(delegate.docToString(view.state.doc)).toBe(delegate.docToString(sourceDoc))
+      expect(undo(view.state, view.dispatch)).toBe(true)
+      expect(view.state.doc.eq(targetDoc)).toBe(true)
     } finally {
       consoleLog.mockRestore()
       view.destroy()
@@ -266,26 +269,25 @@ describe('ClipboardExtension', () => {
     }
   })
 
-  it('pastes plain Markdown clipboard text back as structured nodes', async () => {
+  it('pastes plain Markdown clipboard text back as structured nodes and undoes the paste', () => {
     const delegate = createWysiwygDelegate()
     const sourceDoc = delegate.stringToDoc(markdown)
     const targetDoc = delegate.stringToDoc('replace me')
     const view = createManagedEditorView(delegate, targetDoc, new AllSelection(targetDoc))
-    const clipboard = delegate.manager.getExtension(ClipboardExtension)
+    const { contents, event } = createClipboardEvent('paste')
+    contents.set('text/plain', delegate.docToString(sourceDoc))
     const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     try {
-      const handled = await clipboard.handleClipboardData({
-        html: '',
-        text: delegate.docToString(sourceDoc),
-        view,
-      })
+      view.dom.dispatchEvent(event)
 
-      expect(handled).toBe(true)
+      expect(event.defaultPrevented).toBe(true)
       expect(view.state.doc.content.content.map((node) => node.type.name)).toEqual(
         sourceDoc.content.content.map((node) => node.type.name),
       )
       expect(delegate.docToString(view.state.doc)).toBe(delegate.docToString(sourceDoc))
+      expect(undo(view.state, view.dispatch)).toBe(true)
+      expect(view.state.doc.eq(targetDoc)).toBe(true)
     } finally {
       consoleLog.mockRestore()
       view.destroy()

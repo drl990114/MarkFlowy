@@ -22,7 +22,7 @@ function createRuntimeFixture(
     packageJsonPath,
     JSON.stringify({
       name: options.name ?? '@drl990114/capricorn-runtime',
-      version: options.version ?? '0.5.17',
+      version: options.version ?? '0.5.19',
       exports: { '.': { import: importEntry } },
     }),
   )
@@ -138,6 +138,8 @@ describe('resolvePrivateCapricornRuntime', () => {
     '0.5.14',
     '0.5.15',
     '0.5.16',
+    '0.5.17',
+    '0.5.18',
   ])('rejects an unexpected package version %s', (version) => {
     const fixture = createRuntimeFixture({ version })
 

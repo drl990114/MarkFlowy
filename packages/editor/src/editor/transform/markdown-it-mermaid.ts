@@ -1,9 +1,8 @@
 import type MarkdownIt from 'markdown-it'
-import { Core, StateCore } from 'markdown-it/index.js'
+import type { RuleCore } from 'markdown-it/lib/parser_core.mjs'
 import Token from 'markdown-it/lib/token.mjs'
 
-const rule: Core.RuleCore = (state: StateCore) => {
-  let edited = false
+const rule: RuleCore = (state) => {
   const tokens = state.tokens
   const tokensLength = tokens.length
   for (let i = 0; i <= tokensLength - 1; i++) {
@@ -18,7 +17,7 @@ const rule: Core.RuleCore = (state: StateCore) => {
     }
   }
 
-  return edited
+  return false
 }
 
 function MarkdownItMermaid(md: MarkdownIt) {

@@ -101,7 +101,7 @@ describe.each([['light', lightTheme], ['dark', darkTheme]] as const)(
       expect(view.state.doc.toString()).toBe('alpha')
     })
 
-    it('sizes native search and go-to-line controls without changing their commands', () => {
+    it('sizes native search and go-to-line controls without changing their commands', async () => {
       const view = mountEditor(theme, 'first\nsecond')
       expect(openSearchPanel(view)).toBe(true)
       const panels = view.dom.querySelector<HTMLElement>('.cm-panels')!
@@ -115,12 +115,12 @@ describe.each([['light', lightTheme], ['dark', darkTheme]] as const)(
       }
 
       expect(gotoLine(view)).toBe(true)
-      const lineField = view.dom.querySelector<HTMLInputElement>('.cm-gotoLine input')!
+      const lineField = view.dom.querySelector<HTMLInputElement>('.cm-dialog input[name="line"]')!
       expect(sourceStyle(lineField).minHeight).toBe('28px')
       lineField.value = '2'
       lineField.form!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
-      expect(view.state.selection.main.head).toBe(6)
-      expect(view.dom.querySelector('.cm-gotoLine')).toBeNull()
+      await vi.waitFor(() => expect(view.state.selection.main.head).toBe(6))
+      expect(view.dom.contains(lineField)).toBe(false)
     })
 
     it('themes the fold placeholder and keeps unfolding available', () => {

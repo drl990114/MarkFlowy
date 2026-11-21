@@ -17,6 +17,17 @@ describe('export-only Mermaid Markdown theme', () => {
     expect(preparePdfExportMarkdown(result)).toBe(result)
   })
 
+  it('preserves a multiline reference definition before a Mermaid fence', () => {
+    const reference = '[Guide][docs]\n\n[docs]: https://example.org/guide\n  "User guide"'
+    const source = [reference, '', '```mermaid', 'flowchart LR', 'A --> B', '```'].join('\n')
+    const result = preparePdfExportMarkdown(source)
+
+    expect(result).toBe(source.replace('flowchart LR', `${directive}\nflowchart LR`))
+    expect(parser.render(result)).toContain(
+      '<a href="https://example.org/guide" title="User guide">Guide</a>',
+    )
+  })
+
   it('ignores inline code, indented code and Mermaid-looking fences inside a longer ordinary code fence', () => {
     const source = '`mermaid`\n\n    ```mermaid\n    flowchart LR\n\n````markdown\n```mermaid\nA-->B\n```\n````\n\n> quoted mermaid text\n'
     expect(preparePdfExportMarkdown(source)).toBe(source)

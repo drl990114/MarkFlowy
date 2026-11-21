@@ -1,5 +1,5 @@
 import type MarkdownIt from 'markdown-it'
-import type { Core, StateCore } from 'markdown-it/index.js'
+import type { RuleCore } from 'markdown-it/lib/parser_core.mjs'
 import { isSpace, normalizeReference } from 'markdown-it/lib/common/utils.mjs'
 import Token from 'markdown-it/lib/token.mjs'
 
@@ -247,7 +247,7 @@ export function reference(state, startLine, _endLine, silent) {
   return true
 }
 
-const rule: Core.RuleCore = (state: StateCore) => {
+const rule: RuleCore = (state) => {
   let edited = false
   const tokens = state.tokens
   let tokensLength = tokens.length
