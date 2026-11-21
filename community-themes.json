@@ -5,5 +5,19 @@
     "author": "太极",
     "version": "1.0.0",
     "url": "https://raw.githubusercontent.com/CMOS4000/TheBlue/main/MarkFlowy/theblue-markflowy.json"
+  },
+  {
+    "id": "everforest",
+    "name": "Everforest",
+    "author": "MoMorZ",
+    "version": "1.0.0",
+    "url": "https://raw.githubusercontent.com/MoMorZ/md-themes/main/markflowy/everforest.json"
+  },
+  {
+    "id": "solarized",
+    "name": "Solarized",
+    "author": "MoMorZ",
+    "version": "1.0.0",
+    "url": "https://raw.githubusercontent.com/MoMorZ/md-themes/main/markflowy/solarized.json"
   }
 ]

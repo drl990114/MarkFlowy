@@ -163,6 +163,13 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/spechurkin">
+            <img src="https://avatars.githubusercontent.com/u/51242338?v=4" width="90;" alt="spechurkin"/>
+            <br />
+            <sub><b>Svyatoslav Pechurkin</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/KiraKiraAyu">
             <img src="https://avatars.githubusercontent.com/u/99468824?v=4" width="90;" alt="KiraKiraAyu"/>
             <br />
@@ -196,20 +203,27 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>CMOS4000</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/codex">
             <img src="https://avatars.githubusercontent.com/u/267193182?v=4" width="90;" alt="codex"/>
             <br />
             <sub><b>Codex</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/SamDc73">
             <img src="https://avatars.githubusercontent.com/u/144215270?v=4" width="90;" alt="SamDc73"/>
             <br />
             <sub><b>Husam Alshehadat</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/XDIOEZ">
+            <img src="https://avatars.githubusercontent.com/u/124686087?v=4" width="90;" alt="XDIOEZ"/>
+            <br />
+            <sub><b>Ice_Tilapia</b></sub>
         </a>
     </td>
     <td align="center">
@@ -227,12 +241,20 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/MoMorZ">
+            <img src="https://avatars.githubusercontent.com/u/33596837?v=4" width="90;" alt="MoMorZ"/>
+            <br />
+            <sub><b>Null</b></sub>
+        </a>
+    </td>
+    <td align="center">
         <a href="https://github.com/dinhkarate">
             <img src="https://avatars.githubusercontent.com/u/57869841?v=4" width="90;" alt="dinhkarate"/>
             <br />
             <sub><b>Pham Quang Dinh</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/Raven-1027">
             <img src="https://avatars.githubusercontent.com/u/83693755?v=4" width="90;" alt="Raven-1027"/>
@@ -253,8 +275,7 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>Chiefass</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/coolvitto">
             <img src="https://avatars.githubusercontent.com/u/160416811?v=4" width="90;" alt="coolvitto"/>
@@ -282,7 +303,8 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/punkyard">
             <img src="https://avatars.githubusercontent.com/u/59349105?v=4" width="90;" alt="punkyard"/>
