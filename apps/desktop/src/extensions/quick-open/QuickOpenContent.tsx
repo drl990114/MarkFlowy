@@ -85,7 +85,7 @@ export function QuickOpenContent({
     [openedFiles, historyFiles, workspaceFiles],
   )
   const recentIds = useMemo(() => historyFiles.map((file) => file.id), [historyFiles])
-  const ranking = useQuickOpenRanking(files, query, recentIds)
+  const ranking = useQuickOpenRanking(files, query, recentIds, retry)
   const matches = useMemo(() => {
     const candidates = searching ? ranking.matches : historyFiles
     const openedIds = new Set(openedFiles.map((file) => file.id))
