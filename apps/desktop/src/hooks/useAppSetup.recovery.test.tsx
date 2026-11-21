@@ -6,6 +6,7 @@ import type { UpdateSessionPersistence } from '@/services/update-session'
 import type * as AppSetting from '@/services/app-setting'
 import type * as AppSetup from './useAppSetup'
 import { normalizeStartupAppearance } from '@/startup/appearance'
+import { getEditorContentWidth } from '@/constants/editorWidth'
 
 const mocks = vi.hoisted(() => ({
   invoke: vi.fn(),
@@ -89,7 +90,7 @@ vi.mock('@/stores/useLayoutStore', () => ({
 vi.mock('@/stores/useThemeStore', () => ({
   default: {
     getState: () => ({
-      initFromSettings: vi.fn(),
+      syncFromSettings: vi.fn(),
       fallbackStaleStartupTheme: vi.fn(),
       syncSystemTheme: mocks.syncSystemTheme,
     }),
@@ -206,6 +207,46 @@ function bootstrapSession(restoreSessionLabel: string | null) {
 }
 
 describe('shared setting notifications', () => {
+  it('applies the latest saved reading width in another window when notifications overlap', async () => {
+    mocks.windowLabel = 'workspace-2'
+    await startRuntime()
+    const { default: settings } = await import('@/stores/useAppSettingStore')
+    const readingWidth = renderHook(() =>
+      settings((state) => getEditorContentWidth(state.settingData)),
+    )
+    expect(readingWidth.result.current).toBe('760px')
+
+    const { appSettingStoreSetup } = await vi.importActual<typeof AppSetting>(
+      '@/services/app-setting',
+    )
+    mocks.setupSettings.mockImplementation(appSettingStoreSetup)
+    let finishFirstRead!: () => void
+    const readConfig = vi
+      .fn()
+      .mockImplementationOnce(
+        () => new Promise((resolve) => {
+          finishFirstRead = () => resolve({ editor_width_mode: 'fixed', editor_fixed_width: 813 })
+        }),
+      )
+      .mockResolvedValue({ editor_width_mode: 'fixed', editor_fixed_width: 1040 })
+    mocks.invoke.mockImplementation(async (command) =>
+      command === 'get_app_conf' ? readConfig() : undefined,
+    )
+
+    const first = mocks.settingsChanged()
+    await vi.waitFor(() => expect(readConfig).toHaveBeenCalledOnce())
+    const subsequent: Promise<void>[] = []
+    await act(async () => {
+      subsequent.push(mocks.settingsChanged(), mocks.settingsChanged())
+    })
+    await act(async () => {
+      finishFirstRead()
+      await Promise.all([first, ...subsequent])
+    })
+    expect(readingWidth.result.current).toBe('1040px')
+    expect(readConfig).toHaveBeenCalledTimes(2)
+  })
+
   it('updates this window’s translated UI when another window changes language without an RME editor', async () => {
     const language = await import('../../../../packages/i18n/src/desktop')
     await language.i18nInit({ lng: 'en' })

@@ -1,4 +1,5 @@
 import styled, { css } from 'styled-components'
+import type { CSSProperties } from 'react'
 import {
   EditorViewType,
   isCapricornView,
@@ -9,14 +10,16 @@ import type { FileType } from '@/helper/fileTypeHandler'
 interface EditorWrapperProps {
   $editorViewType?: EditorViewTypeValue
   $fileType?: FileType
-  $fullWidth: boolean
+  $contentWidth: string
   $rootLineHeight: string
   $visible: boolean
   $codeFontSize?: string
   $codeLineHeight?: string
 }
 
-export const EditorWrapper = styled.div<EditorWrapperProps>`
+export const EditorWrapper = styled.div.attrs<EditorWrapperProps>(({ $contentWidth }) => ({
+  style: { '--mf-reader-content-width': $contentWidth } as CSSProperties,
+}))`
   flex: 1;
   width: 100%;
   min-width: 0;
@@ -25,8 +28,6 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  --mf-reader-content-width: ${(props) =>
-    props.$fullWidth ? '100%' : 'var(--mf-theme-editor-content-width, 760px)'};
   --rme-editor-content-width: var(--mf-reader-content-width);
   --rme-editor-inline-padding: clamp(20px, 5vw, 48px);
   /* Match both sides to the block controls: 36px handle + 6px gap + 22px fold + 4px hit area. */
@@ -89,7 +90,7 @@ export const EditorWrapper = styled.div<EditorWrapperProps>`
 
   ${(props) => {
     const shouldFullWidth =
-      props.$fullWidth ||
+      props.$contentWidth === '100%' ||
       props.$editorViewType === EditorViewType.SOURCECODE ||
       (props.$fileType != null && props.$fileType !== 'markdown')
     const shouldKeepLegacyBottomPadding =

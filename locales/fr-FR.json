@@ -520,9 +520,17 @@
       "label": "Editeur",
       "style": {
         "label": "Style",
-        "full_width": {
-          "label": "Pleine largeur",
-          "desc": "Mettre l'éditeur en plein largeur."
+        "content_width": {
+          "label": "Largeur du texte",
+          "desc": "Réglez la largeur maximale du texte pendant la rédaction et dans l’aperçu Markdown, ou utilisez toute la largeur du volet.",
+          "fixed": "Largeur fixe",
+          "theme": "Suivre le thème",
+          "full": "Pleine largeur",
+          "maximum": "Largeur maximale",
+          "default": "Défaut {{value}}",
+          "reset": "Rétablir {{value}} px",
+          "invalid": "Saisissez un nombre entier entre {{min}} et {{max}}.",
+          "save_failed": "Impossible d’enregistrer la largeur du texte. Veuillez réessayer."
         },
         "font_size": {
           "label": "Taille du texte du document",

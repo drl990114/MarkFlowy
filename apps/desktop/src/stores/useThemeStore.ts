@@ -39,6 +39,14 @@ const normalizeSystemTheme = (theme: unknown): SystemTheme | undefined => {
   return theme === 'dark' || theme === 'light' ? theme : undefined
 }
 
+const getSavedThemeMode = (mode: unknown, legacyTheme: unknown): ThemeMode => {
+  if (mode === 'system' || mode === 'light' || mode === 'dark') return mode
+  // The old "light" setting followed the system appearance.
+  if (legacyTheme === 'system' || legacyTheme === 'light') return 'system'
+  const name = typeof legacyTheme === 'string' && legacyTheme ? legacyTheme : 'dark'
+  return name.toLowerCase().includes('dark') ? 'dark' : 'light'
+}
+
 const getBrowserSystemTheme = (): SystemTheme => {
   if (
     typeof window !== 'undefined' &&
@@ -75,7 +83,7 @@ const resolveTheme = (
   themes.find((theme) => theme.name === themeName && theme.mode === mode) ||
   themes.find((theme) => theme.name === fallbackName && theme.mode === mode)
 
-const applyThemeToDOM = (targetTheme: MfTheme, themeMode: ThemeMode) => {
+const applyThemeToDOM = async (targetTheme: MfTheme, themeMode: ThemeMode) => {
   applyResolvedAppearance(targetTheme.mode)
 
   if (targetTheme.globalStyleText) {
@@ -85,15 +93,7 @@ const applyThemeToDOM = (targetTheme: MfTheme, themeMode: ThemeMode) => {
   }
 
   try {
-    const appWindow = getCurrentWindow()
-
-    // Keep the native window on the OS preference while the app UI uses
-    // the resolved systemTheme tracked in this store.
-    if (themeMode === 'system') {
-      void appWindow.setTheme(null)
-    } else {
-      void appWindow.setTheme(targetTheme.mode)
-    }
+    await getCurrentWindow().setTheme(themeMode === 'system' ? null : targetTheme.mode)
   } catch {
     // The desktop build always has Tauri internals; this keeps browser previews from crashing.
   }
@@ -201,11 +201,14 @@ type ThemeStore = {
   restoreThemePreview: () => void
   setSystemTheme: (theme: SystemTheme) => void
   syncSystemTheme: () => Promise<SystemTheme>
-  applyTheme: (persistAppearance?: boolean) => void
+  applyTheme: (persistAppearance?: boolean) => Promise<void>
   persistCurrentAppearance: (accentColorSetting?: unknown) => Promise<StartupAppearancePersistence>
   commitAccentColor: (value: string) => Promise<StartupAppearancePersistence>
   fallbackStaleStartupTheme: () => MfTheme | undefined
-  initFromSettings: (settingData: Record<string, any>) => Promise<void>
+  syncFromSettings: (
+    settingData: Record<string, unknown>,
+    source: 'startup' | 'refresh',
+  ) => Promise<void>
 }
 
 const startupAppearance = readWindowBootstrap()
@@ -250,13 +253,11 @@ const useThemeStore = create<ThemeStore>((set, get) => {
     applyTheme: (persistAppearance = true) => {
       const { targetTheme, themeMode } = resolveSelectedTheme(get())
 
-      applyThemeToDOM(targetTheme, themeMode)
+      const nativeUpdate = applyThemeToDOM(targetTheme, themeMode)
       if (persistAppearance) void persistAppliedTheme(targetTheme, themeMode)
 
-      set((prev) => ({
-        ...prev,
-        curTheme: targetTheme!,
-      }))
+      set({ curTheme: targetTheme })
+      return nativeUpdate
     },
 
     persistCurrentAppearance: (accentColorSetting) => {
@@ -493,22 +494,35 @@ const useThemeStore = create<ThemeStore>((set, get) => {
       return systemThemeRead
     },
 
-    initFromSettings: async (settingData) => {
-      const themeMode = (settingData.theme_mode as ThemeMode) || 'dark'
-      const lightThemeName = (settingData.light_theme as string) || FALLBACK_LIGHT_THEME
-      const darkThemeName = (settingData.dark_theme as string) || FALLBACK_DARK_THEME
+    syncFromSettings: async ({ theme_mode, theme, light_theme, dark_theme }, source) => {
+      const themeMode = getSavedThemeMode(theme_mode, theme)
+      const lightThemeName = (typeof light_theme === 'string' && light_theme) || FALLBACK_LIGHT_THEME
+      const darkThemeName = (typeof dark_theme === 'string' && dark_theme) || FALLBACK_DARK_THEME
+      const previous = get()
+      // Compare the committed selection so unrelated saves leave a local preview alone.
+      if (
+        source === 'refresh' &&
+        themeMode === previous.themeMode &&
+        lightThemeName === previous.lightThemeName &&
+        darkThemeName === previous.darkThemeName
+      ) {
+        return
+      }
 
-      set((prev) => ({
-        ...prev,
-        themeMode,
-        lightThemeName,
-        darkThemeName,
-      }))
-
-      if (themeMode === 'system' && startupAppearance.preference !== 'system') {
+      set({ themeMode, lightThemeName, darkThemeName })
+      const nativeUpdate = get().applyTheme(false)
+      if (themeMode === 'system' && previous.themeMode !== 'system') {
+        // The native window can report its old explicit appearance until the override is released.
+        await nativeUpdate
         await get().syncSystemTheme()
       }
-      get().applyTheme()
+      const applied = resolveSelectedTheme(get())
+      if (source === 'refresh') {
+        // The originating window handles shared persistence.
+        cacheAppliedTheme(applied.targetTheme, applied.themeMode)
+      } else {
+        void persistAppliedTheme(applied.targetTheme, applied.themeMode)
+      }
     },
   }
 })

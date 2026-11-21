@@ -5,22 +5,23 @@ import { EditorViewType } from 'rme'
 import { ServerStyleSheet, StyleSheetManager, ThemeProvider } from 'styled-components'
 import { describe, expect, it } from 'vitest'
 import { EditorWrapper } from './EditorWrapper'
+import { getEditorContentWidth } from '@/constants/editorWidth'
 
 function renderEditorWrapper({
   $editorViewType = EditorViewType.WYSIWYG,
   $fileType = 'markdown',
-  $fullWidth = false,
+  $contentWidth = getEditorContentWidth({}),
 }: Partial<ComponentProps<typeof EditorWrapper>> = {}) {
   const sheet = new ServerStyleSheet()
 
   try {
-    renderToStaticMarkup(
+    const markup = renderToStaticMarkup(
       <StyleSheetManager sheet={sheet.instance}>
         <ThemeProvider theme={desktopLightTheme}>
           <EditorWrapper
             $editorViewType={$editorViewType}
             $fileType={$fileType}
-            $fullWidth={$fullWidth}
+            $contentWidth={$contentWidth}
             $rootLineHeight='1.7'
             $visible
           />
@@ -28,7 +29,7 @@ function renderEditorWrapper({
       </StyleSheetManager>,
     )
 
-    return sheet.getStyleTags().replaceAll(/\s/g, '')
+    return (markup + sheet.getStyleTags()).replaceAll(/\s/g, '')
   } finally {
     sheet.seal()
   }
@@ -40,9 +41,8 @@ describe('EditorWrapper reading layout', () => {
     ($editorViewType) => {
       const css = renderEditorWrapper({ $editorViewType })
 
-      expect(css).toContain('--mf-reader-content-width:var(--mf-theme-editor-content-width,760px)')
+      expect(css).toContain('--mf-reader-content-width:760px')
       expect(css).toContain('--rme-editor-content-width:var(--mf-reader-content-width)')
-      expect(renderEditorWrapper({ $fullWidth: true })).toContain('--mf-reader-content-width:100%')
       expect(css).toContain('--rme-editor-inline-padding:clamp(20px,5vw,48px)')
       expect(css).toContain('--mf-capricorn-inline-padding:68px')
       expect(css).toContain('--cap-editor-inline-padding:var(--mf-capricorn-inline-padding)')
@@ -66,9 +66,21 @@ describe('EditorWrapper reading layout', () => {
   )
 
   it.each([
+    [{ editor_width_mode: 'fixed', editor_fixed_width: 813 }, '813px'],
+    [{ editor_width_mode: 'fixed', editor_fixed_width: 1601 }, '760px'],
+    [{ editor_width_mode: 'full', editor_fixed_width: 813 }, '100%'],
+    [{ editor_width_mode: 'theme', editor_fixed_width: 813 }, 'var(--mf-theme-editor-content-width,760px)'],
+    [{ editor_full_width: true }, '100%'],
+    [{ editor_full_width: false }, 'var(--mf-theme-editor-content-width,760px)'],
+  ] as const)('applies the reading preference %o to the shared column', (settings, expected) => {
+    expect(renderEditorWrapper({ $contentWidth: getEditorContentWidth(settings) }))
+      .toContain(`--mf-reader-content-width:${expected}`)
+  })
+
+  it.each([
     { $editorViewType: EditorViewType.SOURCECODE },
     { $fileType: 'text' as const },
-    { $fullWidth: true },
+    { $contentWidth: '100%' },
   ])('keeps source, non-Markdown, and Full Width modes unconstrained', (props) => {
     expect(renderEditorWrapper(props)).toContain('max-width:none')
   })
@@ -78,6 +90,6 @@ describe('EditorWrapper reading layout', () => {
       'padding-bottom:3rem',
     )
     expect(renderEditorWrapper({ $fileType: 'image' })).toContain('padding-bottom:3rem')
-    expect(renderEditorWrapper({ $fullWidth: true })).toContain('padding-bottom:0')
+    expect(renderEditorWrapper({ $contentWidth: '100%' })).toContain('padding-bottom:0')
   })
 })

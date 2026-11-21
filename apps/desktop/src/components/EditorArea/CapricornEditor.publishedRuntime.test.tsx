@@ -5,11 +5,12 @@ import { createInstance } from '@/i18n'
 import type * as I18nModule from '@/i18n'
 import { desktopLightTheme } from '@markflowy/theme'
 import { act, cleanup, fireEvent, render, waitFor, within } from '@testing-library/react'
-import { createRef, StrictMode } from 'react'
+import { createRef, StrictMode, type CSSProperties } from 'react'
 import { ThemeProvider } from 'styled-components'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import { EditorViewType } from '@/constants/editorViewType'
+import { getEditorContentWidth, type EditorWidthMode } from '@/constants/editorWidth'
 import { getDefaultKeybindings } from '@/commands/keybindingCatalog'
 import { keybindingPlatform } from '@/commands/keybindingKeys'
 import { editorKeymap } from '@/commands/keybindingValidation'
@@ -115,7 +116,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
         <EditorWrapper
           $editorViewType={EditorViewType.WYSIWYG}
           $fileType='markdown'
-          $fullWidth={false}
+          $contentWidth='760px'
           $rootLineHeight='1.7'
           $visible
         >
@@ -204,7 +205,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
         <EditorWrapper
           $editorViewType={EditorViewType.WYSIWYG}
           $fileType='markdown'
-          $fullWidth={false}
+          $contentWidth='760px'
           $rootLineHeight='1.7'
           $visible
         >
@@ -813,7 +814,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
         <EditorWrapper
           $editorViewType={EditorViewType.WYSIWYG}
           $fileType='markdown'
-          $fullWidth={fullWidth}
+          $contentWidth={fullWidth ? '100%' : '760px'}
           $rootLineHeight='1.7'
           $visible
         >
@@ -906,7 +907,7 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     }
   })
 
-  it.each([false, true])('updates full width without remounting (strict=%s)', async (strict) => {
+  it.each([false, true])('updates the reading width without remounting (strict=%s)', async (strict) => {
     await loadCapricornRuntimeFactory()
     const onError = vi.fn()
     const onUnavailable = vi.fn()
@@ -925,23 +926,25 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
         options={{ virtualize: CAPRICORN_DESKTOP_VIRTUALIZE_OPTIONS }}
       />
     )
-    const withLayout = (fullWidth: boolean) => {
+    const withLayout = (mode: EditorWidthMode, fixedWidth: number, themeWidth: string) => {
       const layout = (
         <ThemeProvider theme={desktopLightTheme}>
-          <EditorWrapper
-            $editorViewType={EditorViewType.WYSIWYG}
-            $fileType='markdown'
-            $fullWidth={fullWidth}
-            $rootLineHeight='1.7'
-            $visible
-          >
-            {editor}
-          </EditorWrapper>
+          <div style={{ '--mf-theme-editor-content-width': themeWidth } as CSSProperties}>
+            <EditorWrapper
+              $editorViewType={EditorViewType.WYSIWYG}
+              $fileType='markdown'
+              $contentWidth={getEditorContentWidth({ editor_width_mode: mode, editor_fixed_width: fixedWidth })}
+              $rootLineHeight='1.7'
+              $visible
+            >
+              {editor}
+            </EditorWrapper>
+          </div>
         </ThemeProvider>
       )
       return strict ? <StrictMode>{layout}</StrictMode> : layout
     }
-    const { container, rerender, unmount } = render(withLayout(false))
+    const { container, rerender, unmount } = render(withLayout('fixed', 760, '1200px'))
     await waitFor(() => {
       expect(onError).not.toHaveBeenCalled()
       expect(onUnavailable).not.toHaveBeenCalled()
@@ -951,12 +954,17 @@ describe.skipIf(!isCapricornRuntimeAvailable)('CapricornEditor with the publishe
     const content = container.querySelector<HTMLElement>('[data-cap-content]')!
     const inlinePadding = getComputedStyle(content).getPropertyValue('--cap-editor-inline-padding')
     expect(getComputedStyle(content).getPropertyValue('--cap-editor-content-width')).toBe('760px')
-    for (const fullWidth of [true, false]) {
-      rerender(withLayout(fullWidth))
+    for (const [mode, themeWidth, expected] of [
+      ['fixed', '1200px', '813px'],
+      ['fixed', '760px', '813px'],
+      ['theme', '760px', '760px'],
+      ['theme', '1200px', '1200px'],
+      ['full', '1200px', '100%'],
+      ['fixed', '1200px', '813px'],
+    ] as const) {
+      rerender(withLayout(mode, 813, themeWidth))
       expect(container.querySelector('[data-cap-content]')).toBe(content)
-      expect(getComputedStyle(content).getPropertyValue('--cap-editor-content-width')).toBe(
-        fullWidth ? '100%' : '760px',
-      )
+      expect(getComputedStyle(content).getPropertyValue('--cap-editor-content-width')).toBe(expected)
       expect(getComputedStyle(content).getPropertyValue('--cap-editor-inline-padding')).toBe(
         inlinePadding,
       )

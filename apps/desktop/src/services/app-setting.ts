@@ -7,7 +7,7 @@ import { emit } from '@tauri-apps/api/event'
 let errorReportingPreferenceRevision = 0
 let errorReportingRevoked = false
 
-export const appSettingStoreSetup = async () => {
+export const appSettingStoreSetup = async (source: 'startup' | 'refresh' = 'startup') => {
   const { setSettingData } = useAppSettingStore.getState()
 
   try {
@@ -20,6 +20,7 @@ export const appSettingStoreSetup = async () => {
     )
     return settingData
   } catch (error) {
+    if (source === 'refresh') throw error
     logger.error('Failed to load app setting:', error)
     logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
     const defaultSetting = {

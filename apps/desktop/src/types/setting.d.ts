@@ -18,6 +18,7 @@ declare namespace Setting {
     | FontListSelectSettingItem
     | StringMapJsonSettingItem
     | DateFormatSettingItem
+    | (BaseSettingItem & { type: 'editorWidth' })
 
   type BaseSettingItem = {
     key: string

@@ -620,9 +620,17 @@
       "desc": "Markdown编辑器的配置选项，包括样式、行为和所见即所得模式的相关设置。",
       "style": {
         "label": "样式",
-        "full_width": {
-          "label": "全宽度",
-          "desc": "编辑器是否占满整个窗口。"
+        "content_width": {
+          "label": "正文宽度",
+          "desc": "设置 Markdown 写作和预览的最大栏宽，也可使用编辑区全宽。",
+          "fixed": "固定宽度",
+          "theme": "跟随主题",
+          "full": "全宽",
+          "maximum": "最大宽度",
+          "default": "默认 {{value}}",
+          "reset": "恢复 {{value}} px",
+          "invalid": "请输入 {{min}} 至 {{max}} 之间的整数。",
+          "save_failed": "未能保存正文宽度，请重试。"
         },
         "font_size": {
           "label": "正文字号",

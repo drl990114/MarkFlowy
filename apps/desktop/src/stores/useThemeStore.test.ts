@@ -151,11 +151,74 @@ describe('theme selection preview', () => {
   })
 
   it('reads the system appearance when saved settings override the dark startup default', async () => {
-    await useThemeStore.getState().initFromSettings({ theme_mode: 'system' })
+    await useThemeStore.getState().syncFromSettings({ theme_mode: 'system' }, 'startup')
     expect(mocks.theme).toHaveBeenCalledOnce()
     expect(mocks.invoke).not.toHaveBeenCalledWith('get_system_theme')
     expect(useThemeStore.getState().themeMode).toBe('system')
     expect(useThemeStore.getState().curTheme.mode).toBe('light')
+  })
+
+  it('applies a saved theme and caches it for this window without writing the settings back', async () => {
+    const { syncFromSettings } = useThemeStore.getState()
+    const selection = { theme_mode: 'dark', dark_theme: 'Tokyo Night', light_theme: 'GitHub Light' }
+    await syncFromSettings(selection, 'refresh')
+
+    expect(document.documentElement.dataset.mfTheme).toBe('dark')
+    expect(mocks.setTheme).toHaveBeenLastCalledWith('dark')
+    expect(useThemeStore.getState().curTheme.name).toBe('Tokyo Night')
+    expect(useThemeStore.getState().lightThemeName).toBe('GitHub Light')
+
+    await syncFromSettings({ ...selection, dark_theme: FALLBACK_DARK_THEME }, 'refresh')
+    expect(useThemeStore.getState().curTheme.name).toBe(FALLBACK_DARK_THEME)
+    expect(
+      JSON.parse(window.sessionStorage.getItem(STARTUP_APPEARANCE_SESSION_STORAGE_KEY) ?? '{}'),
+    ).toMatchObject({ preference: 'dark', themeId: FALLBACK_DARK_THEME })
+    expect(mocks.writeSettingPatch).not.toHaveBeenCalled()
+    expect(mocks.writeSettingData).not.toHaveBeenCalled()
+    expect(mocks.invoke).not.toHaveBeenCalledWith('save_startup_appearance', expect.anything())
+  })
+
+  it('leaves a preview in place when a notification carries the same saved selection', async () => {
+    const { previewTheme, syncFromSettings } = useThemeStore.getState()
+    previewTheme({ themeMode: 'dark', darkThemeName: 'Tokyo Night' })
+    mocks.setTheme.mockClear()
+    await syncFromSettings({ theme_mode: 'light', editor_fixed_width: 813 }, 'refresh')
+
+    expect(useThemeStore.getState().curTheme.name).toBe('Tokyo Night')
+    expect(document.documentElement.dataset.mfTheme).toBe('dark')
+    expect(mocks.setTheme).not.toHaveBeenCalled()
+    expect(window.sessionStorage.getItem(STARTUP_APPEARANCE_SESSION_STORAGE_KEY)).toBeNull()
+  })
+
+  it('releases the explicit window theme before reading the system preference on a shared change', async () => {
+    useThemeStore.setState({ themeMode: 'dark', systemTheme: 'dark' })
+    let release!: () => void
+    mocks.setTheme.mockImplementationOnce(
+      () => new Promise<void>((resolve) => { release = resolve }),
+    )
+    const refresh = useThemeStore.getState().syncFromSettings({ theme_mode: 'system' }, 'refresh')
+
+    expect(mocks.setTheme).toHaveBeenLastCalledWith(null)
+    expect(mocks.theme).not.toHaveBeenCalled()
+    release()
+    await refresh
+    expect(mocks.theme).toHaveBeenCalledOnce()
+    expect(mocks.invoke).not.toHaveBeenCalledWith('get_system_theme')
+    expect(useThemeStore.getState().themeMode).toBe('system')
+    expect(document.documentElement.dataset.mfTheme).toBe('light')
+    expect(mocks.writeSettingData).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['light', 'system'],
+    ['Paper Dark', 'dark'],
+    ['Paper', 'light'],
+  ] as const)('resolves the legacy theme %s on startup and refresh', async (theme, expectedMode) => {
+    for (const source of ['startup', 'refresh'] as const) {
+      useThemeStore.setState({ themeMode: expectedMode === 'dark' ? 'light' : 'dark' })
+      await useThemeStore.getState().syncFromSettings({ theme }, source)
+      expect(useThemeStore.getState().themeMode).toBe(expectedMode)
+    }
   })
 
   it('coalesces concurrent theme reads and does not overwrite a newer system event', async () => {

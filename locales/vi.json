@@ -597,9 +597,17 @@
       "label": "Trình soạn thảo",
       "style": {
         "label": "Kiểu dáng",
-        "full_width": {
-          "label": "Toàn chiều rộng",
-          "desc": "Đặt trình soạn thảo ở chế độ toàn chiều rộng."
+        "content_width": {
+          "label": "Độ rộng văn bản",
+          "desc": "Đặt độ rộng tối đa của văn bản khi soạn và xem trước Markdown hoặc dùng toàn bộ chiều rộng của khung.",
+          "fixed": "Độ rộng cố định",
+          "theme": "Theo giao diện",
+          "full": "Toàn chiều rộng",
+          "maximum": "Độ rộng tối đa",
+          "default": "Mặc định {{value}}",
+          "reset": "Khôi phục {{value}} px",
+          "invalid": "Nhập số nguyên từ {{min}} đến {{max}}.",
+          "save_failed": "Không thể lưu độ rộng văn bản. Vui lòng thử lại."
         },
         "font_size": {
           "label": "Cỡ chữ tài liệu",

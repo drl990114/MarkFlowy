@@ -26,7 +26,7 @@ yarn workspace @markflowy/desktop test:e2e:runner
 yarn build
 yarn workspace @markflowy/desktop tauri:build:e2e
 
-# All eight scenarios, serially:
+# All scenarios, serially:
 yarn workspace @markflowy/desktop test:e2e
 # Or a named scenario:
 yarn workspace @markflowy/desktop test:e2e atomic-replace
@@ -48,6 +48,7 @@ cannot satisfy the native test marker/server checks.
 | `switch-tabs` | Rapid A/B switching preserves content ownership and save targets |
 | `history-restore` | UI restoration creates a dirty draft; disk changes only after save |
 | `draft-restart` | SQLite draft persists before process exit and recovers in a new process |
+| `theme-sync` | Changing theme mode in either window updates the other open document without reloading it |
 
 The CLI opens fixtures and reads receipts/hashes. Edits, save shortcuts, mode
 changes, tab switching and history restoration use WebDriver UI interactions.

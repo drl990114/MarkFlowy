@@ -520,9 +520,17 @@
       "label": "Editor",
       "style": {
         "label": "Estilo",
-        "full_width": {
-          "label": "Anchura completa",
-          "desc": "Establecer el editor a anchura completa."
+        "content_width": {
+          "label": "Anchura del texto",
+          "desc": "Elige la anchura máxima del texto al escribir o previsualizar Markdown, o utiliza toda la anchura del panel.",
+          "fixed": "Anchura fija",
+          "theme": "Seguir el tema",
+          "full": "Anchura completa",
+          "maximum": "Anchura máxima",
+          "default": "Predet. {{value}}",
+          "reset": "Restablecer {{value}} px",
+          "invalid": "Introduce un número entero entre {{min}} y {{max}}.",
+          "save_failed": "No se pudo guardar la anchura del texto. Inténtalo de nuevo."
         },
         "font_size": {
           "label": "Tamaño de fuente del documento",

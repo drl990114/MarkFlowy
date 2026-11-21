@@ -597,9 +597,17 @@
       "label": "Editor",
       "style": {
         "label": "Style",
-        "full_width": {
-          "label": "Full width",
-          "desc": "Set the editor to full width."
+        "content_width": {
+          "label": "Document width",
+          "desc": "Set the maximum line width in Markdown writing and preview, or use the full width of the pane.",
+          "fixed": "Fixed width",
+          "theme": "Follow theme",
+          "full": "Full width",
+          "maximum": "Maximum width",
+          "default": "Default {{value}}",
+          "reset": "Reset to {{value}} px",
+          "invalid": "Enter a whole number from {{min}} to {{max}}.",
+          "save_failed": "Could not save the document width. Please try again."
         },
         "font_size": {
           "label": "Document font size",

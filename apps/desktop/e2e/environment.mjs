@@ -15,6 +15,7 @@ export const scenarios = [
   'switch-tabs',
   'history-restore',
   'draft-restart',
+  'theme-sync',
 ]
 
 export function selectScenarios(requested) {

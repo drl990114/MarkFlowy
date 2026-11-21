@@ -528,9 +528,17 @@
       "label": "エディタ",
       "style": {
         "label": "スタイル",
-        "full_width": {
-          "label": "フルサイズ",
-          "desc": "エディタをフルサイズに設定します。"
+        "content_width": {
+          "label": "本文の幅",
+          "desc": "Markdown の執筆時とプレビュー時の本文の最大幅を設定します。ペインの幅いっぱいに表示することもできます。",
+          "fixed": "幅を指定",
+          "theme": "テーマに従う",
+          "full": "幅いっぱい",
+          "maximum": "最大幅",
+          "default": "標準 {{value}}",
+          "reset": "{{value}} px に戻す",
+          "invalid": "{{min}} から {{max}} までの整数を入力してください。",
+          "save_failed": "本文の幅を保存できませんでした。もう一度お試しください。"
         },
         "font_size": {
           "label": "本文の文字サイズ",

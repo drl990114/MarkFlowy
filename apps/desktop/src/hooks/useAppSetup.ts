@@ -193,27 +193,6 @@ async function performWorkspaceSwitch(path: string | undefined) {
   return didSwitch
 }
 
-const initThemeFromSettings = async (settingData: Record<string, any>) => {
-  // Migrate the legacy field before React mounts the themed application shell.
-  if (!settingData.theme_mode) {
-    const oldTheme = settingData.theme || 'dark'
-    if (oldTheme === 'system' || oldTheme === 'light') {
-      settingData.theme_mode = 'system'
-    } else {
-      const isDark = oldTheme.toLowerCase().includes('dark')
-      settingData.theme_mode = isDark ? 'dark' : 'light'
-    }
-    if (!settingData.light_theme) {
-      settingData.light_theme = 'MarkFlowy Light'
-    }
-    if (!settingData.dark_theme) {
-      settingData.dark_theme = 'MarkFlowy Dark'
-    }
-  }
-
-  await useThemeStore.getState().initFromSettings(settingData)
-}
-
 async function appThemeLibrarySetup() {
   try {
     await startThemeLibrary()
@@ -419,7 +398,7 @@ const appShellSetup = async (signal: AbortSignal): Promise<AppShellData> => {
     ? getCurrentWebview().setZoom(Number(settingData.webview_zoom))
     : Promise.resolve()
   await Promise.all([
-    initThemeFromSettings(settingData),
+    useThemeStore.getState().syncFromSettings(settingData, 'startup'),
     i18nInit({ lng: settingData.language }),
     zoomSetup,
   ])
@@ -575,9 +554,10 @@ export const useAppRuntimeSetup = () => {
       }
     })
 
-    const settingDataUpdate = currentWindow.listen('app_conf_change', async () => {
+    const refreshSharedSettings = async () => {
       const prevSettingData = useAppSettingStore.getState().settingData
-      const nextSettingData = await appSettingStoreSetup()
+      const nextSettingData = await appSettingStoreSetup('refresh')
+      await useThemeStore.getState().syncFromSettings(nextSettingData, 'refresh')
       if (nextSettingData.language !== prevSettingData.language) {
         const language = nextSettingData.language
         await changeLng(
@@ -590,6 +570,21 @@ export const useAppRuntimeSetup = () => {
       if (hasFileExcludePatternsChanged(prevSettingData, nextSettingData)) {
         await refreshWorkspaceFileTree()
       }
+    }
+
+    let settingsRefresh = Promise.resolve()
+    let refreshQueued = false
+    const settingDataUpdate = currentWindow.listen('app_conf_change', () => {
+      if (refreshQueued) return settingsRefresh
+      refreshQueued = true
+      // Multiple saves during one read need only one more read of the latest shared config.
+      settingsRefresh = settingsRefresh
+        .then(() => {
+          refreshQueued = false
+          return refreshSharedSettings()
+        })
+        .catch((error) => logger.error('Failed to refresh shared settings', error))
+      return settingsRefresh
     })
 
     const unListenMenu = currentWindow.listen<string>('native:menu', ({ payload }) => {

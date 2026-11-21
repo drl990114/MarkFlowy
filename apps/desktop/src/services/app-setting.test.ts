@@ -32,6 +32,12 @@ describe('settings transactions', () => {
     expect(useAppSettingStore.getState().settingData.open_file_in_new_window).toBe(true)
   })
 
+  it('keeps the last saved settings when a running window cannot refresh them', async () => {
+    mocks.invoke.mockRejectedValueOnce(new Error('config unavailable'))
+    await expect(appSettingStoreSetup('refresh')).rejects.toThrow('config unavailable')
+    expect(useAppSettingStore.getState().settingData).toEqual(backend)
+  })
+
   it('persists the preview-tab preference without changing other editor settings', async () => {
     await writeSettingData({ key: 'editor_enable_preview_tabs' }, false)
     expect(mocks.invoke).toHaveBeenCalledWith('save_app_conf', {

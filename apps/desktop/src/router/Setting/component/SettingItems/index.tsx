@@ -1,6 +1,7 @@
 import FontListSelectSettingItem from './FontListSelect'
 import InputSettingItem from './Input'
 import DateFormatSettingItem from './DateFormat'
+import EditorWidthSettingItem from './EditorWidth'
 import SelectSettingItem from './Select'
 import SliderSettingItem from './Slider'
 import StringMapJsonSettingItem from './StringMapJson'
@@ -19,6 +20,7 @@ import {
 
 const SettingItem: React.FC<SettingItemProps> = (props) => {
   const { item, ...otherProps } = props
+  if (item.type === 'editorWidth') return <EditorWidthSettingItem item={item} />
   if (isSelectSettingItem(item))
     return <SelectSettingItem key={item.key} item={item} {...otherProps} />
 

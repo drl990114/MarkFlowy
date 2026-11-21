@@ -12,8 +12,8 @@ import {
   profilePaths, removeEnvironment, scenarios, selectScenarios,
 } from './environment.mjs'
 
-test('empty selection runs all eight cases and unknown/duplicate selections fail closed', () => {
-  assert.equal(scenarios.length, 8)
+test('empty selection runs all nine cases and unknown/duplicate selections fail closed', () => {
+  assert.equal(scenarios.length, 9)
   assert.deepEqual(selectScenarios([]), scenarios)
   assert.deepEqual(selectScenarios(['draft-restart']), ['draft-restart'])
   assert.throws(() => selectScenarios(['external-wirte']), /Unknown/)

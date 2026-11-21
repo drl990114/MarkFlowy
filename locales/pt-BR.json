@@ -597,9 +597,17 @@
       "label": "Editor",
       "style": {
         "label": "Estilo",
-        "full_width": {
-          "label": "Largura total",
-          "desc": "Define o editor para usar toda a largura."
+        "content_width": {
+          "label": "Largura do texto",
+          "desc": "Defina a largura máxima do texto na edição e na prévia de Markdown ou use toda a largura do painel.",
+          "fixed": "Largura fixa",
+          "theme": "Seguir o tema",
+          "full": "Largura total",
+          "maximum": "Largura máxima",
+          "default": "Padrão {{value}}",
+          "reset": "Restaurar {{value}} px",
+          "invalid": "Digite um número inteiro entre {{min}} e {{max}}.",
+          "save_failed": "Não foi possível salvar a largura do texto. Tente novamente."
         },
         "font_size": {
           "label": "Tamanho da fonte do documento",

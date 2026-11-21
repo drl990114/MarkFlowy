@@ -47,6 +47,8 @@ pub_struct!(AppConf {
     copilot_model: Option<String>,
     copilot_enabled: Option<bool>,
     editor_full_width: Option<bool>,
+    editor_width_mode: Option<String>,
+    editor_fixed_width: Option<u32>,
     editor_enable_preview_tabs: Option<bool>,
     editor_typewriter_scroll: Option<bool>,
     editor_caret_animation: Option<bool>,
@@ -112,6 +114,7 @@ pub const APP_CONF_PATH: &str = "markflowy.conf.json";
 pub const APP_FILE_EXCLUDE_PATTERNS_PATH: &str = "markflowy-ignore";
 pub const DEFAULT_EXCLUDE_PATTERNS: &str = ".DS_Store\n.git\nThumbs.db\n.svn\n.hg\n";
 pub const STORE_KEY: &str = "app_config_v3";
+const DEFAULT_EDITOR_WIDTH: u32 = 760;
 pub const STARTUP_APPEARANCE_PATH: &str = "startup_appearance_v1.json";
 pub const STARTUP_APPEARANCE_SCHEMA_VERSION: u32 = 1;
 
@@ -677,6 +680,8 @@ impl AppConf {
             copilot_model: Some("".to_string()),
             copilot_enabled: Some(false),
             editor_full_width: Some(false),
+            editor_width_mode: Some("fixed".to_string()),
+            editor_fixed_width: Some(DEFAULT_EDITOR_WIDTH),
             editor_enable_preview_tabs: Some(true),
             editor_typewriter_scroll: Some(false),
             editor_caret_animation: Some(false),
@@ -800,12 +805,35 @@ impl AppConf {
         Ok(self)
     }
 
+    fn normalize_editor_width(&mut self) {
+        // Old profiles used the active theme's width when Full width was off.
+        // A fresh profile already carries the explicit fixed-width default.
+        if !matches!(
+            self.editor_width_mode.as_deref(),
+            Some("fixed" | "theme" | "full")
+        ) {
+            let mode = if self.editor_full_width == Some(true) {
+                "full"
+            } else {
+                "theme"
+            };
+            self.editor_width_mode = Some(mode.to_string());
+        }
+        self.editor_full_width = Some(self.editor_width_mode.as_deref() == Some("full"));
+        self.editor_fixed_width = Some(
+            self.editor_fixed_width
+                .filter(|width| (480..=1600).contains(width))
+                .unwrap_or(DEFAULT_EDITOR_WIDTH),
+        );
+    }
+
     /**
      * merge old config
      *
      * Generally used to be compatible with the original config when versions are different.
      */
     pub fn merge_conf(mut self, mut oldconf: AppConf) -> Self {
+        oldconf.normalize_editor_width();
         // Source typography used to share the body settings. Preserve that
         // appearance on upgrade; later writes keep the two modes independent.
         oldconf.editor_source_font_size = oldconf
@@ -836,6 +864,8 @@ impl AppConf {
             copilot_model,
             copilot_enabled,
             editor_full_width,
+            editor_width_mode,
+            editor_fixed_width,
             editor_enable_preview_tabs,
             editor_typewriter_scroll,
             editor_caret_animation,
@@ -961,6 +991,10 @@ impl AppConf {
         let mut config: BTreeMap<String, Value> = serde_json::from_value(val).unwrap();
         let new_json: BTreeMap<String, Value> = serde_json::from_value(json).unwrap();
 
+        if new_json.contains_key("editor_full_width") && !new_json.contains_key("editor_width_mode")
+        {
+            config.remove("editor_width_mode");
+        }
         for (k, mut v) in new_json {
             // Each window sends only the remembered choice it changed. Merge
             // entries here, under the shared config writer lock, so another
@@ -989,7 +1023,10 @@ impl AppConf {
                     .into_iter()
                     .collect::<serde_json::Map<String, Value>>(),
             )) {
-                Ok(v) => v,
+                Ok(mut updated) => {
+                    updated.normalize_editor_width();
+                    updated
+                }
                 Err(_err) => self,
             },
             Err(_err) => self,
@@ -1288,6 +1325,44 @@ mod tests {
             .entry(0)
             .or_insert_with(std::env::temp_dir);
         AppConf::new()
+    }
+
+    #[test]
+    fn editor_width_defaults_and_legacy_migration() {
+        let fresh = typography_default_conf();
+        let first_read = fresh.clone().merge_conf(fresh.clone());
+        assert_eq!(first_read.editor_width_mode.as_deref(), Some("fixed"));
+        assert_eq!(first_read.editor_fixed_width, Some(760));
+        for (old, expected) in [
+            (Some(true), "full"),
+            (Some(false), "theme"),
+            (None, "theme"),
+        ] {
+            let mut legacy = empty_conf();
+            legacy.editor_full_width = old;
+            let upgraded = fresh.clone().merge_conf(legacy);
+            assert_eq!(upgraded.editor_width_mode.as_deref(), Some(expected));
+            assert_eq!(upgraded.editor_fixed_width, Some(760));
+        }
+    }
+
+    #[test]
+    fn editor_width_remembers_fixed_value_across_modes_and_restarts() {
+        let mut conf =
+            typography_default_conf().amend(serde_json::json!({"editor_fixed_width": 813}));
+        for mode in ["full", "theme", "fixed"] {
+            let saved = conf.amend(serde_json::json!({"editor_width_mode": mode}));
+            let roundtrip = serde_json::from_value(serde_json::to_value(saved).unwrap()).unwrap();
+            conf = typography_default_conf().merge_conf(roundtrip);
+            assert_eq!(conf.editor_width_mode.as_deref(), Some(mode));
+            assert_eq!(conf.editor_full_width, Some(mode == "full"));
+            assert_eq!(conf.editor_fixed_width, Some(813));
+        }
+        let legacy_write = conf.amend(serde_json::json!({"editor_full_width": true}));
+        assert_eq!(legacy_write.editor_width_mode.as_deref(), Some("full"));
+        assert_eq!(legacy_write.editor_fixed_width, Some(813));
+        let invalid = legacy_write.amend(serde_json::json!({"editor_fixed_width": 9999}));
+        assert_eq!(invalid.editor_fixed_width, Some(760));
     }
 
     #[test]

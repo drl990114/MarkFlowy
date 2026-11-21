@@ -30,6 +30,7 @@ import { EditorThemeContext } from '@/editorThemeContext'
 import { ThemeContext } from 'styled-components'
 import { createImageExportSurface } from './imageExportSurface'
 import { EVENT } from '@/constants'
+import { getEditorContentWidth } from '@/constants/editorWidth'
 import {
   EditorViewType,
   isCapricornView as isCapricornEditorView,
@@ -734,7 +735,7 @@ function TextEditor(props: TextEditorProps) {
   )
   const codeEditorPreferences = useCodeEditorPreferences()
   const autosaveInterval = useAppSettingStore((state) => state.settingData.autosave_interval)
-  const editorFullWidth = useAppSettingStore((state) => state.settingData.editor_full_width)
+  const editorContentWidth = useAppSettingStore((state) => getEditorContentWidth(state.settingData))
   const editorCaretAnimation = useAppSettingStore(
     (state) => state.settingData.editor_caret_animation === true,
   )
@@ -3196,7 +3197,7 @@ function TextEditor(props: TextEditorProps) {
           className={cls}
           $editorViewType={currentViewType}
           $fileType={fileTypeConfig.type}
-          $fullWidth={editorFullWidth}
+          $contentWidth={editorContentWidth}
           $rootLineHeight={wysiwygRootLineHeight}
           $visible={visible}
           $codeFontSize={codeEditorPreferences.fontSize}

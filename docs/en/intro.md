@@ -66,7 +66,9 @@ If another application changes a clean open file, MarkFlowy reloads it. If both 
 
 Choose the theme mode in **Settings → Appearance**. Open **Theme Store** to create, copy, edit, import, or export a JSON theme. The [theme guide](./Extension/CustomTheme) includes migration steps for older JS/npm themes, which are no longer loaded.
 
-Editor settings include typography, full-width layout, code wrapping, and caret motion. Text direction can be **Auto**, **Left to right**, or **Right to left**, with per-document overrides in **More → Text direction**. The direction setting affects document text; Markdown source and code remain left to right.
+Under **Settings → Editor → Style → Document width**, drag the slider or enter a fixed width from 480 to 1600 px. You can also choose **Follow theme** or **Full width**. Changes save automatically and update Markdown writing and preview in every open editor window. New installations start at 760 px. A fixed width carries across theme changes.
+
+Editor settings also include typography, code wrapping, and caret motion. Text direction can be **Auto**, **Left to right**, or **Right to left**, with per-document overrides in **More → Text direction**. The direction setting affects document text; Markdown source and code remain left to right.
 
 ![MarkFlowy Desktop with a dark theme](/screenshots/darkmode.png)
 

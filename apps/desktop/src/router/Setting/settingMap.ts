@@ -246,14 +246,14 @@ export const getSettingMap = (
       },
       Style: {
         i18nKey: 'settings.editor.style.label',
-        fullWidth: {
-          key: 'editor_full_width',
-          type: 'switch',
+        contentWidth: {
+          key: 'editor_width_mode',
+          type: 'editorWidth',
           title: {
-            i18nKey: 'settings.editor.style.full_width.label',
+            i18nKey: 'settings.editor.style.content_width.label',
           },
           desc: {
-            i18nKey: 'settings.editor.style.full_width.desc',
+            i18nKey: 'settings.editor.style.content_width.desc',
           },
         },
         fontSize: {
