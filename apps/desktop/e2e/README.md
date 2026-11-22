@@ -43,6 +43,7 @@ cannot satisfy the native test marker/server checks.
 | `save-reopen` | UI typing → Cmd+S → exact disk bytes → close → reopen |
 | `switch-modes` | Edited content is saved before switching to source, preview and WYSIWYG; each view and the disk retain the exact bytes |
 | `external-write` | A real in-place external write updates the clean editor |
+| `hidden-directory-write` | An explicitly opened file in nested hidden directories stays in sync after an external write and an atomic replacement |
 | `atomic-replace` | Rename replacement reloads and subsequent writes remain watched |
 | `dirty-conflict` | Local draft, external disk version and visible conflict all survive |
 | `switch-tabs` | Rapid A/B switching preserves content ownership and save targets |

@@ -10,6 +10,7 @@ export const scenarios = [
   'save-reopen',
   'switch-modes',
   'external-write',
+  'hidden-directory-write',
   'atomic-replace',
   'dirty-conflict',
   'switch-tabs',

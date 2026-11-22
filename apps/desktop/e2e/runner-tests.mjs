@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict'
+import { execFileSync } from 'node:child_process'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { createRequire } from 'node:module'
 import test from 'node:test'
+import { pathToFileURL } from 'node:url'
 import { parseReceipt } from './protocol.ts'
 import { assertPhasePassed } from './results.mjs'
 import { hardStopTimeout, phaseTimeout } from './timeouts.ts'
@@ -12,12 +14,22 @@ import {
   profilePaths, removeEnvironment, scenarios, selectScenarios,
 } from './environment.mjs'
 
-test('empty selection runs all nine cases and unknown/duplicate selections fail closed', () => {
-  assert.equal(scenarios.length, 9)
+test('empty selection runs all ten cases and unknown/duplicate selections fail closed', () => {
+  assert.equal(scenarios.length, 10)
   assert.deepEqual(selectScenarios([]), scenarios)
   assert.deepEqual(selectScenarios(['draft-restart']), ['draft-restart'])
   assert.throws(() => selectScenarios(['external-wirte']), /Unknown/)
   assert.throws(() => selectScenarios(['save-reopen', 'save-reopen']), /Duplicate/)
+})
+
+test('Mocha discovers one test per registered scenario file', () => {
+  const mocha = createRequire(import.meta.resolve('@wdio/mocha-framework')).resolve('mocha/bin/mocha.js')
+  const tsx = createRequire(import.meta.resolve('@wdio/cli')).resolve('tsx')
+  const output = execFileSync(process.execPath, [
+    '--import', pathToFileURL(tsx).href, mocha, '--dry-run', '--reporter', 'json', 'specs/*.e2e.ts',
+  ], { cwd: new URL('.', import.meta.url), encoding: 'utf8' })
+  const discovered = JSON.parse(output).tests.map(({ file }) => basename(file, '.e2e.ts'))
+  assert.deepEqual(discovered.sort(), [...scenarios].sort())
 })
 
 test('the runner fails for a missing binary instead of silently skipping native tests', async () => {
