@@ -10,6 +10,7 @@ mod fc;
 mod document_preview;
 mod file_copy;
 mod file_deletion;
+mod directory_watch;
 mod font;
 mod local_history;
 mod menu;
@@ -1720,6 +1721,10 @@ fn install_cli_in_background(app: &tauri::App) {
     });
 }
 
+fn app_context<R: tauri::Runtime>() -> tauri::Context<R> {
+    tauri::generate_context!()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     app::startup_timing::record_native_entry();
@@ -1739,7 +1744,7 @@ pub fn run() {
     reliable_cli::run_client_if_requested();
     handle_read_only_cli_command();
 
-    let context = tauri::generate_context!();
+    let context = app_context();
     #[cfg(feature = "e2e")]
     let context = {
         let mut context = context;
@@ -1834,6 +1839,7 @@ pub fn run() {
             fc::cmd::open_folder_async,
             fc::cmd::get_file_content,
             fc::cmd::get_file_snapshot,
+            directory_watch::allow_hidden_directory_watch,
             fc::cmd::write_file,
             fc::cmd::get_file_write_revision,
             fc::cmd::conditional_write_file,

@@ -102,6 +102,53 @@ describe('useWorkspaceWatcher', () => {
     expect(mocks.invoke).not.toHaveBeenCalled()
   })
 
+  it.each([true, false])('subscribes to a hidden directory after a scope denial (workspace: %s)', async (recursive) => {
+    const directory = '/notes/.archive/.year'
+    const path = directory + '/daily.md'
+    const unwatch = vi.fn()
+    setFileObject('daily', { id: 'daily', name: 'daily.md', kind: 'file', path })
+    useEditorStore.setState({ folderData: recursive ? [root(directory)] : null, opened: ['daily'] })
+    mocks.watch.mockRejectedValueOnce('forbidden path: ' + directory).mockResolvedValue(unwatch)
+    mocks.invoke.mockImplementation(async (command) => command === 'allow_hidden_directory_watch')
+
+    const { unmount } = renderHook(() => useWorkspaceWatcher())
+    await waitFor(() => expect(mocks.watch).toHaveBeenCalledTimes(2))
+    expect(mocks.invoke).toHaveBeenCalledWith('allow_hidden_directory_watch', { directory })
+    const [target, send, options] = mocks.watch.mock.calls[1]
+    expect(target).toBe(directory)
+    expect(options).toEqual({ delayMs: 1000, recursive })
+    expect(mocks.handleExternalWatchEvent).toHaveBeenCalledWith({ type: 'any', paths: [path], attrs: {} })
+    const event = { type: 'any', paths: [path] }
+    send(event)
+    expect(mocks.handleExternalWatchEvent).toHaveBeenCalledWith(event)
+    unmount()
+    expect(unwatch).toHaveBeenCalledOnce()
+  })
+
+  it('does not request additional scope for an OS watcher failure', async () => {
+    mocks.watch.mockRejectedValue(new Error('watch limit reached'))
+    renderHook(() => useWorkspaceWatcher())
+    await waitFor(() => expect(mocks.watch).toHaveBeenCalledTimes(1))
+    expect(mocks.invoke).not.toHaveBeenCalledWith('allow_hidden_directory_watch', expect.anything())
+  })
+
+  it('does not retry a hidden watcher after its workspace has closed', async () => {
+    const directory = '/notes/.archive'
+    useEditorStore.setState({ folderData: [root(directory)], opened: [] })
+    const grant = Promise.withResolvers<boolean>()
+    mocks.invoke.mockImplementation((command) =>
+      command === 'allow_hidden_directory_watch' ? grant.promise : Promise.resolve(),
+    )
+    mocks.watch.mockRejectedValue('forbidden path: ' + directory)
+    const { unmount } = renderHook(() => useWorkspaceWatcher())
+    await waitFor(() =>
+      expect(mocks.invoke).toHaveBeenCalledWith('allow_hidden_directory_watch', { directory }),
+    )
+    unmount()
+    await act(async () => { grant.resolve(true) })
+    expect(mocks.watch).toHaveBeenCalledTimes(1)
+  })
+
   it('uses a window-local official watcher and replaces it when the root changes', async () => {
     const unwatchFirst = vi.fn()
     const unwatchSecond = vi.fn()

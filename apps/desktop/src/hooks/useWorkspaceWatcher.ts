@@ -4,14 +4,14 @@ import {
 } from '@/components/EditorArea/externalFileChanges'
 import { logger } from '@/helper/logger'
 import useFileCacheStore, { getFileObject } from '@/helper/files'
-import { rebaseFilePath } from '@/helper/pathIdentity'
+import { getPathIdentityKey, rebaseFilePath } from '@/helper/pathIdentity'
 import { dirname } from '@tauri-apps/api/path'
 import { currentWindow } from '@/services/windows'
 import { getWorkspace, type WorkSpace } from '@/services/workspace'
 import { useEditorStore } from '@/stores'
 import { startupInteractive } from '@/startup/interactive'
 import { invoke } from '@tauri-apps/api/core'
-import { watch, type UnwatchFn } from '@tauri-apps/plugin-fs'
+import { watch } from '@tauri-apps/plugin-fs'
 import { createGlobalStore } from 'hox'
 import { useEffect } from 'react'
 import { create } from 'zustand'
@@ -32,6 +32,41 @@ export const useWorkspaceStore = create<WorkSpaceStore>((set) => {
 interface WorkSpaceStore {
   workspace: WorkSpace | null
   setWorkspace: (ws: WorkSpace | null) => void
+}
+
+async function watchEditorDirectory(directory: string, recursive: boolean, signal: AbortSignal) {
+  const subscribe = async () => {
+    const unwatch = await watch(directory, (event) => void handleExternalWatchEvent(event), {
+      delayMs: 1000,
+      recursive,
+    })
+    if (signal.aborted) unwatch()
+    else signal.addEventListener('abort', unwatch, { once: true })
+  }
+
+  try {
+    await subscribe()
+  } catch (error) {
+    // A folder opened through the CLI or session restore may lack the scope a picker grants.
+    if (signal.aborted) return
+    if (!String(error).includes('forbidden path:')) throw error
+    const granted = await invoke<boolean>('allow_hidden_directory_watch', { directory })
+    if (signal.aborted) return
+    if (!granted) throw error
+    await subscribe()
+    if (signal.aborted) return
+    // A writer may have saved between the denied subscription and its retry.
+    const prefix = getPathIdentityKey(directory) + '/'
+    const paths = useEditorStore.getState().opened.flatMap((id) => {
+      const path = getFileObject(id)?.path
+      if (!path) return []
+      const key = getPathIdentityKey(path)
+      return key.startsWith(prefix) && (recursive || !key.slice(prefix.length).includes('/'))
+        ? [path]
+        : []
+    })
+    if (paths.length) void handleExternalWatchEvent({ type: 'any', paths, attrs: {} })
+  }
 }
 
 export const useWorkspaceWatcher = () => {
@@ -68,64 +103,37 @@ export const useWorkspaceWatcher = () => {
   )
 
   useEffect(() => {
-    let stopped = false
-    const unwatchers: UnwatchFn[] = []
+    const controller = new AbortController()
     void (async () => {
       const paths: string[] = JSON.parse(loosePaths)
       const parents = new Set(await Promise.all(paths.map((path) => dirname(path))))
-      if (stopped) return
+      if (controller.signal.aborted) return
       await Promise.all(
         [...parents].map(async (parent) => {
           try {
             // Watch the parent so an atomic file replacement keeps being observed.
-            const unwatch = await watch(
-              parent,
-              (event) => {
-                void handleExternalWatchEvent(event)
-              },
-              { delayMs: 1000, recursive: false },
-            )
-            if (stopped) unwatch()
-            else unwatchers.push(unwatch)
+            await watchEditorDirectory(parent, false, controller.signal)
           } catch (error) {
             logger.error('Failed to watch an independent document', error)
           }
         }),
       )
     })().catch((error) => logger.error('Failed to resolve document directories', error))
-    return () => {
-      stopped = true
-      unwatchers.forEach((unwatch) => unwatch())
-    }
+    return () => controller.abort()
   }, [loosePaths])
 
   useEffect(() => {
-    let stopped = false
-    let unwatch: UnwatchFn | undefined
+    const controller = new AbortController()
 
     const updateWorkspaceAndWatcher = async () => {
       const ws = await getWorkspace()
-      if (stopped) return
+      if (controller.signal.aborted) return
       setWorkspace(ws)
 
       if (rootPath) {
         logger.info('rootPath', rootPath)
         try {
-          const stopWatching = await watch(
-            rootPath,
-            (event) => {
-              void handleExternalWatchEvent(event)
-            },
-            {
-              delayMs: 1000,
-              recursive: true,
-            },
-          )
-          if (stopped) {
-            stopWatching()
-          } else {
-            unwatch = stopWatching
-          }
+          await watchEditorDirectory(rootPath, true, controller.signal)
         } catch (error) {
           logger.error('Failed to watch workspace files', error)
         }
@@ -134,10 +142,7 @@ export const useWorkspaceWatcher = () => {
 
     void updateWorkspaceAndWatcher()
 
-    return () => {
-      stopped = true
-      unwatch?.()
-    }
+    return () => controller.abort()
   }, [rootPath, setWorkspace])
 }
 const [useGlobalWorkspaceWatcher] = createGlobalStore(useWorkspaceWatcher)
