@@ -1373,7 +1373,8 @@
       "preparation_failed": "バックグラウンドでのドキュメント準備に失敗しました。再試行してください。"
     },
     "placeholder": {
-      "default": "「/」でコマンドを表示"
+      "default": "「/」でコマンドを表示",
+      "startup": "ここに書き始めるか、/ を入力して見出しやリストを追加できます。"
     },
     "clipboard": {
       "copied_markdown": "Markdown としてコピーしました",

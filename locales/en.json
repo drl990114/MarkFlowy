@@ -1367,7 +1367,8 @@
       "link": "Insert link"
     },
     "placeholder": {
-      "default": "Type '/' for commands"
+      "default": "Type '/' for commands",
+      "startup": "Start writing, or type / to add headings and lists."
     },
     "clipboard": {
       "copied_markdown": "Copied as Markdown",

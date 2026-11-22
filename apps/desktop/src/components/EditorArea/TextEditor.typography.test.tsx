@@ -309,14 +309,15 @@ describe('TextEditor Capricorn typography settings', () => {
     expect(onOptions.mock.lastCall?.[0].linkEditMode).toBe('popover')
   })
 
-  it('forwards the placeholder switch and reacts when it changes', () => {
+  it.each([undefined, '/note.md'])('forwards placeholder setting changes for path %s', (filePath) => {
     const onOptions = vi.fn()
     const { rerender } = render(
-      <Harness settings={{ editor_placeholder: false }} onOptions={onOptions} />,
+      <Harness filePath={filePath} settings={{ editor_placeholder: false }} onOptions={onOptions} />,
     )
-    expect(onOptions.mock.lastCall?.[0].placeholder).toEqual({ enabled: false })
-    rerender(<Harness settings={{ editor_placeholder: true }} onOptions={onOptions} />)
-    expect(onOptions.mock.lastCall?.[0].placeholder).toEqual({ enabled: true })
+    expect(onOptions.mock.lastCall?.[0].placeholder.enabled).toBe(false)
+    rerender(<Harness filePath={filePath} settings={{ editor_placeholder: true }} onOptions={onOptions} />)
+    expect(onOptions.mock.lastCall?.[0].placeholder.enabled).toBe(true)
+    if (filePath) expect(onOptions.mock.lastCall?.[0].placeholder.placeholder).toBeUndefined()
   })
   it('subscribes to shortcut changes and includes them in the memoized runtime options', () => {
     const onOptions = vi.fn()

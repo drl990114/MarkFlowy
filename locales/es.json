@@ -1373,7 +1373,8 @@
       "preparation_failed": "Falló la preparación del documento en segundo plano. Vuelve a intentarlo."
     },
     "placeholder": {
-      "default": "Escribe '/' para ver los comandos"
+      "default": "Escribe '/' para ver los comandos",
+      "startup": "Empieza a escribir o teclea / para añadir títulos y listas."
     },
     "clipboard": {
       "copied_markdown": "Copiado como Markdown",

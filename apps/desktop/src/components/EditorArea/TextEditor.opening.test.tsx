@@ -8,11 +8,14 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import type * as Rme from 'rme'
 import type * as Zens from 'zens'
 import type * as LocalHistory from '@/services/local-history'
+import type * as DesktopI18n from '@/i18n'
 import { EditorViewType } from '@/constants/editorViewType'
 import { isCapricornRuntimeAvailable } from '@/constants/capricornRuntime'
 import bus from '@/helper/eventBus'
 import { getFileObject, getSaveOpenedEditorEntries, setFileObject } from '@/helper/files'
 import { createFile } from '@/helper/filesys'
+import { changeLng, i18nInit } from '@/i18n'
+import { markPristineDocument, touchDocument } from '@/services/pristine-document'
 import useEditorStore from '@/stores/useEditorStore'
 import { createEditorResumeStore } from '@/stores/editorResumeStore'
 import useEditorStateStore from '@/stores/useEditorStateStore'
@@ -75,8 +78,8 @@ vi.mock('@/hooks/useKeyboard', () => {
     ),
   }
 })
-vi.mock('@/i18n', () => ({
-  i18n: { dir: () => 'ltr', language: 'en', t: mocks.t, on: vi.fn(), off: vi.fn() },
+vi.mock('@/i18n', async (importOriginal) => ({
+  ...(await importOriginal<typeof DesktopI18n>()),
   t: mocks.t,
   useTranslation: () => ({ t: mocks.t }),
 }))
@@ -175,6 +178,45 @@ describe.skipIf(!isCapricornRuntimeAvailable)('TextEditor document lifecycle', (
     ])
     history = loadedHistory
   }, 30_000)
+
+  it('localizes the startup hint and restores the ordinary hint after typing and undoing', async ({ onTestFinished }) => {
+    await i18nInit({ lng: 'en' })
+    const { id } = createFile()
+    markPristineDocument(id)
+    onTestFinished(async () => {
+      touchDocument(id)
+      await changeLng('en')
+    })
+    const { container } = render(
+      <TextEditor
+        active
+        id={id}
+        fileTypeConfig={{
+          type: 'markdown',
+          defaultMode: EditorViewType.WYSIWYG,
+          supportedModes: [EditorViewType.WYSIWYG],
+        }}
+      />,
+    )
+    const hint = () =>
+      container.querySelector('[data-cap-placeholder]')?.getAttribute('data-placeholder')
+    await waitFor(() => expect(hint()).toBe('Start writing, or type / to add headings and lists.'))
+    const editor = getCapricornEditor(id)!
+    expect(editor.getMarkdown()).toBe('')
+
+    await act(async () => { await changeLng('cn') })
+    await waitFor(() => expect(hint()).toBe('直接开始写作，或输入 / 添加标题和列表。'))
+    const input = getCapricornRuntimeInput(container)!
+    await act(async () => {
+      fireEvent.input(input, { target: { value: 'X' }, inputType: 'insertText', data: 'X' })
+    })
+    await waitFor(() => expect(editor.getMarkdown()).toBe('X'))
+    expect(hint()).toBeUndefined()
+
+    await act(async () => editor.commands.undo())
+    await waitFor(() => expect(hint()).toBe('输入 / 使用命令'))
+    expect(editor.getMarkdown()).toBe('')
+  })
 
   // Multiple real runtime mounts need more than the default 5s on shared CI runners.
   it('keeps a hidden dirty document through its first split and saves its original draft', { timeout: 30_000 }, async ({ onTestFinished }) => {

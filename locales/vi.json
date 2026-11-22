@@ -1367,7 +1367,8 @@
       "link": "Chèn liên kết"
     },
     "placeholder": {
-      "default": "Gõ “/” để dùng lệnh"
+      "default": "Gõ “/” để dùng lệnh",
+      "startup": "Bắt đầu viết hoặc gõ / để thêm tiêu đề và danh sách."
     },
     "clipboard": {
       "copied_markdown": "Đã sao chép dưới dạng Markdown",

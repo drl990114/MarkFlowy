@@ -1367,7 +1367,8 @@
       "link": "插入链接"
     },
     "placeholder": {
-      "default": "输入 / 使用命令"
+      "default": "输入 / 使用命令",
+      "startup": "直接开始写作，或输入 / 添加标题和列表。"
     },
     "clipboard": {
       "copied_markdown": "已按 Markdown 复制",

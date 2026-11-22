@@ -1367,7 +1367,8 @@
       "link": "Inserir link"
     },
     "placeholder": {
-      "default": "Digite '/' para ver os comandos"
+      "default": "Digite '/' para ver os comandos",
+      "startup": "Comece a escrever ou digite / para adicionar títulos e listas."
     },
     "clipboard": {
       "copied_markdown": "Copiado como Markdown",

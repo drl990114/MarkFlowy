@@ -82,6 +82,7 @@ import {
 } from './capricornKeybindings'
 import { normalizeClonedExportColors } from './exportColors'
 import { i18n, useTranslation } from '@/i18n'
+import { isPristineDocument } from '@/services/pristine-document'
 import { captureException } from '@/services/error-reporting'
 import { useEditorStateStore, useEditorStore } from '@/stores'
 import useRecentFilesStore from '@/stores/useRecentFilesStore'
@@ -2596,7 +2597,15 @@ function TextEditor(props: TextEditorProps) {
       imagePasteHandler: hostOptions.imagePasteHandler,
       localization: capricornLocalization,
       mode: currentViewType === EditorViewType.PREVIEW ? 'preview' : 'edit',
-      placeholder: { enabled: editorPlaceholder },
+      placeholder: {
+        enabled: editorPlaceholder,
+        placeholder: filePath
+          ? undefined
+          : ({ isEditorEmpty }) =>
+              isEditorEmpty && isPristineDocument(curFile.id)
+                ? i18n.t('capricorn.placeholder.startup')
+                : i18n.t('capricorn.placeholder.default'),
+      },
       readOnly: savePathReserved || externalChangeResolving,
       spellCheck: wysiwygEditorSpellcheck,
       style: {
@@ -2623,6 +2632,7 @@ function TextEditor(props: TextEditorProps) {
     codeBlockLineWrapping,
     codeEditorPreferences,
     curFile.id,
+    filePath,
     currentViewType,
     editorColorScheme,
     editorKeybingMap,

@@ -1373,7 +1373,8 @@
       "preparation_failed": "La préparation du document en arrière-plan a échoué. Réessayez."
     },
     "placeholder": {
-      "default": "Tapez « / » pour afficher les commandes"
+      "default": "Tapez « / » pour afficher les commandes",
+      "startup": "Commencez à écrire ou tapez / pour ajouter des titres et des listes."
     },
     "clipboard": {
       "copied_markdown": "Copié au format Markdown",
