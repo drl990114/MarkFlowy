@@ -58,6 +58,27 @@ test('TOML frontmatter retains MDX exports after the parser upgrade', async () =
   assert.match(String(result), /"count": 2/)
 })
 
+test('Contentlayer parses document fields with the same Zod as Desktop', async () => {
+  const sourceFiles = import.meta.resolve('@contentlayer2/source-files')
+  const desktop = createRequire(new URL('../apps/desktop/package.json', import.meta.url))
+  assert.equal(createRequire(sourceFiles).resolve('zod'), desktop.resolve('zod'))
+  const { parseFieldData } = await import(new URL('./fetchData/mapping/parseFieldData.js', sourceFiles))
+  const { provideDocumentContext } = await import(new URL('./fetchData/DocumentContext.js', sourceFiles))
+  const { T } = await import('@contentlayer2/utils/effect')
+  const parse = (fieldType, rawData) => parseFieldData({ fieldName: 'example', fieldType, rawData })
+
+  const nested = { title: '文档', tags: ['one'], options: { visible: true } }
+  for (const type of ['nested', 'nested_polymorphic', 'nested_unnamed']) {
+    assert.deepEqual(await T.runPromise(parse(type, nested)), nested)
+  }
+  assert.deepEqual(await T.runPromise(parse('image', '/cover.png')), { src: '/cover.png' })
+  assert.deepEqual(await T.runPromise(parse('list', [1, 'two'])), [1, 'two'])
+  const context = { relativeFilePath: 'note.md', documentTypeDef: { name: 'Note' } }
+  const invalid = await T.runPromise(T.either(provideDocumentContext(context)(parse('image', 42))))
+  assert.equal(invalid._tag, 'Left')
+  assert.equal(invalid.left._tag, 'IncompatibleFieldDataError')
+})
+
 test('the frontmatter parser limits nesting and isolates prototype keys', () => {
   const remarkRequire = createRequire(rootRequire.resolve('remark-mdx-frontmatter'))
   const toml = remarkRequire('toml')

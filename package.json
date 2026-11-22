@@ -74,6 +74,7 @@
     "turbo": "^2.9.14"
   },
   "resolutions": {
+    "@contentlayer2/source-files/zod": "^4.6.7",
     "@opentelemetry/sdk-trace-node/@opentelemetry/propagator-jaeger": "2.11.0",
     "@tauri-release/cli/@actions/github": "6.0.1",
     "@xmldom/xmldom@npm:0.9.10": "0.9.12",
