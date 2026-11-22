@@ -1,5 +1,69 @@
 # UPDATE LOG
 
+## v1.4.0
+
+Features:
+
+- **Find a heading in the current document.** Choose **Find heading** in the outline, type part of a title, and press Enter to jump to it. Results include parent headings so you can distinguish sections with the same name.
+
+- **Set the width of your Markdown documents.** Under **Settings → Editor → Style → Document width**, choose a fixed width from 480 to 1600 px, **Follow theme**, or **Full width**. New installations start at 760 px, and existing installations keep their previous width setting. Width and theme changes apply across open windows.
+
+- **Highlight INI code blocks.** Set a code block’s language to `ini` to highlight section names, keys, values, and comments in WYSIWYG and Preview modes.
+
+- **Locate a file from its tab.** Right-click a saved document’s tab and choose **Show in Folder** to reveal it in your system file manager.
+
+- **Read release notes before installing an update.** Choose **View release notes** in the update notification to see what changed.
+
+Improvements and Fixes:
+
+- Tabs opened after you choose **Close others** or **Close all** now stay open. MarkFlowy also keeps a document open if you edit it again while its earlier changes are being saved or discarded.
+
+- The editor now detects external changes to documents opened from nested hidden folders, including when another app saves by replacing the original file.
+
+- Fixed the tab bar intercepting input method keys, keyboard shortcuts with modifier keys, and trackpad pinch-to-zoom gestures.
+
+- The outline now tracks the current section more efficiently when scrolling long documents in Source Code mode. Fixed jumps to outdated headings after switching documents.
+
+- Fixed a delayed scroll that could pull the view back to an earlier click. Switching documents also cancels pending updates to the previous document’s selection.
+
+- When replacement text contains the search term, **Replace** now advances to the next original match.
+
+- Retrying a failed **Quick Open** search now reruns it with the words you already entered.
+
+- Added the **Everforest** and **Solarized** community themes to the **Theme Store** and updated heading and code colors in the built-in **Tokyo Night** theme.
+
+---
+
+新功能：
+
+- **按名称查找文档标题。** 在目录面板选择**查找标题**，输入标题中的几个字，按回车即可跳转。结果会显示上级标题，方便区分同名章节。
+
+- **自定义 Markdown 正文宽度。** 在**设置 → 编辑器 → 样式 → 正文宽度**中，可将宽度固定在 480–1600 px 之间，也可选择**跟随主题**或**全宽**。新安装默认使用 760 px，升级时保留原有的宽度设置。调整宽度或切换主题时，所有已打开的窗口都会同步更新。
+
+- **支持 INI 代码块高亮。** 将代码块语言设为 `ini`，即可在所见即所得和预览模式中高亮显示节名、键、值和注释。
+
+- **从标签页定位文件。** 右键单击已保存文档的标签页，选择**打开文件所在位置**，即可在系统文件管理器中找到该文件。
+
+- **安装更新前可查看更新内容。** 收到更新通知时，选择**查看更新内容**即可阅读新版说明。
+
+改进与修复：
+
+- 使用**关闭其他**或**关闭全部**时，操作开始后新打开的标签页会保留。如果在保存或放弃更改的过程中继续编辑，文档也会保持打开，保留最新修改。
+
+- 修复从隐藏目录打开的文档可能收不到外部修改的问题。即使文件位于多层隐藏目录中，或其他编辑器通过替换原文件来保存，MarkFlowy 也能检测到变化。
+
+- 修复标签栏误拦截输入法选词按键、组合快捷键和触控板捏合缩放的问题。
+
+- 优化源码模式下长文档的目录跟随，减少滚动时重复查找当前标题的开销。修复切换文档后点击旧目录项可能跳错位置的问题。
+
+- 修复快速连续点击时，视图可能滚回较早点击位置的问题。切换文档后，编辑器也会取消上一份文档尚未完成的选区更新。
+
+- 查找替换时，即使替换文本包含搜索词，点击**替换**也会跳到下一处原有匹配。
+
+- **快速打开**搜索失败后，点击重试会用已输入的关键词重新搜索。
+
+- 主题商店新增 **Everforest** 和 **Solarized** 两款社区主题，内置 **Tokyo Night** 也调整了标题和代码配色。
+
 ## v1.3.1
 
 Features:
