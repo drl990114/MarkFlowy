@@ -75,6 +75,48 @@ describe('raw source and CodeMirror projection', () => {
     expect(view.raw).toBe(edited)
   })
 
+  it('keeps mixed endings in undo and redo when external edits shift the restored text', () => {
+    const original = 'top|one\r\ntwo\nthree\rfour\r\nend'
+    const view = editor(original)
+    view.change(4, view.state.doc.length - 3, 'X\nY')
+    const local = view.raw
+    const prependExternally = (prefix: string) => {
+      view.dispatch(
+        view.state.update({
+          changes: { from: 0, insert: prefix },
+          effects: resetRawText.of(prefix + view.raw),
+          annotations: Transaction.addToHistory.of(false),
+        }),
+      )
+    }
+
+    prependExternally('remote\n')
+    expect(undo(view)).toBe(true)
+    expect(view.raw).toBe('remote\n' + original)
+    prependExternally('another\r\n')
+    expect(redo(view)).toBe(true)
+    expect(view.raw).toBe('another\r\nremote\n' + local)
+    expect(undo(view)).toBe(true)
+    expect(view.raw).toBe('another\r\nremote\n' + original)
+  })
+
+  it('retains grouped newline deletions when an unrelated external edit lands after them', () => {
+    const view = editor('a\r\nb\nc\rd-long-suffix')
+    view.change(1, 4, 'X', false)
+    view.change(1, 4, 'Y', false)
+    expect(view.raw).toBe('aYd-long-suffix')
+    view.dispatch(
+      view.state.update({
+        changes: { from: 3, insert: '!' },
+        annotations: Transaction.addToHistory.of(false),
+      }),
+    )
+    expect(undo(view)).toBe(true)
+    expect(view.raw).toBe('a\r\nb\nc\rd!-long-suffix')
+    expect(redo(view)).toBe(true)
+    expect(view.raw).toBe('aYd!-long-suffix')
+  })
+
   it('maps CRLF, CR, emoji and search/selection boundaries in UTF-16 offsets', () => {
     const raw = new RawTextProjection('😀\r\n中\rnext\n')
     expect(raw.normalized).toBe('😀\n中\nnext\n')

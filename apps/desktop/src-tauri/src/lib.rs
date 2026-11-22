@@ -1008,6 +1008,10 @@ fn handle_read_only_cli_command() {
     }
 
     match positional.get(1).map(String::as_str) {
+        Some("version") => {
+            print_version();
+            std::process::exit(0);
+        }
         Some("status") => {
             let state = read_cli_runtime_state();
             let mut status = serde_json::to_value(&state).expect("serialize runtime state");

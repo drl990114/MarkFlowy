@@ -7,6 +7,7 @@ import { homedir, tmpdir } from 'node:os'
 import { basename, join, resolve } from 'node:path'
 
 export const scenarios = [
+  'cli-version',
   'save-reopen',
   'switch-modes',
   'external-write',

@@ -1,0 +1,20 @@
+diff --git a/node_modules/@codemirror/commands/dist/index.cjs b/node_modules/@codemirror/commands/dist/index.cjs
+--- a/node_modules/@codemirror/commands/dist/index.cjs
++++ b/node_modules/@codemirror/commands/dist/index.cjs
+@@ -486,4 +486,5 @@ function mapEvent(event, mapping, extraSelections) {
+     let mappedChanges = event.changes.map(mapping), before = mapping.mapDesc(event.changes, true);
+     let fullMapping = event.mapped ? event.mapped.composeDesc(before) : before;
+-    return new HistEvent(mappedChanges, state.StateEffect.mapEffects(event.effects, mapping), fullMapping, event.startSelection.map(before), selections);
++    // Inverse effects refer to the document after the inverse changes, like startSelection.
++    return new HistEvent(mappedChanges, state.StateEffect.mapEffects(event.effects, before), fullMapping, event.startSelection.map(before), selections);
+ }
+diff --git a/node_modules/@codemirror/commands/dist/index.js b/node_modules/@codemirror/commands/dist/index.js
+--- a/node_modules/@codemirror/commands/dist/index.js
++++ b/node_modules/@codemirror/commands/dist/index.js
+@@ -484,4 +484,5 @@ function mapEvent(event, mapping, extraSelections) {
+     let mappedChanges = event.changes.map(mapping), before = mapping.mapDesc(event.changes, true);
+     let fullMapping = event.mapped ? event.mapped.composeDesc(before) : before;
+-    return new HistEvent(mappedChanges, StateEffect.mapEffects(event.effects, mapping), fullMapping, event.startSelection.map(before), selections);
++    // Inverse effects refer to the document after the inverse changes, like startSelection.
++    return new HistEvent(mappedChanges, StateEffect.mapEffects(event.effects, before), fullMapping, event.startSelection.map(before), selections);
+ }

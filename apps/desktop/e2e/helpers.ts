@@ -64,12 +64,12 @@ export async function fixture(name: string, content: string): Promise<string> {
   return path
 }
 
-export async function openFile(path: string, content: string): Promise<FileState> {
+export async function openFile(path: string, content: string, visibleText = content): Promise<FileState> {
   await cli('file', 'open', path, '--wait', 'applied', '--sha256', sha256(content))
   const state = await waitState(path, { open: true, active: true, ready: true,
     dirty: false, contentSha256: sha256(content), mode: 'wysiwyg' })
   await $(`${editor} [data-mf-capricorn-runtime] [data-cap-content]`).waitForDisplayed()
-  await visibleContent(content)
+  await visibleContent(visibleText)
   return state
 }
 

@@ -56,6 +56,26 @@ function mount(content: string) {
 }
 
 describe('source CodeMirror to PM bridge', () => {
+  it('updates the mounted source after a shorter select-all paste and an external reload', () => {
+    const original = '# Hidden Watch QA\n\nWatching the new inode 140\n'
+    const local = '# Hidden Watch QA\n\nLocal unsaved QA 140\n'
+    const external = '# Hidden Watch QA\n\nExternal conflict version 140\n'
+    const { view, source } = mount(original)
+    source.cm.dispatch({
+      changes: { from: 0, to: source.cm.state.doc.length, insert: local },
+      userEvent: 'input.paste',
+    })
+    expect(view.state.doc.textContent).toBe(local)
+
+    view.dispatch(view.state.tr.insertText(external, 1, view.state.doc.content.size - 1))
+    expect(view.state.doc.textContent).toBe(external)
+    expect(source.cm.state.doc.toString()).toBe(external)
+    const rendered = Array.from(source.cm.contentDOM.children, (line) => line.textContent).join('\n')
+    expect(rendered).toBe(external)
+    source.cm.dispatch({ changes: { from: 0, insert: '>' } })
+    expect(view.state.doc.textContent).toBe('>' + external)
+  })
+
   it('keeps exact Markdown and mixed endings outside the edited range, including undo', () => {
     const original = "<SPAN x='a'>A &amp; B</SPAN>\r\n\r\n[link][Ref]\n\n[Ref]: <a b>\r\nedit\r"
     const { view, source } = mount(original)

@@ -40,12 +40,13 @@ cannot satisfy the native test marker/server checks.
 
 | Scenario | Required outcome |
 | --- | --- |
+| `cli-version` | With the app running, `version`, `--version` and `-V` print its version and leave a same-named file closed |
 | `save-reopen` | UI typing → Cmd+S → exact disk bytes → close → reopen |
 | `switch-modes` | Edited content is saved before switching to source, preview and WYSIWYG; each view and the disk retain the exact bytes |
-| `external-write` | A real in-place external write updates the clean editor |
+| `external-write` | A real in-place write reloads WYSIWYG and a source document saved after a shorter select-all paste |
 | `hidden-directory-write` | An explicitly opened file in nested hidden directories stays in sync after an external write and an atomic replacement |
 | `atomic-replace` | Rename replacement reloads and subsequent writes remain watched |
-| `dirty-conflict` | Local draft, external disk version and visible conflict all survive |
+| `dirty-conflict` | The draft and disk version survive until Update is clicked, then the visible WYSIWYG or source body and the disk both contain the external version |
 | `switch-tabs` | Rapid A/B switching preserves content ownership and save targets |
 | `history-restore` | UI restoration creates a dirty draft; disk changes only after save |
 | `draft-restart` | SQLite draft persists before process exit and recovers in a new process |
