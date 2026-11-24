@@ -4968,7 +4968,7 @@ __metadata:
   dependencies:
     "@types/node": "npm:^22.19.0"
     esbuild: "npm:^0.28.2"
-    i18next: "npm:23.16.8"
+    i18next: "npm:26.3.4"
     react: "npm:^19.3.1"
     react-i18next: "npm:15.7.4"
     rimraf: "npm:^6.1.0"
@@ -5107,7 +5107,7 @@ __metadata:
     csstype: "npm:^3.1.3"
     enzyme: "npm:^3.11.0"
     enzyme-to-json: "npm:^3.6.2"
-    i18next: "npm:23.16.8"
+    i18next: "npm:26.3.4"
     isomorphic-fetch: "npm:^3.0.0"
     lodash: "npm:^4.18.1"
     markdown-to-jsx: "npm:^7.7.10"
@@ -18402,12 +18402,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:23.16.8":
-  version: 23.16.8
-  resolution: "i18next@npm:23.16.8"
-  dependencies:
-    "@babel/runtime": "npm:^7.23.2"
-  checksum: 10/d5c38011de4d3b4aa466fac6773520eb28007b9d6138e03432bfbfc0d041c04df45e15c67d96f22cd660088cc9b24d3eda32cddc9fb4c6508c5afada6c2e6290
+"i18next@npm:26.3.4":
+  version: 26.3.4
+  resolution: "i18next@npm:26.3.4"
+  peerDependencies:
+    typescript: ^5 || ^6
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10/133ba9a5f76c1d57337f0dcc1b0ab0ff987714a1863813dcc95024531074c6d92603a19b0bac9c16a6b04c734742d8d098da0c222bef5a9562bdde231ea4b221
   languageName: node
   linkType: hard
 
