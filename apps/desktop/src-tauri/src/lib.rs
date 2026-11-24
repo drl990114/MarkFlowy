@@ -2041,16 +2041,22 @@ pub fn run() {
             {
                 // NOTICE: `args` may include URL protocol (`your-app-protocol://`) or arguments (`--`) if app supports them.
                 // Launchers such as the Linux desktop entry pass plain paths, which
-                // `Url::parse` rejects; convert existing paths to file URLs as well.
+                // `Url::parse` rejects. Only treat the invocation as a path launch
+                // when the first argument is an existing path, so subcommands and
+                // their option values are left to the CLI parser.
+                let args: Vec<String> = env::args().collect();
+                let launches_with_path = args
+                    .get(1)
+                    .is_some_and(|arg| !arg.starts_with('-') && Path::new(arg).exists());
                 let mut urls = Vec::new();
-                for arg in env::args().skip(1) {
+                for arg in args.iter().skip(1) {
                     if arg.starts_with('-') {
                         continue;
                     }
-                    if let Ok(url) = url::Url::parse(&arg) {
+                    if let Ok(url) = url::Url::parse(arg) {
                         urls.push(url);
-                    } else if Path::new(&arg).exists() {
-                        if let Ok(url) = url::Url::parse(&path_to_file_url(&arg, None)) {
+                    } else if launches_with_path && Path::new(arg).exists() {
+                        if let Ok(url) = url::Url::parse(&path_to_file_url(arg, None)) {
                             urls.push(url);
                         }
                     }
