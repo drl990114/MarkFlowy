@@ -335,12 +335,14 @@
     "longDescription": "MarkFlowy is a modern, lightweight Markdown editor with built-in AI capabilities. Features include AI-powered translation, summarization, multiple editing modes (WYSIWYG and source code), custom themes, keyboard shortcuts, and support for multiple file formats. Built with Tauri for optimal performance.",
     "fileAssociations": [
       {
-        "ext": [
-          ".md",
-          ".markdown",
-          ".json",
-          ".txt"
-        ],
+        "ext": [".md", ".markdown"],
+        "name": "Markdown Document",
+        "description": "Markdown Document",
+        "mimeType": "text/markdown",
+        "role": "Editor"
+      },
+      {
+        "ext": [".json", ".txt"],
         "name": "Text Document",
         "description": "Text Document",
         "mimeType": "text/plain",
@@ -357,6 +359,10 @@
       "icons/icon.ico"
     ],
     "targets": "all",
+    "linux": {
+      "deb": { "desktopTemplate": "linux/MarkFlowy.desktop" },
+      "rpm": { "desktopTemplate": "linux/MarkFlowy.desktop" }
+    },
     "resources": {
       "../../../packages/theme/licenses/": "licenses/themes/"
     },

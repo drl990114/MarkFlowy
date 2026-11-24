@@ -2040,15 +2040,24 @@ pub fn run() {
             #[cfg(any(windows, target_os = "linux"))]
             {
                 // NOTICE: `args` may include URL protocol (`your-app-protocol://`) or arguments (`--`) if app supports them.
+                // Launchers such as the Linux desktop entry pass plain paths, which
+                // `Url::parse` rejects; convert existing paths to file URLs as well.
                 let mut urls = Vec::new();
                 for arg in env::args().skip(1) {
+                    if arg.starts_with('-') {
+                        continue;
+                    }
                     if let Ok(url) = url::Url::parse(&arg) {
                         urls.push(url);
+                    } else if Path::new(&arg).exists() {
+                        if let Ok(url) = url::Url::parse(&path_to_file_url(&arg, None)) {
+                            urls.push(url);
+                        }
                     }
                 }
 
                 if !urls.is_empty() {
-                    file_urls.0.lock().unwrap().replace(urls);
+                    append_opened_urls(&file_urls, &urls);
                 }
             }
 
