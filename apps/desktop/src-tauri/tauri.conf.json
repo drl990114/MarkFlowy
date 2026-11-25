@@ -360,6 +360,14 @@
     "resources": {
       "../../../packages/theme/licenses/": "licenses/themes/"
     },
+    "linux": {
+      "deb": {
+        "recommends": ["zenity"]
+      },
+      "rpm": {
+        "recommends": ["zenity"]
+      }
+    },
     "windows": {
       "digestAlgorithm": "sha256",
       "webviewInstallMode": {
