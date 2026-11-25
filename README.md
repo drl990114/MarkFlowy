@@ -112,6 +112,10 @@ sh install-linux.sh
 
 Use `wget -O install-linux.sh <url>` if `curl` is unavailable. Add `--appimage` to force the AppImage, or `--uninstall` to remove MarkFlowy.
 
+Linux file dialogs use your desktop’s XDG FileChooser portal when available (for example, `xdg-desktop-portal-kde` on Plasma). Install `zenity` for fallback dialogs when a compatible portal is unavailable.
+
+AppImage and minimal installations rely on these host packages. If dialogs stop opening after an in-app update, install Zenity with your distribution’s package manager.
+
 ## Why
 
 **Actually, the initial inspiration for MarkFlowy stemmed from a casual conversation with a friend a few years ago**. As developers, we shared many expectations for an ideal Markdown editor. After trying many existing applications, I felt they couldn't fully meet our comprehensive needs in terms of efficiency, aesthetics, lightweight design, and workflow integration. We envisioned our ideal editor together. Although we later went our separate ways and lost touch, that seed of desire to create something beautiful has always remained in my heart.
