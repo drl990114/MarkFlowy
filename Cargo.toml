@@ -1,3 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["apps/desktop/src-tauri", "crates/*", "tools/*"]
+
+[patch.crates-io]
+# Keep the portal backend and apply MarkFlowy's Zenity file-selection fixes.
+rfd = { path = "vendor/rfd" }

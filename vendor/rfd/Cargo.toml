@@ -1,0 +1,117 @@
+[package]
+name = "rfd"
+version = "0.16.0"
+edition = "2021"
+
+authors = ["Poly <marynczak.bartlomiej@gmail.com>"]
+description = "Rusty File Dialog"
+keywords = ["file", "ui", "dialog"]
+license = "MIT"
+repository = "https://github.com/PolyMeilex/rfd"
+documentation = "https://docs.rs/rfd"
+
+[features]
+default = ["xdg-portal", "wayland", "async-std"]
+file-handle-inner = []
+gtk3 = ["gtk-sys", "glib-sys", "gobject-sys"]
+xdg-portal = ["ashpd", "urlencoding", "pollster"]
+# Use async-std for xdg-portal
+async-std = ["ashpd?/async-std"]
+# Use tokio for xdg-portal
+tokio = ["ashpd?/tokio"]
+# Enable wayland support for xdg-portal
+wayland = ["ashpd?/wayland"]
+common-controls-v6 = ["windows-sys/Win32_UI_Controls"]
+
+[dev-dependencies]
+futures = "0.3.12"
+
+[dependencies]
+raw-window-handle = "0.6"
+log = "0.4"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+block2 = "0.6.0"
+dispatch2 = "0.3.0"
+objc2 = "0.6.0"
+objc2-foundation = { version = "0.3.0", default-features = false, features = [
+  "std",
+  "NSArray",
+  "NSEnumerator",
+  "NSString",
+  "NSThread",
+  "NSURL",
+] }
+objc2-app-kit = { version = "0.3.0", default-features = false, features = [
+  "std",
+  "block2",
+  "NSAlert",
+  "NSApplication",
+  "NSButton",
+  "NSControl",
+  "NSOpenPanel",
+  "NSPanel",
+  "NSResponder",
+  "NSRunningApplication",
+  "NSSavePanel",
+  "NSView",
+  "NSWindow",
+] }
+objc2-core-foundation = { version = "0.3.0", default-features = false, features = [
+  "std",
+  "CFBase",
+  "CFDate",
+  "CFString",
+  "CFURL",
+  "CFUserNotification",
+] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = { version = "0.60", features = [
+  "Win32_Foundation",
+  "Win32_System_Com",
+  "Win32_UI_Shell_Common",
+  "Win32_UI_Shell",
+  "Win32_UI_WindowsAndMessaging",
+] }
+
+[target.'cfg(any(target_os = "linux", target_os = "freebsd", target_os = "dragonfly", target_os = "netbsd", target_os = "openbsd"))'.dependencies]
+# XDG Desktop Portal
+ashpd = { version = "0.11", optional = true, default-features = false, features = [
+  "raw_handle",
+] }
+urlencoding = { version = "2.1.0", optional = true }
+pollster = { version = "0.4", optional = true }
+# GTK
+gtk-sys = { version = "0.18.0", features = ["v3_24"], optional = true }
+glib-sys = { version = "0.18.0", optional = true }
+gobject-sys = { version = "0.18.0", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2.69"
+js-sys = "0.3.46"
+web-sys = { version = "0.3.46", features = [
+  'Document',
+  'Element',
+  'HtmlInputElement',
+  'HtmlButtonElement',
+  'HtmlAnchorElement',
+  'Window',
+  'Navigator',
+  'UserActivation',
+  'File',
+  'FileList',
+  'FileReader',
+  'Blob',
+  'BlobPropertyBag',
+  'Url',
+] }
+wasm-bindgen-futures = "0.4.19"
+
+[[example]]
+name = "simple"
+[[example]]
+name = "async"
+
+[package.metadata.docs.rs]
+features = ["file-handle-inner"]
