@@ -24,7 +24,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "i18next": "23.16.8",
+    "i18next": "26.3.4",
     "react-i18next": "15.7.4"
   },
   "peerDependencies": {
