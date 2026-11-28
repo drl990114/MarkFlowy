@@ -100,6 +100,19 @@ test('Intel macOS packages build on Intel runners', async () => {
   }
 })
 
+test('Linux packages forward selected files and recommend the Zenity dialog fallback', async () => {
+  const configUrl = new URL('../apps/desktop/src-tauri/tauri.conf.json', import.meta.url)
+  const { bundle } = JSON.parse(await readFile(configUrl, 'utf8'))
+
+  for (const format of ['deb', 'rpm']) {
+    const { desktopTemplate, recommends } = bundle.linux[format]
+    assert.ok(desktopTemplate, `${format} is missing its desktop template`)
+    const template = await readFile(new URL(desktopTemplate, configUrl), 'utf8')
+    assert.match(template, /^Exec=.* %[FU](?:\s|$)/m, `${format} must forward selected files`)
+    assert.ok(recommends?.includes('zenity'), `${format} must recommend Zenity`)
+  }
+})
+
 test('all release packages retain matching signatures through collection and publication', async (t) => {
   const directory = await mkdtemp(path.join(tmpdir(), 'markflowy-release-artifacts-'))
   t.after(() => rm(directory, { recursive: true, force: true }))

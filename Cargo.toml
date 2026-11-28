@@ -1,3 +1,8 @@
 [workspace]
 resolver = "2"
 members = ["apps/desktop/src-tauri", "crates/*", "tools/*"]
+
+[patch.crates-io]
+# Remove this temporary override once a released tauri-plugin-dialog passes the
+# Zenity fallback cases documented in vendor/rfd/MARKFLOWY.md with upstream rfd.
+rfd = { path = "vendor/rfd" }

@@ -114,6 +114,10 @@ sh install-linux.sh<!--en-->
 <!--en-->
 Use `wget -O install-linux.sh <url>` if `curl` is unavailable. Add `--appimage` to force the AppImage, or `--uninstall` to remove MarkFlowy.<!--en-->
 <!--en-->
+Linux file dialogs use your desktop’s XDG FileChooser portal when available (for example, `xdg-desktop-portal-kde` on Plasma). Install `zenity` for fallback dialogs when a compatible portal is unavailable.<!--en-->
+<!--en-->
+AppImage and minimal installations rely on these host packages. If dialogs stop opening after an in-app update, install Zenity with your distribution’s package manager.<!--en-->
+<!--en-->
 ## Why<!--en-->
 <!--en-->
 **Actually, the initial inspiration for MarkFlowy stemmed from a casual conversation with a friend a few years ago**. As developers, we shared many expectations for an ideal Markdown editor. After trying many existing applications, I felt they couldn't fully meet our comprehensive needs in terms of efficiency, aesthetics, lightweight design, and workflow integration. We envisioned our ideal editor together. Although we later went our separate ways and lost touch, that seed of desire to create something beautiful has always remained in my heart.<!--en-->
@@ -401,6 +405,10 @@ sh install-linux.sh<!--zh-->
 <!--zh-->
 没有 `curl` 时可用 `wget -O install-linux.sh <url>`。加 `--appimage` 强制使用 AppImage，加 `--uninstall` 卸载。<!--zh-->
 <!--zh-->
+Linux 上的文件对话框优先使用桌面环境的 XDG FileChooser 门户（例如 Plasma 的 `xdg-desktop-portal-kde`）。如果没有可用的门户，可以安装 `zenity` 来使用备用对话框。<!--zh-->
+<!--zh-->
+AppImage 和精简安装都依赖系统提供这些组件。如果应用内更新后文件对话框无法打开，请用发行版的软件包管理器安装 Zenity。<!--zh-->
+<!--zh-->
 ## 为什么开发<!--zh-->
 <!--zh-->
 其实，**创作 MarkFlowy 的最初灵感，源于几年前和一位朋友一次闲聊**，作为开发者，我们对一款理想 Markdown 编辑器有很多的期待。在尝试过许多现有应用后，我感到它们难以完全满足在高效、美观、轻量与工作流融合上的综合需求。我们共同畅想了一款理想中编辑器的模样。尽管后来我们各自奔赴不同的人生，联系渐少，但那颗渴望创造美好的种子，一直在我心里。<!--zh-->
@@ -567,6 +575,10 @@ sh install-linux.sh<!--ja-->
 ```<!--ja-->
 <!--ja-->
 `curl` が利用できない場合は `wget -O install-linux.sh <url>` を使用します。`--appimage` を付けると AppImage を強制的にインストールし、`--uninstall` でアンインストールします。<!--ja-->
+<!--ja-->
+Linux のファイル選択ダイアログは、デスクトップ環境の XDG FileChooser ポータル（Plasma の `xdg-desktop-portal-kde` など）が利用できる場合にこれを使用します。対応するポータルが使えない環境では、`zenity` をインストールすると代わりのダイアログを利用できます。<!--ja-->
+<!--ja-->
+AppImage や最小構成の環境では、これらのパッケージをシステム側で用意してください。アプリ内更新後にファイル選択ダイアログが開かなくなった場合は、ディストリビューションのパッケージマネージャーで Zenity をインストールしてください。<!--ja-->
 <!--ja-->
 ## 動機<!--ja-->
 <!--ja-->

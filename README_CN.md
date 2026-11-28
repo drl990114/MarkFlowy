@@ -113,6 +113,10 @@ sh install-linux.sh
 
 没有 `curl` 时可用 `wget -O install-linux.sh <url>`。加 `--appimage` 强制使用 AppImage，加 `--uninstall` 卸载。
 
+Linux 上的文件对话框优先使用桌面环境的 XDG FileChooser 门户（例如 Plasma 的 `xdg-desktop-portal-kde`）。如果没有可用的门户，可以安装 `zenity` 来使用备用对话框。
+
+AppImage 和精简安装都依赖系统提供这些组件。如果应用内更新后文件对话框无法打开，请用发行版的软件包管理器安装 Zenity。
+
 ## 为什么开发
 
 其实，**创作 MarkFlowy 的最初灵感，源于几年前和一位朋友一次闲聊**，作为开发者，我们对一款理想 Markdown 编辑器有很多的期待。在尝试过许多现有应用后，我感到它们难以完全满足在高效、美观、轻量与工作流融合上的综合需求。我们共同畅想了一款理想中编辑器的模样。尽管后来我们各自奔赴不同的人生，联系渐少，但那颗渴望创造美好的种子，一直在我心里。

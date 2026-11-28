@@ -360,8 +360,14 @@
     ],
     "targets": "all",
     "linux": {
-      "deb": { "desktopTemplate": "linux/MarkFlowy.desktop" },
-      "rpm": { "desktopTemplate": "linux/MarkFlowy.desktop" }
+      "deb": {
+        "desktopTemplate": "linux/MarkFlowy.desktop",
+        "recommends": ["zenity"]
+      },
+      "rpm": {
+        "desktopTemplate": "linux/MarkFlowy.desktop",
+        "recommends": ["zenity"]
+      }
     },
     "resources": {
       "../../../packages/theme/licenses/": "licenses/themes/"
