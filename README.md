@@ -202,13 +202,20 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
         </a>
     </td>
     <td align="center">
+        <a href="https://github.com/Krimoire">
+            <img src="https://avatars.githubusercontent.com/u/83659438?v=4" width="90;" alt="Krimoire"/>
+            <br />
+            <sub><b>Null</b></sub>
+        </a>
+    </td></tr>
+<tr>
+    <td align="center">
         <a href="https://github.com/CMOS4000">
             <img src="https://avatars.githubusercontent.com/u/94772159?v=4" width="90;" alt="CMOS4000"/>
             <br />
             <sub><b>CMOS4000</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/codex">
             <img src="https://avatars.githubusercontent.com/u/267193182?v=4" width="90;" alt="codex"/>
@@ -250,15 +257,15 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/dinhkarate">
             <img src="https://avatars.githubusercontent.com/u/57869841?v=4" width="90;" alt="dinhkarate"/>
             <br />
             <sub><b>Pham Quang Dinh</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/Raven-1027">
             <img src="https://avatars.githubusercontent.com/u/83693755?v=4" width="90;" alt="Raven-1027"/>
@@ -300,15 +307,15 @@ The development of **MarkFlowy** cannot be separated from these contributors. Th
             <br />
             <sub><b>Fossabot</b></sub>
         </a>
-    </td>
+    </td></tr>
+<tr>
     <td align="center">
         <a href="https://github.com/hope-zjl">
             <img src="https://avatars.githubusercontent.com/u/54581644?v=4" width="90;" alt="hope-zjl"/>
             <br />
             <sub><b>Null</b></sub>
         </a>
-    </td></tr>
-<tr>
+    </td>
     <td align="center">
         <a href="https://github.com/punkyard">
             <img src="https://avatars.githubusercontent.com/u/59349105?v=4" width="90;" alt="punkyard"/>
