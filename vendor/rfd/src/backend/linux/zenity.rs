@@ -57,11 +57,28 @@ fn add_filters(command: &mut Command, filters: &[Filter]) {
     }
 }
 
-fn add_filename(command: &mut Command, file_name: &Option<String>) {
-    if let Some(name) = file_name.as_ref() {
-        command.arg("--filename");
-        command.arg(name);
+fn file_selection(dialog: &FileDialog, flags: &[&str]) -> Command {
+    let mut cmd = command();
+    cmd.arg("--file-selection").args(flags);
+    add_filters(&mut cmd, &dialog.filters);
+
+    let name = dialog.file_name.as_deref();
+    if let Some(dir) = &dialog.starting_directory {
+        // Zenity needs an explicit absolute path to override GTK's recent-files view.
+        // Joining an empty name adds the trailing slash for a directory-only hint.
+        let dir = std::path::absolute(dir).unwrap_or_else(|_| dir.clone());
+        let path = dir.join(name.unwrap_or(""));
+        // Zenity 4 treats "/" as a bare name. "/./" explicitly selects the root.
+        let hint = if path.as_os_str() == "/" {
+            std::ffi::OsStr::new("/./")
+        } else {
+            path.as_os_str()
+        };
+        cmd.arg("--filename").arg(hint);
+    } else if let Some(name) = name {
+        cmd.arg("--filename").arg(name);
     }
+    cmd
 }
 
 async fn run(command: Command) -> ZenityResult<Option<String>> {
@@ -71,81 +88,57 @@ async fn run(command: Command) -> ZenityResult<Option<String>> {
     Ok((res.status.success() || !buffer.is_empty()).then_some(buffer))
 }
 
+// GFile returns absolute paths without "." components, so this separator also
+// preserves names containing pipes, newlines or other whitespace.
+const SELECTION_SEPARATOR: &str = "/./";
+
+fn strip_output_newline(output: &str) -> &str {
+    output.strip_suffix('\n').unwrap_or(output)
+}
+
+fn selected_paths(output: &str) -> Vec<PathBuf> {
+    strip_output_newline(output)
+        .split(SELECTION_SEPARATOR)
+        .map(PathBuf::from)
+        .collect()
+}
+
+async fn pick_path(dialog: &FileDialog, flags: &[&str]) -> ZenityResult<Option<PathBuf>> {
+    Ok(run(file_selection(dialog, flags))
+        .await?
+        .as_deref()
+        .map(strip_output_newline)
+        .map(PathBuf::from))
+}
+
+async fn pick_paths(dialog: &FileDialog, flags: &[&str]) -> ZenityResult<Vec<PathBuf>> {
+    let mut cmd = file_selection(dialog, flags);
+    cmd.args(["--multiple", "--separator", SELECTION_SEPARATOR]);
+    Ok(run(cmd)
+        .await?
+        .as_deref()
+        .map(selected_paths)
+        .unwrap_or_default())
+}
+
 pub async fn pick_file(dialog: &FileDialog) -> ZenityResult<Option<PathBuf>> {
-    let mut command = command();
-    command.arg("--file-selection");
-
-    add_filters(&mut command, &dialog.filters);
-    add_filename(&mut command, &dialog.file_name);
-
-    run(command).await.map(|res| {
-        res.map(|buffer| {
-            let trimed = buffer.trim();
-            trimed.into()
-        })
-    })
+    pick_path(dialog, &[]).await
 }
 
 pub async fn pick_files(dialog: &FileDialog) -> ZenityResult<Vec<PathBuf>> {
-    let mut command = command();
-    command.args(["--file-selection", "--multiple"]);
-
-    add_filters(&mut command, &dialog.filters);
-    add_filename(&mut command, &dialog.file_name);
-
-    run(command).await.map(|res| {
-        res.map(|buffer| {
-            let list = buffer.trim().split('|').map(PathBuf::from).collect();
-            list
-        })
-        .unwrap_or_default()
-    })
+    pick_paths(dialog, &[]).await
 }
 
 pub async fn pick_folder(dialog: &FileDialog) -> ZenityResult<Option<PathBuf>> {
-    let mut command = command();
-    command.args(["--file-selection", "--directory"]);
-
-    add_filters(&mut command, &dialog.filters);
-    add_filename(&mut command, &dialog.file_name);
-
-    run(command).await.map(|res| {
-        res.map(|buffer| {
-            let trimed = buffer.trim();
-            trimed.into()
-        })
-    })
+    pick_path(dialog, &["--directory"]).await
 }
 
 pub async fn pick_folders(dialog: &FileDialog) -> ZenityResult<Vec<PathBuf>> {
-    let mut command = command();
-    command.args(["--file-selection", "--directory", "--multiple"]);
-
-    add_filters(&mut command, &dialog.filters);
-    add_filename(&mut command, &dialog.file_name);
-
-    run(command).await.map(|res| {
-        res.map(|buffer| {
-            let list = buffer.trim().split('|').map(PathBuf::from).collect();
-            list
-        })
-        .unwrap_or_default()
-    })
+    pick_paths(dialog, &["--directory"]).await
 }
 
 pub async fn save_file(dialog: &FileDialog) -> ZenityResult<Option<PathBuf>> {
-    let mut command = command();
-    command.args(["--file-selection", "--save", "--confirm-overwrite"]);
-
-    add_filters(&mut command, &dialog.filters);
-    add_filename(&mut command, &dialog.file_name);
-
-    run(command).await.map(|res| {
-        res.map(|buffer| {
-            let trimed = buffer.trim();
-            trimed.into()
-        })
-    })
+    pick_path(dialog, &["--save", "--confirm-overwrite"]).await
 }
 
 pub async fn message(
@@ -237,7 +230,71 @@ pub async fn question(
 
 #[cfg(test)]
 mod tests {
+    use std::ffi::{OsStr, OsString};
+    use std::path::PathBuf;
+
     use crate::FileDialog;
+
+    fn filename_hint(dialog: FileDialog) -> Option<OsString> {
+        let cmd = super::file_selection(&dialog, &[]);
+        let mut args = cmd.get_args();
+        args.find(|arg| *arg == "--filename")?;
+        args.next().map(OsStr::to_owned)
+    }
+
+    #[test]
+    fn directory_hint_explicitly_selects_the_folder() {
+        let dialog = FileDialog::new().set_directory("/tmp/My notes ");
+        assert_eq!(
+            filename_hint(dialog).as_deref(),
+            Some(OsStr::new("/tmp/My notes /"))
+        );
+        assert_eq!(
+            filename_hint(FileDialog::new().set_directory("/")).as_deref(),
+            Some(OsStr::new("/./"))
+        );
+    }
+
+    #[test]
+    fn directory_and_suggested_name_are_combined_without_trimming() {
+        let expected = std::env::current_dir().unwrap().join("notes/draft.md ");
+        let dialog = FileDialog::new()
+            .set_directory("notes")
+            .set_file_name("draft.md ");
+        assert_eq!(filename_hint(dialog).as_deref(), Some(expected.as_os_str()));
+        assert_eq!(
+            filename_hint(FileDialog::new().set_file_name("draft.md ")).as_deref(),
+            Some(OsStr::new("draft.md "))
+        );
+        assert_eq!(filename_hint(FileDialog::new()), None);
+    }
+
+    #[test]
+    fn one_selection_keeps_all_whitespace_in_the_path() {
+        for path in [
+            "/tmp/normal",
+            "/tmp/notes ",
+            "/tmp/name\t",
+            "/tmp/line\n",
+            "/tmp/name\r",
+        ] {
+            assert_eq!(super::strip_output_newline(&format!("{path}\n")), path);
+        }
+        assert_eq!(super::strip_output_newline("/tmp/notes "), "/tmp/notes ");
+    }
+
+    #[test]
+    fn multiple_selections_keep_pipes_newlines_and_trailing_spaces() {
+        let paths = [
+            "/",
+            "/tmp/a|b",
+            "/tmp/dir\n/file",
+            "/tmp/.hidden",
+            "/tmp/notes ",
+        ];
+        let output = paths.join(super::SELECTION_SEPARATOR) + "\n";
+        assert_eq!(super::selected_paths(&output), paths.map(PathBuf::from));
+    }
 
     #[test]
     #[ignore]

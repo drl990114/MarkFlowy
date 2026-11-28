@@ -58,6 +58,10 @@ jobs:
         with:
           key: ${{ matrix.target }}
 
+      - name: Test the Zenity file dialog fallback
+        if: matrix.build == 'linux'
+        run: cargo test --locked -p rfd --lib backend::linux::zenity::tests
+
       - name: Install dependencies
         run: yarn install --immutable
 

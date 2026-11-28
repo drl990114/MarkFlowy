@@ -23,9 +23,6 @@ tokio = ["ashpd?/tokio"]
 wayland = ["ashpd?/wayland"]
 common-controls-v6 = ["windows-sys/Win32_UI_Controls"]
 
-[dev-dependencies]
-futures = "0.3.12"
-
 [dependencies]
 raw-window-handle = "0.6"
 log = "0.4"
