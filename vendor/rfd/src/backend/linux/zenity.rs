@@ -1,4 +1,9 @@
-use std::{error::Error, fmt::Display, path::PathBuf, process::Command};
+use std::{
+    error::Error,
+    fmt::Display,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use crate::{
     file_dialog::Filter,
@@ -10,6 +15,7 @@ use crate::{
 pub enum ZenityError {
     Io(std::io::Error),
     FromUtf8Error(std::string::FromUtf8Error),
+    NonLocalSelection,
 }
 
 impl Error for ZenityError {}
@@ -19,6 +25,9 @@ impl Display for ZenityError {
         match self {
             ZenityError::Io(io) => write!(f, "{io}"),
             ZenityError::FromUtf8Error(err) => err.fmt(f),
+            ZenityError::NonLocalSelection => {
+                f.write_str("Zenity returned a selection without an absolute local path")
+            }
         }
     }
 }
@@ -60,6 +69,9 @@ fn add_filters(command: &mut Command, filters: &[Filter]) {
 fn file_selection(dialog: &FileDialog, flags: &[&str]) -> Command {
     let mut cmd = command();
     cmd.arg("--file-selection").args(flags);
+    if let Some(title) = &dialog.title {
+        cmd.arg("--title").arg(title);
+    }
     add_filters(&mut cmd, &dialog.filters);
 
     let name = dialog.file_name.as_deref();
@@ -96,49 +108,53 @@ fn strip_output_newline(output: &str) -> &str {
     output.strip_suffix('\n').unwrap_or(output)
 }
 
-fn selected_paths(output: &str) -> Vec<PathBuf> {
-    strip_output_newline(output)
-        .split(SELECTION_SEPARATOR)
-        .map(PathBuf::from)
-        .collect()
+fn local_path(value: &str) -> ZenityResult<PathBuf> {
+    let path = Path::new(value);
+    // GFile paths are absolute. Zenity can print "(null)" for a remote selection.
+    if !path.is_absolute() {
+        return Err(ZenityError::NonLocalSelection);
+    }
+    Ok(path.to_path_buf())
 }
 
-async fn pick_path(dialog: &FileDialog, flags: &[&str]) -> ZenityResult<Option<PathBuf>> {
-    Ok(run(file_selection(dialog, flags))
+async fn pick_path(cmd: Command) -> ZenityResult<Option<PathBuf>> {
+    run(cmd)
         .await?
         .as_deref()
         .map(strip_output_newline)
-        .map(PathBuf::from))
+        .map(local_path)
+        .transpose()
 }
 
-async fn pick_paths(dialog: &FileDialog, flags: &[&str]) -> ZenityResult<Vec<PathBuf>> {
-    let mut cmd = file_selection(dialog, flags);
+async fn pick_paths(mut cmd: Command) -> ZenityResult<Vec<PathBuf>> {
     cmd.args(["--multiple", "--separator", SELECTION_SEPARATOR]);
-    Ok(run(cmd)
-        .await?
-        .as_deref()
-        .map(selected_paths)
-        .unwrap_or_default())
+    let Some(output) = run(cmd).await? else {
+        return Ok(Vec::new());
+    };
+    strip_output_newline(&output)
+        .split(SELECTION_SEPARATOR)
+        .map(local_path)
+        .collect()
 }
 
 pub async fn pick_file(dialog: &FileDialog) -> ZenityResult<Option<PathBuf>> {
-    pick_path(dialog, &[]).await
+    pick_path(file_selection(dialog, &[])).await
 }
 
 pub async fn pick_files(dialog: &FileDialog) -> ZenityResult<Vec<PathBuf>> {
-    pick_paths(dialog, &[]).await
+    pick_paths(file_selection(dialog, &[])).await
 }
 
 pub async fn pick_folder(dialog: &FileDialog) -> ZenityResult<Option<PathBuf>> {
-    pick_path(dialog, &["--directory"]).await
+    pick_path(file_selection(dialog, &["--directory"])).await
 }
 
 pub async fn pick_folders(dialog: &FileDialog) -> ZenityResult<Vec<PathBuf>> {
-    pick_paths(dialog, &["--directory"]).await
+    pick_paths(file_selection(dialog, &["--directory"])).await
 }
 
 pub async fn save_file(dialog: &FileDialog) -> ZenityResult<Option<PathBuf>> {
-    pick_path(dialog, &["--save", "--confirm-overwrite"]).await
+    pick_path(file_selection(dialog, &["--save", "--confirm-overwrite"])).await
 }
 
 pub async fn message(
@@ -231,9 +247,16 @@ pub async fn question(
 #[cfg(test)]
 mod tests {
     use std::ffi::{OsStr, OsString};
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
+    use std::process::Command;
 
     use crate::FileDialog;
+
+    fn zenity_reply(stdout: &str) -> Command {
+        let mut cmd = Command::new("sh");
+        cmd.args(["-c", r#"printf '%s' "$1""#, "zenity", stdout]);
+        cmd
+    }
 
     fn filename_hint(dialog: FileDialog) -> Option<OsString> {
         let cmd = super::file_selection(&dialog, &[]);
@@ -270,17 +293,46 @@ mod tests {
     }
 
     #[test]
+    fn file_selection_forwards_the_optional_title_as_one_argument() {
+        let title = "复制到 | Export draft";
+        let dialog = FileDialog::new().set_title(title);
+        for flags in [
+            &[][..],
+            &["--directory"],
+            &["--save", "--confirm-overwrite"],
+        ] {
+            let cmd = super::file_selection(&dialog, flags);
+            let mut args = cmd.get_args();
+            assert!(args.any(|arg| arg == "--title"));
+            assert_eq!(args.next(), Some(OsStr::new(title)));
+        }
+        let untitled = super::file_selection(&FileDialog::new(), &[]);
+        assert!(!untitled.get_args().any(|arg| arg == "--title"));
+    }
+
+    #[test]
     fn one_selection_keeps_all_whitespace_in_the_path() {
         for path in [
             "/tmp/normal",
+            "/tmp/(null)",
             "/tmp/notes ",
             "/tmp/name\t",
             "/tmp/line\n",
             "/tmp/name\r",
         ] {
-            assert_eq!(super::strip_output_newline(&format!("{path}\n")), path);
+            let result = pollster::block_on(super::pick_path(zenity_reply(&format!("{path}\n"))));
+            assert_eq!(result.unwrap().as_deref(), Some(Path::new(path)));
         }
-        assert_eq!(super::strip_output_newline("/tmp/notes "), "/tmp/notes ");
+        let result = pollster::block_on(super::pick_path(zenity_reply("/tmp/notes ")));
+        assert_eq!(result.unwrap().as_deref(), Some(Path::new("/tmp/notes ")));
+    }
+
+    #[test]
+    fn single_selection_rejects_results_without_a_local_path() {
+        for output in ["(null)\n", "relative/notes.md\n", "\n"] {
+            let result = pollster::block_on(super::pick_path(zenity_reply(output)));
+            assert!(matches!(result, Err(super::ZenityError::NonLocalSelection)));
+        }
     }
 
     #[test]
@@ -293,7 +345,17 @@ mod tests {
             "/tmp/notes ",
         ];
         let output = paths.join(super::SELECTION_SEPARATOR) + "\n";
-        assert_eq!(super::selected_paths(&output), paths.map(PathBuf::from));
+        let result = pollster::block_on(super::pick_paths(zenity_reply(&output)));
+        assert_eq!(result.unwrap(), paths.map(PathBuf::from));
+    }
+
+    #[test]
+    fn one_non_local_path_rejects_the_whole_multiple_selection() {
+        for paths in [["/tmp/(null)", "(null)"], ["relative.md", "/tmp/notes "]] {
+            let output = paths.join(super::SELECTION_SEPARATOR) + "\n";
+            let result = pollster::block_on(super::pick_paths(zenity_reply(&output)));
+            assert!(matches!(result, Err(super::ZenityError::NonLocalSelection)));
+        }
     }
 
     #[test]
