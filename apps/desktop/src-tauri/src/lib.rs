@@ -411,6 +411,93 @@ fn attach_parent_console() {
 #[cfg(not(windows))]
 fn attach_parent_console() {}
 
+#[cfg(target_os = "linux")]
+fn linux_startup_open_urls(args: &[String], cwd: &Path) -> Vec<url::Url> {
+    let Some(first) = args.get(1) else {
+        return Vec::new();
+    };
+    let positional_only = first == "--";
+    // Explicit commands and their options belong to the existing CLI dispatch.
+    if !positional_only
+        && (first.starts_with('-')
+            || matches!(
+                first.as_str(),
+                "open" | "file" | "window" | "command" | "version" | "help"
+            ))
+    {
+        return Vec::new();
+    }
+
+    args.iter()
+        .skip(if positional_only { 2 } else { 1 })
+        .filter(|arg| positional_only || !arg.starts_with('-'))
+        .filter_map(|arg| {
+            let path = cwd.join(arg);
+            if path.exists() {
+                url::Url::from_file_path(path).ok()
+            } else {
+                url::Url::parse(arg).ok()
+            }
+        })
+        .collect()
+}
+
+#[cfg(all(test, target_os = "linux"))]
+mod linux_startup_open_tests {
+    use super::linux_startup_open_urls;
+    use std::fs;
+
+    fn argv(args: &[&str]) -> Vec<String> {
+        args.iter().map(|arg| (*arg).to_owned()).collect()
+    }
+
+    #[test]
+    fn stale_selection_does_not_suppress_later_valid_paths() {
+        let directory = tempfile::tempdir().unwrap();
+        let document = directory.path().join("valid 文档.md");
+        let second = directory.path().join("mix:case.md");
+        fs::write(&document, "document").unwrap();
+        fs::write(&second, "second").unwrap();
+        let urls = linux_startup_open_urls(
+            &argv(&["markflowy", "missing.md", "valid 文档.md", "mix:case.md"]),
+            directory.path(),
+        );
+        assert_eq!(
+            urls.into_iter()
+                .map(|url| url.to_file_path().unwrap())
+                .collect::<Vec<_>>(),
+            vec![document, second],
+        );
+    }
+
+    #[test]
+    fn cli_commands_and_their_option_values_are_not_file_launches() {
+        let directory = tempfile::tempdir().unwrap();
+        fs::write(directory.path().join("open"), "not a command").unwrap();
+        fs::write(directory.path().join("option.md"), "not a launch argument").unwrap();
+        assert!(linux_startup_open_urls(
+            &argv(&["markflowy", "open", "--window-id", "option.md"]),
+            directory.path(),
+        )
+        .is_empty());
+    }
+
+    #[test]
+    fn accepts_file_urls_and_dash_prefixed_paths_after_delimiter() {
+        let directory = tempfile::tempdir().unwrap();
+        let document = directory.path().join("-file.md");
+        fs::write(&document, "document").unwrap();
+        let url = url::Url::from_file_path(&document).unwrap();
+        assert_eq!(
+            linux_startup_open_urls(
+                &argv(&["markflowy", "--", "-file.md", url.as_str()]),
+                directory.path(),
+            ),
+            vec![url.clone(), url],
+        );
+    }
+}
+
 fn path_to_file_url(path: &str, cwd: Option<&str>) -> String {
     if url::Url::parse(path).is_ok() {
         return path.to_string();
@@ -2037,16 +2124,22 @@ pub fn run() {
             let opened_urls: State<OpenedUrls> = app.state();
             let file_urls = opened_urls.inner().to_owned();
 
-            #[cfg(any(windows, target_os = "linux"))]
+            #[cfg(target_os = "linux")]
             {
-                // NOTICE: `args` may include URL protocol (`your-app-protocol://`) or arguments (`--`) if app supports them.
-                let mut urls = Vec::new();
-                for arg in env::args().skip(1) {
-                    if let Ok(url) = url::Url::parse(&arg) {
-                        urls.push(url);
-                    }
+                let args: Vec<String> = env::args().collect();
+                let cwd = env::current_dir().unwrap_or_default();
+                let urls = linux_startup_open_urls(&args, &cwd);
+                if !urls.is_empty() {
+                    append_opened_urls(&file_urls, &urls);
                 }
+            }
 
+            #[cfg(windows)]
+            {
+                let urls: Vec<_> = env::args()
+                    .skip(1)
+                    .filter_map(|arg| url::Url::parse(&arg).ok())
+                    .collect();
                 if !urls.is_empty() {
                     file_urls.0.lock().unwrap().replace(urls);
                 }
